@@ -1,0 +1,16 @@
+# Godot
+game/.godot/
+game/*.translation
+game/locale/*.translation
+.import/
+# Build output
+build/
+# Secrets (only .env.example is tracked)
+.env
+.env.*
+!.env.example
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
