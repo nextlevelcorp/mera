@@ -29,6 +29,7 @@
       "plankton"
     ],
     "surface_thrash": 4,
+    "teeth": 1,
     "length_min_cm": 8,
     "length_max_cm": 35,
     "length_record_cm": 40,
@@ -70,6 +71,7 @@
       "small_fish"
     ],
     "surface_thrash": 15,
+    "teeth": 18,
     "length_min_cm": 20,
     "length_max_cm": 80,
     "length_record_cm": 100,
@@ -112,6 +114,7 @@
       "crustacean"
     ],
     "surface_thrash": 10,
+    "teeth": 3,
     "length_min_cm": 25,
     "length_max_cm": 100,
     "length_record_cm": 110,

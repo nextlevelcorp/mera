@@ -26,5 +26,19 @@
         "design_fill": true
       }
     }
+  },
+  {
+    "id": "wire_leader",
+    "name_key": "FIXTURE_LEADER_WIRE",
+    "type": "wire",
+    "length_m": 0.3,
+    "breaking_strain_kg": 8,
+    "visibility": 18,
+    "abrasion_resistance": 20,
+    "provenance": {
+      "default": {
+        "design_fill": true
+      }
+    }
   }
 ]

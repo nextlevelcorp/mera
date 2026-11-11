@@ -91,6 +91,7 @@ func test_range_type_and_enum_checks() -> void:
 	_expect(func(db): db["species"][0]["strength"] = 21, "above the maximum", "attribute 21")
 	_expect(func(db): db["species"][0]["strength"] = 0, "below the minimum", "attribute 0")
 	_expect(func(db): db["species"][0]["strength"] = 5.5, "whole number", "fractional attribute")
+	_expect(func(db): (db["species"][0] as Dictionary).erase("teeth"), "missing required field", "teeth is required")
 	_expect(func(db): db["species"][0]["strength"] = "6", "whole number", "string attribute")
 	_expect(func(db): db["species"][0]["diet_tags"] = ["rocks"], "is not one of", "bad diet tag")
 	_expect(func(db): db["lure"][0]["type"] = "boat", "is not one of", "bad lure type")

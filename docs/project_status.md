@@ -9,7 +9,6 @@
 - Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Reminders for the owner
-- Decide the 90 s fight rule: it applies to the biggest fish on light tackle by design, or the constants are re-tuned (`data_model.md` 5.5). Should toothy species cut leaders?
 - Pick the first spot and the three species; real data is written only after that and the licence reads.
 - One legal consultation covers: OpenStreetMap (ODbL), article 31 of Law 5846 for the fishing communique, Sentinel-2 and Copernicus Marine terms.
 - After the slice passes: add the remaining 2-4 spots (MVP is 3-5 spots).

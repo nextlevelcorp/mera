@@ -57,7 +57,9 @@ static func resolve(ctx: Dictionary, k: Dictionary) -> Dictionary:
 	var fg := fight(k, species, position, ctx["reel"], ctx["line"], ctx["leader"], ctx["angler"], play)
 	var land := landing(k, position, env, float(fg["W_kg"]), float(fg["Beff"]))
 
-	var p_land: float = 0.0 if fg["line_breaks"] else float(hk["hook"]) * float(land["landing_q"])
+	# P(landed | take, strike in the window): zero if the line breaks; otherwise the
+	# hook must hold, the leader must not be cut by teeth, and the landing must work.
+	var p_land: float = 0.0 if fg["line_breaks"] else float(hk["hook"]) * (1.0 - float(fg["p_cut"])) * float(land["landing_q"])
 	return {
 		"environment": env,
 		"water_depth_m": water_depth,
@@ -67,7 +69,7 @@ static func resolve(ctx: Dictionary, k: Dictionary) -> Dictionary:
 		"hook": hk,
 		"fight": fg,
 		"landing": land,
-		"chain": {"inputs": {"hook": hk["hook"], "landing_q": land["landing_q"], "line_breaks": fg["line_breaks"]}, "p_land_given_take": p_land},
+		"chain": {"inputs": {"hook": hk["hook"], "p_cut": fg["p_cut"], "landing_q": land["landing_q"], "line_breaks": fg["line_breaks"]}, "p_land_given_take": p_land},
 	}
 
 
@@ -198,11 +200,16 @@ static func fight(k: Dictionary, sp: Dictionary, position: Dictionary, reel: Dic
 	var t_reel: float = float(play["hook_distance_m"]) / float(reel["retrieve_m_per_s"])
 	var t_fight: float = maxf(t_tire, t_reel) + float(k["LAND_PHASE"])
 	var cap: float = float(k["FIGHT_CAP_S"])
+	var t_capped: float = minf(t_fight, cap)
+	# Teeth cut the leader at a constant hazard over the (capped) fight; wire is immune.
+	var cut_factor: float = float(k["WIRE_CUT_FACTOR"]) if leader["type"] == "wire" else 1.0
+	var cut_rate: float = float(k["TEETH_RATE"]) * n(float(sp["teeth"])) * (1.0 - n(float(leader["abrasion_resistance"]))) * cut_factor
+	var p_cut: float = 1.0 - exp(-cut_rate * t_capped)
 	return {
-		"inputs": {"fish_length_cm": length_cm, "drag_kg": drag, "line_breaking_kg": float(line["breaking_strain_kg"]), "leader_breaking_kg": float(leader["breaking_strain_kg"]), "knot_strength": float(angler["knot_strength"]), "structure": float(position["structure"]), "hook_distance_m": float(play["hook_distance_m"])},
+		"inputs": {"fish_length_cm": length_cm, "drag_kg": drag, "line_breaking_kg": float(line["breaking_strain_kg"]), "leader_breaking_kg": float(leader["breaking_strain_kg"]), "knot_strength": float(angler["knot_strength"]), "structure": float(position["structure"]), "hook_distance_m": float(play["hook_distance_m"]), "teeth": float(sp["teeth"]), "leader_type": leader["type"], "leader_abrasion_resistance": float(leader["abrasion_resistance"])},
 		"W_kg": weight_kg, "Fmax_kgf": f_max, "E0": energy, "Beff": b_eff, "spike": spike, "line_breaks": spike > b_eff,
 		"Tbar": t_bar, "t_tire": t_tire, "t_reel": t_reel, "t_fight": t_fight,
-		"t_fight_capped": minf(t_fight, cap), "cap_applied": t_fight > cap,
+		"t_fight_capped": t_capped, "cap_applied": t_fight > cap, "cut_rate_per_s": cut_rate, "p_cut": p_cut,
 	}
 
 

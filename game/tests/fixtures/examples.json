@@ -48,12 +48,14 @@
       "t_tire": 8.296650717703349,
       "t_reel": 25.0,
       "t_fight": 30.0,
+      "cut_rate_per_s": 0.0,
+      "p_cut": 0.0,
       "line_breaks": false,
       "landing_q": 1.0,
       "visible_at_m": 2.7861052631578946,
       "p_land_given_take": 0.7717894736842105,
-      "total_take_rate_all_species": 0.02470941208300676,
-      "median_wait_all_species_s": 28.051949525607643
+      "total_take_rate_all_species": 0.024709412083006758,
+      "median_wait_all_species_s": 28.051949525607647
     }
   },
   {
@@ -105,10 +107,12 @@
       "t_tire": 21.112200271452267,
       "t_reel": 16.666666666666668,
       "t_fight": 26.112200271452267,
+      "cut_rate_per_s": 0.0019944598337950136,
+      "p_cut": 0.05074682450966872,
       "line_breaks": false,
       "landing_q": 1.0,
       "visible_at_m": 4.6547368421052635,
-      "p_land_given_take": 0.751578947368421,
+      "p_land_given_take": 0.7134387024211543,
       "total_take_rate_all_species": 0.0011397093209325247,
       "median_wait_all_species_s": 608.1789170529933
     }
@@ -162,6 +166,8 @@
       "t_tire": 13.421052631578945,
       "t_reel": 30.0,
       "t_fight": 35.0,
+      "cut_rate_per_s": 0.011301939058171744,
+      "p_cut": 0.32670241283699664,
       "line_breaks": true,
       "landing_q": 0.9129192479791746,
       "visible_at_m": 2.361684210526316,
@@ -219,10 +225,12 @@
       "t_tire": 25.281242061386227,
       "t_reel": 30.0,
       "t_fight": 35.0,
+      "cut_rate_per_s": 0.011301939058171744,
+      "p_cut": 0.32670241283699664,
       "line_breaks": false,
       "landing_q": 0.9129192479791746,
       "visible_at_m": 2.361684210526316,
-      "p_land_given_take": 0.5816544867545629,
+      "p_land_given_take": 0.3916265624943823,
       "total_take_rate_all_species": 0.024308098450155545,
       "median_wait_all_species_s": 28.515072126322984
     }

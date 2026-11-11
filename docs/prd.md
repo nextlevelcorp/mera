@@ -146,6 +146,10 @@ Scope: one real spot with 3-4 standing positions, lure spinning/LRF only, 3 spec
 - Given a pull request, then CI imports, runs the unit tests and exports the web build; given a push to `main`, then the build deploys to GitHub Pages.
 - Given a visual feature, then frame rate is measured before and after on the named test phone.
 
+**F19. Overmatched-tackle hint (P1, owner decision 2026-11-11).**
+- Given a hooked fish whose estimated fight exceeds the 90 s cap on the current tackle, then the player sees a hint that the fish is too big for the tackle (the "why" view shows the numbers); the fight still ends by the 90 s rule.
+- Given a fish that is not overmatched, then no hint is shown.
+
 **F18. Settings and accessibility basics (P1).** Readable text size; adjustable text scale; sound cues have visual counterparts.
 
 **P2 (designed for, not built in 0.1):** bait/float fishing, walkable top-down world, gyro rod angle, XP, money and tackle unlocks, shop, season changes, waves simulation, more spots and species.
@@ -282,3 +286,4 @@ The slice builds the first confirmed spot; the rest of the 3-5 MVP spots follow 
 24. **Unreachable sources** (Reddit, Ekşi Sözlük, TÜİK, etc.): skipped. Turkish demand evidence will come from the end-of-slice test, not desk research.
 25. **Approved by the owner** (2026-11-11, reply "Onaylıyorum" to the three points raised in the previous PR): the single network exception in `.claude/rules/security.md` (anonymous counters); the schedule adjustment (8 weeks to a playable slice, tester round after); the spot shortlist as candidates only (owner confirms on a visit). The PRD itself is approved only when the box in section 14 is ticked.
 26. **PRD approved** by the owner (2026-11-11). Next task given: the data model (`docs/data_model.md`).
+27. **Fight rules (owner, 2026-11-11):** the 90 s fight cap stays even though big fish on light tackle would run longer, with an overmatched-tackle hint (F19); toothy species cut leaders (`teeth` attribute; wire leaders are immune).

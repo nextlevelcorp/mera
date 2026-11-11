@@ -82,6 +82,8 @@ func test_worked_examples_match_the_reference() -> void:
 		assert_near(r["hook"]["hook"], e["hook"], "%s hook" % name)
 		for key in ["W_kg", "Fmax_kgf", "E0", "Beff", "spike", "Tbar", "t_tire", "t_reel", "t_fight"]:
 			assert_near(r["fight"][key], e[key], "%s %s" % [name, key])
+		assert_near(r["fight"]["cut_rate_per_s"], e["cut_rate_per_s"], "%s cut rate" % name)
+		assert_near(r["fight"]["p_cut"], e["p_cut"], "%s p_cut" % name)
 		assert_eq(r["fight"]["line_breaks"], e["line_breaks"], "%s line breaks" % name)
 		assert_near(r["landing"]["landing_q"], e["landing_q"], "%s landing" % name)
 		assert_near(r["landing"]["visible_at_m"], e["visible_at_m"], "%s visible at" % name)
@@ -109,8 +111,24 @@ func test_line_break_example() -> void:
 	assert_true(results["C"]["fight"]["line_breaks"], "C: drag 2.6 kg breaks the line")
 	assert_near(results["C"]["chain"]["p_land_given_take"], 0.0, "C: a broken line never lands")
 	assert_true(not results["C2"]["fight"]["line_breaks"], "C2: drag 1.2 kg holds")
-	assert_true(results["C2"]["chain"]["p_land_given_take"] > 0.5, "C2: the fish can be landed")
+	assert_true(results["C2"]["chain"]["p_land_given_take"] > 0.3, "C2: the fish can be landed")
 	assert_true(results["C2"]["fight"]["spike"] < results["C2"]["fight"]["Beff"], "C2: spike is under the real line strength")
+
+
+func test_teeth_cut_fluorocarbon_but_not_wire() -> void:
+	_setup()
+	var example := {"species": "lufer", "position": "pier_end", "tackle": "spin", "conditions": {"slot": "dawn", "month": 9, "wind_dir": "SW", "wind_ms": 6},
+		"play": {"cast_m": 20, "lure_depth_m": 3, "retrieve_speed": 16, "timing_quality": 0.9, "fish_length_cm": 45, "drag_kg": 2.0, "hook_distance_m": 30}}
+	var plain := CatchModelScript.resolve(_ctx(example), _k)
+	var wired_ctx := _ctx(example)
+	wired_ctx["leader"] = _by_id("leader", "wire_leader")
+	var wired := CatchModelScript.resolve(wired_ctx, _k)
+	assert_true(plain["fight"]["p_cut"] > 0.2, "a bluefish cuts a fluorocarbon leader often, got %s" % str(plain["fight"]["p_cut"]))
+	assert_near(wired["fight"]["p_cut"], 0.0, "a wire leader is never cut")
+	assert_true(wired["commit"]["commit"] < plain["commit"]["commit"], "the wire leader's visibility makes the fish less willing to take")
+	assert_true(wired["chain"]["p_land_given_take"] > plain["chain"]["p_land_given_take"], "wire lands more of the toothy fish")
+	var gentle := _ctx({"species": "istavrit", "position": "pier_end", "tackle": "lrf", "conditions": example["conditions"], "play": example["play"]})
+	assert_near(CatchModelScript.resolve(gentle, _k)["fight"]["p_cut"], 0.0, "a species with teeth 1 never cuts the leader")
 
 
 func test_every_stage_logs_its_inputs() -> void:

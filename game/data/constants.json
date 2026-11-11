@@ -53,6 +53,8 @@
   "VIS_RANGE": 7.0,
   "LAND_PHASE": 5.0,
   "LAND_FREE": 0.3,
-  "FIGHT_CAP_S": 90.0
+  "FIGHT_CAP_S": 90.0,
+  "TEETH_RATE": 0.03,
+  "WIRE_CUT_FACTOR": 0.0
  }
 }
