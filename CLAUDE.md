@@ -42,3 +42,10 @@ If a repository, secret, connector, asset or licence is missing, say exactly wha
 
 NEEDS MY GO-AHEAD FIRST
 New dependencies or plugins, anything that costs money, licence choices for data or assets, changes to scope or pillars, anything touching player data, and release steps.
+
+COMMANDS (run from repo root; GODOT = Godot binary, version pinned in .godot-version)
+- Import: $GODOT --headless --path game --import
+- Test: $GODOT --headless --path game --script res://tests/run_tests.gd
+- Web export: mkdir -p build/web && $GODOT --headless --path game --export-release Web
+- Serve: python3 -m http.server -d build/web 8000
+- Cloud setup: scripts/install_godot.sh installs Godot and the web templates.
