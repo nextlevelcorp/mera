@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Docs: provisional first spot (Kadıköy/Moda breakwater or pier area) and three species (horse mackerel, bluefish, sea bass) recorded; no real data written.
+- Data layer and catch model: `game/data/schema.json` and `constants.json`, `DataValidator` and `DataStore`, and `CatchModel` (stages 0-4 and 6, closed-form fight) in `game/sim/`; illustrative fixtures and 18 new tests (26 in total) that reproduce the three worked examples of `data_model.md`. Not wired into the scenes. Cast distance, shoal follow-up and the real-time fight are not ported.
+- Teeth: species `teeth` attribute and a leader-cut hazard in the fight (`cut_rate_per_s`, `p_cut`); wire leaders are immune. 90 s fight cap kept, hint planned (PRD F19). Workbook and tests updated (27 tests).
 - Docs: PRD approved by the owner (2026-11-11). Data model proposal in `docs/data_model.md` (schemas, staged catch resolution with formulas, three worked examples, data sources and licences) with companion workbook `docs/data_model_examples.xlsx`.
 - Docs: PRD draft v2 in `docs/prd.md` (problem, players, goals and non-goals, user stories, measurable funnel, feature list with acceptance criteria for 0.1 and 0.5, success metrics, schedule, risks, approvals ledger). `security.md` allows one network exception: anonymous event counters.
 - Docs: PRD decision log started in `docs/prd.md` (interview answers on measurement, top-down scope, vibration, platform, round length, first cast, pass bar, reach, technique, fight input).

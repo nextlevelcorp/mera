@@ -1,6 +1,6 @@
 # Data model and catch resolution
 
-**Status:** Proposed (phase 2, Design), 2026-11-11. **Decider:** the owner. Nothing here is built yet.
+**Status:** Approved by the owner (2026-11-11), with the open questions in section 9. Schema, validator and the formulas of section 5 (except the cast model, the shoal follow-up and the real-time fight) are implemented in `game/sim/` and `game/data/`; see section 11.
 
 Inputs: `project_spec.md` 5.2-5.4, `prd.md` (F2-F12, F14), `research.md`. Companion workbook: `data_model_examples.xlsx` (the three worked examples with live formulas; 136 cells checked against a reference calculation, 0 mismatches).
 
@@ -79,6 +79,7 @@ Types: `int20` = integer 1-20; `float01` = 0..1. Units are in the field name. "0
 | `mouth_gape_mm` | float | 0.1 attraction, hook | Mouth opening |
 | `diet_tags` | list (`small_fish`, `crustacean`, `worm`, `plankton`, `squid`, ...) | 0.1 attraction | What it eats |
 | `surface_thrash` | int20 | 0.1 visuals; MVP hook pull-out | Thrashing at the surface |
+| `teeth` | int20 | 0.1 fight | How easily it cuts a leader (1 = none). Added by the owner's decision of 2026-11-11 |
 | `length_min_cm`, `length_max_cm`, `length_record_cm` | float | 0.1 size draw | Catchable size range |
 | `lw_a`, `lw_b` | float | 0.1 fight | Length-weight relation: weight in g = `a x length_cm ^ b` |
 | `weight_record_kg` | float | log | Record weight |
@@ -241,8 +242,10 @@ Real-time rules, per simulation tick:
 - **Line break:** immediately if `T` or `spike` exceeds `B_eff`; also if `T` stays above `0.8 * B_eff` for more than 2 s.
 - **Hook pull-out:** while the line is slack (`T < 0.1 * F_max`), a hazard of `0.15 * (1 - h)` per second.
 - **Tiring:** `d(energy)/dt = -(T + K.REST_DRAIN * F_max)`. More drag tires the fish faster and risks the line. That trade-off is the fight.
+- **Teeth (owner decision 2026-11-11):** a species with teeth cuts the leader at a constant hazard over the fight:
+  `cut_rate = K.TEETH_RATE * n(sp.teeth) * (1 - n(leader.abrasion_resistance)) * (K.WIRE_CUT_FACTOR if leader.type == "wire" else 1)`, and `p_cut = 1 - exp(-cut_rate * min(t_fight, 90 s))`. A cut ends the fight at once. Wire is immune, but its visibility feeds stage 3 suspicion like any leader's.
 - **Landing phase** starts when `energy <= K.LAND_ENERGY * E0` and the fish is close.
-- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0`, otherwise the hook pulls out. This is a deliberate game rule, not realism; the constants are calibrated so it rarely triggers (a record-size 80 cm example fish on medium tackle takes about 69 s).
+- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0`, otherwise the hook pulls out. This is a deliberate game rule, not realism. It is not rare: with the drag set to a third of the line strength, the closed-form estimate exceeds 90 s for the largest bluefish (103 s) and sea bass (131 s) on light tackle and for a 100 cm sea bass on medium tackle (99 s), and stays under it for every smaller fish tested (found by the unit tests in `game/tests/test_catch_model.gd`). The owner decided on 2026-11-11 that the rule stays and that the game warns the player (PRD F19, P1) when light tackle meets a big fish.
 
 Closed-form estimate at a constant drag, used in the worked examples and as the test oracle for the tick model:
 
@@ -262,7 +265,7 @@ visible_m = K.VIS_BASE + K.VIS_RANGE * visibility                               
 
 ### 5.7 The chain
 
-`P(landed | take) = P(strike inside the window) * h * P(no break, no pull-out) * q`. The first and third factors are the player's doing; the others come from the match between tackle and fish. The attempt log stores every symbol above, per stage.
+`P(landed | take) = P(strike inside the window) * h * (1 - p_cut) * P(no break, no pull-out) * q`. The first and third factors are the player's doing; the others come from the match between tackle and fish. The attempt log stores every symbol above, per stage.
 
 ### 5.8 Constants (`constants.json`, all design fills)
 
@@ -278,7 +281,8 @@ visible_m = K.VIS_BASE + K.VIS_RANGE * visibility                               
 | SIZE_LO / HI / M | 1.0 / 4.0 / 2.0 | PEN_BASE | 0.6 | ABRASION | 0.3 |
 | SPEED_PEN | 0.8 | TIMING_BASE | 0.7 | SPIKE | 0.5 |
 | DETECT_BASE | 0.4 | HOOK_MAX | 0.98 | VIS_BASE / VIS_RANGE | 1 m / 7 m |
-| LAND_FREE | 0.3 | LAND_PHASE | 5 s | | |
+| LAND_FREE | 0.3 | LAND_PHASE | 5 s | TEETH_RATE | 0.03 /s |
+| WIRE_CUT_FACTOR | 0.0 | FIGHT_CAP_S | 90 s | | |
 
 Calibration targets from the PRD: best-case median wait for a take 20-40 s (the examples give 28 s); worst case at least 120 s (608 s); fights 20-90 s (26-69 s).
 
@@ -286,11 +290,11 @@ Calibration targets from the PRD: best-case median wait for a take 20-40 s (the 
 
 Illustrative records (design fills). The spot is an imagined pier with two positions: **pier end** (8 m of water, structure 12, exposed to south-west wind 0.8, landing difficulty 0.5) and **inner corner** (3 m, structure 5, sheltered, landing difficulty 0.2); typical clarity 11, pressure 15.
 
-| Species (illustrative) | str | sta | spd | cau | agg | feeding depth m | temp C | activity dawn/day/eve/night | gape mm | lw a, b |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| Horse mackerel | 6 | 6 | 12 | 5 | 14 | 1-15 | 12-24 | 0.8 / 0.5 / 1.0 / 0.7 | 14 | 0.0085, 3 |
-| Bluefish | 15 | 13 | 17 | 9 | 18 | 1-20 | 14-24 | 1.0 / 0.4 / 0.9 / 0.5 | 30 | 0.011, 3 |
-| Sea bass | 14 | 15 | 11 | 16 | 10 | 0.5-10 | 10-24 | 0.9 / 0.2 / 0.8 / 1.0 | 45 | 0.010, 3 |
+| Species (illustrative) | str | sta | spd | cau | agg | teeth | feeding depth m | temp C | activity dawn/day/eve/night | gape mm | lw a, b |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Horse mackerel | 6 | 6 | 12 | 5 | 14 | 1 | 1-15 | 12-24 | 0.8 / 0.5 / 1.0 / 0.7 | 14 | 0.0085, 3 |
+| Bluefish | 15 | 13 | 17 | 9 | 18 | 18 | 1-20 | 14-24 | 1.0 / 0.4 / 0.9 / 0.5 | 30 | 0.011, 3 |
+| Sea bass | 14 | 15 | 11 | 16 | 10 | 3 | 0.5-10 | 10-24 | 0.9 / 0.2 / 0.8 / 1.0 | 45 | 0.010, 3 |
 
 | Tackle set | Rod power / sens | Reel smoothness / retrieve | Main line | Leader (strain / visibility / abrasion) | Lure |
 | --- | --- | --- | --- | --- | --- |
@@ -327,7 +331,7 @@ Inner corner, north wind 1 m/s, lure at 1.5 m, retrieve speed 16, timing quality
 | 5 Fight | W 1.25 kg; peak pull 2.96 kgf; line strength 5.68 kg; spike 2.58 kg, no break; tire 21 s, recover 17 s; **fight 26 s** |
 | 6 Landing | q **1.0**; visible inside 4.7 m |
 
-Result: the lure itself is fine, but a sea bass alone would take about 74 minutes to arrive (median). With all species the median wait is 608 s, far above the 120 s "bad choice" bar. The "why" view shows the three weak inputs: time slot (0.2), depth (0.53) and commit (0.27). Evening, the pier end and a less visible leader each fix one of them.
+Result: the lure itself is fine, but a sea bass alone would take about 74 minutes to arrive (median). With all species the median wait is 608 s, far above the 120 s "bad choice" bar. The "why" view shows the three weak inputs: time slot (0.2), depth (0.53) and commit (0.27). Evening, the pier end and a less visible leader each fix one of them. A sea bass that does get hooked has a 5% chance of cutting the leader (teeth 3), so a hooked fish lands with probability 0.752 x 0.95 x 1.0 = **0.71**.
 
 ### Example C: the fight is lost, then won (bluefish, light tackle, September dawn)
 
@@ -343,9 +347,9 @@ Pier end, south-west wind 6 m/s, lure at 3 m, retrieve speed 16, timing quality 
 | 5 Fight | W 1.00 kg; peak pull 2.48 kgf; line strength 2.11 kg |
 
 - **Drag 2.6 kg:** spike 2.6 x 1.21 = 3.15 kg, above the 2.11 kg the leader really holds. **The line breaks on the first run.** P(landed) = 0.
-- **Drag 1.2 kg:** spike 1.45 kg, under 2.11 kg. Tire 25 s, recover line 30 s, **fight 35 s**; landing q 0.913 (a 1 kg fish lifted on a 2.1 kg line from a high pier). P(landed | take, good strike) = 0.637 x 0.913 = **0.58**.
+- **Drag 1.2 kg:** spike 1.45 kg, under 2.11 kg. Tire 25 s, recover line 30 s, **fight 35 s**; landing q 0.913 (a 1 kg fish lifted on a 2.1 kg line from a high pier). The bluefish's teeth cut the fluorocarbon leader with probability **0.33** over a 35 s fight (hazard 0.0113 /s). P(landed | take, good strike) = 0.637 x (1 - 0.33) x 0.913 = **0.39**.
 
-What the player learns: the leader's label says 2.7 kg, but knot and abrasion leave 2.11 kg, and a jerky drag overshoots its setting. Setting the drag near a third of the weakest link is the lesson, and the screen shows each of those numbers.
+What the player learns: the leader's label says 2.7 kg, but knot and abrasion leave 2.11 kg, and a jerky drag overshoots its setting. Setting the drag near a third of the weakest link is the lesson, and the screen shows each of those numbers. The teeth add a second lesson: against a bluefish a wire leader is never cut (spin tackle, same conditions: landing probability 0.86 with wire against 0.52 with fluorocarbon, the commit probability only slightly lower, 0.78 against 0.80, because a bluefish is not very cautious). A cautious, toothless species shifts that balance the other way (unit test `test_teeth_cut_fluorocarbon_but_not_wire`).
 
 ## 7. Data sources and licences (proposal)
 
@@ -383,7 +387,7 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 
 1. **Activity by time slot, not by hour.** The spec lists "activity by hour"; the PRD has four slots, so the schema stores four values. Hours can replace them later without changing the formulas.
 2. **Depth range means feeding depth.** The spec's "preferred depth range" is defined here as the depth band below the surface where the species feeds.
-3. **Fields added to the spec's lists:** `lw_a`, `lw_b`, `regulation` (species); `water_class`, `water_temp_by_month_c`, `wind_by_month`, `landing_difficulty` (spot); `retrieve_m_per_s` instead of a retrieve ratio (reel); a separate **leader** record; `imitates`, running depths, `sink_rate_m_per_s`, `hook_gape_mm` (lure). Hook size is stored as gape in mm because hook size numbers are not linear.
+3. **Fields added to the spec's lists:** `lw_a`, `lw_b`, `regulation`, `teeth` (species); `water_class`, `water_temp_by_month_c`, `wind_by_month`, `landing_difficulty` (spot); `retrieve_m_per_s` instead of a retrieve ratio (reel); a separate **leader** record; `imitates`, running depths, `sink_rate_m_per_s`, `hook_gape_mm` (lure). Hook size is stored as gape in mm because hook size numbers are not linear.
 4. **Spec attributes stored but not used by the 0.1 formulas:** species `rarity`, `activity_by_month`; spot `access_difficulty`, position `current`, `bottom_type`; rod `action`, `durability`; reel `size`, `line_capacity_m`; line `diameter_mm`, `visibility`, `abrasion_resistance` (the leader's values are used instead); lure `scent`, `durability`; angler `strike_timing`, `fight_control`, `patience`, `species_knowledge`, `spot_knowledge`. They are kept so the MVP does not need a schema change.
 5. **The 90 s rule** resolves a fight by a game rule (5.5). It follows the PRD's cap and is not realistic for very large fish.
 
@@ -392,8 +396,9 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 | Question | Who | Blocking? |
 | --- | --- | --- |
 | Do the formulas match an angler's judgement (drag at a third of the weakest link, flash in murky water, cautious fish and visible leaders)? | Owner | Blocks tuning, not the build |
-| Which three species, and their sources | Owner | Blocks species data |
-| Should toothy species cut leaders (a `teeth` attribute against leader abrasion resistance)? Not in the spec | Owner | No |
+| Species and spot are provisional (horse mackerel, bluefish, sea bass; a Kadıköy/Moda breakwater or pier area, chosen by Claude on 2026-11-11); sources for every value still needed | Owner (visit, citations) | Blocks real data |
+| ~~Should toothy species cut leaders?~~ **Decided yes (2026-11-11)**: `teeth` attribute, section 5.5 | Owner | Done |
+| ~~90 s rule~~ **Decided (2026-11-11)**: the cap stays; the game shows a hint when the capped fight is likely (PRD F19) | Owner | Done |
 | Licence reads: Sentinel-2 notice, Copernicus Marine licence, the communique text, article 31 | Owner with legal advice | Blocks only the data that uses them |
 | Is the top-down map traced from Sentinel-2 or drawn from the owner's photos? | Owner, art direction | Blocks the map art |
 | Tick rate and state machine details of the fight (run, rest, thrash) | Engineering, with the architecture | Blocks the fight build |
@@ -405,3 +410,16 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 3. [ ] Port the formulas to `game/sim/` as pure functions; the worked examples become unit tests with these exact numbers.
 4. [ ] Owner picks the first spot and three species; values entered by hand with provenance.
 5. [ ] Read each licence in section 7 before its data is committed; record it in `reference_docs.md`.
+
+## 11. Implementation status
+
+| Part | File | State |
+| --- | --- | --- |
+| Schema (all entities of section 3 except float and sinker) | `game/data/schema.json` | Done |
+| Constants (section 5.8, all design fills) | `game/data/constants.json` | Done |
+| Validator (sections 2 and 4) | `game/sim/data_validator.gd` | Done; negative tests for each rule |
+| Loader | `game/sim/data_store.gd` | Done; returns errors, the caller decides how loudly to fail; not yet wired into start-up because no real data exists |
+| Stages 0-4 and 6, closed-form fight (5.5 estimate) including teeth and the 90 s cap flag | `game/sim/catch_model.gd` | Done; the three worked examples (four runs) are unit tests and agree with this document and the workbook |
+| Cast distance (5.0), shoal follow-up (5.3), real-time fight tick model (5.5) | none | Not ported: the first two have no worked example yet, the third waits for the fight controls design |
+| Fixtures (illustrative design fills, not real data) | `game/tests/fixtures/` | Excluded from the export |
+| Real species and spot data | `game/data/species.json`, `spots.json`, `tackle/` | Not written: waits for the owner's choice of spot and species and the licence reads |

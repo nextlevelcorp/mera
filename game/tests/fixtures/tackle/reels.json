@@ -1,0 +1,30 @@
+[
+  {
+    "id": "lrf_reel",
+    "name_key": "FIXTURE_REEL_LRF",
+    "size": 2000,
+    "drag_max_kg": 3,
+    "retrieve_m_per_s": 1.0,
+    "smoothness": 12,
+    "line_capacity_m": 150,
+    "provenance": {
+      "default": {
+        "design_fill": true
+      }
+    }
+  },
+  {
+    "id": "spin_reel",
+    "name_key": "FIXTURE_REEL_SPIN",
+    "size": 4000,
+    "drag_max_kg": 6,
+    "retrieve_m_per_s": 1.2,
+    "smoothness": 9,
+    "line_capacity_m": 200,
+    "provenance": {
+      "default": {
+        "design_fill": true
+      }
+    }
+  }
+]

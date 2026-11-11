@@ -1,0 +1,782 @@
+{
+ "version": 1,
+ "notes": "Field specs for docs/data_model.md section 3. Types: string, int, number, enum, list, map (exact keys), object. All records also need a provenance block (validated separately). Bait is included for the MVP; float and sinker records are not defined yet. An entity with optional_file may have no data file yet.",
+ "entities": {
+  "species": {
+   "file": "species.json",
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "scientific_name": {
+     "type": "string"
+    },
+    "strength": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "stamina": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "speed": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "caution": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "aggression": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "schooling": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "feeding_depth_min_m": {
+     "type": "number",
+     "min": 0,
+     "max": 200
+    },
+    "feeding_depth_max_m": {
+     "type": "number",
+     "min": 0,
+     "max": 200
+    },
+    "temp_min_c": {
+     "type": "number",
+     "min": -2,
+     "max": 40
+    },
+    "temp_max_c": {
+     "type": "number",
+     "min": -2,
+     "max": 40
+    },
+    "activity_by_slot": {
+     "type": "map",
+     "keys": [
+      "dawn",
+      "day",
+      "evening",
+      "night"
+     ],
+     "value": {
+      "type": "number",
+      "min": 0,
+      "max": 1
+     }
+    },
+    "activity_by_month": {
+     "type": "list",
+     "item": {
+      "type": "number",
+      "min": 0,
+      "max": 1
+     },
+     "min_items": 12,
+     "max_items": 12,
+     "required": false
+    },
+    "salinity": {
+     "type": "list",
+     "item": {
+      "type": "enum",
+      "values": [
+       "marine",
+       "brackish",
+       "fresh"
+      ]
+     },
+     "min_items": 1,
+     "max_items": 3
+    },
+    "mouth_gape_mm": {
+     "type": "number",
+     "min": 1,
+     "max": 1000
+    },
+    "diet_tags": {
+     "type": "list",
+     "item": {
+      "type": "enum",
+      "values": [
+       "small_fish",
+       "crustacean",
+       "worm",
+       "plankton",
+       "squid",
+       "insect",
+       "mollusc"
+      ]
+     },
+     "min_items": 1,
+     "max_items": 7
+    },
+    "surface_thrash": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "teeth": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "length_min_cm": {
+     "type": "number",
+     "min": 1,
+     "max": 1000
+    },
+    "length_max_cm": {
+     "type": "number",
+     "min": 1,
+     "max": 1000
+    },
+    "length_record_cm": {
+     "type": "number",
+     "min": 1,
+     "max": 1000
+    },
+    "weight_record_kg": {
+     "type": "number",
+     "min": 0.001,
+     "max": 2000
+    },
+    "rarity": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "lw_a": {
+     "type": "number",
+     "min": 0,
+     "max": 1
+    },
+    "lw_b": {
+     "type": "number",
+     "min": 1,
+     "max": 5
+    },
+    "regulation": {
+     "type": "object",
+     "fields": {
+      "min_length_cm": {
+       "type": "number",
+       "min": 1,
+       "max": 1000,
+       "required": false
+      },
+      "daily_limit": {
+       "type": "int",
+       "min": 0,
+       "max": 1000,
+       "required": false
+      },
+      "closed_season": {
+       "type": "string",
+       "required": false
+      },
+      "as_of": {
+       "type": "string"
+      },
+      "source": {
+       "type": "string"
+      }
+     },
+     "required": false
+    }
+   }
+  },
+  "spot": {
+   "file": "spots.json",
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "region": {
+     "type": "string"
+    },
+    "lat": {
+     "type": "number",
+     "min": -90,
+     "max": 90
+    },
+    "lon": {
+     "type": "number",
+     "min": -180,
+     "max": 180
+    },
+    "shore_type": {
+     "type": "enum",
+     "values": [
+      "rock",
+      "sand",
+      "pier",
+      "harbour"
+     ]
+    },
+    "water_class": {
+     "type": "enum",
+     "values": [
+      "marine",
+      "brackish",
+      "fresh"
+     ]
+    },
+    "typical_clarity": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "pressure": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "access_difficulty": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "water_temp_by_month_c": {
+     "type": "list",
+     "item": {
+      "type": "number",
+      "min": -2,
+      "max": 40
+     },
+     "min_items": 12,
+     "max_items": 12
+    },
+    "wind_by_month": {
+     "type": "free_object",
+     "required": false
+    },
+    "species": {
+     "type": "list",
+     "item": {
+      "type": "object",
+      "fields": {
+       "species_id": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+       },
+       "abundance_by_month": {
+        "type": "list",
+        "item": {
+         "type": "number",
+         "min": 0,
+         "max": 1
+        },
+        "min_items": 12,
+        "max_items": 12
+       }
+      }
+     },
+     "min_items": 1,
+     "max_items": 200
+    },
+    "positions": {
+     "type": "list",
+     "item": {
+      "type": "object",
+      "entity": "position"
+     },
+     "min_items": 3,
+     "max_items": 4
+    }
+   }
+  },
+  "position": {
+   "file": null,
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "map_x": {
+     "type": "number",
+     "min": 0,
+     "max": 1
+    },
+    "map_y": {
+     "type": "number",
+     "min": 0,
+     "max": 1
+    },
+    "depth_profile": {
+     "type": "list",
+     "item": {
+      "type": "object",
+      "fields": {
+       "distance_m": {
+        "type": "number",
+        "min": 0,
+        "max": 500
+       },
+       "depth_m": {
+        "type": "number",
+        "min": 0,
+        "max": 200
+       }
+      }
+     },
+     "min_items": 2,
+     "max_items": 50
+    },
+    "bottom_type": {
+     "type": "enum",
+     "values": [
+      "rock",
+      "sand",
+      "mud",
+      "weed",
+      "mixed"
+     ]
+    },
+    "structure": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "structure_tags": {
+     "type": "list",
+     "item": {
+      "type": "string"
+     },
+     "min_items": 0,
+     "max_items": 20
+    },
+    "exposure_by_wind": {
+     "type": "map",
+     "keys": [
+      "N",
+      "NE",
+      "E",
+      "SE",
+      "S",
+      "SW",
+      "W",
+      "NW"
+     ],
+     "value": {
+      "type": "number",
+      "min": 0,
+      "max": 1
+     }
+    },
+    "current": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "landing_difficulty": {
+     "type": "number",
+     "min": 0,
+     "max": 1
+    }
+   }
+  },
+  "rod": {
+   "file": "tackle/rods.json",
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "length_m": {
+     "type": "number",
+     "min": 0.5,
+     "max": 6
+    },
+    "power": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "action": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "cast_weight_min_g": {
+     "type": "number",
+     "min": 0,
+     "max": 500
+    },
+    "cast_weight_max_g": {
+     "type": "number",
+     "min": 0,
+     "max": 500
+    },
+    "sensitivity": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "durability": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    }
+   }
+  },
+  "reel": {
+   "file": "tackle/reels.json",
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "size": {
+     "type": "int",
+     "min": 100,
+     "max": 30000
+    },
+    "drag_max_kg": {
+     "type": "number",
+     "min": 0.1,
+     "max": 50
+    },
+    "retrieve_m_per_s": {
+     "type": "number",
+     "min": 0.1,
+     "max": 5
+    },
+    "smoothness": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "line_capacity_m": {
+     "type": "number",
+     "min": 10,
+     "max": 2000
+    }
+   }
+  },
+  "line": {
+   "file": "tackle/lines.json",
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "type": {
+     "type": "enum",
+     "values": [
+      "mono",
+      "braid",
+      "fluorocarbon"
+     ]
+    },
+    "diameter_mm": {
+     "type": "number",
+     "min": 0.01,
+     "max": 2
+    },
+    "breaking_strain_kg": {
+     "type": "number",
+     "min": 0.1,
+     "max": 100
+    },
+    "stretch": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "visibility": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "abrasion_resistance": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    }
+   }
+  },
+  "leader": {
+   "file": "tackle/leaders.json",
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "type": {
+     "type": "enum",
+     "values": [
+      "mono",
+      "fluorocarbon",
+      "wire"
+     ]
+    },
+    "length_m": {
+     "type": "number",
+     "min": 0.1,
+     "max": 10
+    },
+    "breaking_strain_kg": {
+     "type": "number",
+     "min": 0.1,
+     "max": 100
+    },
+    "visibility": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "abrasion_resistance": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    }
+   }
+  },
+  "lure": {
+   "file": "tackle/lures.json",
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "type": {
+     "type": "enum",
+     "values": [
+      "soft_plastic",
+      "metal_jig",
+      "spoon",
+      "minnow",
+      "popper"
+     ]
+    },
+    "length_cm": {
+     "type": "number",
+     "min": 0.5,
+     "max": 40
+    },
+    "weight_g": {
+     "type": "number",
+     "min": 0.1,
+     "max": 200
+    },
+    "flash": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "action": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "scent": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "durability": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "imitates": {
+     "type": "list",
+     "item": {
+      "type": "enum",
+      "values": [
+       "small_fish",
+       "crustacean",
+       "worm",
+       "plankton",
+       "squid",
+       "insect",
+       "mollusc"
+      ]
+     },
+     "min_items": 1,
+     "max_items": 7
+    },
+    "run_depth_min_m": {
+     "type": "number",
+     "min": 0,
+     "max": 100
+    },
+    "run_depth_max_m": {
+     "type": "number",
+     "min": 0,
+     "max": 100
+    },
+    "sink_rate_m_per_s": {
+     "type": "number",
+     "min": 0,
+     "max": 5
+    },
+    "hook_gape_mm": {
+     "type": "number",
+     "min": 1,
+     "max": 100
+    },
+    "hook_pattern": {
+     "type": "string"
+    }
+   }
+  },
+  "bait": {
+   "file": "tackle/baits.json",
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "type": {
+     "type": "string"
+    },
+    "size_cm": {
+     "type": "number",
+     "min": 0.1,
+     "max": 40
+    },
+    "scent": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "durability": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "target_diet_tags": {
+     "type": "list",
+     "item": {
+      "type": "enum",
+      "values": [
+       "small_fish",
+       "crustacean",
+       "worm",
+       "plankton",
+       "squid",
+       "insect",
+       "mollusc"
+      ]
+     },
+     "min_items": 1,
+     "max_items": 7
+    },
+    "effective_depth_min_m": {
+     "type": "number",
+     "min": 0,
+     "max": 100
+    },
+    "effective_depth_max_m": {
+     "type": "number",
+     "min": 0,
+     "max": 100
+    }
+   },
+   "optional_file": true
+  },
+  "angler": {
+   "file": "angler.json",
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "casting_distance": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "casting_accuracy": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "strike_timing": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "fight_control": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "knot_strength": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "patience": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "species_knowledge": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    },
+    "spot_knowledge": {
+     "type": "int",
+     "min": 1,
+     "max": 20
+    }
+   }
+  }
+ }
+}

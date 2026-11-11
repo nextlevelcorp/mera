@@ -11,7 +11,8 @@ See `project_spec.md` 6.5. `game/` is the Godot 4.4 project:
 | `game/ui/` | UI scripts; `device_guard.gd` shows the "turn your phone" screen in portrait | skeleton |
 | `game/locale/` | `translations.csv` (en, tr, es) | skeleton |
 | `game/tests/` | Headless tests, run by `run_tests.gd` | skeleton |
-| `game/data/`, `game/sim/` | Attribute database and simulation core | empty |
+| `game/data/` | `schema.json`, `constants.json`; real species, spot and tackle data not written yet | schema and constants |
+| `game/sim/` | Data validator, loader, catch model | first parts |
 
 ## Decisions
 - **Engine**: Godot 4.4.1, pinned in `.godot-version` and read by CI and the cloud setup script.
@@ -21,8 +22,8 @@ See `project_spec.md` 6.5. `game/` is the Godot 4.4 project:
 - **Tests**: own minimal headless runner (`game/tests/run_tests.gd`). The GUT plugin from spec 7.9 is not installed because new plugins need the owner's approval.
 - **Export type on Pages**: release export. A debug menu will be gated by a feature tag later.
 
-## Data layer (proposed, not built)
-See `data_model.md`: JSON files under `game/data/` with one schema file and a GDScript validator that fails loudly at start-up; catch resolution in six logged stages as pure functions in `game/sim/`. Waiting for the owner's approval.
+## Data layer and simulation (first parts built)
+See `data_model.md`. JSON files under `game/data/` with `schema.json` and `constants.json`; `game/sim/data_validator.gd` and `data_store.gd` load and validate them (errors returned, the caller decides how loudly to fail); `game/sim/catch_model.gd` holds the staged catch resolution as pure functions (no nodes, no globals, no randomness). Tests use illustrative fixtures in `game/tests/fixtures/`, excluded from the export. Not wired into the scenes yet.
 
 ## CI (`.github/workflows/ci.yml`)
 `changelog` (PRs only: code changed needs `docs/changelog.md` changed) and `build` (import, unit tests, web export, uploaded as Pages artifact) → `deploy` (only on push to `main`, GitHub Pages). Godot binary and web templates are downloaded from the official `godotengine/godot-builds` releases and cached by version.
