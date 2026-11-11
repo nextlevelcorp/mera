@@ -22,7 +22,7 @@ See `project_spec.md` 6.5. `game/` is the Godot 4.4 project:
 - **Export type on Pages**: release export. A debug menu will be gated by a feature tag later.
 
 ## CI (`.github/workflows/ci.yml`)
-`build` (import, unit tests, web export, uploaded as Pages artifact) → `deploy` (only on push to `main`, GitHub Pages). Godot binary and web templates are downloaded from the official `godotengine/godot-builds` releases and cached by version.
+`changelog` (PRs only: code changed needs `docs/changelog.md` changed) and `build` (import, unit tests, web export, uploaded as Pages artifact) → `deploy` (only on push to `main`, GitHub Pages). Godot binary and web templates are downloaded from the official `godotengine/godot-builds` releases and cached by version.
 
 ## Cloud environment
 `scripts/cloud_env_setup.sh` installs the same Godot version and web templates into a cloud session. Paste its contents into the environment's Setup script field (environment menu in the session title bar → Edit). The environment's network access must allow `github.com`, `objects.githubusercontent.com` and `release-assets.githubusercontent.com`; package registries alone are not enough.

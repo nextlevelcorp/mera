@@ -17,6 +17,26 @@ env:
   INSTALL_DIR: ${{ github.workspace }}/.godot-bin
 
 jobs:
+  changelog:
+    name: Changelog updated
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Require docs/changelog.md when code changes
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          changed="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
+          echo "$changed"
+          if echo "$changed" | grep -qE '^(game/|scripts/|\.github/)' && ! echo "$changed" | grep -qx 'docs/changelog.md'; then
+            echo "::error::Code or CI changed but docs/changelog.md did not."
+            exit 1
+          fi
+
   build:
     name: Test and export web build
     runs-on: ubuntu-24.04
