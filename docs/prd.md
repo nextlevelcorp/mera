@@ -164,9 +164,9 @@ Owner decision of 2026-11-11: proceed with the recommendations below.
 6. **First cast.** A ready-made rig and standing position are preselected. "Edit rig" is always visible and fully open. Target: first cast within about 2 minutes. The ready rig carries a design-fill label.
 
 ### Interview (PRD gaps)
-7. **First spot.** Not chosen yet. Owner lives in Istanbul and fishes with rod and lure, so the owner is the primary domain expert and can visit. Selection criteria still to agree.
+7. **First spot.** Owner lives in Istanbul and fishes with rod and lure, so the owner is the primary domain expert and can visit. Superseded by decisions 18 and 20: criteria fixed, shortlist in section 7.
 8. **Pass bar for the slice.** 5 anglers plus 5 non-anglers: at least 4 of 5 anglers call the fight and line logic believable; at least 6 of 10 testers say they would play again tomorrow. Anonymous counters count as second evidence only with 100 or more visitors.
-9. **Reach.** Angler groups (Facebook, Instagram, Telegram) and fishing content creators. Not available: own circle, tackle shops. Open: the first 10 testers need a plan, since the owner's own circle is not an option.
+9. **Reach.** Angler groups (Facebook, Instagram, Telegram) and fishing content creators. Not available: own circle, tackle shops. Superseded by decision 21: recruiting starts when the slice is playable.
 10. **Technique in the slice.** Lure spinning / light rock fishing (LRF). No bait/float in the slice.
 11. **Fight input.** Two thumbs in landscape: left corner reel (hold, slide for speed); right corner drag/brake and pulling the rod tip against the fish's run. Tension bar centred. No gyro.
 
