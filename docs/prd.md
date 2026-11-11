@@ -1,6 +1,6 @@
 # Product Requirements Document
 
-Status: **draft v2 for owner approval** (phase 1, Definition). No gameplay code until the owner ticks the approval box in section 14.
+Status: **approved by the owner on 2026-11-11** (phase 1, Definition). Changes after this date need the owner's approval.
 
 Inputs: `project_spec.md`, `research.md`, the owner interview (decision log in the appendix). Where this PRD narrows or adds to the spec it says so. Priorities: **P0** = the version cannot ship without it, **P1** = should follow soon, **P2** = designed for, not built.
 
@@ -231,7 +231,7 @@ Owner decision of 2026-11-11: proceed with the recommendations below.
 
 ## 14. Approval
 
-- [ ] Owner approves this PRD (phase 1). Until ticked, no gameplay code.
+- [x] Owner approved this PRD on 2026-11-11 ("Prd ok"). Phase 2 (design) may start; build follows the phase order in CLAUDE.md.
 
 ## 15. Spot shortlist (candidates only)
 
@@ -281,4 +281,4 @@ The slice builds the first confirmed spot; the rest of the 3-5 MVP spots follow 
 23. **Approvals delegated to recommendations** (owner, 2026-11-11): anonymous counter service, developer accounts, species data licence, regional rules. Recommendations are in section 11.
 24. **Unreachable sources** (Reddit, Ekşi Sözlük, TÜİK, etc.): skipped. Turkish demand evidence will come from the end-of-slice test, not desk research.
 25. **Approved by the owner** (2026-11-11, reply "Onaylıyorum" to the three points raised in the previous PR): the single network exception in `.claude/rules/security.md` (anonymous counters); the schedule adjustment (8 weeks to a playable slice, tester round after); the spot shortlist as candidates only (owner confirms on a visit). The PRD itself is approved only when the box in section 14 is ticked.
-
+26. **PRD approved** by the owner (2026-11-11). Next task given: the data model (`docs/data_model.md`).

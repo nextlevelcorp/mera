@@ -1,6 +1,6 @@
 # Project status
 
-**Phase**: 1 Definition: PRD draft v2 written (owner approved the security exception, schedule and spot candidates), waiting for the owner's approval of the PRD itself (no gameplay code until then). Phase 0 second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
+**Phase**: 2 Design. PRD approved by the owner on 2026-11-11; data model proposed (`data_model.md`), waiting for the owner's review. Phase 0 second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
 
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
@@ -9,6 +9,8 @@
 - Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Reminders for the owner
+- Review `data_model.md` sections 5, 6 and 8 (formulas, examples, spec changes); pick the first spot and the three species.
+- One legal consultation covers: OpenStreetMap (ODbL), article 31 of Law 5846 for the fishing communique, Sentinel-2 and Copernicus Marine terms.
 - After the slice passes: add the remaining 2-4 spots (MVP is 3-5 spots).
 - When the slice is playable: recruit the first 10 testers (angler groups, creators); set a stop date first.
 - Before the counter service is added: check GoatCounter's hosted terms for commercial use.

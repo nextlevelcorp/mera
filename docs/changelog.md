@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Docs: PRD approved by the owner (2026-11-11). Data model proposal in `docs/data_model.md` (schemas, staged catch resolution with formulas, three worked examples, data sources and licences) with companion workbook `docs/data_model_examples.xlsx`.
 - Docs: PRD draft v2 in `docs/prd.md` (problem, players, goals and non-goals, user stories, measurable funnel, feature list with acceptance criteria for 0.1 and 0.5, success metrics, schedule, risks, approvals ledger). `security.md` allows one network exception: anonymous event counters.
 - Docs: PRD decision log started in `docs/prd.md` (interview answers on measurement, top-down scope, vibration, platform, round length, first cast, pass bar, reach, technique, fight input).
 - Docs: owner decisions on scope, first audience and spot data sources recorded in `project_status.md`.

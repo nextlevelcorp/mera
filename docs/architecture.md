@@ -21,6 +21,9 @@ See `project_spec.md` 6.5. `game/` is the Godot 4.4 project:
 - **Tests**: own minimal headless runner (`game/tests/run_tests.gd`). The GUT plugin from spec 7.9 is not installed because new plugins need the owner's approval.
 - **Export type on Pages**: release export. A debug menu will be gated by a feature tag later.
 
+## Data layer (proposed, not built)
+See `data_model.md`: JSON files under `game/data/` with one schema file and a GDScript validator that fails loudly at start-up; catch resolution in six logged stages as pure functions in `game/sim/`. Waiting for the owner's approval.
+
 ## CI (`.github/workflows/ci.yml`)
 `changelog` (PRs only: code changed needs `docs/changelog.md` changed) and `build` (import, unit tests, web export, uploaded as Pages artifact) → `deploy` (only on push to `main`, GitHub Pages). Godot binary and web templates are downloaded from the official `godotengine/godot-builds` releases and cached by version.
 
