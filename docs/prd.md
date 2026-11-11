@@ -1,116 +1,194 @@
 # Product Requirements Document
 
-Status: **draft v1 for owner approval** (phase 1, Definition). Approving this document is the owner's call and is required before any gameplay code. Nothing below is approved until the owner says so.
+Status: **draft v2 for owner approval** (phase 1, Definition). No gameplay code until the owner ticks the approval box in section 14.
 
-Inputs: `project_spec.md` (the spec), `research.md` (phase 0), the owner interview (decision log at the end). Where this PRD adds to or narrows the spec, it says so. English is the source language; Turkish and Spanish text come from the localisation table.
+Inputs: `project_spec.md`, `research.md`, the owner interview (decision log in the appendix). Where this PRD narrows or adds to the spec it says so. Priorities: **P0** = the version cannot ship without it, **P1** = should follow soon, **P2** = designed for, not built.
 
-## 1. Summary
+## 1. Problem statement
 
-Mera is a shore-fishing RPG that plays like a relaxed exploration game and resolves like a simulation. The player picks a real shore spot, reads the conditions, rigs, casts, waits, strikes and fights a fish in a first-person view; outcomes come from depth, feeding time, tackle match and line tension, and the screen shows enough to reason about them. The first audience is hobby anglers who want realism they can check against their own experience.
+Hobby anglers who play fishing games get arcade timing bars, invented fish, pay-to-win and ads (research: monetisation was the largest complaint theme in a 117-review mobile sample, and "microtransactions/DLC/grind" in 11 of 21 sampled negative Fishing Planet reviews). Realistic simulators rate only 62-84% positive among English Steam reviewers, and real anglers specifically criticise fight length, line logic and lure behaviour. Nothing found lets a player learn and practise reading a real shore spot with outcomes they can explain. Not solving it leaves anglers with games they do not trust, and people curious about fishing with videos and forums only.
 
-## 2. Problem and audience
+Evidence status: market evidence **moderate**; demand for this exact concept (realistic, real-location shore fishing) **weak** (0 direct requests found, no Turkish signal). Version 0.1 exists to find out, cheaply.
 
-- **Audience (first):** realism enthusiasts, hobby anglers (owner decision). They check details: research found real anglers criticise fight length, line logic and lure behaviour in existing sims, and also play sims when they cannot fish.
-- **Later audiences (not targeted yet):** cozy and collection players; people curious about fishing.
-- **Evidence status:** market evidence moderate, demand for this exact concept weak (0 direct requests, no Turkish signal). The slice and its tests exist to find out. See `research.md`.
-- **Unmet needs the product answers:** no ads, timers or pay-to-win (top complaint cluster); fair, short fights; sourced places and species labelled as such.
+## 2. Target players
 
-## 3. Goals and non-goals
-
-**Goals (0.1 slice)**
-1. A complete cast, wait, bite, fight, land, log loop at one real spot that a hobby angler finds believable.
-2. Readable outcomes: every result can be explained from depth, feeding time, tackle match and line tension, and the test suite checks it.
-3. A web build that holds a stable frame rate on a mid-range phone (target and test device set in phase 2).
-4. Honest sourcing: every spot and species value has a source or a design-fill label.
-
-**Non-goals (0.1):** walking world, multiple spots, bait or float fishing, XP, money, tackle unlocks, shop, accounts, cloud save, backend, ads, in-app purchases, live weather data, native builds, multiplayer.
-
-## 4. Versions and scope (versioning plan)
-
-| Version | Scope | Gate to start |
+| Player | Wants | Status |
 | --- | --- | --- |
-| 0.1 slice | One spot with 3-4 standing positions, lure spinning/LRF only, 3 species, simulation core, fight with two-thumb input, catch log and records, local save, en/tr/es, debug menu, anonymous counters, web build on GitHub Pages | This PRD approved |
-| 0.5 MVP | 3-5 Turkey spots, 15-25 species with sourced behaviour (spec 4.6), wider conditions (waves, clarity, season), more tackle, progression | The slice passes the tester threshold |
-| 1.0 release | Paid one-time iOS/Android app, store listing, security audit, full test pass | MVP retention evidence (spec 4.7) |
-| Later | More regions, community features (spec 4.7) | As in the spec |
+| **Hobby angler (primary)**: rod anglers, rod-and-lure shore fishing in Turkey first | Their own waters, real species, tackle choices that matter, a fight and line model they can believe | Owner decision: first audience |
+| Cozy / collection player | A calm world, a log to fill, steady mastery | Later; not designed for in 0.1 |
+| Fishing-curious person | A way to learn rigs, lures and reading water without gear | Later; served indirectly by explanations in 0.1 |
 
-Spec 4.6 listed top-down exploration for the MVP; this PRD narrows the slice to a static top-down map with 3-4 tappable standing positions. A walkable top-down world is not in 0.1.
+Research notes for the primary player: real anglers play sims also when they cannot fish (age, weather, time), check species and place accuracy, and mark down long fights.
 
-## 5. The first five minutes (slice experience)
+## 3. Goals
 
-1. Open the web build on a landscape phone (portrait shows the turn-your-phone screen).
-2. Arrive at the spot, pick a time slot (dawn, day, evening, night). Wind and water clarity come from a date-based seed.
-3. A ready-made rig and a standing position are preselected. "Edit rig" and the position choice are always open.
-4. First cast within about 2 minutes. Cast, retrieve the lure, read signs.
-5. A bite (nibble or committed take), strike, fight, fish appears near the shore, land or lose it. The log records it.
+1. **Believable fight and line logic (0.1).** At least 4 of 5 tester anglers call it believable (pass bar, section 9).
+2. **Readable outcomes (0.1).** Every catch attempt result can be explained from depth, feeding time, tackle match and line tension; a headless test asserts every stage logs its inputs.
+3. **Fast first cast (0.1).** A new player reaches a first cast within about 2 minutes of the game loading (measured by anonymous counters; target set after a baseline).
+4. **Honest sourcing (0.1+).** 100% of spot and species values carry a source or a design-fill label; a data test fails otherwise.
+5. **Playable on a phone (0.1).** The single-threaded web build holds a stable frame rate on a named mid-range phone (target and device set in phase 2).
+6. **Evidence of demand (0.1 to 0.5).** Tester pass bar met, then a funnel baseline from the first 100 visitors.
 
-Round length: the simulation decides the wait (good spot and hour about 20-40 s, bad: minutes), the player may speed time up, signs stay readable. A fight lasts 20-90 s by species and size and never exceeds 90 s. Typical round 1.5-4 min.
+## 4. Non-goals
 
-## 6. Functional requirements
+- **Ads, timers, pay-to-win, loot boxes**: the most-complained-about features in competing games; against pillars 2 and 5.
+- **Accounts, cloud save, backend, email collection, waitlist**: web build keeps all data on the phone (owner decision); native data collection is a later, separately approved design.
+- **Walkable top-down world in 0.1**: a static map with standing positions tests the same decision at far lower cost; revisited for 0.5.
+- **Bait/float fishing, boats, sonar, deep sea**: 0.1 is lure spinning/LRF only; the rest is out of the MVP (spec 4.6).
+- **Live weather or any live data**: conditions come from a date-based seed; live data is a later pipeline (spec 4.7).
+- **Native iOS/Android in 0.1 and 0.5**: native paid release is 1.0.
+- **Real-brand tackle names**: fictional tackle labelled design fill avoids the brand-licence question.
 
-Each requirement is testable; the simulation requirements are tested headless.
+## 5. User stories
 
-**Views and controls**
-- R1. Landscape only, 1280x720 design space, `canvas_items` stretch, `expand` aspect; portrait shows the guard screen.
-- R2. Top-down spot map: one image with 3-4 tappable standing positions, each with different depth and structure.
-- R3. First-person fishing view from cast to land or loss; centred 1280x720 design rectangle, backgrounds to the screen edges.
-- R4. Fight input, two thumbs: left corner reel (hold, slide for speed); right corner drag/brake and pulling the rod tip against the fish's run. Tension bar centred. No gyro.
-- R5. Touch controls pinned to the screen corners; targets large enough for thumbs (size fixed in phase 2).
+**Hobby angler**
+- As a hobby angler, I want to pick a standing position at a real spot and see its depth and structure so that I can decide where to cast, as I would on the shore.
+- As a hobby angler, I want the time of day, wind and water clarity to change what bites so that reading conditions is a skill I can learn.
+- As a hobby angler, I want to choose lure, line and hook, and see why a choice worked or failed so that I learn tackle matching.
+- As a hobby angler, I want a bite to feel like a nibble or a committed take and my strike timing to matter so that patience pays off.
+- As a hobby angler, I want a fight that is short, intense and decided by line tension and drag, not a timing bar so that I trust the game.
+- As a hobby angler, I want a catch log with my records so that I have something to beat and fill.
+- As a hobby angler on an iPhone, I want every cue that Android shows as vibration to also show on screen and in sound so that I lose nothing.
+- As a hobby angler, I want to play in Turkish so that terms feel natural.
 
-**Simulation (plain GDScript, deterministic under a seed, no scene dependencies)**
-- R6. Environment: time slot, wind direction and speed, water clarity from the date seed.
-- R7. Presence: which of the 3 species can be at the position now (spot, season, time, wind, depth).
-- R8. Attraction: lure type, size, colour/flash, retrieve speed and depth against species preference.
-- R9. Bite: nibbles versus a committed take; hook size versus mouth size; strike timing.
-- R10. Fight: fish strength and stamina against rod power, line strength, drag and player input; runs; tiring; line break, hook pull-out or landing.
-- R11. Landing: tired fish appears near the shore at a distance set by water clarity; landed or lost at the edge.
-- R12. Every stage logs its inputs so a result can be explained to the player and asserted in tests.
-- R13. Fish stays invisible during the wait and the early fight; the player reads float/line/rod bend/splashes/rings.
+**First-time visitor**
+- As a first-time visitor, I want to cast within about 2 minutes with a sensible rig preselected so that I am not stopped by menus.
+- As a visitor holding the phone upright, I want a clear "turn your phone" screen so that I know what to do.
 
-**Feedback**
-- R14. Every cue that vibration carries on Android also has a visual and an audio equivalent (iPhone Safari has no Vibration API). Tension is never shown by colour alone.
-- R15. Sound starts after the first player tap (browser autoplay rule).
+**Owner (reviewer and tester)**
+- As the owner, I want a debug menu to jump to a spot, set time, wind and clarity, force a bite and pick species and size so that I can check any flow in the time I have (about 3 hours a week).
 
-**Progress, data, platform**
-- R16. Catch log: first-seen date and biggest length and weight per species; records; last rig and standing position. Versioned local save on the phone; nothing leaves the phone.
-- R17. Game data in data files with a schema and a source field: spot, 3 species, rod, reel, line, hook, lures (spec 5.3 attributes, 1-20 scale where defined). Loaded and validated at start-up; schema errors fail loudly.
-- R18. Every user-facing string through the localisation table (en, tr, es); the test fails on a missing key. Spanish is flagged "not reviewed by a native speaker" until someone reviews it.
-- R19. Debug menu in development builds only, compiled out of release: jump to spot, set time slot, wind and clarity, force a bite, pick species and size, grant tackle, show simulation inputs. Every flow the owner must check is reachable from it.
-- R20. Anonymous counters (see section 8). No identifiers, no cookies, no emails, no waitlist.
-- R21. Accessibility defaults (proposed, owner to review): readable text sizes, no colour-only signals, sound cues have visual counterparts.
+## 6. Player funnel (measurable steps)
 
-## 7. Data and sourcing
+Measured with anonymous event counts only: no identifier, no cookie, no email. A counter that cannot be measured without identifying a person is not measured. Targets are not set for any step until the first 100 visitors give a baseline (owner decision); the tester threshold is the 0.1 pass gate.
 
-- **Spot record:** id, English source name, localisation keys, coordinates, region, shore type, depth profile per standing position, bottom type, structure, exposure by wind direction, typical clarity, access notes, species list with seasonal weights, `source` or `design_fill: true`.
-- **Source rule for spots:** owner's own visit with dated notes, plus official or public-authority data after its licence is read. Not OpenStreetMap until a lawyer has advised (owner decision). Unsourced values are labelled design fill in the data and in the in-game log.
-- **Species (3 in the slice):** one common and easy, one medium, one rare chase species. Chosen by the owner's observation plus a published source.
-- **Species licence rule (recommendation, section 11):** do not import FishBase or similar datasets in bulk; hand-enter values with citations; any bulk import needs the owner's approval after the licence is read.
-- **Spot shortlist (candidates only):** these come from general knowledge, were not verified in this session, and are for the owner to confirm on a visit or replace with a better-known spot. Criteria: reachable and fishable, 3-4 distinct standing positions, simple known depth and structure.
-  1. Galata Bridge, Karaköy/Eminönü side (bridge deck, positions along the rail).
-  2. A Kadıköy/Moda breakwater or pier area.
-  3. A Bosphorus-side or Black Sea pier or breakwater the owner knows well.
-  The slice builds spot 1 or the owner's replacement; the rest of the 3-5 spots follow after the slice passes.
+| # | Step | Definition (event) | Measured as | Target |
+| --- | --- | --- | --- | --- |
+| S0 | Discover | A page open of the build (counter's page view) | Daily count | Baseline only |
+| S1 | Open the build | Game finished loading and showed the first screen (`loaded`) | `loaded` / S0 | Baseline after 100 visitors |
+| S2 | First cast within 2 minutes | First cast completed within 120 s of `loaded` in a fresh session (`first_cast_fast`); slower first casts are `first_cast_slow` | `first_cast_fast` / `loaded` for first-time visitors (first visit flagged on the phone) | Baseline after 100 visitors |
+| S3 | First fish landed | First landed fish ever on this phone (`first_fish`) | `first_fish` / `loaded` for first-time visitors | Baseline after 100 visitors |
+| S4 | Return next day | First `loaded` on a later calendar day than the first visit; only the event is sent (`return_next_day`), the phone computes it from a local date | Approximate: `return_next_day` on day N / `first_visit` on day N-1. A true cohort cannot be built without identifiers, so use only with enough daily volume | Baseline after 100 visitors |
+| S5* | Third spot unlocked | MVP only | Event defined in the MVP design | Set with the MVP |
+| S6* | Log half complete | MVP only | Event defined in the MVP design | Set with the MVP |
 
-## 8. Measurement and funnel
+Notes: counter events are not sent from development or debug builds; failures to reach the counter are silent and never block play. The counter service is GoatCounter pending a check of its hosted terms (section 11). Tester observation (section 9) covers what counters cannot: believability and "play again tomorrow".
 
-Slice funnel: page open, first cast within 2 minutes, first fish landed, returning visit. No numeric targets until the first 100 visitors set a baseline; targets are then written here. The pass gate is the tester threshold (section 9).
+## 7. Feature list and acceptance criteria
 
-- Counters are anonymous event counts (no identifier, no cookie, no email). "Returning visit" is computed on the phone from a local last-visit date, and only the count is sent, never an identifier.
-- Counter service (recommendation): GoatCounter. It is open source and, per its README, offers a free hosted service, does not track with unique identifiers and says it needs no GDPR notice. Its hosted terms for commercial use could not be checked from this environment; the PR that adds it must check them first. If they do not fit, the fallback is no analytics and the testers only.
-- Funnel steps and event names are final in phase 2.
+### 7.1 Version 0.1 (the slice)
 
-## 9. Success criteria and schedule
+Scope: one real spot with 3-4 standing positions, lure spinning/LRF only, 3 species, the full cast, wait, bite, fight, land, log loop, local save, en/tr/es, debug menu, anonymous counters, web build on GitHub Pages.
 
-**Pass bar for the slice (set before testing):** 5 anglers and 5 non-anglers play it. At least 4 of 5 anglers call the fight and line logic believable; at least 6 of 10 testers say they would play again tomorrow. Anonymous counters count as a second signal only with 100 or more visitors.
+**F1. Landscape layout (P0).** 1280x720 design space, `canvas_items`, `expand`.
+- Given the window is taller than wide, then a "turn your phone" screen covers the game and gameplay input is ignored.
+- Given a 16:9 and a wider phone ratio, then the first-person view keeps a centred 1280x720 rectangle with backgrounds to the screen edges and touch controls inside the screen corners.
 
-**Schedule:** target 8 weeks from phase 1 approval to a playable 0.1 slice. The owner decided testing comes last, so the first 10 testers are recruited (angler groups, creators) only when the slice is playable. With about 3 owner hours a week (about 24 in 8 weeks), a tester round of 10 sessions does not fit inside week 8. Proposed adjustment, owner to confirm: 8 weeks to a playable slice, tester round in weeks 9-10. The one first-spot visit also needs a block of owner time; plan it in the first weeks. Re-check the plan at week 4.
+**F2. Spot and standing positions (P0).** Static top-down map of one real spot.
+- Given the map, when the player taps a standing position, then it is selected and its depth and structure are shown.
+- Given the spot data, then it has 3-4 positions and no two share both depth profile and structure (data test).
+
+**F3. Conditions (P0).** Four time slots; wind and clarity from a date seed.
+- Given arrival, when the player picks dawn, day, evening or night, then the choice is applied.
+- Given the same date and seed, then wind direction, wind speed and clarity are identical (unit test); given 30 consecutive dates, then they are not all identical (unit test).
+
+**F4. Rig (P0).** A ready rig is preselected; "Edit rig" is always open.
+- Given a first launch, then a rig and standing position are preselected and labelled design fill in the data.
+- Given Edit rig, then rod, line, hook and lure come from data; a lure outside the rod's casting-weight range shows a visible warning.
+
+**F5. Cast (P0).**
+- Given a rig and a position, when the player casts, then the view switches to first person and the lure lands at a distance set by rod, lure weight and the cast input, identically for the same seed and input (unit test).
+
+**F6. Wait and read (P0).**
+- Given a lure in the water, then line, rod tip, surface rings and splashes show activity and the fish itself is never visible.
+- Given a headless run over seeded trials, then for the best position, time slot and lure the median wait for a bite is between 20 and 40 s, and for the worst it is at least 120 s.
+- Given the player taps speed-up, then waiting runs faster and the signs stay readable.
+
+**F7. Bite and strike (P0).**
+- Given a fish interested in the lure, then it produces either nibbles or a committed take.
+- Given a committed take and a strike inside the strike window, then the hook sets with a probability that depends on hook size and mouth size; given a strike outside the window, then no hook set (unit tests).
+
+**F8. Fight (P0).** Two thumbs: left corner reel (hold, slide for speed), right corner drag/brake and pulling the rod tip against the fish's run; tension bar centred.
+- Given a hooked fish, then it runs, tires and can be landed, lost to a line break (tension above line strength for too long) or lost to a hook pull-out.
+- Given every species and size combination, then a fight ends (landed or lost) within 90 s and a typical one lasts 20-90 s (unit test over seeded fights).
+- Given the fight screen, then tension is shown by shape or position, not colour alone.
+
+**F9. Landing and log (P0).**
+- Given a tired fish, then it appears near the shore at a distance set by water clarity; the player lands it or loses it at the edge.
+- Given a landed fish, then the log records first-seen date and keeps the biggest length and weight per species, and shows records.
+
+**F10. Explainable outcomes (P0).**
+- Given any catch attempt, then each stage (presence, attraction, bite, hook hold, fight) records its inputs and result, a "why" view shows depth, feeding time, tackle match and tension, and a headless test asserts every stage logs its inputs.
+
+**F11. Equal cues (P0 for equivalents, P1 for Android vibration).**
+- Given any cue that vibrates on Android, then the same information is shown on screen and in sound; iPhone Safari gets no vibration and loses no information.
+- Given a fresh page, then sound starts after the player's first tap.
+
+**F12. Sourced data (P0).** Data files with a schema.
+- Given any spot or species record, then it has `id`, English source name, localisation keys and either `source` or `design_fill: true`; a record missing these fails the data test and fails loudly at start-up.
+- Given a value with no source, then the in-game log shows it as a design fill.
+
+**F13. Localisation (P0).**
+- Given every user-facing string, then it exists in en, tr and es (test fails on a missing key); Spanish carries a "not reviewed by a native speaker" flag until reviewed.
+
+**F14. Local save (P0).** Versioned save on the phone.
+- Given the player closes and reopens, then log, records, last rig and last position are restored.
+- Given an old or corrupt save, then it migrates or resets with a message and does not crash; nothing is sent off the phone.
+
+**F15. Debug menu (P0).** Development builds only.
+- Given a development build, then the menu can jump to a position, set time slot, wind and clarity, force a bite, pick species and size, grant tackle and show simulation inputs.
+- Given the release export, then no debug menu is present (checked in CI by export contents).
+
+**F16. Anonymous counters (P0, after the terms check).**
+- Given S0-S4, then the events in section 6 are sent with no identifier, no cookie and no email; an unreachable counter never blocks play; development builds send nothing.
+
+**F17. Build, tests and deploy (P0).**
+- Given a pull request, then CI imports, runs the unit tests and exports the web build; given a push to `main`, then the build deploys to GitHub Pages.
+- Given a visual feature, then frame rate is measured before and after on the named test phone.
+
+**F18. Settings and accessibility basics (P1).** Readable text size; adjustable text scale; sound cues have visual counterparts.
+
+**P2 (designed for, not built in 0.1):** bait/float fishing, walkable top-down world, gyro rod angle, XP, money and tackle unlocks, shop, season changes, waves simulation, more spots and species.
+
+### 7.2 Version 0.5 (the MVP, scope from spec 4.6; criteria detailed after the slice passes)
+
+| Feature | Acceptance criteria (summary) |
+| --- | --- |
+| M1. 3-5 Turkey spots | Each has 3-4 positions, sources or design-fill labels, owner-visit notes; the data test passes |
+| M2. 15-25 species with sourced behaviour | Each with source or design-fill label; species data licence rule kept (no bulk import) |
+| M3. Wind-driven waves, clarity, season | Simulation tests per stage; frame rate re-measured on the test phone |
+| M4. Tackle breadth and progression | Experience, money, tackle and spot unlocks; funnel steps S5 and S6 defined and counted |
+| M5. Exploration | Owner decides at the end of 0.1: static map again or walkable top-down |
+| M6. Save migration and Spanish review | Old saves migrate; Spanish reviewed by a native speaker |
+
+## 8. Success metrics
+
+**Leading (days to weeks)**
+- Tester pass bar met (section 9).
+- Funnel baseline recorded from the first 100 visitors; targets then written into this PRD.
+- Frame rate on the named test phone meets the phase 2 target.
+- Zero console errors in the smoke test of the web build.
+
+**Lagging (weeks to months)**
+- Return-next-day trend (approximate, section 6).
+- Share of first-time visitors who land a first fish.
+- Tester comments on repeated catches ("does the fight stay interesting").
+
+No revenue metric applies: the web build is free. The willingness-to-pay question moves to the paid 1.0 release; counters can not measure it.
+
+## 9. Pass bar and schedule
+
+**Pass bar (set before testing, owner decision):** 5 anglers and 5 non-anglers play the slice. At least 4 of 5 anglers call the fight and line logic believable; at least 6 of 10 testers say they would play again tomorrow. Counters count as a second signal only with 100 or more visitors. A stop date is set before the tester round (owner to choose).
+
+**Schedule (owner-approved):** 8 weeks from phase 1 approval to a playable 0.1 slice; tester round in weeks 9-10 (testing comes last). Owner time: about 3 hours a week. Outline: weeks 1-2 phase 2 design (data schema, architecture, frame-rate target and test phone, art and audio direction); weeks 3-7 build; week 8 hardening and the debug menu; plan one block for the spot visit early. Re-check the plan at week 4.
 
 ## 10. Non-functional requirements
 
-- Web export single-threaded, stable frame rate on a mid-range phone; target frame rate and test device set in phase 2; measure before and after any visual feature.
-- No secrets in the repository or the export; no backend.
-- Network: only the anonymous counter request (section 8). No player data leaves the phone. Any native-app data collection later needs its own approval, consent and privacy design.
-- Release build contains no debug menu.
+- Single-threaded web export, stable frame rate on a mid-range phone; measure before and after any visual feature.
+- No secrets in the repository or the export; no backend; no player data leaves the phone.
+- Network: only the anonymous counter request, as allowed by `.claude/rules/security.md`.
+- Simulation core is plain GDScript, deterministic under a seed, headless-testable; rendering reads simulation state.
+- Release builds contain no debug menu.
 
 ## 11. Dependencies and approvals ledger
 
@@ -118,32 +196,51 @@ Owner decision of 2026-11-11: proceed with the recommendations below.
 
 | Item | Recommendation | State |
 | --- | --- | --- |
-| Anonymous counter service | GoatCounter, terms check in the integration PR; fallback no analytics. `.claude/rules/security.md` gets a single stated exception for it. | Decided in principle; integration after phase 1 approval |
-| Developer accounts (Apple about USD 99 a year, Google about USD 25 once) | Do not buy now. Buy at the release gate, when a native build exists. | Decided: no cost now |
-| Species data licence | No bulk import; hand-entered values with citations; owner approval for any import. Licence terms of FishBase, GBIF and others were not readable from this environment. | Decided |
-| Regional rules (Turkey, Spain, age rating, privacy) | Web slice collects no personal data, so little applies now; a compliance check (store age rating, KVKK/GDPR for the native app's separate data collection) at the release gate. | Decided: deferred to release gate |
+| Anonymous counter service | GoatCounter (open source; README says no unique identifiers). Hosted commercial terms could not be checked from this environment: check them in the integration PR. Fallback: no analytics, testers only | Decided in principle |
+| Developer accounts (Apple about USD 99 a year, Google about USD 25 once) | Do not buy now; buy at the release gate | Decided |
+| Species data licence | No bulk import of FishBase or similar; hand-enter values with citations; owner approval for any import. Terms of FishBase, GBIF not readable from this environment | Decided |
+| Regional rules and age rating | Web slice collects no personal data; check at the release gate, including privacy for any native data collection | Decided: deferred |
+| OpenStreetMap | Not used for the first spot; legal advice before any use | Decided |
 
 ## 12. Risks
 
-| Risk | Mitigation |
-| --- | --- |
-| No proven demand for a real-location shore game | Slice plus tester pass bar and anonymous counters; stop date: owner sets one before the tester round |
-| Fight or loop becomes repetitive or too long | Fight cap 90 s; tester question on repeated catches; simulation tuned from tests |
-| Real anglers reject line or fight logic | Owner (an angler) reviews the model; tester threshold is on anglers |
-| iPhone has no vibration | Visual and audio equivalents (R14) |
-| Phone web performance breaks the first five minutes | Measure early on a named mid-range phone; phase 2 sets the budget |
-| Unsourced or wrong spot or species data is caught by players | Source or design-fill label on every value; owner's visit notes |
-| Owner time (3 h a week) limits visits, reviews and tests | Schedule check at week 4; tester round after the slice |
+| Risk | Likelihood | Impact | Mitigation |
+| --- | --- | --- | --- |
+| No real demand for a realistic real-location shore game | Unknown (weak evidence) | High | Slice, tester pass bar, counters; stop date before the tester round |
+| Loop or fight becomes repetitive or too long | Medium | High | 90 s fight cap; tests across species and sizes; tester question on repeated catches |
+| Real anglers reject the fight or line logic | Medium | High | Owner (an angler) reviews the model; threshold is on anglers |
+| iPhone has no vibration | Certain | Low | Visual and audio equivalents (F11) |
+| Phone web performance breaks the first five minutes | Medium | High | Phase 2 sets the budget; measure early on a named phone |
+| Spot or species data wrong or unsourced | Medium | Medium | Source or design-fill label on every value; owner-visit notes; data test |
+| Owner time (about 3 h a week) limits visits, reviews and tests | High | Medium | Tester round after the slice; check at week 4; debug menu for fast checks |
+| Crowded fishing releases on Steam (706 dated 2023-2026) hide a small new game | High | Medium | Free web build and reach through angler groups and creators; no store dependence for 0.1 |
+| Counter terms do not fit commercial use | Low-Medium | Low | Fallback: no analytics |
+| Realistic sims are a small, mid-rated audience; a paid 1.0 may cap reach | Medium | Medium | Decide platform and price evidence at 1.0, not now |
 
-## 13. Open items, defaults and reminders
+## 13. Open questions
 
-- **Phase 2 (design) decides:** art and audio direction, target frame rate and test device, counter event names, tension model parameters, sizes of touch targets.
-- **Owner to do:** confirm or replace the spot shortlist after a visit; confirm the schedule adjustment in section 9; set a stop date before the tester round.
-- **Reminders for the owner** (listed in `project_status.md`): add the remaining 2-4 spots after the slice passes; Turkish demand evidence from the tester round; Spanish native review; counter-service terms check; developer accounts and compliance at the release gate.
+| Question | Who | Blocking? |
+| --- | --- | --- |
+| Which spot is first (candidates in section 15)? Confirm on a visit | Owner | Blocks spot data, not simulation work |
+| Which 3 species (easy, medium, chase) and their sources? | Owner with data research | Blocks species data |
+| Target frame rate, test phone, touch-target sizes, event names | Engineering (phase 2) | Blocks build |
+| Art and audio direction | Design (phase 2) | Blocks build |
+| GoatCounter hosted terms for commercial use | Legal/owner | Blocks only the counter PR |
+| Stop date for the tester round | Owner | Before testers |
+| 0.5 exploration: static map or walkable top-down | Owner | At the end of 0.1 |
 
 ## 14. Approval
 
-- [ ] Owner approves this PRD (phase 1). Until then no gameplay code.
+- [ ] Owner approves this PRD (phase 1). Until ticked, no gameplay code.
+
+## 15. Spot shortlist (candidates only)
+
+From general knowledge, not verified in this session; the owner confirms on a visit or replaces them. Criteria (owner): fishable and reachable regularly; 3-4 distinct standing positions; simple, well-known depth and structure.
+1. Galata Bridge, Karaköy/Eminönü side (positions along the rail).
+2. A Kadıköy/Moda breakwater or pier area.
+3. A Bosphorus-side or Black Sea pier or breakwater the owner knows well.
+
+The slice builds the first confirmed spot; the rest of the 3-5 MVP spots follow after the slice passes (the owner wants a reminder; see `project_status.md`).
 
 ## Appendix: decision log (owner interview, 2026-11-11)
 
@@ -183,4 +280,5 @@ Owner decision of 2026-11-11: proceed with the recommendations below.
 22. **Owner time.** About 3 hours per week.
 23. **Approvals delegated to recommendations** (owner, 2026-11-11): anonymous counter service, developer accounts, species data licence, regional rules. Recommendations are in section 11.
 24. **Unreachable sources** (Reddit, Ekşi Sözlük, TÜİK, etc.): skipped. Turkish demand evidence will come from the end-of-slice test, not desk research.
+25. **Approved by the owner** (2026-11-11, reply "Onaylıyorum" to the three points raised in the previous PR): the single network exception in `.claude/rules/security.md` (anonymous counters); the schedule adjustment (8 weeks to a playable slice, tester round after); the spot shortlist as candidates only (owner confirms on a visit). The PRD itself is approved only when the box in section 14 is ticked.
 

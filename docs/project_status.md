@@ -1,6 +1,6 @@
 # Project status
 
-**Phase**: 1 Definition: PRD draft v1 written, waiting for the owner's approval (no gameplay code until then). Phase 0 second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
+**Phase**: 1 Definition: PRD draft v2 written (owner approved the security exception, schedule and spot candidates), waiting for the owner's approval of the PRD itself (no gameplay code until then). Phase 0 second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
 
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.

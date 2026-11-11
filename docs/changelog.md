@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-- Docs: PRD draft v1 in `docs/prd.md` (scope, versions, requirements, data rules, funnel, schedule, risks, approvals ledger). `security.md` allows one network exception: anonymous event counters.
+- Docs: PRD draft v2 in `docs/prd.md` (problem, players, goals and non-goals, user stories, measurable funnel, feature list with acceptance criteria for 0.1 and 0.5, success metrics, schedule, risks, approvals ledger). `security.md` allows one network exception: anonymous event counters.
 - Docs: PRD decision log started in `docs/prd.md` (interview answers on measurement, top-down scope, vibration, platform, round length, first cast, pass bar, reach, technique, fight input).
 - Docs: owner decisions on scope, first audience and spot data sources recorded in `project_status.md`.
 - Docs: phase 0 market research in `docs/research.md`, second pass with primary Steam, Play, App Store and fws.gov data (market evidence moderate, concept demand weak; corrections to the first pass listed; board stress test included).
