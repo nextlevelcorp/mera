@@ -2,6 +2,12 @@
 
 **Phase**: 0 Discovery first pass done (`research.md`, evidence weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
 
+## Owner decisions (2026-11-11)
+- Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
+- First audience: realism enthusiasts (hobby anglers).
+- Spot data: first spot from non-OSM sources; legal advice before any OSM data is used.
+- Business model: open, owner asked why it was deferred; recommendation pending owner confirmation.
+
 ## Done
 - Spec and CLAUDE.md in repo.
 - Repo skeleton and an empty Godot 4.4.1 web build (title screen, portrait guard, en/tr/es).
