@@ -1,6 +1,6 @@
 # Project status
 
-**Phase**: 0 Discovery not done; skeleton added ahead of it at the owner's request. No gameplay code until phase 1 is approved.
+**Phase**: 0 Discovery first pass done (`research.md`, evidence weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
 
 ## Done
 - Spec and CLAUDE.md in repo.
@@ -8,10 +8,12 @@
 - CI workflow green on the PR (build job). Deploy job untested until the first push to `main`.
 
 ## Next
-- Phase 0: market and competitor research (`research.md`).
+- Phase 0: re-run research with blocked hosts reachable (Steam, Reddit, Play Store, SteamDB, fws.gov, Turkish forums); direct demand test (waitlist or 5+5 player test).
 - Phase 1: PRD, funnel, MVP scope, versioning plan.
 
 ## Open
+- Research verdict: no verified request for a real-location shore game, no Turkish demand signal; board 3 x FUND IF (4.7/10). Owner decisions listed in `research.md` section "What this means for the spec" (scope, first audience, OSM licence, business model).
+- Network: research sub-tasks could not fetch several hosts; the environment network edit was rejected by the service, so the owner may need to add them in environment settings.
 - GitHub Pages source must be set to GitHub Actions for the deploy job to pass (repo is now public).
 - GUT test plugin: owner decided to skip for now; own runner stays.
 - Debug menu does not exist yet; required before any gameplay flow is reviewed.
