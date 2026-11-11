@@ -244,6 +244,8 @@ From general knowledge, not verified in this session; the owner confirms on a vi
 2. A Kadıköy/Moda breakwater or pier area.
 3. A Bosphorus-side or Black Sea pier or breakwater the owner knows well.
 
+**Chosen (2026-11-11, by Claude at the owner's request: "Sen seç"): candidate 2, a Kadıköy/Moda breakwater or pier area.** Reason: a breakwater gives three naturally different standing positions (inner harbour side, outer face, head) with simple depth and structure; Galata Bridge positions along a rail are too alike. The exact structure is named and confirmed on the owner's visit; the choice is provisional until then.
+
 The slice builds the first confirmed spot; the rest of the 3-5 MVP spots follow after the slice passes (the owner wants a reminder; see `project_status.md`).
 
 ## Appendix: decision log (owner interview, 2026-11-11)
@@ -287,3 +289,4 @@ The slice builds the first confirmed spot; the rest of the 3-5 MVP spots follow 
 25. **Approved by the owner** (2026-11-11, reply "Onaylıyorum" to the three points raised in the previous PR): the single network exception in `.claude/rules/security.md` (anonymous counters); the schedule adjustment (8 weeks to a playable slice, tester round after); the spot shortlist as candidates only (owner confirms on a visit). The PRD itself is approved only when the box in section 14 is ticked.
 26. **PRD approved** by the owner (2026-11-11). Next task given: the data model (`docs/data_model.md`).
 27. **Fight rules (owner, 2026-11-11):** the 90 s fight cap stays even though big fish on light tackle would run longer, with an overmatched-tackle hint (F19); toothy species cut leaders (`teeth` attribute; wire leaders are immune).
+28. **First spot and species (provisional):** the owner asked Claude to choose. Spot: a Kadıköy/Moda breakwater or pier area (confirmed on the owner's visit). Species: horse mackerel (easy), bluefish (medium), sea bass (chase), chosen for variety of behaviour; none of their values has been sourced yet. No real data files are written until the owner's visit notes and the licence reads exist. The owner confirms or replaces both choices after the visit.

@@ -396,7 +396,7 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 | Question | Who | Blocking? |
 | --- | --- | --- |
 | Do the formulas match an angler's judgement (drag at a third of the weakest link, flash in murky water, cautious fish and visible leaders)? | Owner | Blocks tuning, not the build |
-| Which three species, and their sources | Owner | Blocks species data |
+| Species and spot are provisional (horse mackerel, bluefish, sea bass; a Kadıköy/Moda breakwater or pier area, chosen by Claude on 2026-11-11); sources for every value still needed | Owner (visit, citations) | Blocks real data |
 | ~~Should toothy species cut leaders?~~ **Decided yes (2026-11-11)**: `teeth` attribute, section 5.5 | Owner | Done |
 | ~~90 s rule~~ **Decided (2026-11-11)**: the cap stays; the game shows a hint when the capped fight is likely (PRD F19) | Owner | Done |
 | Licence reads: Sentinel-2 notice, Copernicus Marine licence, the communique text, article 31 | Owner with legal advice | Blocks only the data that uses them |

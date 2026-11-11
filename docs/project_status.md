@@ -9,7 +9,7 @@
 - Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Reminders for the owner
-- Pick the first spot and the three species; real data is written only after that and the licence reads.
+- First spot and species are provisional (Kadıköy/Moda breakwater or pier area; horse mackerel, bluefish, sea bass). After your visit: confirm or replace them, name the exact structure and send your notes; real data is written only after that and the licence reads.
 - One legal consultation covers: OpenStreetMap (ODbL), article 31 of Law 5846 for the fishing communique, Sentinel-2 and Copernicus Marine terms.
 - After the slice passes: add the remaining 2-4 spots (MVP is 3-5 spots).
 - When the slice is playable: recruit the first 10 testers (angler groups, creators); set a stop date first.
