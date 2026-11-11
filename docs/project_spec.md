@@ -210,3 +210,182 @@ Nothing ships to a store until all four are closed and recorded in docs/release_
 4. Owner sign-off.
 6.7 After release
 A monthly scheduled research task checks for changes in species status, seasons and local regulations, proposes data updates with sources, and opens a pull request for review.
+7. Repo ve araç tarafı
+Repo dosyalarını elle yazmana gerek yok; ilk thread aşağıdaki tariflere göre oluşturur ve onayına sunar.
+7.1 CLAUDE.md
+Kısa tutulur (bir-iki ekran), çünkü her thread'de tamamı okunur. Dört başlık istedin; içerikleri şöyle olmalı:
+Başlık
+İçerik
+Project goal
+İki cümlelik vizyon, beş tasarım ilkesi, docs/project_spec.md bağlantısı
+Design style guide
+Görünümler (top-down / birinci şahıs), 1280×720 tasarım alanı, dokunmatik düzen, renk ve tipografi kararları, GDScript adlandırma kuralları
+Constraints & policies
+Godot sürümü, tek iş parçacıklı web export, veri kaynak gösterme kuralı, sır yasağı, branch ve PR kuralları, onay gerektiren işler
+Documentation
+Hangi dosya ne zaman güncellenir; build, test ve export komutları
+7.2 Otomatik dokümantasyon
+Dosya
+Ne tutar
+Ne zaman güncellenir
+docs/architecture.md
+Modüller, veri akışı, alınan mimari kararlar
+Yapısal değişiklikte
+docs/changelog.md
+Sürüm ve build başına değişiklikler
+Her birleşen PR'da
+docs/project_status.md
+Faz, biten ve sıradaki işler, açık riskler
+Her kilometre taşında
+docs/reference_docs.md
+Dış kaynaklar, veri kaynakları ve lisansları
+Yeni kaynak eklendiğinde
+Kural hem proje talimatlarında hem CLAUDE.md'de yazılıdır. Hook'lar proje thread'lerinde çalışmadığı için bunu bir hook'la zorlayamazsın; güvence olarak CI'da "kod değişti ama changelog değişmedi" kontrolü eklenebilir.
+7.3 .env
+MVP'de backend olmadığı için oyunun kendisi .env kullanmaz. Web export'a giren her şey herkese açıktır; build içine anahtar konmaz.
+• Repoya yalnız .env.example girer (değişken adları, değer yok). .env .gitignore içindedir.
+• Thread'lerin ihtiyaç duyduğu değerler Project settings → Environment altında tanımlanır.
+• CI'ın ihtiyaç duyduğu değerler GitHub Secrets'ta durur.
+• Bugün için gereken tek şey Godot sürüm değişkenidir. İleride backend anahtarları geldikçe eklenir.
+7.4 Eklentiler
+Bu depoların ve mağaza sayfalarının içeriğini incelemedim; aşağıdaki öneriler adlarına ve bilinen amaçlarına dayanır. Üçüncü taraf bir eklenti thread'lerine talimat ve araç ekler; kurmadan önce kaynağını oku. Listenin tamamını aynı anda kurma: birkaçı kendi iş akışını dayatır ve birbiriyle çakışır.
+Eklenti
+Öneri
+Gerekçe
+Code review
+İlk günden kur
+Her PR için ikinci göz
+Playwright
+Web build çıkınca kur
+Tarayıcıda yükleme, konsol hatası ve ekran görüntüsü testi. Godot tek bir canvas çizdiği için düğme düzeyinde otomasyon sınırlıdır
+Karpathy skills
+İlk günden kur
+Sade, küçük ve doğrulanabilir değişiklik disiplini
+feature-dev veya Superpowers veya Compound engineering
+Yalnız birini seç
+Üçü de planla-uygula-gözden geçir akışı getirir. Birini dene, tutmazsa değiştir
+frontend-design
+Erteleyebilirsin
+Web arayüzleri (HTML/CSS) içindir; Godot UI'ına katkısı dolaylı. Tanıtım sayfası yaparken işe yarar
+7.5 Skill'ler
+Skill'ler claude.ai hesabında etkinleştirilir; repoya koymak proje thread'lerine taşımaz.
+Skill
+Öneri
+Gerekçe
+Game-studios
+Faz 2'de değerlendir
+Oyun stüdyosu rollerini kapsayan büyük bir paket; 7.4'teki iş akışı eklentisiyle çakışabilir
+Founder
+Faz 0–1'de kullan
+Pazar, PMF ve kapsam tartışmaları için. Listende iki kez yazılı; tek kurulum yeter
+Caveman
+İsteğe bağlı
+Yanıtları kısaltıp token harcamasını azaltır; tasarım tartışmalarında kapalı tut
+7.6 MCP bağlantıları
+• GitHub: thread'lerin repoyu klonlayıp PR açması Claude GitHub App ile olur (Bölüm 2, adım 2). Issue ve proje panosu gibi işlemler için GitHub bağlayıcısı hesap düzeyinde eklenir.
+• Ücretli görsel servisi kullanılmıyor; görsel ve ses kaynakları Bölüm 7.8'de.
+• Proje sohbetinin kendisinde bağlayıcı yoktur; bağlayıcı gerektiren işi görev olarak bir thread'e gönder.
+7.7 Ajanlar ve slash komutları
+Repodaki .claude/agents/ ve .claude/commands/ proje thread'lerinde yüklenmez. Üç rolün karşılığı:
+İstediğin rol
+Projede karşılığı
+Orkestratör
+Proje sohbetinin kendisi. Görevleri böler, thread açar, sonuçları raporlar
+Project finance
+docs/finance.md + aylık zamanlanmış görev. Abonelikleri, mağaza ücretlerini (geliştirici hesapları), araç ve varlık maliyetlerini, ileride gelir modelini izler. Claude muhasebeci değildir; vergi ve şirket konularını bir mali müşavire danış
+Security auditor
+.claude/rules/security.md kontrol listesi + sürüm öncesi ayrı bir denetim thread'i. Kodu yazan thread kendi işini denetlemez
+Bu rolleri gerçek alt ajan olarak istiyorsan iki yol var: ajan tanımlarını kendi eklentin olarak paketleyip Project settings → Plugins'e eklemek, veya ilgili işi proje dışında tek repolu bir bulut oturumunda çalıştırmak (orada .claude/agents/ otomatik yüklenir).
+7.8 Ücretsiz görsel ve ses kaynakları
+Ücretli bir servis yerine aşağıdaki kaynaklar kullanılır. Her kaynak, kullanıldığı dosyayla birlikte docs/reference_docs.md içinde ad, adres, lisans ve atf metniyle kaydedilir. Lisanslar yayın öncesi tek tek doğrulanır.
+Kaynak
+Ne için
+Lisans
+Not
+Kenney.nl
+2D sprite, arayüz, ikon, bazı ses
+CC0
+Atf zorunlu değil; yine de kaydet
+Poly Haven
+Doku, HDRI, bazı modeller
+CC0
+Su ve gök referansı için
+ambientCG
+PBR doku: kum, kaya, ıslak zemin
+CC0
+Kıyı zemini için
+OpenGameArt.org
+Karmaşık sprite ve müzik
+Dosya başına değişir (CC0, CC-BY, GPL)
+Her dosyanın lisansını tek tek kontrol et
+Freesound.org
+Dalga, rüzgar, makara, balık çırpması gibi ses efektleri
+Ses başına değişir (CC0, CC-BY)
+CC-BY ise kredi sayfası gerekir
+Incompetech
+Müzik
+CC BY 4.0
+Oyunda kredi sayfası zorunlu
+jsfxr / sfxr
+Retro ses efekti üretimi
+Açık kaynak
+Üretilen sesleri kaydet
+Krita
+Sprite, boyama, doku çizimi
+GPL
+GPU gerektirmez; ana çizim aracı
+Yerel ComfyUI / Stable Diffusion
+Kavram görseli, doku taslagı
+Model başına değişir
+Güçlü bir GPU gerekir; her modelin ticari kullanım şartını kontrol et
+Godot içi araçlar
+Su dalgası, parçacık, Perlin gürültüsü (FastNoiseLite), tween, ses çalma, shader
+Godot MIT
+Ek maliyet yok; plan zaten bunları gerektiriyor
+Kredi sayfası oyunun içinde "Credits" ekranında tutulur ve tüm CC-BY kaynakları listeler.
+7.9 Diğer konular, teknikler ve ücretsiz kaynaklar
+Konu
+Kaynak / teknik
+Ne için
+Dikkat
+Balık biyolojisi
+FishBase (fishbase.se)
+Tür boy, derinlik, sıcaklık, beslenme verisi
+Altını yazıp kullanım şartlarını doğrula
+Hava ve deniz
+Open-Meteo marine ve weather API
+Rüzgar, dalga yönü ve yüksekliği, su sıcaklığı
+Anahtarsız çalışır; ticari kullanımda ücretli plan gerekebilir, kontrol et
+Deniz verisi
+Copernicus Marine Service
+Ayrıntılı deniz sıcaklığı, akıntı, berraklik
+Ücretsiz kayıt gerekir
+Harita ve kıyı
+OpenStreetMap, Natural Earth
+Kıyı çizgisi, yer adları, sınırlar
+OSM: ODbL, atf zorunlu; Natural Earth: kamu malı
+Av mevzuatı
+T.C. Tarım ve Orman Bakanlığı su ürünleri yönetmelikleri
+Av dönemleri, minimum boy, yasak alanlar
+Oyunda gösterilecekse resmi güncel metinden al; her ay güncelleme taramasına dahil et
+Test
+GUT (Godot Unit Test) eklentisi
+Simülasyon çekirdeğinin headless testleri
+Ücretsiz; Playwright ile birlikte
+Çeviri
+Godot CSV çeviri sistemi
+en, tr, es metinleri
+Yerleşik, ücretsiz
+Yayın
+GitHub Pages, GitHub Actions
+Web yayını ve CI
+Herkese açık repoda Actions ücretsiz; özel repoda aylık dakika sınırı var
+Analitik
+GoatCounter
+Gizlilikçi ziyaretçi sayımı
+Kişisel veri toplamadığını doğrula; KVKK ve GDPR
+Claude becerileri
+frontend-design (tanıtım sayfası), xlsx (tür ve mera tablolarını kontrol), pdf (kaynak raporlarını okuma)
+Yardımcı iş akışları
+Hesabında etkin olanı kullan; Godot oyununun kendisi için gerekmez
+Bu tablo, Bölüm 10'daki veri lisansları ve yayın kapılarıyla birlikte okunmalıdır.
