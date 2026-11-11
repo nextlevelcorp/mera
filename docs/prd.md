@@ -27,11 +27,20 @@ Sources: `project_spec.md`, `research.md`. Decisions below are the owner's, date
 10. **Technique in the slice.** Lure spinning / light rock fishing (LRF). No bait/float in the slice.
 11. **Fight input.** Two thumbs in landscape: left corner reel (hold, slide for speed); right corner drag/brake and pulling the rod tip against the fish's run. Tension bar centred. No gyro.
 
+12. **Waitlist.** Removed from the web MVP. Demand is measured with the anonymous counters and the testers. An "tell me when the app is out" opt-in, if ever, is collected inside the native app with its own consent and privacy rules; that is a later decision.
+13. **Schedule.** Target 8 weeks from phase 1 approval to a playable 0.1 slice with the first 10 testers. Owner's hours per week not stated: open.
+14. **Species.** 3 species in the slice: one common and easy, one medium, one rare "chase" species. Selection rule: owner's observation plus a published source; any value without a source is labelled design fill. Species data licence (FishBase terms and similar) is not yet researched and must be closed before species data is committed.
+15. **Local save.** Versioned local save of: catch log (first-seen date, biggest length and weight per species), records, last rig and standing position. No XP, money or unlocks in the slice.
+16. **Languages.** en, tr and es all ship; es is marked "not reviewed by a native speaker" until someone reviews it; the slice test is played in tr and en. The localisation test and the CLAUDE.md rule stay unchanged.
+17. **Funnel targets.** No numeric targets yet. The first 100 visitors only set the baseline; targets are written into the PRD afterwards. The pass gate stays the tester threshold (decision 8).
+18. **First spot criteria.** The owner can visit it regularly and rod fishing is allowed there (owner confirms current rules); it has 3-4 distinct standing positions; simple, well-known depth and structure (pier, breakwater, harbour wall). Not required: being famous among Istanbul rod anglers. Spot not chosen yet.
+19. **Conditions.** At arrival the player picks a time slot (dawn, day, evening, night). Wind direction and strength and water clarity come from a date-based seed (no server; same for everyone that day). The simulation stays deterministic.
+
 ## Open (still to ask)
-- What "waitlist" means now (no data leaves the phone): drop it, or something local only.
-- Time budget and target dates for 0.1 and 0.5.
-- What persists in a local save in the slice.
-- Species count and selection rule for the slice; data schema owner.
-- Art and audio direction (parked for phase 2 unless the PRD needs a line).
-- Debug menu scope for the slice, accessibility basics, languages in the slice (en/tr/es all, or en first).
-- First spot: selection criteria and the first 10 testers.
+- Owner's hours per week for testing, spot visits and decisions.
+- Who recruits the first 10 testers and when (angler groups, creators), and the post text.
+- First spot: which one (owner picks against decision 18).
+- Species licence and source check (FishBase and similar); regional rules (Turkey, Spain; age rating).
+- Anonymous counter service: which one, and the owner's go-ahead (new dependency).
+- Art and audio direction: parked for phase 2.
+- Accessibility basics and debug menu scope: proposed as PRD defaults (tension never colour-only, readable text sizes; debug menu as in CLAUDE.md), owner to review.
