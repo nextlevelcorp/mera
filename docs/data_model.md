@@ -1,6 +1,6 @@
 # Data model and catch resolution
 
-**Status:** Proposed (phase 2, Design), 2026-11-11. **Decider:** the owner. Nothing here is built yet.
+**Status:** Approved by the owner (2026-11-11), with the open questions in section 9. Schema, validator and the formulas of section 5 (except the cast model, the shoal follow-up and the real-time fight) are implemented in `game/sim/` and `game/data/`; see section 11.
 
 Inputs: `project_spec.md` 5.2-5.4, `prd.md` (F2-F12, F14), `research.md`. Companion workbook: `data_model_examples.xlsx` (the three worked examples with live formulas; 136 cells checked against a reference calculation, 0 mismatches).
 
@@ -242,7 +242,7 @@ Real-time rules, per simulation tick:
 - **Hook pull-out:** while the line is slack (`T < 0.1 * F_max`), a hazard of `0.15 * (1 - h)` per second.
 - **Tiring:** `d(energy)/dt = -(T + K.REST_DRAIN * F_max)`. More drag tires the fish faster and risks the line. That trade-off is the fight.
 - **Landing phase** starts when `energy <= K.LAND_ENERGY * E0` and the fish is close.
-- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0`, otherwise the hook pulls out. This is a deliberate game rule, not realism; the constants are calibrated so it rarely triggers (a record-size 80 cm example fish on medium tackle takes about 69 s).
+- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0`, otherwise the hook pulls out. This is a deliberate game rule, not realism. It is not rare: with the drag set to a third of the line strength, the closed-form estimate exceeds 90 s for the largest bluefish (103 s) and sea bass (131 s) on light tackle and for a 100 cm sea bass on medium tackle (99 s), and stays under it for every smaller fish tested (found by the unit tests in `game/tests/test_catch_model.gd`). Either the rule applies to the biggest fish by design, or the constants are re-tuned; this is the owner's call.
 
 Closed-form estimate at a constant drag, used in the worked examples and as the test oracle for the tick model:
 
@@ -405,3 +405,16 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 3. [ ] Port the formulas to `game/sim/` as pure functions; the worked examples become unit tests with these exact numbers.
 4. [ ] Owner picks the first spot and three species; values entered by hand with provenance.
 5. [ ] Read each licence in section 7 before its data is committed; record it in `reference_docs.md`.
+
+## 11. Implementation status
+
+| Part | File | State |
+| --- | --- | --- |
+| Schema (all entities of section 3 except float and sinker) | `game/data/schema.json` | Done |
+| Constants (section 5.8, all design fills) | `game/data/constants.json` | Done |
+| Validator (sections 2 and 4) | `game/sim/data_validator.gd` | Done; negative tests for each rule |
+| Loader | `game/sim/data_store.gd` | Done; returns errors, the caller decides how loudly to fail; not yet wired into start-up because no real data exists |
+| Stages 0-4 and 6, closed-form fight (5.5 estimate) | `game/sim/catch_model.gd` | Done; the three worked examples are unit tests and agree with this document and the workbook |
+| Cast distance (5.0), shoal follow-up (5.3), real-time fight tick model (5.5) | none | Not ported: the first two have no worked example yet, the third waits for the fight controls design |
+| Fixtures (illustrative design fills, not real data) | `game/tests/fixtures/` | Excluded from the export |
+| Real species and spot data | `game/data/species.json`, `spots.json`, `tackle/` | Not written: waits for the owner's choice of spot and species and the licence reads |

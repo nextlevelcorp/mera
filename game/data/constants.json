@@ -1,0 +1,58 @@
+{
+ "version": 1,
+ "provenance": {
+  "default": {
+   "design_fill": true
+  }
+ },
+ "constants": {
+  "R0": 0.04,
+  "LIGHT": {
+   "dawn": 0.6,
+   "day": 1.0,
+   "evening": 0.6,
+   "night": 0.25
+  },
+  "CHOP_CLARITY": 8,
+  "STRUCT_BASE": 0.7,
+  "TEMP_M": 3.0,
+  "REACH_BASE": 0.5,
+  "REACH_CLAR": 1.5,
+  "DIET_MISS": 0.4,
+  "SIZE_LO": 1.0,
+  "SIZE_HI": 4.0,
+  "SIZE_M": 2.0,
+  "SPEED_PEN": 0.8,
+  "DETECT_BASE": 0.4,
+  "COMMIT_BASE": 0.25,
+  "COMMIT_AGG": 0.75,
+  "COMMIT_LINE": 0.6,
+  "COMMIT_PRESS": 0.3,
+  "COMMIT_MIN": 0.05,
+  "COMMIT_MAX": 0.95,
+  "TW_BASE": 0.4,
+  "TW_SENS": 0.6,
+  "TW_AGG": 0.4,
+  "GAPE_LO": 0.25,
+  "GAPE_HI": 0.7,
+  "GAPE_M": 0.25,
+  "PEN_BASE": 0.6,
+  "TIMING_BASE": 0.7,
+  "HOOK_MAX": 0.98,
+  "PULL_BASE": 1.0,
+  "PULL_STR": 2.0,
+  "STA_BASE": 6,
+  "STA_RANGE": 18,
+  "REST_DRAIN": 0.1,
+  "LAND_ENERGY": 0.15,
+  "KNOT_BASE": 0.75,
+  "KNOT_SKILL": 0.2,
+  "ABRASION": 0.3,
+  "SPIKE": 0.5,
+  "VIS_BASE": 1.0,
+  "VIS_RANGE": 7.0,
+  "LAND_PHASE": 5.0,
+  "LAND_FREE": 0.3,
+  "FIGHT_CAP_S": 90.0
+ }
+}
