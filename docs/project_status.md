@@ -5,8 +5,8 @@
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
 - First audience: realism enthusiasts (hobby anglers).
-- Spot data: first spot from non-OSM sources; legal advice before any OSM data is used.
-- Business model: open, owner asked why it was deferred; recommendation pending owner confirmation.
+- Spot data: first spot from non-OSM sources (coordinates and shore data from an official source or own survey, source recorded); legal advice before any OSM data is used.
+- Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Done
 - Spec and CLAUDE.md in repo.
@@ -19,7 +19,7 @@
 
 ## Open
 - Research verdict: no verified request for a real-location shore game, no Turkish demand signal; board 3 x FUND IF (4.7/10). Owner decisions listed in `research.md` section "What this means for the spec" (scope, first audience, OSM licence, business model).
-- Network: research sub-tasks could not fetch several hosts; the environment network edit was rejected by the service, so the owner may need to add them in environment settings.
+- Network: owner added Steam, Play Store, App Store, fws.gov, PC Gamer hosts to the environment. Reddit, SteamDB and Eksi Sozluk return 403 (site-side bot blocking), so they stay unreachable.
 - GitHub Pages source must be set to GitHub Actions for the deploy job to pass (repo is now public).
 - GUT test plugin: owner decided to skip for now; own runner stays.
 - Debug menu does not exist yet; required before any gameplay flow is reviewed.
