@@ -1,12 +1,20 @@
 # Project status
 
-**Phase**: 0 Discovery second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
+**Phase**: 1 Definition: PRD draft v1 written, waiting for the owner's approval (no gameplay code until then). Phase 0 second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
 
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
 - First audience: realism enthusiasts (hobby anglers).
 - Spot data: first spot from non-OSM sources (coordinates and shore data from an official source or own survey, source recorded); legal advice before any OSM data is used.
 - Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
+
+## Reminders for the owner
+- After the slice passes: add the remaining 2-4 spots (MVP is 3-5 spots).
+- When the slice is playable: recruit the first 10 testers (angler groups, creators); set a stop date first.
+- Before the counter service is added: check GoatCounter's hosted terms for commercial use.
+- Before the MVP: a native speaker reviews the Spanish text; hand-enter species data with citations.
+- At the release gate: developer accounts (cost), age rating, privacy and regional rules for the native app.
+- Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
 - Spec and CLAUDE.md in repo.
