@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Docs: owner decisions on scope, first audience and spot data sources recorded in `project_status.md`.
+- Docs: phase 0 market research in `docs/research.md`, second pass with primary Steam, Play, App Store and fws.gov data (market evidence moderate, concept demand weak; corrections to the first pass listed; board stress test included).
 - Repository skeleton: `.claude/rules`, `.env.example`, docs files, CI workflow (test, export, deploy to GitHub Pages), cloud setup script.
 - CI: `changelog` job fails a PR that changes `game/`, `scripts/` or `.github/` without touching `docs/changelog.md`.
 - CLAUDE.md: added build, test and export commands.

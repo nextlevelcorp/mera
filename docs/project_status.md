@@ -1,6 +1,12 @@
 # Project status
 
-**Phase**: 0 Discovery not done; skeleton added ahead of it at the owner's request. No gameplay code until phase 1 is approved.
+**Phase**: 0 Discovery second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
+
+## Owner decisions (2026-11-11)
+- Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
+- First audience: realism enthusiasts (hobby anglers).
+- Spot data: first spot from non-OSM sources (coordinates and shore data from an official source or own survey, source recorded); legal advice before any OSM data is used.
+- Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Done
 - Spec and CLAUDE.md in repo.
@@ -8,10 +14,13 @@
 - CI workflow green on the PR (build job). Deploy job untested until the first push to `main`.
 
 ## Next
-- Phase 0: market and competitor research (`research.md`).
+- Phase 0 leftovers: Turkish-language evidence pass (Reddit, Eksi Sozluk, Donanimhaber, TUIK are unreachable from the session), shore-feature check of Euro Fishing / Sea Fishing Simulator / Real VR Fishing, fish-data licence, regional rules.
+- Demand test: waitlist (needs owner go-ahead: collects emails) plus 5 anglers + 5 non-anglers on the one-spot slice.
 - Phase 1: PRD, funnel, MVP scope, versioning plan.
 
 ## Open
+- Research verdict (pass 2): 0 direct requests for a real-location shore game, 0 Turkish demand signal, no official Turkish angler count; board (pass 1) 3 x FUND IF (4.7/10). Owner decisions listed in `research.md` section "What this means for the spec" (scope, first audience, OSM licence, business model).
+- Network: owner added Steam, Play Store, App Store, fws.gov, PC Gamer hosts. Reddit, SteamDB, Eksi Sozluk (site-side 403), Roblox, Poki, CrazyGames, TUIK and others stay unreachable.
 - GitHub Pages source must be set to GitHub Actions for the deploy job to pass (repo is now public).
 - GUT test plugin: owner decided to skip for now; own runner stays.
 - Debug menu does not exist yet; required before any gameplay flow is reviewed.
