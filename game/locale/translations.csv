@@ -2,3 +2,16 @@ keys,en,tr,es
 TITLE,Mera,Mera,Mera
 SKELETON_NOTE,Empty skeleton build,Boş iskelet sürümü,Versión esqueleto vacía
 TURN_PHONE,Turn your phone sideways,Telefonunu yan çevir,Gira el teléfono en horizontal
+PROTO_OPEN,Water prototype,Su prototipi,Prototipo de agua
+PROTO_NOTE,Prototype with test controls. Not the game.,Test kontrollü prototip. Oyun değil.,Prototipo con controles de prueba. No es el juego.
+PROTO_CHOP,Chop,Dalga,Oleaje
+PROTO_CLARITY,Clarity,Berraklık,Claridad
+PROTO_LIGHT,Light,Işık,Luz
+PROTO_RES,Resolution,Çözünürlük,Resolución
+PROTO_BACK,Back,Geri,Volver
+PROTO_FPS,Average %d fps · worst 1%% %d fps (%d s),Ortalama %d fps · en kötü %%1 %d fps (%d sn),Media %d fps · peor 1%% %d fps (%d s)
+PROTO_VISIBLE,Fish visible inside %.1f m,Balık %.1f m içinde görünür,Pez visible dentro de %.1f m
+SLOT_DAWN,Dawn,Şafak,Amanecer
+SLOT_DAY,Day,Gündüz,Día
+SLOT_EVENING,Evening,Akşam,Atardecer
+SLOT_NIGHT,Night,Gece,Noche

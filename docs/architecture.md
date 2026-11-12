@@ -7,8 +7,8 @@ See `project_spec.md` 6.5. `game/` is the Godot 4.4 project:
 
 | Path | Purpose | State |
 | --- | --- | --- |
-| `game/scenes/` | Scenes; `main.tscn` is the entry scene | skeleton |
-| `game/ui/` | UI scripts; `device_guard.gd` shows the "turn your phone" screen in portrait | skeleton |
+| `game/scenes/` | Scenes; `main.tscn` is the entry scene; `water_prototype/` is a temporary test scene (shader water in a half-resolution SubViewport, full-resolution overlay) | skeleton and prototype |
+| `game/ui/` | UI scripts; `device_guard.gd` shows the "turn your phone" screen in portrait; `frame_stats.gd` computes average and worst-1% fps | skeleton |
 | `game/locale/` | `translations.csv` (en, tr, es) | skeleton |
 | `game/tests/` | Headless tests, run by `run_tests.gd` | skeleton |
 | `game/data/` | `schema.json`, `constants.json`; real species, spot and tackle data not written yet | schema and constants |

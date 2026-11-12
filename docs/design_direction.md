@@ -1,6 +1,6 @@
 # Design direction: performance, art and audio
 
-**Status:** Proposed (phase 2, Design), 2026-11-12. **Decider:** the owner. Nothing here is decided until the owner answers section 6.
+**Status:** Decided by the owner on 2026-11-12 (section 6), except the art direction, which is provisional until the owner has judged the water prototype on the test phones.
 
 Inputs: `project_spec.md` 5.1, 6.1, 6.3, 7.8; `prd.md` (goal 5, F1, F8, F11, F17, F18); `data_model.md`. This document covers what the PRD left to phase 2: frame-rate target and test phone, touch-target sizes, art direction, audio direction, and the water prototype the spec requires before the art is locked.
 
@@ -73,15 +73,27 @@ Pass criteria, set before building:
 3. Clear and murky water are visibly different, and the visibility distance matches what the simulation reports.
 4. If criterion 1 fails at 640x360, the fallbacks are tried in this order: fewer wave layers, lower resolution, a non-shader animated texture. The art direction is locked only after one of them passes.
 
-## 6. Decisions needed from the owner
+## 6. Owner decisions (2026-11-12)
 
-| # | Question | Recommendation |
+| # | Question | Decision |
 | --- | --- | --- |
-| 1 | Which phone is the test phone (model and year)? Is an older Android phone available as a second device? | The owner's own phone as device 1 |
-| 2 | Frame-rate floor 30 fps, goal 60 fps? | Yes |
-| 3 | Art direction A, B or C? | A |
-| 4 | Will the owner record ambient and reel sounds at the spot? | Yes; otherwise CC0 files only |
-| 5 | No music in 0.1? | Agree |
+| 1 | Test phones | **iPhone 16e (device 1) and iPhone 14 (device 2, the older one).** Both run Safari on iOS |
+| 2 | Frame rate | **Floor 30 fps, goal 60 fps.** Approved |
+| 3 | Art direction | **Option A for now**, to be judged in the game. The water prototype (below) exists for that |
+| 4 | Sound | The owner cannot record. **Free real recordings first** (CC0); if that fails, a paid service such as ElevenLabs. Paying needs the owner's go-ahead at that time, and generated sound is labelled as generated, not as a recording of the place |
+| 5 | Music | **None in 0.1** |
+
+Consequences to keep in view:
+- **No Android test device.** Vibration (Android only) and Android performance stay untested, and neither iPhone is the "mid-range phone" the project rules name. The 30 fps floor proven on these two phones does not prove it for a mid-range Android phone. An Android device, borrowed if need be, is needed before the tester round.
+- **Sound sourcing is blocked from this environment:** freesound.org, commons.wikimedia.org, opengameart.org, kenney.nl and archive.org are not on the network allowlist (checked 2026-11-12), so no file could be searched, heard or licence-checked. Nothing was downloaded.
+
+## 6a. Water prototype (built 2026-11-12)
+
+`game/scenes/water_prototype/`, opened from the title screen's "Water prototype" button. It is a test scene, not the game: on-screen controls for chop, clarity, light slot and render resolution (360p or 720p), with average fps and the worst 1% over the last 60 s. It shows the same visibility distance the simulation computes. It must be removed or moved behind the debug menu before 0.1, because release builds may not carry debug controls.
+
+Checked in desktop Chromium (software rendering, so its 15-19 fps says nothing about a phone): the scene opens from the title screen and returns to it, all controls respond, calm and rough water and clear and murky water look different, the turn-your-phone screen still appears in portrait, no console errors. **Not checked: any phone.** The owner measures on the two iPhones against the pass criteria of section 5 and reports average and worst-1% fps at 360p and 720p.
+
+Known weak points of the first version: wave shapes are plain sine layers and look smooth and synthetic, there is no shoreline or structure, and the pixel look of option A is barely visible because the water has no hard edges. It answers "does shader water hold 30 fps on the phone", not yet "is this the look".
 
 ## 7. Out of scope here
 

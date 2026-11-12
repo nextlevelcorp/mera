@@ -9,7 +9,10 @@
 - Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Reminders for the owner
-- Answer the five questions in `design_direction.md` section 6 (test phone, frame-rate floor, art direction, own sound recordings, music).
+- Open the Pages build on the iPhone 16e and the iPhone 14, tap "Water prototype", and report average and worst-1% fps at 360p and 720p, plus whether you like the look (art option A is provisional until then).
+- Sound: add freesound.org, cdn.freesound.org, commons.wikimedia.org, upload.wikimedia.org and opengameart.org to the environment's allowed domains so free CC0 recordings can be searched; a paid service is the fallback and needs your go-ahead.
+- An Android phone (borrowed is fine) is needed before the tester round: vibration and mid-range performance are untested on iPhones.
+- Before 0.1: remove the water prototype or move it behind the debug menu.
 - First spot and species are provisional (Kadıköy/Moda breakwater or pier area; horse mackerel, bluefish, sea bass). After your visit: confirm or replace them, name the exact structure and send your notes; real data is written only after that and the licence reads.
 - One legal consultation covers: OpenStreetMap (ODbL), article 31 of Law 5846 for the fishing communique, Sentinel-2 and Copernicus Marine terms.
 - After the slice passes: add the remaining 2-4 spots (MVP is 3-5 spots).

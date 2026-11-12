@@ -1,6 +1,8 @@
 # Changelog
 
 ## Unreleased
+- Water prototype: `game/scenes/water_prototype/` (shader water at 360p or 720p driven by chop, clarity and light; rod, line and lure overlay; fps overlay via `FrameStats`), opened from the title screen. Test scene, to be removed or gated before 0.1. 42 tests.
+- Docs: owner decisions of 2026-11-12 in `design_direction.md` (test phones iPhone 16e and iPhone 14, 30/60 fps, art option A provisional, free real sounds first, no music).
 - Docs: `docs/design_direction.md` proposes the performance budget (30 fps floor, 60 goal, test phone), art direction options, audio direction and the water prototype with pass criteria; includes build-size and simulation-cost measurements.
 - Real-time fight: `game/sim/fight_sim.gd` (`FightSim`, fixed 30 Hz step, seeded): fish run / rest / thrash states, drag slip and line recovery, line break and strain, teeth, slack hook pull-out, landing phase, 90 s rule. Not connected to controls or a scene.
 - Cast distance: `CatchModel.cast` and `headwind`; new required position field `facing`; the first cast formula (which ignored lure weight) replaced.
