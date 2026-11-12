@@ -1,6 +1,6 @@
 # Design direction: performance, art and audio
 
-**Status:** Decided by the owner on 2026-11-12 (section 6), except the art direction, which is provisional until the owner has judged the water prototype on the test phones.
+**Status:** Decided by the owner on 2026-11-12 (section 6). Art direction for the water: revised after the first phone test towards stylised realism at full resolution (section 6b); it is locked once the owner has judged the second water on the phones.
 
 Inputs: `project_spec.md` 5.1, 6.1, 6.3, 7.8; `prd.md` (goal 5, F1, F8, F11, F17, F18); `data_model.md`. This document covers what the PRD left to phase 2: frame-rate target and test phone, touch-target sizes, art direction, audio direction, and the water prototype the spec requires before the art is locked.
 
@@ -94,6 +94,24 @@ Consequences to keep in view:
 Checked in desktop Chromium (software rendering, so its 15-19 fps says nothing about a phone): the scene opens from the title screen and returns to it, all controls respond, calm and rough water and clear and murky water look different, the turn-your-phone screen still appears in portrait, no console errors. **Not checked: any phone.** The owner measures on the two iPhones against the pass criteria of section 5 and reports average and worst-1% fps at 360p and 720p.
 
 Known weak points of the first version: wave shapes are plain sine layers and look smooth and synthetic, there is no shoreline or structure, and the pixel look of option A is barely visible because the water has no hard edges. It answers "does shader water hold 30 fps on the phone", not yet "is this the look".
+
+## 6b. First phone measurement and the second water (2026-11-12)
+
+The owner ran the first prototype (basic shader) on both test phones and reported:
+
+| Phone | Setting | Worst 1% of frames |
+| --- | --- | --- |
+| iPhone 16e | 720p, basic water | **55 fps** |
+| iPhone 14 | 720p, basic water | **57 fps** |
+
+Average fps and the 360p figures were not reported; the average cannot be lower than the worst 1%. Against the pass criteria of section 5: criterion 1 (30 fps average, 24 fps worst 1%) **passed on both phones at full resolution**, criterion 2 (chop levels look different) **passed**, criterion 3 (clear against murky) was not reported. The browser caps the frame rate at the display's refresh rate, so these numbers show the basic water is near that cap; they do not show how much room is left.
+
+Owner feedback on the look: **it could be more realistic.** Consequences:
+- The half-resolution "pixel look" of option A is dropped as the default: it is not needed for the frame rate on these phones and it works against realism. The art direction for the water moves to **stylised realism at full resolution** (between options A and C). The top-down map's style is still open.
+- A second shader, `water_realistic.gdshader`, was added and is the default: a camera ray cast onto the sea plane, five directional waves with sharpened crests plus noise ripples giving a surface normal, Fresnel reflection of the sky, a sun or moon with its glitter path, light through the crests, whitecaps when it blows, haze and a generic far shore on the horizon (not a real skyline). The "Water" button switches between realistic and basic so the cost can be compared on the phone.
+- Cost: unknown on a phone. In desktop software rendering the realistic water ran at about 8 fps against 15-19 fps for the basic one, so it costs roughly twice as much per frame. Whether the iPhones stay above the floor has to be measured again.
+
+Still missing for realism, in the order I would add them if the frame rate allows: a foreground (the breakwater or pier edge the angler stands on), rings and splashes where the lure lands, clouds, and wave motion on the line.
 
 ## 7. Out of scope here
 

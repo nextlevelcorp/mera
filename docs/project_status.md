@@ -9,7 +9,7 @@
 - Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Reminders for the owner
-- Open the Pages build on the iPhone 16e and the iPhone 14, tap "Water prototype", and report average and worst-1% fps at 360p and 720p, plus whether you like the look (art option A is provisional until then).
+- Water, second round: on both iPhones open "Water prototype" and report average and worst-1% fps for "Water: Realistic" and "Water: Basic" at 720p (about a minute each, also at chop 1), and whether the realistic water is the look you want.
 - Sound: listen to the shortlist in `audio_sources.md` and say which files to use. Reel-under-load and cast sounds are missing; choose between the single reel file, hand-picked Freesound downloads (the site blocks automated clients) or the paid fallback.
 - An Android phone (borrowed is fine) is needed before the tester round: vibration and mid-range performance are untested on iPhones.
 - Before 0.1: remove the water prototype or move it behind the debug menu.
