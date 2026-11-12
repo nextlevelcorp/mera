@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Docs: `docs/design_direction.md` proposes the performance budget (30 fps floor, 60 goal, test phone), art direction options, audio direction and the water prototype with pass criteria; includes build-size and simulation-cost measurements.
 - Real-time fight: `game/sim/fight_sim.gd` (`FightSim`, fixed 30 Hz step, seeded): fish run / rest / thrash states, drag slip and line recovery, line break and strain, teeth, slack hook pull-out, landing phase, 90 s rule. Not connected to controls or a scene.
 - Cast distance: `CatchModel.cast` and `headwind`; new required position field `facing`; the first cast formula (which ignored lure weight) replaced.
 - Closed-form fight estimate corrected: a fish that can slip the drag is recovered after it tires (tire + recover), not during. Examples B and C2 changed (43 s and 60 s); `TEETH_RATE` lowered to 0.02. Workbook gained a `Cast` sheet (185 formulas). 39 tests.
