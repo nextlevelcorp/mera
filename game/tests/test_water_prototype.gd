@@ -48,3 +48,23 @@ func test_prototype_uses_the_simulation_environment() -> void:
 	scene.chop = 1.0
 	assert_true(scene.environment()["clarity_eff"] < 9.08, "more chop, murkier water")
 	scene.free()
+
+
+func test_shading_keeps_the_breakwater_opaque() -> void:
+	var scene = PROTOTYPE.instantiate()
+	var c: Color = scene._shaded(Color(0.5, 0.4, 0.3), 0.25)
+	assert_near(c.a, 1.0, "night shading keeps alpha at 1")
+	assert_near(c.r, 0.125, "and darkens the colour")
+	scene.free()
+
+
+func test_projection_matches_the_shader_camera() -> void:
+	var scene = PROTOTYPE.instantiate()
+	scene._build_overlay()
+	scene._overlay.size = Vector2(1280, 720)
+	var near: Vector2 = scene.project(Vector2(0, 10))
+	var far: Vector2 = scene.project(Vector2(0, 40))
+	assert_near(near.x, 640.0, "straight ahead is the screen centre")
+	assert_true(far.y < near.y and far.y > 720 * 0.38, "farther water is higher on screen but below the horizon")
+	assert_near(near.y, (0.38 + 2.2 / (10.0 * 0.9)) * 720.0, "same formula as the shader")
+	scene.free()
