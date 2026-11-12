@@ -10,7 +10,7 @@
 
 ## Reminders for the owner
 - Open the Pages build on the iPhone 16e and the iPhone 14, tap "Water prototype", and report average and worst-1% fps at 360p and 720p, plus whether you like the look (art option A is provisional until then).
-- Sound: add freesound.org, cdn.freesound.org, commons.wikimedia.org, upload.wikimedia.org and opengameart.org to the environment's allowed domains so free CC0 recordings can be searched; a paid service is the fallback and needs your go-ahead.
+- Sound: listen to the shortlist in `audio_sources.md` and say which files to use. Reel-under-load and cast sounds are missing; choose between the single reel file, hand-picked Freesound downloads (the site blocks automated clients) or the paid fallback.
 - An Android phone (borrowed is fine) is needed before the tester round: vibration and mid-range performance are untested on iPhones.
 - Before 0.1: remove the water prototype or move it behind the debug menu.
 - First spot and species are provisional (Kadıköy/Moda breakwater or pier area; horse mackerel, bluefish, sea bass). After your visit: confirm or replace them, name the exact structure and send your notes; real data is written only after that and the licence reads.

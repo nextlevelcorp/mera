@@ -85,7 +85,7 @@ Pass criteria, set before building:
 
 Consequences to keep in view:
 - **No Android test device.** Vibration (Android only) and Android performance stay untested, and neither iPhone is the "mid-range phone" the project rules name. The 30 fps floor proven on these two phones does not prove it for a mid-range Android phone. An Android device, borrowed if need be, is needed before the tester round.
-- **Sound sourcing is blocked from this environment:** freesound.org, commons.wikimedia.org, opengameart.org, kenney.nl and archive.org are not on the network allowlist (checked 2026-11-12), so no file could be searched, heard or licence-checked. Nothing was downloaded.
+- **Sound sourcing:** after the owner opened the hosts, opengameart.org and (partly) commons.wikimedia.org were scanned on 2026-11-12; freesound.org still refuses automated clients. The shortlist and its gaps are in `audio_sources.md`. Nobody has listened to the files yet.
 
 ## 6a. Water prototype (built 2026-11-12)
 
