@@ -3,7 +3,10 @@ extends Control
 ## scene with on-screen controls so the water can be judged and its frame rate
 ## measured on a phone. To be removed or moved behind the debug menu before 0.1.
 
-const WATER_SHADER := preload("res://scenes/water_prototype/water.gdshader")
+const WATER_SHADERS := {
+	"realistic": preload("res://scenes/water_prototype/water_realistic.gdshader"),
+	"basic": preload("res://scenes/water_prototype/water.gdshader"),
+}
 const MAIN_SCENE := "res://scenes/main.tscn"
 const SLOTS: Array[String] = ["dawn", "day", "evening", "night"]
 const HORIZON := 0.38
@@ -13,11 +16,19 @@ const PALETTES := {
 	"evening": [Color(0.2, 0.2, 0.42), Color(0.98, 0.55, 0.3), Color(0.06, 0.12, 0.22), Color(0.2, 0.28, 0.35)],
 	"night": [Color(0.02, 0.03, 0.08), Color(0.08, 0.1, 0.18), Color(0.01, 0.03, 0.06), Color(0.03, 0.07, 0.1)],
 }
+## Sun or moon per slot: direction (x right, y up, z away from the angler) and colour.
+const SUNS := {
+	"dawn": [Vector3(0.3, 0.12, 1.0), Color(1.0, 0.72, 0.5)],
+	"day": [Vector3(0.2, 0.75, 0.6), Color(1.0, 0.96, 0.88)],
+	"evening": [Vector3(-0.25, 0.10, 1.0), Color(1.0, 0.55, 0.3)],
+	"night": [Vector3(0.15, 0.45, 0.9), Color(0.35, 0.4, 0.55)],
+}
 
 var chop := 0.3
 var clarity := 11.0
 var slot_index := 1
-var low_res := true
+var low_res := false
+var realistic := true
 
 var _k: Dictionary
 var _material: ShaderMaterial
@@ -30,6 +41,7 @@ var _chop_label: Label
 var _clarity_label: Label
 var _slot_button: Button
 var _res_button: Button
+var _style_button: Button
 var _since_label_update := 0.0
 var _time := 0.0
 
@@ -41,6 +53,7 @@ func _ready() -> void:
 	_build_overlay()
 	_build_controls()
 	add_child(DeviceGuard.new())
+	resized.connect(_apply)
 	_apply()
 
 
@@ -76,7 +89,7 @@ func _build_water() -> void:
 	var rect := ColorRect.new()
 	rect.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_material = ShaderMaterial.new()
-	_material.shader = WATER_SHADER
+	_material.shader = WATER_SHADERS["realistic"]
 	_material.set_shader_parameter("horizon", HORIZON)
 	rect.material = _material
 	viewport.add_child(rect)
@@ -156,6 +169,10 @@ func _build_controls() -> void:
 		low_res = not low_res
 		_stats.reset()
 		_apply())
+	_style_button = _button(panel, func() -> void:
+		realistic = not realistic
+		_stats.reset()
+		_apply())
 
 
 func _label(parent: Node, font_size: int) -> Label:
@@ -189,6 +206,12 @@ func _button(parent: Node, on_press: Callable) -> Button:
 func _apply() -> void:
 	var env := environment()
 	var palette: Array = PALETTES[SLOTS[slot_index]]
+	var sun: Array = SUNS[SLOTS[slot_index]]
+	_material.shader = WATER_SHADERS["realistic" if realistic else "basic"]
+	_material.set_shader_parameter("sun_dir", (sun[0] as Vector3).normalized())
+	_material.set_shader_parameter("sun_color", sun[1])
+	_material.set_shader_parameter("aspect", size.x / maxf(size.y, 1.0))
+	_material.set_shader_parameter("horizon", HORIZON)
 	_material.set_shader_parameter("chop", chop)
 	_material.set_shader_parameter("visibility", env["visibility"])
 	_material.set_shader_parameter("light", env["light"])
@@ -201,4 +224,5 @@ func _apply() -> void:
 	_clarity_label.text = "%s: %d" % [tr("PROTO_CLARITY"), int(clarity)]
 	_slot_button.text = "%s: %s" % [tr("PROTO_LIGHT"), tr("SLOT_%s" % SLOTS[slot_index].to_upper())]
 	_res_button.text = "%s: %s" % [tr("PROTO_RES"), "360p" if low_res else "720p"]
+	_style_button.text = "%s: %s" % [tr("PROTO_STYLE"), tr("STYLE_REALISTIC") if realistic else tr("STYLE_BASIC")]
 	_visible_label.text = tr("PROTO_VISIBLE") % env["visible_at_m"]
