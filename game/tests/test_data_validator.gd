@@ -103,6 +103,7 @@ func test_missing_and_unknown_fields_fail() -> void:
 	_expect(func(db): db["species"][0]["strenght"] = 5, "unknown field", "typo field")
 	_expect(func(db): (db["species"][0]["activity_by_slot"] as Dictionary).erase("night"), "missing key night", "slot missing")
 	_expect(func(db): (db["spot"][0]["positions"][0]["exposure_by_wind"] as Dictionary).erase("SW"), "missing key SW", "wind missing")
+	_expect(func(db): db["spot"][0]["positions"][0]["facing"] = "UP", "is not one of", "bad facing")
 
 
 func test_ordering_rules() -> void:

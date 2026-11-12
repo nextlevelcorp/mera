@@ -1,6 +1,13 @@
 # Changelog
 
 ## Unreleased
+- Docs: `docs/audio_sources.md`, a shortlist of CC0 and public-domain sound candidates with source page, licence, author and measured duration; no audio committed.
+- Water prototype: `game/scenes/water_prototype/` (shader water at 360p or 720p driven by chop, clarity and light; rod, line and lure overlay; fps overlay via `FrameStats`), opened from the title screen. Test scene, to be removed or gated before 0.1. 42 tests.
+- Docs: owner decisions of 2026-11-12 in `design_direction.md` (test phones iPhone 16e and iPhone 14, 30/60 fps, art option A provisional, free real sounds first, no music).
+- Docs: `docs/design_direction.md` proposes the performance budget (30 fps floor, 60 goal, test phone), art direction options, audio direction and the water prototype with pass criteria; includes build-size and simulation-cost measurements.
+- Real-time fight: `game/sim/fight_sim.gd` (`FightSim`, fixed 30 Hz step, seeded): fish run / rest / thrash states, drag slip and line recovery, line break and strain, teeth, slack hook pull-out, landing phase, 90 s rule. Not connected to controls or a scene.
+- Cast distance: `CatchModel.cast` and `headwind`; new required position field `facing`; the first cast formula (which ignored lure weight) replaced.
+- Closed-form fight estimate corrected: a fish that can slip the drag is recovered after it tires (tire + recover), not during. Examples B and C2 changed (43 s and 60 s); `TEETH_RATE` lowered to 0.02. Workbook gained a `Cast` sheet (185 formulas). 39 tests.
 - Docs: provisional first spot (Kadıköy/Moda breakwater or pier area) and three species (horse mackerel, bluefish, sea bass) recorded; no real data written.
 - Data layer and catch model: `game/data/schema.json` and `constants.json`, `DataValidator` and `DataStore`, and `CatchModel` (stages 0-4 and 6, closed-form fight) in `game/sim/`; illustrative fixtures and 18 new tests (26 in total) that reproduce the three worked examples of `data_model.md`. Not wired into the scenes. Cast distance, shoal follow-up and the real-time fight are not ported.
 - Teeth: species `teeth` attribute and a leader-cut hazard in the fight (`cut_rate_per_s`, `p_cut`); wire leaders are immune. 90 s fight cap kept, hint planned (PRD F19). Workbook and tests updated (27 tests).

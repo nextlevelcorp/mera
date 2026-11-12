@@ -83,6 +83,7 @@
         "name_key": "FIXTURE_POS_PIER_END",
         "map_x": 0.8,
         "map_y": 0.5,
+        "facing": "SW",
         "depth_profile": [
           {
             "distance_m": 0,
@@ -121,6 +122,7 @@
         "name_key": "FIXTURE_POS_INNER_CORNER",
         "map_x": 0.3,
         "map_y": 0.6,
+        "facing": "N",
         "depth_profile": [
           {
             "distance_m": 0,
@@ -158,6 +160,7 @@
         "name_key": "FIXTURE_POS_OUTER_FACE",
         "map_x": 0.9,
         "map_y": 0.2,
+        "facing": "S",
         "depth_profile": [
           {
             "distance_m": 0,

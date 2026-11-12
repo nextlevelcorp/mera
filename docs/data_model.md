@@ -109,6 +109,7 @@ Standing position (inside a spot):
 | Field | Type | Used in | Meaning |
 | --- | --- | --- | --- |
 | `id`, `name_key`, `map_x`, `map_y` | string, float | 0.1 map | Identity and place on the top-down map |
+| `facing` | N, NE, E, SE, S, SW, W, NW | 0.1 cast | Compass direction the angler faces when casting; with the wind direction it gives the headwind |
 | `depth_profile` | list of {`distance_m`, `depth_m`} | 0.1 presence, attraction | Depth along the cast line; interpolated at the lure's distance |
 | `bottom_type` | `rock`, `sand`, `mud`, `weed`, `mixed` | display; MVP | Bottom |
 | `structure` | int20 | 0.1 presence, line abrasion | Cover: rocks, pilings, weed, drop-offs |
@@ -163,14 +164,16 @@ clarity_eff = clamp(spot.typical_clarity - K.CHOP_CLARITY * chop, 1, 20)
 light       = K.LIGHT[slot]                       # dawn 0.6, day 1.0, evening 0.6, night 0.25
 visibility  = n(clarity_eff) * light
 
-weight_fit  = max(0.3, band(lure.weight_g, rod.cast_weight_min_g, rod.cast_weight_max_g, rod.cast_weight_max_g))
-cast_max_m  = (15 + 10 * rod.length_m) * weight_fit * (0.6 + 0.4 * n(angler.casting_distance)) * (1 - 0.3 * headwind)
+reach_ref_m = K.CAST_LEN_FACTOR * rod.length_m * (1 + ln(1 + lure.weight_g) / ln(1 + K.CAST_WEIGHT_REF_G))
+weight_fit  = max(K.CAST_FIT_MIN, band(lure.weight_g, rod.cast_weight_min_g, rod.cast_weight_max_g, rod.cast_weight_max_g))
+headwind    = max(0, cos(angle between wind_dir and pos.facing)) * min(wind_ms / 10, 1)
+cast_max_m  = reach_ref_m * weight_fit * (K.CAST_SKILL_BASE + (1 - K.CAST_SKILL_BASE) * n(angler.casting_distance)) * (1 - K.CAST_HEADWIND * headwind)
 cast_m      = cast_max_m * power_input            # power_input 0..1 from the player
 aim_error   = normal(0, 0.15 - 0.12 * n(angler.casting_accuracy)) radians
 water_depth = interpolate(pos.depth_profile, cast_m)
 ```
 
-`headwind` is 0..1: the wind component blowing at the angler, scaled like `chop`. The lure's depth during the retrieve comes from its sink rate, the count-down the player allows and the retrieve speed, kept between `run_depth_min_m` and `run_depth_max_m`; the formulas below take it as `lure_depth_m`.
+`headwind` is 0..1: 1 when a wind of 10 m/s or more blows straight into the angler's face, 0 with the wind from the side or behind (a tail wind does not add distance in 0.1). The reference reach grows with rod length and with lure weight (a 30 g lure reaches twice as far as a weightless one); the first version of this formula ignored lure weight and gave a medium rod only 33 m, so it was replaced. A lure outside the rod's casting range sets `lure_out_of_range`, which drives the rig warning (PRD F4). The lure's depth during the retrieve comes from its sink rate, the count-down the player allows and the retrieve speed, kept between `run_depth_min_m` and `run_depth_max_m`; the formulas below take it as `lure_depth_m`.
 
 ### 5.1 Stage 1: presence (is the species here now?)
 
@@ -237,15 +240,17 @@ B_eff  = min(line.breaking_strain_kg, leader.breaking_strain_kg)
 
 Real-time rules, per simulation tick:
 - The fish alternates run, rest and thrash states (seeded). Its pull is `F_fish = F_max * effort * sqrt(energy / E0)`.
-- Line tension is `T = min(F_fish + reel_pull, drag)`. When the fish and the reel together exceed the drag, line pays out.
+- The angler's pull is `P = angler_pull_max * (0.5 * reel + 0.5 * rod)` with `angler_pull_max = K.ANGLER_PULL_BASE + K.ANGLER_PULL_RANGE * n(rod.power)`; `reel` and `rod` are the two thumb inputs, 0..1.
+- Line tension is `T = min(F_fish + P, drag)`. When fish and angler together exceed the drag, the drag slips and line pays out at `run_speed * effort * sqrt(energy / E0) * (F_fish + P - drag) / (F_fish + P)`, with `run_speed = K.RUN_SPEED_BASE + K.RUN_SPEED_RANGE * n(sp.speed)`.
+- When the drag holds and the player reels, line comes in at `reel * reel.retrieve_m_per_s * (1 - F_fish / drag)`. So a fish strong enough to slip the drag cannot be brought closer until it tires.
 - At the start of a run the tension overshoots: `spike = drag * (1 + K.SPIKE * (1 - n(reel.smoothness)))`.
 - **Line break:** immediately if `T` or `spike` exceeds `B_eff`; also if `T` stays above `0.8 * B_eff` for more than 2 s.
-- **Hook pull-out:** while the line is slack (`T < 0.1 * F_max`), a hazard of `0.15 * (1 - h)` per second.
+- **Hook pull-out:** the line is slack when the fish is not running and the angler keeps less than `K.SLACK_SHARE` of the possible pull on it; then a hazard of `K.SLACK_HAZARD * (1 - h)` per second. Keep reeling when it rests.
 - **Tiring:** `d(energy)/dt = -(T + K.REST_DRAIN * F_max)`. More drag tires the fish faster and risks the line. That trade-off is the fight.
 - **Teeth (owner decision 2026-11-11):** a species with teeth cuts the leader at a constant hazard over the fight:
   `cut_rate = K.TEETH_RATE * n(sp.teeth) * (1 - n(leader.abrasion_resistance)) * (K.WIRE_CUT_FACTOR if leader.type == "wire" else 1)`, and `p_cut = 1 - exp(-cut_rate * min(t_fight, 90 s))`. A cut ends the fight at once. Wire is immune, but its visibility feeds stage 3 suspicion like any leader's.
 - **Landing phase** starts when `energy <= K.LAND_ENERGY * E0` and the fish is close.
-- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0`, otherwise the hook pulls out. This is a deliberate game rule, not realism. It is not rare: with the drag set to a third of the line strength, the closed-form estimate exceeds 90 s for the largest bluefish (103 s) and sea bass (131 s) on light tackle and for a 100 cm sea bass on medium tackle (99 s), and stays under it for every smaller fish tested (found by the unit tests in `game/tests/test_catch_model.gd`). The owner decided on 2026-11-11 that the rule stays and that the game warns the player (PRD F19, P1) when light tackle meets a big fish.
+- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0`, otherwise the hook pulls out. This is a deliberate game rule, not realism. It is not rare: with the drag set to a third of the line strength, the closed-form estimate exceeds 90 s on light tackle for a 62 cm sea bass (109 s) and an 80 cm bluefish (133 s), and on medium tackle for an 80 cm bluefish (95 s) and an 80 cm sea bass (102 s); it stays under it for the small and mid-size fish tested (50 cm bluefish on light tackle: 83 s). The owner decided on 2026-11-11 that the rule stays and that the game warns the player (PRD F19, P1) when light tackle meets a big fish.
 
 Closed-form estimate at a constant drag, used in the worked examples and as the test oracle for the tick model:
 
@@ -253,7 +258,7 @@ Closed-form estimate at a constant drag, used in the worked examples and as the 
 T_bar   = min(drag, F_max)
 t_tire  = (1 - K.LAND_ENERGY) * E0 / (T_bar + K.REST_DRAIN * F_max)
 t_reel  = hook_distance_m / reel.retrieve_m_per_s
-t_fight = max(t_tire, t_reel) + K.LAND_PHASE
+t_fight = (t_tire + t_reel  if F_max > drag  else  max(t_tire, t_reel)) + K.LAND_PHASE
 ```
 
 ### 5.6 Stage 6: landing
@@ -281,10 +286,15 @@ visible_m = K.VIS_BASE + K.VIS_RANGE * visibility                               
 | SIZE_LO / HI / M | 1.0 / 4.0 / 2.0 | PEN_BASE | 0.6 | ABRASION | 0.3 |
 | SPEED_PEN | 0.8 | TIMING_BASE | 0.7 | SPIKE | 0.5 |
 | DETECT_BASE | 0.4 | HOOK_MAX | 0.98 | VIS_BASE / VIS_RANGE | 1 m / 7 m |
-| LAND_FREE | 0.3 | LAND_PHASE | 5 s | TEETH_RATE | 0.03 /s |
-| WIRE_CUT_FACTOR | 0.0 | FIGHT_CAP_S | 90 s | | |
+| LAND_FREE | 0.3 | LAND_PHASE | 5 s | TEETH_RATE | 0.02 /s |
+| WIRE_CUT_FACTOR | 0.0 | FIGHT_CAP_S | 90 s | CAP_LAND_ENERGY | 0.4 |
+| RUN_SPEED_BASE / RANGE | 0.3 / 1.2 m/s | ANGLER_PULL_BASE / RANGE | 0.5 / 3.5 kgf | EFFORT run / rest / thrash | 1.0 / 0.5 / 0.7 |
+| STATE_SECONDS run / rest / thrash | 3-6 / 1-2 / 1-2 s | STRAIN_SHARE / LIMIT | 0.8 / 2 s | SLACK_SHARE / HAZARD | 0.1 / 0.15 /s |
+| LAND_DISTANCE_M | 2 m | THRASH_DISTANCE_M | 10 m | CAST_LEN_FACTOR | 12 |
+| CAST_WEIGHT_REF_G | 30 g | CAST_FIT_MIN | 0.3 | CAST_SKILL_BASE | 0.6 |
+| CAST_HEADWIND | 0.3 | AIM_SIGMA_BASE / SKILL | 0.15 / 0.12 rad | | |
 
-Calibration targets from the PRD: best-case median wait for a take 20-40 s (the examples give 28 s); worst case at least 120 s (608 s); fights 20-90 s (26-69 s).
+Calibration targets from the PRD: best-case median wait for a take 20-40 s (the examples give 28 s); worst case at least 120 s (608 s); fights 20-90 s (30-60 s in the examples).
 
 ## 6. Three worked examples
 
@@ -328,10 +338,10 @@ Inner corner, north wind 1 m/s, lure at 1.5 m, retrieve speed 16, timing quality
 | 2 Attraction | G 1.0 x M 1.0 x Z 1.0 x V 0.789 (retrieve too fast) x F 0.894 = **0.706** |
 | 3 Commit | suspicion 0.260 (cautious fish, visible leader, bright clear water), pressure 0.582; c = **0.275**; take rate 0.00016 /s |
 | 4 Hook | 1.0 x 0.884 x 0.85 = **0.752** |
-| 5 Fight | W 1.25 kg; peak pull 2.96 kgf; line strength 5.68 kg; spike 2.58 kg, no break; tire 21 s, recover 17 s; **fight 26 s** |
+| 5 Fight | W 1.25 kg; peak pull 2.96 kgf; line strength 5.68 kg; spike 2.58 kg, no break; tire 21 s, then recover 17 s (the fish can slip a 2.0 kg drag), land 5 s; **fight 43 s** |
 | 6 Landing | q **1.0**; visible inside 4.7 m |
 
-Result: the lure itself is fine, but a sea bass alone would take about 74 minutes to arrive (median). With all species the median wait is 608 s, far above the 120 s "bad choice" bar. The "why" view shows the three weak inputs: time slot (0.2), depth (0.53) and commit (0.27). Evening, the pier end and a less visible leader each fix one of them. A sea bass that does get hooked has a 5% chance of cutting the leader (teeth 3), so a hooked fish lands with probability 0.752 x 0.95 x 1.0 = **0.71**.
+Result: the lure itself is fine, but a sea bass alone would take about 74 minutes to arrive (median). With all species the median wait is 608 s, far above the 120 s "bad choice" bar. The "why" view shows the three weak inputs: time slot (0.2), depth (0.53) and commit (0.27). Evening, the pier end and a less visible leader each fix one of them. A sea bass that does get hooked has a 5.5% chance of cutting the leader (teeth 3), so a hooked fish lands with probability 0.752 x 0.945 x 1.0 = **0.71**.
 
 ### Example C: the fight is lost, then won (bluefish, light tackle, September dawn)
 
@@ -347,9 +357,34 @@ Pier end, south-west wind 6 m/s, lure at 3 m, retrieve speed 16, timing quality 
 | 5 Fight | W 1.00 kg; peak pull 2.48 kgf; line strength 2.11 kg |
 
 - **Drag 2.6 kg:** spike 2.6 x 1.21 = 3.15 kg, above the 2.11 kg the leader really holds. **The line breaks on the first run.** P(landed) = 0.
-- **Drag 1.2 kg:** spike 1.45 kg, under 2.11 kg. Tire 25 s, recover line 30 s, **fight 35 s**; landing q 0.913 (a 1 kg fish lifted on a 2.1 kg line from a high pier). The bluefish's teeth cut the fluorocarbon leader with probability **0.33** over a 35 s fight (hazard 0.0113 /s). P(landed | take, good strike) = 0.637 x (1 - 0.33) x 0.913 = **0.39**.
+- **Drag 1.2 kg:** spike 1.45 kg, under 2.11 kg. Tire 25 s, then recover line 30 s (a fish pulling 2.48 kgf slips a 1.2 kg drag, so no line comes in while it tires), land 5 s: **fight 60 s**; landing q 0.913 (a 1 kg fish lifted on a 2.1 kg line from a high pier). The bluefish's teeth cut the fluorocarbon leader with probability **0.37** over a 60 s fight (hazard 0.0075 /s). P(landed | take, good strike) = 0.637 x (1 - 0.37) x 0.913 = **0.37**.
 
-What the player learns: the leader's label says 2.7 kg, but knot and abrasion leave 2.11 kg, and a jerky drag overshoots its setting. Setting the drag near a third of the weakest link is the lesson, and the screen shows each of those numbers. The teeth add a second lesson: against a bluefish a wire leader is never cut (spin tackle, same conditions: landing probability 0.86 with wire against 0.52 with fluorocarbon, the commit probability only slightly lower, 0.78 against 0.80, because a bluefish is not very cautious). A cautious, toothless species shifts that balance the other way (unit test `test_teeth_cut_fluorocarbon_but_not_wire`).
+What the player learns: the leader's label says 2.7 kg, but knot and abrasion leave 2.11 kg, and a jerky drag overshoots its setting. Setting the drag near a third of the weakest link is the lesson, and the screen shows each of those numbers. The teeth add a second lesson: against a bluefish a wire leader is never cut (spin tackle, same conditions: landing probability 0.86 with wire against 0.51 with fluorocarbon, the commit probability only slightly lower, 0.78 against 0.80, because a bluefish is not very cautious). A cautious, toothless species shifts that balance the other way (unit test `test_teeth_cut_fluorocarbon_but_not_wire`).
+
+### Cast distance examples
+
+Angler casting distance and accuracy 10; pier end, facing south-west. Workbook sheet `Cast`.
+
+| Example | Reference reach | Weight fit | Skill | Headwind | Result |
+| --- | --- | --- | --- | --- | --- |
+| 1. Light rod 2.1 m (1-7 g), 3 g lure, calm, full power | 12 x 2.1 x 1.404 = 35.4 m | 1.0 | 0.789 | 0 | **27.9 m** |
+| 2. Medium rod 2.7 m (7-28 g), 18 g lure, south-west wind 8 m/s in the face, full power | 12 x 2.7 x 1.857 = 60.2 m | 1.0 | 0.789 | 0.8 | 47.5 x (1 - 0.24) = **36.1 m** |
+| 3. Light rod, 18 g lure (11 g over its range), west wind 5 m/s (quartering), half power | 46.8 m | 0.3 | 0.789 | 0.354 | maximum 9.9 m, cast **5.0 m**; rig warning shown |
+
+Aim error is 0.093 rad (1 sigma, about 5 degrees) at accuracy 10.
+
+### The real-time fight against the estimate
+
+200 seeded fights per row with a simple policy (reel all the time, never touch the rod or the drag). The estimate is the closed form of 5.5.
+
+| Example | Estimate | Real-time fight (200 seeds) |
+| --- | --- | --- |
+| A, horse mackerel, drag 0.8 kg | 30 s, always landed | mean 28 s, 200 of 200 landed |
+| B, sea bass 50 cm, drag 2.0 kg | 43 s, landed 0.94 of hooked fish | mean landed fight 47 s; within 0.1 of the estimated landing rate |
+| C, bluefish, drag 2.6 kg | line breaks | line breaks on the first tick, 200 of 200 |
+| C2, bluefish, drag 1.2 kg | 60 s, landed 0.58 of hooked fish | mean landed fight 71 s; within 0.1 of the estimated landing rate |
+
+The real-time fight runs up to 18% longer than the estimate because the fish also takes line while it tires; the unit tests hold the two within 25% for time and 0.1 for landing rate. Not reeling at all loses more than a quarter of example A's fish to hook pull-outs (tested), against none with a tight line.
 
 ## 7. Data sources and licences (proposal)
 
@@ -387,7 +422,7 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 
 1. **Activity by time slot, not by hour.** The spec lists "activity by hour"; the PRD has four slots, so the schema stores four values. Hours can replace them later without changing the formulas.
 2. **Depth range means feeding depth.** The spec's "preferred depth range" is defined here as the depth band below the surface where the species feeds.
-3. **Fields added to the spec's lists:** `lw_a`, `lw_b`, `regulation`, `teeth` (species); `water_class`, `water_temp_by_month_c`, `wind_by_month`, `landing_difficulty` (spot); `retrieve_m_per_s` instead of a retrieve ratio (reel); a separate **leader** record; `imitates`, running depths, `sink_rate_m_per_s`, `hook_gape_mm` (lure). Hook size is stored as gape in mm because hook size numbers are not linear.
+3. **Fields added to the spec's lists:** `lw_a`, `lw_b`, `regulation`, `teeth` (species); `water_class`, `water_temp_by_month_c`, `wind_by_month`, `landing_difficulty`, `facing` (spot and positions); `retrieve_m_per_s` instead of a retrieve ratio (reel); a separate **leader** record; `imitates`, running depths, `sink_rate_m_per_s`, `hook_gape_mm` (lure). Hook size is stored as gape in mm because hook size numbers are not linear.
 4. **Spec attributes stored but not used by the 0.1 formulas:** species `rarity`, `activity_by_month`; spot `access_difficulty`, position `current`, `bottom_type`; rod `action`, `durability`; reel `size`, `line_capacity_m`; line `diameter_mm`, `visibility`, `abrasion_resistance` (the leader's values are used instead); lure `scent`, `durability`; angler `strike_timing`, `fight_control`, `patience`, `species_knowledge`, `spot_knowledge`. They are kept so the MVP does not need a schema change.
 5. **The 90 s rule** resolves a fight by a game rule (5.5). It follows the PRD's cap and is not realistic for very large fish.
 
@@ -419,7 +454,8 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 | Constants (section 5.8, all design fills) | `game/data/constants.json` | Done |
 | Validator (sections 2 and 4) | `game/sim/data_validator.gd` | Done; negative tests for each rule |
 | Loader | `game/sim/data_store.gd` | Done; returns errors, the caller decides how loudly to fail; not yet wired into start-up because no real data exists |
-| Stages 0-4 and 6, closed-form fight (5.5 estimate) including teeth and the 90 s cap flag | `game/sim/catch_model.gd` | Done; the three worked examples (four runs) are unit tests and agree with this document and the workbook |
-| Cast distance (5.0), shoal follow-up (5.3), real-time fight tick model (5.5) | none | Not ported: the first two have no worked example yet, the third waits for the fight controls design |
+| Stages 0-4 and 6, cast distance (5.0), closed-form fight (5.5 estimate) including teeth and the 90 s cap flag | `game/sim/catch_model.gd` | Done; the three worked examples (four runs) are unit tests and agree with this document and the workbook |
+| Real-time fight (5.5): fixed 30 Hz step, seeded, run / rest / thrash states, drag slip, line break and strain, teeth, slack hook pull-out, landing phase, 90 s rule | `game/sim/fight_sim.gd` | Done; tested against the closed-form estimate over 200 seeds per example. Takes `reel`, `rod`, `drag_kg` per tick; not connected to touch controls or a scene yet |
+| Shoal follow-up (5.3) | none | Not ported: needs the wait loop that owns the bite timer |
 | Fixtures (illustrative design fills, not real data) | `game/tests/fixtures/` | Excluded from the export |
 | Real species and spot data | `game/data/species.json`, `spots.json`, `tackle/` | Not written: waits for the owner's choice of spot and species and the licence reads |

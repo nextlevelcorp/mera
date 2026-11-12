@@ -54,7 +54,44 @@
   "LAND_PHASE": 5.0,
   "LAND_FREE": 0.3,
   "FIGHT_CAP_S": 90.0,
-  "TEETH_RATE": 0.03,
-  "WIRE_CUT_FACTOR": 0.0
+  "TEETH_RATE": 0.02,
+  "WIRE_CUT_FACTOR": 0.0,
+  "RUN_SPEED_BASE": 0.3,
+  "RUN_SPEED_RANGE": 1.2,
+  "ANGLER_PULL_BASE": 0.5,
+  "ANGLER_PULL_RANGE": 3.5,
+  "EFFORT": {
+   "run": 1.0,
+   "rest": 0.5,
+   "thrash": 0.7
+  },
+  "STATE_SECONDS": {
+   "run": [
+    3.0,
+    6.0
+   ],
+   "rest": [
+    1.0,
+    2.0
+   ],
+   "thrash": [
+    1.0,
+    2.0
+   ]
+  },
+  "STRAIN_SHARE": 0.8,
+  "STRAIN_LIMIT_S": 2.0,
+  "SLACK_SHARE": 0.1,
+  "SLACK_HAZARD": 0.15,
+  "LAND_DISTANCE_M": 2.0,
+  "CAP_LAND_ENERGY": 0.4,
+  "THRASH_DISTANCE_M": 10.0,
+  "CAST_LEN_FACTOR": 12.0,
+  "CAST_WEIGHT_REF_G": 30.0,
+  "CAST_FIT_MIN": 0.3,
+  "CAST_SKILL_BASE": 0.6,
+  "CAST_HEADWIND": 0.3,
+  "AIM_SIGMA_BASE": 0.15,
+  "AIM_SIGMA_SKILL": 0.12
  }
 }

@@ -327,6 +327,19 @@
      "min": 0,
      "max": 1
     },
+    "facing": {
+     "type": "enum",
+     "values": [
+      "N",
+      "NE",
+      "E",
+      "SE",
+      "S",
+      "SW",
+      "W",
+      "NW"
+     ]
+    },
     "depth_profile": {
      "type": "list",
      "item": {

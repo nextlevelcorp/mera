@@ -1,6 +1,6 @@
 # Project status
 
-**Phase**: 2 Design. PRD approved by the owner on 2026-11-11; data model approved; schema, validator and catch model built with tests (`data_model.md` section 11). Phase 0 second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
+**Phase**: 2 Design. PRD approved by the owner on 2026-11-11; data model approved; schema, validator, catch model, cast model and real-time fight built with tests (`data_model.md` section 11); design direction proposed (`design_direction.md`). Phase 0 second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
 
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
@@ -9,6 +9,10 @@
 - Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Reminders for the owner
+- Open the Pages build on the iPhone 16e and the iPhone 14, tap "Water prototype", and report average and worst-1% fps at 360p and 720p, plus whether you like the look (art option A is provisional until then).
+- Sound: listen to the shortlist in `audio_sources.md` and say which files to use. Reel-under-load and cast sounds are missing; choose between the single reel file, hand-picked Freesound downloads (the site blocks automated clients) or the paid fallback.
+- An Android phone (borrowed is fine) is needed before the tester round: vibration and mid-range performance are untested on iPhones.
+- Before 0.1: remove the water prototype or move it behind the debug menu.
 - First spot and species are provisional (Kadıköy/Moda breakwater or pier area; horse mackerel, bluefish, sea bass). After your visit: confirm or replace them, name the exact structure and send your notes; real data is written only after that and the licence reads.
 - One legal consultation covers: OpenStreetMap (ODbL), article 31 of Law 5846 for the fishing communique, Sentinel-2 and Copernicus Marine terms.
 - After the slice passes: add the remaining 2-4 spots (MVP is 3-5 spots).

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "1: matched light tackle, calm",
+    "rod": "lrf_rod",
+    "lure": "lrf_soft",
+    "position": "pier_end",
+    "conditions": {
+      "wind_dir": "N",
+      "wind_ms": 0
+    },
+    "power": 1.0,
+    "expected": {
+      "reach_ref_m": 35.37319396373784,
+      "weight_fit": 1.0,
+      "skill": 0.7894736842105263,
+      "headwind": 0.0,
+      "cast_max_m": 27.926205760845665,
+      "cast_m": 27.926205760845665,
+      "aim_sigma_rad": 0.0931578947368421
+    }
+  },
+  {
+    "name": "2: medium tackle into a headwind",
+    "rod": "spin_rod",
+    "lure": "spin_minnow",
+    "position": "pier_end",
+    "conditions": {
+      "wind_dir": "SW",
+      "wind_ms": 8
+    },
+    "power": 1.0,
+    "expected": {
+      "reach_ref_m": 60.1810653459601,
+      "weight_fit": 1.0,
+      "skill": 0.7894736842105263,
+      "headwind": 0.8,
+      "cast_max_m": 36.10863920757606,
+      "cast_m": 36.10863920757606,
+      "aim_sigma_rad": 0.0931578947368421
+    }
+  },
+  {
+    "name": "3: heavy lure on the light rod, half power",
+    "rod": "lrf_rod",
+    "lure": "spin_minnow",
+    "position": "pier_end",
+    "conditions": {
+      "wind_dir": "W",
+      "wind_ms": 5
+    },
+    "power": 0.5,
+    "expected": {
+      "reach_ref_m": 46.80749526908007,
+      "weight_fit": 0.3,
+      "skill": 0.7894736842105263,
+      "headwind": 0.3535533905932738,
+      "cast_max_m": 9.910139369639568,
+      "cast_m": 4.955069684819784,
+      "aim_sigma_rad": 0.0931578947368421
+    }
+  }
+]

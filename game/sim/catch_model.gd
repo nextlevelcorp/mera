@@ -5,9 +5,8 @@ extends RefCounted
 ## the inputs it used ("inputs") next to its results, so the "why" view and the
 ## tests read the same record (PRD F10).
 ##
-## Not ported yet (see the PR notes): the cast distance model (5.0), the
-## shoal follow-up after a take (5.3) and the real-time fight tick model (5.5).
-## The fight here is the closed-form estimate at a constant drag.
+## The fight here is the closed-form estimate at a constant drag; the real-time
+## fight is FightSim. Not ported yet: the shoal follow-up after a take (5.3).
 
 ## Attribute 1-20 -> 0..1.
 static func n(attribute: float) -> float:
@@ -101,6 +100,36 @@ static func environment(k: Dictionary, spot: Dictionary, position: Dictionary, c
 	return {
 		"inputs": {"exposure": exposure, "wind_ms": float(cond["wind_ms"]), "typical_clarity": float(spot["typical_clarity"]), "slot": cond["slot"]},
 		"chop": chop, "clarity_eff": clarity, "light": light, "visibility": n(clarity) * light,
+	}
+
+
+const WIND_DIRECTIONS: Array[String] = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+
+
+## 0..1: how much of the wind blows straight at an angler facing `facing`.
+## wind_dir is where the wind comes from.
+static func headwind(facing: String, wind_dir: String, wind_ms: float) -> float:
+	var steps: int = WIND_DIRECTIONS.find(wind_dir) - WIND_DIRECTIONS.find(facing)
+	return maxf(0.0, cos(steps * PI / 4.0)) * minf(wind_ms / 10.0, 1.0)
+
+
+## Cast distance, docs/data_model.md 5.0. power_input 0..1 comes from the player.
+## The aim error itself is drawn by the caller from aim_sigma_rad (seeded).
+static func cast(k: Dictionary, rod: Dictionary, lure: Dictionary, angler: Dictionary, position: Dictionary, cond: Dictionary, power_input: float) -> Dictionary:
+	var weight: float = float(lure["weight_g"])
+	var reach_ref: float = float(k["CAST_LEN_FACTOR"]) * float(rod["length_m"]) * (1.0 + log(1.0 + weight) / log(1.0 + float(k["CAST_WEIGHT_REF_G"])))
+	var weight_fit: float = maxf(float(k["CAST_FIT_MIN"]), band(weight, float(rod["cast_weight_min_g"]), float(rod["cast_weight_max_g"]), float(rod["cast_weight_max_g"])))
+	var skill: float = float(k["CAST_SKILL_BASE"]) + (1.0 - float(k["CAST_SKILL_BASE"])) * n(float(angler["casting_distance"]))
+	var head := headwind(position["facing"], cond["wind_dir"], float(cond["wind_ms"]))
+	var cast_max: float = reach_ref * weight_fit * skill * (1.0 - float(k["CAST_HEADWIND"]) * head)
+	var cast_m: float = cast_max * clampf(power_input, 0.0, 1.0)
+	return {
+		"inputs": {"rod_length_m": float(rod["length_m"]), "lure_weight_g": weight, "cast_weight_min_g": float(rod["cast_weight_min_g"]), "cast_weight_max_g": float(rod["cast_weight_max_g"]), "casting_distance": float(angler["casting_distance"]), "facing": position["facing"], "wind_dir": cond["wind_dir"], "wind_ms": float(cond["wind_ms"]), "power_input": power_input},
+		"reach_ref_m": reach_ref, "weight_fit": weight_fit, "skill": skill, "headwind": head,
+		"cast_max_m": cast_max, "cast_m": cast_m,
+		"aim_sigma_rad": float(k["AIM_SIGMA_BASE"]) - float(k["AIM_SIGMA_SKILL"]) * n(float(angler["casting_accuracy"])),
+		"water_depth_m": depth_at(position["depth_profile"], cast_m),
+		"lure_out_of_range": weight < float(rod["cast_weight_min_g"]) or weight > float(rod["cast_weight_max_g"]),
 	}
 
 
@@ -198,7 +227,9 @@ static func fight(k: Dictionary, sp: Dictionary, position: Dictionary, reel: Dic
 	var t_bar: float = minf(drag, f_max)
 	var t_tire: float = (1.0 - float(k["LAND_ENERGY"])) * energy / (t_bar + float(k["REST_DRAIN"]) * f_max)
 	var t_reel: float = float(play["hook_distance_m"]) / float(reel["retrieve_m_per_s"])
-	var t_fight: float = maxf(t_tire, t_reel) + float(k["LAND_PHASE"])
+	# A fish that can slip the drag takes line while it tires, so the line is
+	# recovered afterwards; a fish that cannot is reeled in while it tires.
+	var t_fight: float = (t_tire + t_reel if f_max > drag else maxf(t_tire, t_reel)) + float(k["LAND_PHASE"])
 	var cap: float = float(k["FIGHT_CAP_S"])
 	var t_capped: float = minf(t_fight, cap)
 	# Teeth cut the leader at a constant hazard over the (capped) fight; wire is immune.
