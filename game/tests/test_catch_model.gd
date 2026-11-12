@@ -111,7 +111,7 @@ func test_line_break_example() -> void:
 	assert_true(results["C"]["fight"]["line_breaks"], "C: drag 2.6 kg breaks the line")
 	assert_near(results["C"]["chain"]["p_land_given_take"], 0.0, "C: a broken line never lands")
 	assert_true(not results["C2"]["fight"]["line_breaks"], "C2: drag 1.2 kg holds")
-	assert_true(results["C2"]["chain"]["p_land_given_take"] > 0.3, "C2: the fish can be landed")
+	assert_true(results["C2"]["chain"]["p_land_given_take"] > 0.25, "C2: the fish can be landed")
 	assert_true(results["C2"]["fight"]["spike"] < results["C2"]["fight"]["Beff"], "C2: spike is under the real line strength")
 
 
@@ -172,3 +172,40 @@ func test_resolution_is_deterministic_and_pure() -> void:
 	var b := CatchModelScript.resolve(ctx, _k)
 	assert_eq(a, b, "same inputs give identical results")
 	assert_eq(ctx, before, "resolve does not modify its inputs")
+
+
+func test_cast_examples_match_the_reference() -> void:
+	_setup()
+	var errors: Array[String] = []
+	var cases: Array = DataStore.read_json("%s/cast_examples.json" % FIXTURE_DIR, errors)
+	assert_eq(cases.size(), 3, "three cast examples")
+	for case: Dictionary in cases:
+		var position: Dictionary = {}
+		for p: Dictionary in _db["spot"][0]["positions"]:
+			if p["id"] == case["position"]:
+				position = p
+		var r := CatchModelScript.cast(_k, _by_id("rod", case["rod"]), _by_id("lure", case["lure"]), _by_id("angler", "default"), position, case["conditions"], case["power"])
+		for key: String in case["expected"]:
+			assert_near(r[key], case["expected"][key], "%s %s" % [case["name"], key])
+		assert_true(not (r["inputs"] as Dictionary).is_empty(), "cast logs its inputs")
+
+
+func test_cast_behaviour() -> void:
+	_setup()
+	var position: Dictionary = _db["spot"][0]["positions"][0]
+	var angler := _by_id("angler", "default")
+	var calm := {"wind_dir": "N", "wind_ms": 0}
+	var matched := CatchModelScript.cast(_k, _by_id("rod", "lrf_rod"), _by_id("lure", "lrf_soft"), angler, position, calm, 1.0)
+	var heavy := CatchModelScript.cast(_k, _by_id("rod", "lrf_rod"), _by_id("lure", "spin_minnow"), angler, position, calm, 1.0)
+	assert_true(not matched["lure_out_of_range"] and heavy["lure_out_of_range"], "the out-of-range flag drives the rig warning (PRD F4)")
+	assert_true(heavy["cast_max_m"] < matched["cast_max_m"], "a lure far over the rod's range casts shorter than a matched one")
+	var expert := angler.duplicate()
+	expert["casting_distance"] = 20
+	expert["casting_accuracy"] = 20
+	var far := CatchModelScript.cast(_k, _by_id("rod", "lrf_rod"), _by_id("lure", "lrf_soft"), expert, position, calm, 1.0)
+	assert_true(far["cast_max_m"] > matched["cast_max_m"] and far["aim_sigma_rad"] < matched["aim_sigma_rad"], "skill adds distance and accuracy")
+	assert_near(CatchModelScript.cast(_k, _by_id("rod", "lrf_rod"), _by_id("lure", "lrf_soft"), angler, position, calm, 0.0)["cast_m"], 0.0, "zero power, zero distance")
+	assert_near(CatchModelScript.headwind("SW", "SW", 10.0), 1.0, "wind in the face")
+	assert_near(CatchModelScript.headwind("SW", "NE", 10.0), 0.0, "wind from behind does not help or hurt")
+	assert_near(CatchModelScript.headwind("SW", "W", 10.0), cos(PI / 4.0), "quartering wind")
+	assert_near(CatchModelScript.headwind("N", "NW", 5.0), 0.5 * cos(PI / 4.0), "direction wraps around north")

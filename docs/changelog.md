@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Real-time fight: `game/sim/fight_sim.gd` (`FightSim`, fixed 30 Hz step, seeded): fish run / rest / thrash states, drag slip and line recovery, line break and strain, teeth, slack hook pull-out, landing phase, 90 s rule. Not connected to controls or a scene.
+- Cast distance: `CatchModel.cast` and `headwind`; new required position field `facing`; the first cast formula (which ignored lure weight) replaced.
+- Closed-form fight estimate corrected: a fish that can slip the drag is recovered after it tires (tire + recover), not during. Examples B and C2 changed (43 s and 60 s); `TEETH_RATE` lowered to 0.02. Workbook gained a `Cast` sheet (185 formulas). 39 tests.
 - Docs: provisional first spot (Kadıköy/Moda breakwater or pier area) and three species (horse mackerel, bluefish, sea bass) recorded; no real data written.
 - Data layer and catch model: `game/data/schema.json` and `constants.json`, `DataValidator` and `DataStore`, and `CatchModel` (stages 0-4 and 6, closed-form fight) in `game/sim/`; illustrative fixtures and 18 new tests (26 in total) that reproduce the three worked examples of `data_model.md`. Not wired into the scenes. Cast distance, shoal follow-up and the real-time fight are not ported.
 - Teeth: species `teeth` attribute and a leader-cut hazard in the fight (`cut_rate_per_s`, `p_cut`); wire leaders are immune. 90 s fight cap kept, hint planned (PRD F19). Workbook and tests updated (27 tests).
