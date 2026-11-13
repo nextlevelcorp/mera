@@ -31,3 +31,16 @@ Converted to mono 22.05 kHz Ogg Vorbis; cuts and loops made with ffmpeg and nump
 | `splash.ogg` | https://opengameart.org/content/fisheefects | Memoraphile | CC0 | first 1.0 s |
 | `splash_heavy.ogg` | https://opengameart.org/content/ocean-splash | Thimras | CC0 | mono, normalised |
 | `lure_drop.ogg` | https://opengameart.org/content/object-dropping-into-water-0 | angeloyazar | CC0 | 0.15-0.65 s (first drop), gain raised |
+
+## Spot and species research sources (2026-11-13, `spot_research.md`)
+No value from these is in `game/data/` yet.
+
+| Source | Licence or terms | How used |
+| --- | --- | --- |
+| Wikidata (SPARQL and entity data; items listed in `spot_candidates_tr.csv`) | CC0 (structured data) | Names and coordinates of piers, breakwaters, capes, lighthouses and ports; the Q-number is the source of each row |
+| MGM, Marmara sea-water temperature 2025 PDF | Terms of use not found | Twelve monthly means cited as facts with the source; no table copied |
+| Zengin (2009), SÜMAE Yunus Araştırma Bülteni 9(3), via DergiPark | Article copyright | Facts cited (species, seasons, angler counts); no text copied |
+| Öndes (2019), Anadolu Çev. ve Hay. Dergisi 4(3), via DergiPark | Article copyright | Percentages cited; no table copied |
+| WoRMS REST API | WoRMS terms; names cited | Valid scientific names and AphiaIDs |
+| GBIF occurrence API | Per record (CC0, CC BY, CC BY-NC) | Counts only; no record copied |
+| Search summaries of yemek.com, ensonhaber.com, istanbul.com, rudaw.net | Page copyright; pages not opened | Leads only, marked "S" |

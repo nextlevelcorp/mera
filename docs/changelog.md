@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Docs: `spot_research.md` (first pass at real Turkish sea spots from Wikidata coordinates, DergiPark papers, MGM temperatures, WoRMS and GBIF; recommends the Galata Bridge) and `spot_candidates_tr.csv` (287 coastal structures in Turkey from Wikidata, CC0). No game data changed.
 - 90 s rule: a fish counts as landed at the cap only if it is tired and within `CAP_LAND_DISTANCE_M` (5 m) of the shore; otherwise the hook pulls (owner decision 2026-11-13). A landed fish is now swung out of the water and hangs from the line, kicking and dripping (damped pendulum), before the result shows.
 - Recorded sounds: ten CC0 files in `game/audio/` (waves, wind loop and gust, reel loop, splashes, lure drop; owner listened on 2026-11-13) played by `SoundDirector`: wind follows the wind speed, waves the chop, the reel's pitch and volume follow line going out or coming in. 196 KB in total.
 - CI and export: the release preset excludes `debug/*`; a second preset "Web Debug" (feature tag `mera_debug`) is exported to `/debug/` on Pages; CI fails if the release pck contains the debug menu (owner approval 2026-11-13). 76 tests.
