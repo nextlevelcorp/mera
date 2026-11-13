@@ -19,3 +19,39 @@ PROTO_STYLE,Water,Su,Agua
 STYLE_REALISTIC,Realistic,Gerçekçi,Realista
 STYLE_BASIC,Basic,Basit,Básico
 PROTO_CAST,Cast,At,Lanzar
+DEMO_SPECIES_HORSE_MACKEREL,Horse mackerel,İstavrit,Jurel
+DEMO_SPECIES_BLUEFISH,Bluefish,Lüfer,Anjova
+DEMO_SPECIES_SEA_BASS,Sea bass,Levrek,Lubina
+DEMO_SPOT_PIER,Demo breakwater (not a real place),Demo mendirek (gerçek bir yer değil),Rompeolas de prueba (no es un lugar real)
+DEMO_POS_PIER_END,Pier end,İskele ucu,Punta del muelle
+DEMO_POS_INNER_CORNER,Inner corner,İç köşe,Esquina interior
+DEMO_POS_OUTER_FACE,Outer face,Dış yüz,Cara exterior
+DEMO_ROD_LRF,Light rod (demo),Hafif olta (demo),Caña ligera (prueba)
+DEMO_ROD_SPIN,Medium spin rod (demo),Orta spin oltası (demo),Caña de spinning media (prueba)
+DEMO_REEL_LRF,Light reel (demo),Hafif makara (demo),Carrete ligero (prueba)
+DEMO_REEL_SPIN,Medium reel (demo),Orta makara (demo),Carrete medio (prueba)
+DEMO_LINE_LRF,Thin braid (demo),İnce örgü misina (demo),Trenzado fino (prueba)
+DEMO_LINE_SPIN,Medium braid (demo),Orta örgü misina (demo),Trenzado medio (prueba)
+DEMO_LEADER_LRF,Light leader (demo),Hafif lider (demo),Bajo de línea ligero (prueba)
+DEMO_LEADER_SPIN,Medium leader (demo),Orta lider (demo),Bajo de línea medio (prueba)
+DEMO_LEADER_WIRE,Wire leader (demo),Çelik lider (demo),Bajo de acero (prueba)
+DEMO_LURE_LRF,Soft plastic (demo),Silikon yem (demo),Señuelo blando (prueba)
+DEMO_LURE_SPIN,Minnow (demo),Minnow yem (demo),Minnow (prueba)
+DEMO_ANGLER,Demo angler,Demo balıkçı,Pescador de prueba
+FIGHT_OPEN,Fight (demo),Savaş (demo),Pelea (prueba)
+FIGHT_SETUP,Fight setup (demo data),Savaş kurulumu (demo veri),Preparar pelea (datos de prueba)
+FIGHT_SPECIES,Species,Tür,Especie
+FIGHT_TACKLE,Tackle,Takım,Equipo
+FIGHT_START,Hook up,Takıldı,Enganchar
+FIGHT_NOTE,"Demo data: made-up fish and tackle, not real places or species.","Demo veri: uydurma balık ve takım, gerçek yer veya tür değil.","Datos de prueba: peces y equipo inventados, no son lugares ni especies reales."
+FIGHT_REEL,Reel,Makara,Carrete
+FIGHT_DRAG,Drag,Fren,Freno
+FIGHT_PULL,Pull,Çek,Tirar
+FIGHT_LANDED,Landed!,Karaya alındı!,¡Capturado!
+FIGHT_LINE_BREAK,Line broke,Misina koptu,Se rompió el sedal
+FIGHT_LEADER_CUT,Leader cut by teeth,Lider dişle kesildi,El bajo fue cortado por los dientes
+FIGHT_HOOK_PULLED,Hook pulled out,Kanca çıktı,Se soltó el anzuelo
+FIGHT_LOST_AT_EDGE,Lost at the edge,Kenarda kaçtı,Se perdió en la orilla
+FIGHT_DETAIL,Fight %.0f s · peak tension %.2f kg · line strength %.2f kg,Savaş %.0f sn · en yüksek gerginlik %.2f kg · misina dayanımı %.2f kg,Pelea %.0f s · tensión máxima %.2f kg · resistencia del sedal %.2f kg
+FIGHT_CAP,The 90 s rule ended this fight.,90 sn kuralı bu savaşı bitirdi.,La regla de 90 s terminó esta pelea.
+FIGHT_AGAIN,Again,Tekrar,Otra vez

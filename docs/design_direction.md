@@ -141,7 +141,7 @@ Still missing: a real-place foreground, the fish and its splash during a fight, 
 
 ## 6e. First like-for-like comparison, realistic against basic at 720p (2026-11-13)
 
-Owner's table. Chop entered as "dalga 11", read as chop 1 (a typo for 1). Clarity entered as "berraklık 100", which is above the slider's maximum of 20; the value used is not known. Both shaders were measured on the same phone in the same session.
+Owner's table. Chop entered as "dalga 11", read as chop 1 (a typo for 1). Clarity was first entered as "berraklık 100" and corrected by the owner to 20. Both shaders were measured on the same phone in the same session.
 
 | Phone | Realistic average | Realistic worst 1% | Basic average | Basic worst 1% |
 | --- | --- | --- | --- | --- |
@@ -152,9 +152,9 @@ Reading:
 - **Average is 60 on both shaders and both phones.** That is the browser's refresh cap, so the average hides the cost: both shaders have headroom that these numbers do not show.
 - **Worst 1% differs by 1 to 2 fps.** The realistic shader costs about 2 fps at the slow end on the iPhone 16e and 1 fps on the iPhone 14. Small in this condition.
 - **Earlier realistic figures do not match this table.** Section 6d gave 50 fps for the iPhone 16e and 56 for the iPhone 14 at chop 1 with the metric unstated. This table gives 54 worst-1% for the same phone and condition, so one of the two runs is not comparable. Likely a different scene state or background load. Not resolved.
-- **Clarity:** the owner confirmed "berraklık 100" and "dalga 1" (2026-11-13). The clarity slider in the prototype has a maximum of 20, so 100 cannot be set on it. The value that produced these numbers is therefore unresolved; the owner has chosen not to run more measurements now. Clarity changes how much of the bottom is drawn, so the cost depends on it.
+- **Clarity (corrected 2026-11-13):** the owner first wrote "berraklık 100", then corrected it: **clarity 20, chop 1** (the slider maximum). The numbers in this table are at clarity 20, chop 1, 720p. Clarity changes how much of the bottom is drawn, so the cost depends on it.
 
-Still open, not scheduled by the owner: runs at a lower clarity and with casts under chop 1, to see whether the 60 fps cap hides a real cost.
+Still open, not scheduled by the owner: runs at lower clarity and with casts under chop 1, to see whether the 60 fps cap hides a real cost.
 
 ## 7. Out of scope here
 

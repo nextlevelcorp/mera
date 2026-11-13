@@ -1,0 +1,32 @@
+[
+  {
+    "id": "lrf_line",
+    "name_key": "DEMO_LINE_LRF",
+    "type": "braid",
+    "diameter_mm": 0.1,
+    "breaking_strain_kg": 3.5,
+    "stretch": 2,
+    "visibility": 6,
+    "abrasion_resistance": 6,
+    "provenance": {
+      "default": {
+        "design_fill": true
+      }
+    }
+  },
+  {
+    "id": "spin_line",
+    "name_key": "DEMO_LINE_SPIN",
+    "type": "braid",
+    "diameter_mm": 0.2,
+    "breaking_strain_kg": 9,
+    "stretch": 2,
+    "visibility": 7,
+    "abrasion_resistance": 7,
+    "provenance": {
+      "default": {
+        "design_fill": true
+      }
+    }
+  }
+]

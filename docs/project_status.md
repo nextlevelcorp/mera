@@ -9,7 +9,7 @@
 - Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Reminders for the owner
-- Water, fourth round, like-for-like (chop 1, 720p, clarity unknown): realistic and basic both average 60 fps on both phones; worst 1% realistic 54 (16e) and 56 (14), basic 56 and 57. Clarity was entered as 100 (owner-confirmed); the slider maxes at 20, so the setting is unresolved. The owner declined more water measurements for now.
+- Water, fourth round, like-for-like (chop 1, 720p, clarity unknown): realistic and basic both average 60 fps on both phones; worst 1% realistic 54 (16e) and 56 (14), basic 56 and 57. Settings corrected by the owner to clarity 20, chop 1. The owner declined more water measurements for now.
 - Water, third round (superseded): realistic at chop 1, 720p: iPhone 16e 50 fps, iPhone 14 56 fps (metric unstated). Still needed: basic water on both phones at 720p, same chop, and the metric (average or worst 1%).
 - Water, second round (superseded): on both iPhones open "Water prototype", press "At" a few times, and report average and worst-1% fps for "Water: Realistic" and "Water: Basic" at 720p (about a minute each, also at chop 1), and whether the look is right.
 - Sound: listen to the shortlist in `audio_sources.md` and say which files to use. Reel-under-load and cast sounds are missing; choose between the single reel file, hand-picked Freesound downloads (the site blocks automated clients) or the paid fallback.
@@ -25,6 +25,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Fight screen on demo data (2026-11-13): played end to end in the web build with software GL: landed (bluefish, medium tackle), line broke at 2.89 kg against a 2.11 kg line (light tackle, drag at maximum, reel and pull held with two touches). Fish silhouette visible near the shore after the drawing-depth fix. Not measured on a phone yet; sound, body animation, cast/bite return, save, debug menu and real spot data are still to do.
 - Spec and CLAUDE.md in repo.
 - Repo skeleton and an empty Godot 4.4.1 web build (title screen, portrait guard, en/tr/es).
 - CI workflow green on the PR (build job). Deploy job untested until the first push to `main`.

@@ -1,0 +1,131 @@
+[
+  {
+    "id": "istavrit",
+    "name_key": "DEMO_SPECIES_HORSE_MACKEREL",
+    "scientific_name": "Trachurus trachurus",
+    "strength": 6,
+    "stamina": 6,
+    "speed": 12,
+    "caution": 5,
+    "aggression": 14,
+    "schooling": 12,
+    "feeding_depth_min_m": 1,
+    "feeding_depth_max_m": 15,
+    "temp_min_c": 12,
+    "temp_max_c": 24,
+    "activity_by_slot": {
+      "dawn": 0.8,
+      "day": 0.5,
+      "evening": 1.0,
+      "night": 0.7
+    },
+    "salinity": [
+      "marine"
+    ],
+    "mouth_gape_mm": 14,
+    "diet_tags": [
+      "small_fish",
+      "crustacean",
+      "plankton"
+    ],
+    "surface_thrash": 4,
+    "teeth": 1,
+    "length_min_cm": 8,
+    "length_max_cm": 35,
+    "length_record_cm": 40,
+    "weight_record_kg": 0.4,
+    "rarity": 3,
+    "lw_a": 0.0085,
+    "lw_b": 3.0,
+    "provenance": {
+      "default": {
+        "design_fill": true
+      }
+    }
+  },
+  {
+    "id": "lufer",
+    "name_key": "DEMO_SPECIES_BLUEFISH",
+    "scientific_name": "Pomatomus saltatrix",
+    "strength": 15,
+    "stamina": 13,
+    "speed": 17,
+    "caution": 9,
+    "aggression": 18,
+    "schooling": 14,
+    "feeding_depth_min_m": 1,
+    "feeding_depth_max_m": 20,
+    "temp_min_c": 14,
+    "temp_max_c": 24,
+    "activity_by_slot": {
+      "dawn": 1.0,
+      "day": 0.4,
+      "evening": 0.9,
+      "night": 0.5
+    },
+    "salinity": [
+      "marine"
+    ],
+    "mouth_gape_mm": 30,
+    "diet_tags": [
+      "small_fish"
+    ],
+    "surface_thrash": 15,
+    "teeth": 18,
+    "length_min_cm": 20,
+    "length_max_cm": 80,
+    "length_record_cm": 100,
+    "weight_record_kg": 12,
+    "rarity": 12,
+    "lw_a": 0.011,
+    "lw_b": 3.0,
+    "provenance": {
+      "default": {
+        "design_fill": true
+      }
+    }
+  },
+  {
+    "id": "levrek",
+    "name_key": "DEMO_SPECIES_SEA_BASS",
+    "scientific_name": "Dicentrarchus labrax",
+    "strength": 14,
+    "stamina": 15,
+    "speed": 11,
+    "caution": 16,
+    "aggression": 10,
+    "schooling": 6,
+    "feeding_depth_min_m": 0.5,
+    "feeding_depth_max_m": 10,
+    "temp_min_c": 10,
+    "temp_max_c": 24,
+    "activity_by_slot": {
+      "dawn": 0.9,
+      "day": 0.2,
+      "evening": 0.8,
+      "night": 1.0
+    },
+    "salinity": [
+      "marine"
+    ],
+    "mouth_gape_mm": 45,
+    "diet_tags": [
+      "small_fish",
+      "crustacean"
+    ],
+    "surface_thrash": 10,
+    "teeth": 3,
+    "length_min_cm": 25,
+    "length_max_cm": 100,
+    "length_record_cm": 110,
+    "weight_record_kg": 13,
+    "rarity": 14,
+    "lw_a": 0.01,
+    "lw_b": 3.0,
+    "provenance": {
+      "default": {
+        "design_fill": true
+      }
+    }
+  }
+]
