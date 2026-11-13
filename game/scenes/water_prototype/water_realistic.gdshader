@@ -17,6 +17,7 @@ uniform vec3 water_shallow : source_color = vec3(0.1, 0.45, 0.55);
 uniform vec3 bottom_color : source_color = vec3(0.55, 0.5, 0.38);
 uniform vec3 sun_color : source_color = vec3(1.0, 0.95, 0.85);
 uniform vec3 sun_dir = vec3(0.2, 0.75, 0.6);
+uniform float cloud_cover = 0.35;
 
 const float CAM_HEIGHT = 2.2;
 const float FOV = 0.9;
@@ -41,12 +42,36 @@ void add_wave(vec2 p, vec2 dir, float k, float speed, float a, float sharp, inou
 	slope += dir * (a * sharp * pow(s, sharp - 1.0) * cos(phase) * k);
 }
 
-vec3 sky_color(vec3 d) {
+float fbm(vec2 p, int octaves) {
+	float v = 0.0;
+	float a = 0.5;
+	for (int i = 0; i < octaves; i++) {
+		v += a * noise(p);
+		p = p * 2.03 + vec2(17.0, 9.0);
+		a *= 0.5;
+	}
+	return v;
+}
+
+// Cloud layer seen in direction d; fewer octaves for reflections.
+float cloud_density(vec3 d, int octaves) {
+	if (d.y <= 0.0) {
+		return 0.0;
+	}
+	vec2 cp = d.xz / (d.y + 0.08) * 0.55 + vec2(TIME * 0.012, TIME * 0.004);
+	float f = fbm(cp, octaves);
+	return smoothstep(1.0 - cloud_cover, 1.15 - cloud_cover * 0.6, f) * smoothstep(0.0, 0.12, d.y);
+}
+
+vec3 sky_color(vec3 d, int octaves) {
 	float up = clamp(d.y, 0.0, 1.0);
 	vec3 c = mix(sky_horizon, sky_top, pow(up, 0.5));
+	float cloud = cloud_density(d, octaves);
+	vec3 cloud_col = mix(sky_horizon, vec3(1.0), 0.45) * (0.35 + 0.65 * light);
+	c = mix(c, cloud_col, cloud * 0.85);
 	float s = max(dot(d, sun_dir), 0.0);
 	// A small disc, a tight halo and a wide soft glow.
-	c += sun_color * (smoothstep(0.9993, 0.9997, s) * 3.0 + pow(s, 300.0) * 0.6 + pow(s, 12.0) * 0.18);
+	c += sun_color * (smoothstep(0.9993, 0.9997, s) * 3.0 + pow(s, 300.0) * 0.6 + pow(s, 12.0) * 0.18) * (1.0 - 0.8 * cloud);
 	return c;
 }
 
@@ -54,7 +79,7 @@ void fragment() {
 	vec2 uv = UV;
 	vec3 ray = normalize(vec3((uv.x - 0.5) * aspect * FOV, (horizon - uv.y) * FOV, 1.0));
 	if (ray.y >= 0.0) {
-		vec3 c = sky_color(ray);
+		vec3 c = sky_color(normalize(ray), 4);
 		// A hazy far shore on the horizon (generic, not a real skyline).
 		float above = horizon - uv.y;
 		float ridge = 0.010 + 0.022 * noise(vec2(uv.x * 5.0, 3.0)) + 0.007 * noise(vec2(uv.x * 37.0, 7.0));
@@ -86,7 +111,7 @@ void fragment() {
 		float fresnel = 0.02 + 0.98 * pow(1.0 - max(dot(n, view), 0.0), 5.0);
 		vec3 refl_dir = reflect(ray, n);
 		refl_dir.y = abs(refl_dir.y);
-		vec3 reflection = sky_color(refl_dir);
+		vec3 reflection = sky_color(normalize(refl_dir), 2);
 
 		vec3 body = mix(water_shallow, water_deep, smoothstep(2.0, 25.0, dist));
 		// Clear, bright water shows the bottom close to the angler.

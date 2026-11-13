@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
+- Water prototype: breakwater foreground, Cast button with lure flight, splash droplets and perspective rings, lure riding the shader's waves, clouds with reflections, and the line as a Verlet chain moved by gravity and wind (`game/ui/fx/verlet_rope.gd`, `splash_fx.gd`). 50 tests.
 - Water prototype: second shader `water_realistic.gdshader` (ray-cast sea plane, wave normals, Fresnel sky reflection, sun and moon glitter, whitecaps, haze, far shore), now the default at 720p, with a button to switch back to the basic water. First phone measurements recorded in `design_direction.md` (worst 1% of frames: 55 fps on iPhone 16e, 57 fps on iPhone 14, basic water at 720p).
 - Docs: `docs/audio_sources.md`, a shortlist of CC0 and public-domain sound candidates with source page, licence, author and measured duration; no audio committed.
 - Water prototype: `game/scenes/water_prototype/` (shader water at 360p or 720p driven by chop, clarity and light; rod, line and lure overlay; fps overlay via `FrameStats`), opened from the title screen. Test scene, to be removed or gated before 0.1. 42 tests.

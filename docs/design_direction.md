@@ -111,7 +111,15 @@ Owner feedback on the look: **it could be more realistic.** Consequences:
 - A second shader, `water_realistic.gdshader`, was added and is the default: a camera ray cast onto the sea plane, five directional waves with sharpened crests plus noise ripples giving a surface normal, Fresnel reflection of the sky, a sun or moon with its glitter path, light through the crests, whitecaps when it blows, haze and a generic far shore on the horizon (not a real skyline). The "Water" button switches between realistic and basic so the cost can be compared on the phone.
 - Cost: unknown on a phone. In desktop software rendering the realistic water ran at about 8 fps against 15-19 fps for the basic one, so it costs roughly twice as much per frame. Whether the iPhones stay above the floor has to be measured again.
 
-Still missing for realism, in the order I would add them if the frame rate allows: a foreground (the breakwater or pier edge the angler stands on), rings and splashes where the lure lands, clouds, and wave motion on the line.
+Added next, in the order agreed with the owner (2026-11-12):
+1. **Foreground:** the concrete top of a breakwater with slab joints and a wet edge, and armour stones along the water line on the left. Generic shapes, not a survey of the real spot; replaced by the real structure after the owner's visit.
+2. **Lure, rings and splash:** an "At / Cast" button in the bottom-right corner throws the lure in an arc to a random point 14-32 m out; on landing it throws droplets (particles under gravity) and two expanding rings drawn in perspective on the water. While it sits, small rings appear every few seconds and the lure rides the same waves as the shader (the three largest are computed again in GDScript).
+3. **Clouds:** a noise cloud layer in the sky, its cover rising with chop, mirrored in the water's reflection with fewer octaves to save cost; clouds dim the sun.
+4. **Line:** an 18-point Verlet chain (`game/ui/fx/verlet_rope.gd`) from the rod tip to the lure under gravity and noise-driven wind; it pays out while the lure flies and sags when it lands. Visual only: line tension in a fight comes from `FightSim`.
+
+Cost: unknown on the phones. Clouds add noise lookups per pixel to both the sky and the water; the overlay adds a few hundred line segments and up to about 36 droplets. To be measured by the owner.
+
+Still missing: a real-place foreground, the fish and its splash during a fight, rain and fog.
 
 ## 7. Out of scope here
 
