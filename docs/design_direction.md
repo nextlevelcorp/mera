@@ -139,6 +139,23 @@ Still missing: a real-place foreground, the fish and its splash during a fight, 
 - Metric still open: average or worst 1%. Needed for the comparison.
 - Against the pass criteria (section 5): above the 30 fps floor on both phones at full resolution, and above the 60 fps goal only on neither phone. Recorded as measured at chop 1, the hardest setting.
 
+## 6e. First like-for-like comparison, realistic against basic at 720p (2026-11-13)
+
+Owner's table. Chop entered as "dalga 11", read as chop 1 (a typo for 1). Clarity entered as "berraklık 100", which is above the slider's maximum of 20; the value used is not known. Both shaders were measured on the same phone in the same session.
+
+| Phone | Realistic average | Realistic worst 1% | Basic average | Basic worst 1% |
+| --- | --- | --- | --- | --- |
+| iPhone 16e | 60 | 54 | 60 | 56 |
+| iPhone 14 | 60 | 56 | 60 | 57 |
+
+Reading:
+- **Average is 60 on both shaders and both phones.** That is the browser's refresh cap, so the average hides the cost: both shaders have headroom that these numbers do not show.
+- **Worst 1% differs by 1 to 2 fps.** The realistic shader costs about 2 fps at the slow end on the iPhone 16e and 1 fps on the iPhone 14. Small in this condition.
+- **Earlier realistic figures do not match this table.** Section 6d gave 50 fps for the iPhone 16e and 56 for the iPhone 14 at chop 1 with the metric unstated. This table gives 54 worst-1% for the same phone and condition, so one of the two runs is not comparable. Likely a different scene state or background load. Not resolved.
+- **Clarity is unresolved:** the value that produced these numbers is unknown. Clarity changes how much of the bottom is drawn, so the cost depends on it.
+
+Still open: a run at a lower clarity (e.g. 10) and a run where the phone is pushed harder (both casts and chop 1), to see whether the cap hides a real cost.
+
 ## 7. Out of scope here
 
 Colour palette, character and tackle sprites, the exact screen layout of the rig editor and the log, and store art. They follow the art decision and the water prototype.
