@@ -14,6 +14,11 @@ var sim: FightSim
 var visible_at_m: float
 var drag_max_kg: float
 var max_tension_kg := 0.0
+## PRD F19: the closed-form estimate says this fight would run past the 90 s
+## cap on this tackle, so the player is told the fish is too big for it.
+var overmatched := false
+## Estimated fight length without the cap, for the "why" view.
+var estimated_fight_s := 0.0
 
 var _k: Dictionary
 var _accum := 0.0
@@ -26,6 +31,8 @@ func _init(ctx: Dictionary, k: Dictionary, seed_value: int) -> void:
 	sim = FightSim.new(ctx, k, resolved["hook"]["hook"], seed_value)
 	visible_at_m = float(resolved["landing"]["visible_at_m"])
 	drag_max_kg = float(ctx["reel"]["drag_max_kg"])
+	overmatched = bool(resolved["fight"]["cap_applied"])
+	estimated_fight_s = float(resolved["fight"]["t_fight"])
 
 
 ## Advances by frame_s with the current input and returns the HUD state.

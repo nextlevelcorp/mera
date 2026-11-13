@@ -15,3 +15,6 @@ Add every data, art, audio and tool source here with its licence before it is us
 
 ## Fight screen demo data (2026-11-13)
 `game/data/demo/` holds invented species, spot, angler and tackle records copied from the test fixtures; every record is `design_fill: true` and names use `DEMO_` keys. No external source, no licence to record. Replace with sourced records before 0.1.
+
+## Generated sound cues (2026-11-13)
+`game/ui/audio/cue_synth.gd` computes the nibble, take and landed cues from formulas at start-up (filtered noise and sine partials, fixed seeds). No external source, no file, no licence. They are generated sound, not recordings of a place.

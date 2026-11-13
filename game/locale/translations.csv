@@ -38,11 +38,8 @@ DEMO_LEADER_WIRE,Wire leader (demo),Çelik lider (demo),Bajo de acero (prueba)
 DEMO_LURE_LRF,Soft plastic (demo),Silikon yem (demo),Señuelo blando (prueba)
 DEMO_LURE_SPIN,Minnow (demo),Minnow yem (demo),Minnow (prueba)
 DEMO_ANGLER,Demo angler,Demo balıkçı,Pescador de prueba
-FIGHT_OPEN,Fight (demo),Savaş (demo),Pelea (prueba)
-FIGHT_SETUP,Fight setup (demo data),Savaş kurulumu (demo veri),Preparar pelea (datos de prueba)
 FIGHT_SPECIES,Species,Tür,Especie
 FIGHT_TACKLE,Tackle,Takım,Equipo
-FIGHT_START,Hook up,Takıldı,Enganchar
 FIGHT_NOTE,"Demo data: made-up fish and tackle, not real places or species.","Demo veri: uydurma balık ve takım, gerçek yer veya tür değil.","Datos de prueba: peces y equipo inventados, no son lugares ni especies reales."
 FIGHT_REEL,Reel,Makara,Carrete
 FIGHT_DRAG,Drag,Fren,Freno
@@ -54,4 +51,41 @@ FIGHT_HOOK_PULLED,Hook pulled out,Kanca çıktı,Se soltó el anzuelo
 FIGHT_LOST_AT_EDGE,Lost at the edge,Kenarda kaçtı,Se perdió en la orilla
 FIGHT_DETAIL,Fight %.0f s · peak tension %.2f kg · line strength %.2f kg,Savaş %.0f sn · en yüksek gerginlik %.2f kg · misina dayanımı %.2f kg,Pelea %.0f s · tensión máxima %.2f kg · resistencia del sedal %.2f kg
 FIGHT_CAP,The 90 s rule ended this fight.,90 sn kuralı bu savaşı bitirdi.,La regla de 90 s terminó esta pelea.
-FIGHT_AGAIN,Again,Tekrar,Otra vez
+FISH_OPEN,Fishing (demo data),Balık tut (demo veri),Pescar (datos de demostración)
+FISH_CAST,Cast,At,Lanzar
+FISH_STRIKE,Strike!,Tak!,¡Clava!
+FISH_REEL_IN,Reel in,Topla,Recoger
+FISH_SPEED,Faster ×4,Hızlı ×4,Rápido ×4
+FISH_RIG,Rig,Takım,Equipo
+FISH_LOG,Catch log,Av defteri,Registro
+FISH_POSITION,Position,Konum,Posición
+FISH_CLOSE,Close,Kapat,Cerrar
+FISH_TAKE_MISSED,It let go,Bıraktı,Lo ha soltado
+FISH_HOOK_FAILED,The hook did not set,Kanca tutmadı,El anzuelo no clavó
+FISH_STRIKE_EMPTY,Nothing there,Boşa vurdun,No había nada
+FISH_RETRIEVED,Lure is back. Cast again.,Yem geri geldi. Tekrar at.,El señuelo ha vuelto. Lanza otra vez.
+FISH_CAST_AGAIN,Cast again,Tekrar at,Lanzar otra vez
+FISH_CATCH,%s · %.0f cm · %.2f kg,%s · %.0f cm · %.2f kg,%s · %.0f cm · %.2f kg
+FISH_FIRST,First of its kind in your log!,Defterine ilk kez girdi!,¡El primero en tu registro!
+FISH_RECORD,New record!,Yeni rekor!,¡Nuevo récord!
+FISH_STATUS,%s · wind %s %d m/s · %s,%s · rüzgâr %s %d m/s · %s,%s · viento %s %d m/s · %s
+FISH_RIG_INFO,Lure: %s · longest cast about %.0f m,Yem: %s · en uzak atış yaklaşık %.0f m,Señuelo: %s · lance máximo unos %.0f m
+RIG_WARN_RANGE,Lure outside the rod's casting weight,"Yem, kamışın atış ağırlığının dışında",Señuelo fuera del peso de lance de la caña
+LOG_TITLE,Catch log,Av defteri,Registro de capturas
+LOG_ROW,"%s: %d caught · best %.0f cm, %.2f kg · first %s","%s: %d adet · en iyi %.0f cm, %.2f kg · ilk %s","%s: %d capturas · mejor %.0f cm, %.2f kg · primera %s"
+LOG_EMPTY_ROW,%s: not caught yet,%s: henüz tutulmadı,%s: aún no capturado
+SAVE_RESET,Your save could not be read and was reset.,"Kaydın okunamadı, sıfırlandı.",No se pudo leer tu partida; se ha reiniciado.
+SAVE_MIGRATED,Your save was updated to the new format.,Kaydın yeni biçime güncellendi.,Tu partida se ha actualizado al nuevo formato.
+DBG_OPEN,Debug,Debug,Debug
+DBG_SLOT,Time,Saat,Hora
+DBG_WIND,Wind,Rüzgâr,Viento
+DBG_WIND_DIR,Wind from,Rüzgâr yönü,Viento del
+DBG_CLARITY,Clarity,Berraklık,Claridad
+DBG_AUTO,from data,veriden,de los datos
+DBG_SIZE,Size,Boy,Tamaño
+DBG_SIZE_RANDOM,random,rastgele,aleatorio
+DBG_SIZE_SMALL,small,küçük,pequeño
+DBG_SIZE_MEDIUM,medium,orta,mediano
+DBG_SIZE_LARGE,large,büyük,grande
+DBG_FORCE_BITE,Force a bite,Isırma zorla,Forzar picada
+FISH_OVERMATCHED,This fish is too big for this tackle,Bu balık bu takım için fazla büyük,Este pez es demasiado grande para este equipo

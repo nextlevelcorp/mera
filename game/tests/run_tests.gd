@@ -11,6 +11,12 @@ func _init() -> void:
 	var failed := 0
 	for file_name in _test_files():
 		var script: GDScript = load("%s/%s" % [TEST_DIR, file_name])
+		if script == null or not script.can_instantiate():
+			# A parse error used to skip the whole file silently.
+			total += 1
+			failed += 1
+			printerr("FAIL  %s: the test file does not load" % file_name)
+			continue
 		for method in script.get_script_method_list():
 			var method_name: String = method["name"]
 			if not method_name.begins_with("test_"):

@@ -123,25 +123,3 @@ func test_every_species_and_tackle_can_be_fought() -> void:
 			var ctx := _ctx(sp, tk, 0.3)
 			var hud := _run(1.0 / 60.0, ctx, 3, float(ctx["play"]["drag_kg"]))
 			assert_true(hud["outcome"] != "", "%s on %s ends: %s" % [sp, tk, str(hud["outcome"])])
-
-
-func test_fight_screen_runs_a_fight_headless() -> void:
-	var screen = load("res://scenes/fight/fight_screen.tscn").instantiate()
-	screen.size = Vector2(1280, 720)
-	screen.setup()
-	screen._reel_pad.size = Vector2(260, 300)
-	assert_true(screen._db.has("species"), "the screen loads the demo data")
-	screen.species_index = 0
-	screen.tackle_index = 0
-	screen.start_fight()
-	assert_true(screen.running, "the fight starts")
-	var guard := 0
-	while screen.running and guard < 60000:
-		screen._reel_pressed = true
-		screen._reel_y = 0.0
-		screen._process(1.0 / 60.0)
-		guard += 1
-	assert_true(not screen.running and screen._hud["outcome"] != "", "the fight ends with an outcome: %s" % str(screen._hud["outcome"]))
-	assert_true(screen._result_panel.visible, "the result panel shows")
-	assert_true(screen._result_label.text != "", "with a result text")
-	screen.free()

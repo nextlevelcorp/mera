@@ -25,6 +25,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Fishing loop on demo data (2026-11-13): played in the web debug build with software GL: cast, wait, forced bites, strike, fights (horse mackerel 23 cm landed, bluefish 35 cm landed with the fish body and splashes near the shore, sea bass 93 cm "landed" by the 90 s rule from 69 m out), result, catch log, rig and position kept after a page reload; release build shows no debug button; English, Spanish and 844×390 checked. Not measured on a phone.
 - Fight screen on demo data (2026-11-13): played end to end in the web build with software GL: landed (bluefish, medium tackle), line broke at 2.89 kg against a 2.11 kg line (light tackle, drag at maximum, reel and pull held with two touches). Fish silhouette visible near the shore after the drawing-depth fix. Not measured on a phone yet; sound, body animation, cast/bite return, save, debug menu and real spot data are still to do.
 - Spec and CLAUDE.md in repo.
 - Repo skeleton and an empty Godot 4.4.1 web build (title screen, portrait guard, en/tr/es).
@@ -40,5 +41,7 @@
 - Network: owner added Steam, Play Store, App Store, fws.gov, PC Gamer hosts. Reddit, SteamDB, Eksi Sozluk (site-side 403), Roblox, Poki, CrazyGames, TUIK and others stay unreachable.
 - GitHub Pages source must be set to GitHub Actions for the deploy job to pass (repo is now public).
 - GUT test plugin: owner decided to skip for now; own runner stays.
-- Debug menu does not exist yet; required before any gameplay flow is reviewed.
+- Debug menu exists in debug builds only. GitHub Pages deploys the release export, so the owner cannot use it there yet: needs a decision (second debug export on Pages, or a feature-tag preset) and approval for the CI and export change.
+- 90 s rule lands a fish whose energy is low even when it is far out (seen: 93 cm sea bass at 69 m). The rule in `data_model.md` 5.5 checks energy only; needs the owner's decision.
+- Real recordings for ambient, reel and cast sounds still wait for the owner to listen to `audio_sources.md`. Generated cues cover nibble, take and landed.
 - Performance budget and test device are set in phase 2.

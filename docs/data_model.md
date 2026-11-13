@@ -292,7 +292,10 @@ visible_m = K.VIS_BASE + K.VIS_RANGE * visibility                               
 | STATE_SECONDS run / rest / thrash | 3-6 / 1-2 / 1-2 s | STRAIN_SHARE / LIMIT | 0.8 / 2 s | SLACK_SHARE / HAZARD | 0.1 / 0.15 /s |
 | LAND_DISTANCE_M | 2 m | THRASH_DISTANCE_M | 10 m | CAST_LEN_FACTOR | 12 |
 | CAST_WEIGHT_REF_G | 30 g | CAST_FIT_MIN | 0.3 | CAST_SKILL_BASE | 0.6 |
-| CAST_HEADWIND | 0.3 | AIM_SIGMA_BASE / SKILL | 0.15 / 0.12 rad | | |
+| CAST_HEADWIND | 0.3 | AIM_SIGMA_BASE / SKILL | 0.15 / 0.12 rad | WAIT_RETRIEVE_M_PER_S | 0.4 m/s |
+| WAIT_END_M | 3 m | SHOAL_BOOST_S | 60 s | | |
+
+`WAIT_RETRIEVE_M_PER_S` is how fast the lure comes back while the player waits; the cast ends when the lure is `WAIT_END_M` from the shore. `SHOAL_BOOST_S` is the 60 s shoal follow-up of 5.3. All three were added with the real-time wait (2026-11-13).
 
 Calibration targets from the PRD: best-case median wait for a take 20-40 s (the examples give 28 s); worst case at least 120 s (608 s); fights 20-90 s (30-60 s in the examples).
 
@@ -455,7 +458,8 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 | Validator (sections 2 and 4) | `game/sim/data_validator.gd` | Done; negative tests for each rule |
 | Loader | `game/sim/data_store.gd` | Done; returns errors, the caller decides how loudly to fail; not yet wired into start-up because no real data exists |
 | Stages 0-4 and 6, cast distance (5.0), closed-form fight (5.5 estimate) including teeth and the 90 s cap flag | `game/sim/catch_model.gd` | Done; the three worked examples (four runs) are unit tests and agree with this document and the workbook |
-| Real-time fight (5.5): fixed 30 Hz step, seeded, run / rest / thrash states, drag slip, line break and strain, teeth, slack hook pull-out, landing phase, 90 s rule | `game/sim/fight_sim.gd` | Done; tested against the closed-form estimate over 200 seeds per example. Takes `reel`, `rod`, `drag_kg` per tick; not connected to touch controls or a scene yet |
-| Shoal follow-up (5.3) | none | Not ported: needs the wait loop that owns the bite timer |
+| Real-time fight (5.5): fixed 30 Hz step, seeded, run / rest / thrash states, drag slip, line break and strain, teeth, slack hook pull-out, landing phase, 90 s rule | `game/sim/fight_sim.gd` | Done; tested against the closed-form estimate over 200 seeds per example. Takes `reel`, `rod`, `drag_kg` per tick; driven by the fishing screen |
+| Real-time wait, bite and strike (5.3, 5.4): interest events as a Poisson process per species, nibble or take, strike window and timing quality, hook roll, shoal follow-up, slow retrieve, attempt log | `game/sim/wait_sim.gd` | Done; seeded, 30 Hz; best-case median wait over repeated casts 27 s and worst case 714 s (PRD F6 test). The window does not shrink on a slow frame: during a take at most two ticks run per frame |
+| Fight on screen | `game/sim/fight_controller.gd`, `game/scenes/fishing/` | Done; overmatched-tackle flag (PRD F19) from the closed-form estimate |
 | Fixtures (illustrative design fills, not real data) | `game/tests/fixtures/` | Excluded from the export |
 | Real species and spot data | `game/data/species.json`, `spots.json`, `tackle/` | Not written: waits for the owner's choice of spot and species and the licence reads |
