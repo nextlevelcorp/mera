@@ -121,6 +121,13 @@ Cost: unknown on the phones. Clouds add noise lookups per pixel to both the sky 
 
 Still missing: a real-place foreground, the fish and its splash during a fight, rain and fog.
 
+## 6c. Owner's report on the realistic water (2026-11-13)
+
+- **Realistic water, 720p: 50 fps** (the owner did not say whether this is the average or the worst 1%; recorded as reported).
+- **Look:** the owner says the look is going in the wanted direction.
+- **Not yet reported:** the basic water at 720p again on the same phones, the chop-1 measurement, and the phone-by-phone split. Both phones were not reported separately.
+- **Reading:** 50 fps is above the 30 fps floor and below the 60 fps goal. Earlier worst-1% figures for the basic water were 55 and 57 fps, so the realistic water costs roughly 5 fps or more at the same resolution, but the two numbers are not the same metric and cannot be compared exactly until the owner reports both as average and worst 1%.
+
 ## 7. Out of scope here
 
 Colour palette, character and tackle sprites, the exact screen layout of the rig editor and the log, and store art. They follow the art decision and the water prototype.
