@@ -128,6 +128,17 @@ Still missing: a real-place foreground, the fish and its splash during a fight, 
 - **Not yet reported:** the basic water at 720p again on the same phones, the chop-1 measurement, and the phone-by-phone split. Both phones were not reported separately.
 - **Reading:** 50 fps is above the 30 fps floor and below the 60 fps goal. Earlier worst-1% figures for the basic water were 55 and 57 fps, so the realistic water costs roughly 5 fps or more at the same resolution, but the two numbers are not the same metric and cannot be compared exactly until the owner reports both as average and worst 1%.
 
+## 6d. Owner's per-phone numbers, realistic water at chop 1 (2026-11-13)
+
+| Phone | Water | Chop | Resolution | fps (metric not stated) |
+| --- | --- | --- | --- | --- |
+| iPhone 16e | Realistic | 1.0 | 720p | 50 |
+| iPhone 14 | Realistic | 1.0 | 720p | 56 |
+
+- The owner said these were taken at wave 1 with the realistic water. **The basic water has not been measured yet** on either phone; the earlier basic numbers (55 and 57 fps worst 1%, section 6b) were at chop 0.3.
+- Metric still open: average or worst 1%. Needed for the comparison.
+- Against the pass criteria (section 5): above the 30 fps floor on both phones at full resolution, and above the 60 fps goal only on neither phone. Recorded as measured at chop 1, the hardest setting.
+
 ## 7. Out of scope here
 
 Colour palette, character and tackle sprites, the exact screen layout of the rig editor and the log, and store art. They follow the art decision and the water prototype.
