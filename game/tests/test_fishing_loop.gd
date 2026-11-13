@@ -209,6 +209,10 @@ func test_fish_body_beats_harder_when_thrashing() -> void:
 
 func test_loop_casts_bites_fights_and_logs() -> void:
 	var screen = load("res://scenes/fishing/fishing_screen.tscn").instantiate()
+	assert_true(screen.has_method("setup"), "the fishing screen script loads")
+	if not screen.has_method("setup"):
+		screen.free()
+		return
 	screen.size = Vector2(1280, 720)
 	screen.setup("")
 	screen._overlay.size = Vector2(1280, 720)
@@ -241,7 +245,7 @@ func test_loop_casts_bites_fights_and_logs() -> void:
 		screen._process(1.0 / 60.0)
 	assert_true(hooked, "a strike in the window hooks a fish within 30 tries")
 	guard = 0
-	while screen.phase == screen.Phase.FIGHT and guard < 60000:
+	while (screen.phase == screen.Phase.FIGHT or screen.phase == screen.Phase.LIFT) and guard < 60000:
 		screen.set_fight_input(true, 0.0, false, 0.33)
 		screen._process(1.0 / 60.0)
 		guard += 1
@@ -256,6 +260,10 @@ func test_loop_casts_bites_fights_and_logs() -> void:
 
 func test_debug_menu_only_in_debug_builds() -> void:
 	var screen = load("res://scenes/fishing/fishing_screen.tscn").instantiate()
+	assert_true(screen.has_method("setup"), "the fishing screen script loads")
+	if not screen.has_method("setup"):
+		screen.free()
+		return
 	screen.setup("")
 	var expected := OS.is_debug_build() or OS.has_feature("mera_debug")
 	assert_eq(screen._debug_menu != null, expected, "debug menu present only in debug builds")
@@ -268,3 +276,15 @@ func test_overmatched_hint_follows_the_estimate() -> void:
 	var small := FightController.new(FightSetup.build(_db, "istavrit", "lrf", "pier_end", 0.2, cond), _k, 1)
 	assert_true(big.overmatched, "a large sea bass on light tackle is flagged (PRD F19), estimate %.0f s" % big.estimated_fight_s)
 	assert_true(not small.overmatched, "a small horse mackerel is not, estimate %.0f s" % small.estimated_fight_s)
+
+
+func test_recorded_sounds_load_and_are_listed_with_a_licence() -> void:
+	var refs := FileAccess.get_file_as_string("res://../docs/reference_docs.md")
+	if refs == "":
+		refs = FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://").path_join("../docs/reference_docs.md"))
+	for name_id: String in SoundDirector.WAVES + SoundDirector.ONE_SHOTS + ["wind_loop", "reel_loop"]:
+		var path := "%s/%s.ogg" % [SoundDirector.AUDIO_DIR, name_id]
+		assert_true(ResourceLoader.exists(path), "%s exists" % path)
+		assert_true(load(path) is AudioStreamOggVorbis, "%s loads as Ogg Vorbis" % path)
+		var listed := refs.contains("`%s.ogg`" % name_id) or (name_id.begins_with("wave_") and refs.contains("`wave_01.ogg` … `wave_04.ogg`"))
+		assert_true(listed, "%s is listed in reference_docs.md with its source and licence" % name_id)

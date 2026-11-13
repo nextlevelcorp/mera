@@ -250,7 +250,7 @@ Real-time rules, per simulation tick:
 - **Teeth (owner decision 2026-11-11):** a species with teeth cuts the leader at a constant hazard over the fight:
   `cut_rate = K.TEETH_RATE * n(sp.teeth) * (1 - n(leader.abrasion_resistance)) * (K.WIRE_CUT_FACTOR if leader.type == "wire" else 1)`, and `p_cut = 1 - exp(-cut_rate * min(t_fight, 90 s))`. A cut ends the fight at once. Wire is immune, but its visibility feeds stage 3 suspicion like any leader's.
 - **Landing phase** starts when `energy <= K.LAND_ENERGY * E0` and the fish is close.
-- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0`, otherwise the hook pulls out. This is a deliberate game rule, not realism. It is not rare: with the drag set to a third of the line strength, the closed-form estimate exceeds 90 s on light tackle for a 62 cm sea bass (109 s) and an 80 cm bluefish (133 s), and on medium tackle for an 80 cm bluefish (95 s) and an 80 cm sea bass (102 s); it stays under it for the small and mid-size fish tested (50 cm bluefish on light tackle: 83 s). The owner decided on 2026-11-11 that the rule stays and that the game warns the player (PRD F19, P1) when light tackle meets a big fish.
+- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0` and the fish is within `K.CAP_LAND_DISTANCE_M` (5 m) of the shore, otherwise the hook pulls out. The distance condition was added by the owner on 2026-11-13 after a 93 cm sea bass was counted as landed 69 m out. This is a deliberate game rule, not realism. It is not rare: with the drag set to a third of the line strength, the closed-form estimate exceeds 90 s on light tackle for a 62 cm sea bass (109 s) and an 80 cm bluefish (133 s), and on medium tackle for an 80 cm bluefish (95 s) and an 80 cm sea bass (102 s); it stays under it for the small and mid-size fish tested (50 cm bluefish on light tackle: 83 s). The owner decided on 2026-11-11 that the rule stays and that the game warns the player (PRD F19, P1) when light tackle meets a big fish.
 
 Closed-form estimate at a constant drag, used in the worked examples and as the test oracle for the tick model:
 
@@ -293,7 +293,7 @@ visible_m = K.VIS_BASE + K.VIS_RANGE * visibility                               
 | LAND_DISTANCE_M | 2 m | THRASH_DISTANCE_M | 10 m | CAST_LEN_FACTOR | 12 |
 | CAST_WEIGHT_REF_G | 30 g | CAST_FIT_MIN | 0.3 | CAST_SKILL_BASE | 0.6 |
 | CAST_HEADWIND | 0.3 | AIM_SIGMA_BASE / SKILL | 0.15 / 0.12 rad | WAIT_RETRIEVE_M_PER_S | 0.4 m/s |
-| WAIT_END_M | 3 m | SHOAL_BOOST_S | 60 s | | |
+| WAIT_END_M | 3 m | SHOAL_BOOST_S | 60 s | CAP_LAND_DISTANCE_M | 5 m |
 
 `WAIT_RETRIEVE_M_PER_S` is how fast the lure comes back while the player waits; the cast ends when the lure is `WAIT_END_M` from the shore. `SHOAL_BOOST_S` is the 60 s shoal follow-up of 5.3. All three were added with the real-time wait (2026-11-13).
 

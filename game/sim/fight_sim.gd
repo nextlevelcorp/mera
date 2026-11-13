@@ -158,10 +158,14 @@ func step(input: Dictionary) -> Dictionary:
 		in_landing = true
 		landing_s = 0.0
 
-	# The 90 s rule (PRD F8): a game rule, not realism.
+	# The 90 s rule (PRD F8): a game rule, not realism. Only a tired fish that
+	# is already close to the shore counts as landed (owner, 2026-11-13); a
+	# fish still far out pulls the hook.
 	if time_s >= float(_k["FIGHT_CAP_S"]) and not is_over():
 		cap_applied = true
-		return _finish(OUTCOME_LANDED if energy <= float(_k["CAP_LAND_ENERGY"]) * e0 else OUTCOME_HOOK_PULLED)
+		var tired := energy <= float(_k["CAP_LAND_ENERGY"]) * e0
+		var close := distance_m <= float(_k["CAP_LAND_DISTANCE_M"])
+		return _finish(OUTCOME_LANDED if tired and close else OUTCOME_HOOK_PULLED)
 	return snapshot()
 
 

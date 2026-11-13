@@ -22,7 +22,10 @@ const FISH_DRAW_SCALE := 2.0
 const POWER_PERIOD_S := 1.4
 const SPEED_UP := 4.0
 
-enum Phase { READY, CHARGE, FLIGHT, WAIT, FIGHT, RESULT }
+enum Phase { READY, CHARGE, FLIGHT, WAIT, FIGHT, LIFT, RESULT }
+
+const LIFT_RISE_S := 0.8   ## landed fish: time to swing it up out of the water
+const LIFT_HOLD_S := 1.8   ## then it hangs and kicks before the result shows
 
 var phase: int = Phase.READY
 var conditions := {"slot": "evening", "month": 10, "wind_dir": "SW", "wind_ms": 3}
@@ -63,8 +66,15 @@ var _tip_kick := 0.0
 var _tip_vel := 0.0
 var _speed_on := false
 var _toast_s := 0.0
+var _lift_t := 0.0
+var _lift_from := Vector2.ZERO
+var _swing := 0.0
+var _swing_v := 0.0
+var _drip_clock := 0.0
 var _result := {}
 var _audio: Dictionary = {}
+var _sound: SoundDirector
+var _last_distance := -1.0
 var _stats := FrameStats.new(60.0)
 
 var _reel_pressed := false
@@ -135,6 +145,8 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	_build_result()
 	_build_log()
 	_build_audio()
+	_sound = SoundDirector.new()
+	add_child(_sound)
 	apply_conditions()
 	_build_debug()
 	_set_phase(Phase.READY)
@@ -151,6 +163,8 @@ func apply_conditions() -> void:
 	_ctx = _base_context("istavrit")
 	_env = CatchModel.environment(_k, _ctx["spot"], _ctx["position"], conditions)
 	if _water:
+		if _sound:
+			_sound.set_conditions(float(conditions["wind_ms"]), float(_env["chop"]))
 		_water.set_conditions(conditions["slot"], clampf(float(_env["chop"]), 0.05, 1.0), float(_env["visibility"]), float(_env["light"]))
 	_update_texts()
 
@@ -236,6 +250,7 @@ func _land_lure() -> void:
 	var world := Vector2(_lure_x(cast_m), NEAR_DRAW_M + cast_m)
 	_fx.splash(WaterView.project(world, 0.0, _overlay.size), world, 0.4)
 	_fx.add_ring(world, 0.6, 1.4, 0.6)
+	_snd("lure_drop", -4.0)
 	_set_phase(Phase.WAIT)
 
 
@@ -317,8 +332,10 @@ func _start_fight(hooked: Dictionary) -> void:
 	_fish = FishBody.new(float(_fight_ctx["play"]["fish_length_cm"]) / 100.0, _fish_world())
 	_fx = SplashFx.new(_seed_counter)
 	_last_state = ""
+	_last_distance = -1.0
 	_reel_pressed = false
 	_pull_pressed = false
+	_snd("splash", -6.0)
 	_set_phase(Phase.FIGHT)
 
 
@@ -340,12 +357,18 @@ func set_fight_input(reel_pressed: bool, reel_y: float, pull_pressed: bool, drag
 
 func _step_fight(delta: float) -> void:
 	_hud = _controller.advance(delta, current_input())
+	var d := float(_hud["distance_m"])
+	if _sound and delta > 0.0 and _last_distance >= 0.0:
+		_sound.set_reel((d - _last_distance) / delta, _hud["outcome"] == "")
+	_last_distance = d
 	_fight_effects(delta)
 	if _hud["outcome"] != "":
 		_finish_fight()
 
 
 func _finish_fight() -> void:
+	if _sound:
+		_sound.set_reel(0.0, false)
 	var outcome: String = _hud["outcome"]
 	var sp: Dictionary = _fight_ctx["species"]
 	_result = {"outcome": outcome, "species_id": sp["id"], "length_cm": float(_fight_ctx["play"]["fish_length_cm"]), "weight_kg": _controller.sim.weight_kg}
@@ -353,8 +376,99 @@ func _finish_fight() -> void:
 		_result.merge(SaveGame.record_catch(save, sp["id"], _result["length_cm"], _result["weight_kg"], Time.get_date_string_from_system()))
 		_store()
 		_play("landed")
+		_lift_t = 0.0
+		_lift_from = WaterView.project(_fish_world(), 0.0, _overlay.size)
+		_swing = 1.1
+		_swing_v = 0.0
+		_fx.splash(_lift_from, _fish_world(), 0.9)
+		_snd("splash", -2.0)
+		_set_phase(Phase.LIFT)
+		return
 	_show_result()
 	_set_phase(Phase.RESULT)
+
+
+## The landed fish is swung out of the water and hangs from the line: a
+## damped pendulum (pillar 3: oscillation) kicked by the fish's own flapping.
+func _step_lift(delta: float) -> void:
+	_lift_t += delta
+	var gravity_term := -12.0 * sin(_swing)
+	var kick := 0.0
+	if _lift_t > LIFT_RISE_S:
+		kick = 9.0 * sin(_lift_t * 7.3) * maxf(0.0, sin(_lift_t * 1.7))
+	_swing_v += (gravity_term - 1.6 * _swing_v + kick) * delta
+	_swing += _swing_v * delta
+	_drip_clock -= delta
+	if _drip_clock <= 0.0 and _lift_t > LIFT_RISE_S * 0.5:
+		_drip_clock = 0.18
+		var tail := _lift_points()[1]
+		_fx.splash(tail, _fish_world(), 0.12)
+	if phase == Phase.LIFT and _lift_t >= LIFT_RISE_S + LIFT_HOLD_S:
+		_show_result()
+		_set_phase(Phase.RESULT)
+
+
+## Screen position of the hook (fish's mouth) and of the tail while lifted.
+func _lift_points() -> PackedVector2Array:
+	var size := _overlay.size
+	var tip := _rod_tip(0.7)
+	var hang := tip + Vector2(0.0, size.y * 0.30)
+	var r := smoothstep(0.0, LIFT_RISE_S, _lift_t)
+	var mouth := _lift_from.lerp(hang, r) + Vector2(0.0, -size.y * 0.08 * sin(PI * r))
+	var length_px := _lift_length_px()
+	var dir := Vector2(sin(_swing), cos(_swing))
+	return PackedVector2Array([mouth, mouth + dir * length_px])
+
+
+func _lift_length_px() -> float:
+	var size := _overlay.size
+	var aspect := size.x / maxf(size.y, 1.0)
+	var px_per_m := size.x / ((NEAR_DRAW_M + 1.0) * aspect * WaterView.FOV)
+	return clampf(float(_fight_ctx["play"]["fish_length_cm"]) / 100.0 * FISH_DRAW_SCALE * px_per_m, 40.0, 230.0)
+
+
+func _draw_lifted_fish(tip: Vector2) -> void:
+	var pts := _lift_points()
+	var mouth: Vector2 = pts[0]
+	var length_px := _lift_length_px()
+	var dir := (pts[1] - mouth).normalized()
+	var side := Vector2(-dir.y, dir.x)
+	var flap := 0.18 if _lift_t > LIFT_RISE_S else 0.05
+	var left := PackedVector2Array()
+	var right := PackedVector2Array()
+	var spine := PackedVector2Array()
+	for i in FishBody.SEGMENTS:
+		var s := float(i) / float(FishBody.SEGMENTS - 1)
+		var sway := sin(_time * 11.0 - s * 4.0) * flap * length_px * s * s
+		spine.append(mouth + dir * s * length_px + side * sway)
+	for i in spine.size():
+		var s := float(i) / float(spine.size() - 1)
+		var a: Vector2 = spine[maxi(i - 1, 0)]
+		var b: Vector2 = spine[mini(i + 1, spine.size() - 1)]
+		var d := (b - a).normalized()
+		var n := Vector2(-d.y, d.x)
+		var w := FishBody.half_width(s) * length_px * 1.3
+		left.append(spine[i] + n * w)
+		right.append(spine[i] - n * w)
+	var tail: Vector2 = spine[spine.size() - 1]
+	var back := (tail - spine[spine.size() - 2]).normalized()
+	var across := Vector2(-back.y, back.x)
+	var fin := length_px * 0.16
+	var outline := PackedVector2Array()
+	outline.append_array(left)
+	outline.append(tail + back * fin + across * fin * 0.8)
+	outline.append(tail + back * fin * 0.35)
+	outline.append(tail + back * fin - across * fin * 0.8)
+	right.reverse()
+	outline.append_array(right)
+	_overlay.draw_line(tip, mouth, Color(1, 1, 1, 0.9), 1.5, true)
+	if Geometry2D.triangulate_polygon(outline).size() > 0:
+		_overlay.draw_colored_polygon(outline, Color(0.62, 0.68, 0.72))
+	outline.append(outline[0])
+	_overlay.draw_polyline(outline, Color(0.12, 0.15, 0.18), 2.0, true)
+	# Dark back along the spine and an eye near the mouth.
+	_overlay.draw_polyline(spine.slice(0, spine.size() - 1), Color(0.2, 0.25, 0.3, 0.8), maxf(length_px * 0.05, 2.0), true)
+	_overlay.draw_circle(mouth + dir * length_px * 0.06 + side * length_px * 0.03, maxf(length_px * 0.018, 2.0), Color(0.05, 0.05, 0.05))
 
 
 func _fight_effects(delta: float) -> void:
@@ -370,6 +484,7 @@ func _fight_effects(delta: float) -> void:
 	if _splash_clock <= 0.0 and (state == "thrash" or (_hud["in_landing"] and state != "rest")):
 		_splash_clock = 0.45
 		_fx.splash(WaterView.project(pos, 0.0, _overlay.size), pos, 0.7)
+		_snd("splash_heavy", -8.0)
 
 
 ## Where the fish is on the water: out along the line by the simulation's
@@ -396,6 +511,11 @@ func _process(delta: float) -> void:
 			_step_wait(delta)
 		Phase.FIGHT:
 			_step_fight(delta)
+		Phase.LIFT:
+			_step_lift(delta)
+		Phase.RESULT:
+			if _result.get("outcome", "") == FightSim.OUTCOME_LANDED:
+				_step_lift(delta)
 	# Rod tip as a damped spring: kicks from nibbles and takes settle by themselves.
 	var target := 0.0
 	if phase == Phase.WAIT and _wait_state.get("phase", "") == WaitSim.PHASE_TAKE:
@@ -422,9 +542,12 @@ func _draw_overlay() -> void:
 		var ry := WaterView.CAM_HEIGHT * r / (world.y * world.y * WaterView.FOV) * size.y
 		_ellipse(centre, rx, ry, Color(1, 1, 1, 0.55 * SplashFx.ring_alpha(ring)))
 	var bend := 0.0
+	var lifted: bool = phase == Phase.LIFT or (phase == Phase.RESULT and _result.get("outcome", "") == FightSim.OUTCOME_LANDED)
 	match phase:
 		Phase.FIGHT, Phase.RESULT:
 			bend = clampf(float(_hud.get("tension_ratio", 0.0)), 0.0, 1.2)
+		Phase.LIFT:
+			bend = 0.7
 		Phase.WAIT:
 			bend = clampf(_tip_kick, -0.2, 1.2)
 		Phase.CHARGE:
@@ -444,11 +567,15 @@ func _draw_overlay() -> void:
 			_draw_line_to(tip, lure, clampf(bend, 0.0, 1.0) * 0.6, false)
 			_overlay.draw_circle(lure, 3.0, Color(0.95, 0.75, 0.3))
 		Phase.FIGHT, Phase.RESULT:
-			if not _hud.is_empty():
+			if lifted:
+				_draw_lifted_fish(_rod_tip(0.7))
+			elif not _hud.is_empty():
 				_draw_fight(size, tip, bend)
+		Phase.LIFT:
+			_draw_lifted_fish(tip)
 	for p: Dictionary in _fx.particles:
 		_overlay.draw_circle(p["pos"], p["size"], Color(0.92, 0.96, 1.0, 0.85 * float(p["life"]) / float(p["max_life"])))
-	_draw_rod(size, tip, bend)
+	_draw_rod(size, _rod_tip(0.7) if lifted else tip, 0.7 if lifted else bend)
 	if phase == Phase.FIGHT or (phase == Phase.RESULT and not _hud.is_empty()):
 		_draw_tension_bar(size)
 	if phase == Phase.CHARGE:
@@ -733,6 +860,11 @@ func _play(cue: String) -> void:
 	var player: AudioStreamPlayer = _audio.get(cue)
 	if player and player.is_inside_tree():
 		player.play()
+
+
+func _snd(name_id: String, volume_db: float) -> void:
+	if _sound:
+		_sound.play(name_id, volume_db)
 
 
 func _store() -> void:

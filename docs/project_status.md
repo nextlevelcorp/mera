@@ -41,7 +41,6 @@
 - Network: owner added Steam, Play Store, App Store, fws.gov, PC Gamer hosts. Reddit, SteamDB, Eksi Sozluk (site-side 403), Roblox, Poki, CrazyGames, TUIK and others stay unreachable.
 - GitHub Pages source must be set to GitHub Actions for the deploy job to pass (repo is now public).
 - GUT test plugin: owner decided to skip for now; own runner stays.
-- Debug menu exists in debug builds only. GitHub Pages deploys the release export, so the owner cannot use it there yet: needs a decision (second debug export on Pages, or a feature-tag preset) and approval for the CI and export change.
-- 90 s rule lands a fish whose energy is low even when it is far out (seen: 93 cm sea bass at 69 m). The rule in `data_model.md` 5.5 checks energy only; needs the owner's decision.
-- Real recordings for ambient, reel and cast sounds still wait for the owner to listen to `audio_sources.md`. Generated cues cover nibble, take and landed.
+- Debug menu on Pages: `/debug/` after the next merge to main (owner approved 2026-11-13).
+- Sound candidates for the cast, drag clicker and rod creak are on a private listening page for the owner; none is committed until chosen.
 - Performance budget and test device are set in phase 2.
