@@ -1,6 +1,6 @@
 # Spot research: Turkish sea shore, first pass
 
-**Status:** 2026-11-13. Research only; no real spot or species record is written into `game/data/` yet. The game still runs on the demo data. The owner asked (2026-11-13) to find real sea places from the web, starting in Turkey, without a site visit.
+**Status:** 2026-11-13. The owner chose the Galata Bridge; its records are in `game/data/` (see `reference_docs.md`). The owner asked (2026-11-13) to find real sea places from the web, starting in Turkey, without a site visit.
 
 ## How this was done
 

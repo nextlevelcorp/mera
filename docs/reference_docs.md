@@ -44,3 +44,17 @@ No value from these is in `game/data/` yet.
 | WoRMS REST API | WoRMS terms; names cited | Valid scientific names and AphiaIDs |
 | GBIF occurrence API | Per record (CC0, CC BY, CC BY-NC) | Counts only; no record copied |
 | Search summaries of yemek.com, ensonhaber.com, istanbul.com, rudaw.net | Page copyright; pages not opened | Leads only, marked "S" |
+
+## Galata Bridge data in `game/data/` (2026-11-13)
+Single values entered by hand with their citation in each record's `provenance`; no table or text copied.
+
+| Value | Source | Licence or terms |
+| --- | --- | --- |
+| Coordinates, length | Wikidata Q81523 | CC0 |
+| Monthly water temperature | MGM Marmara 2025 PDF | Terms not found; facts cited |
+| Angler pressure; seasons of horse mackerel, çinekop, bonito | Zengin (2009), SÜMAE Yunus Araştırma Bülteni 9(3) | Article copyright; facts cited |
+| Legal minimum sizes (13, 18, 25 cm), bonito closed season, 5 kg daily limit | Communique 6/2 (2024/21), Resmî Gazete 32629, Çizelge 7 and article 15(4) | Official text; values cited. Article 31 reading still for the legal consultation |
+| Horse mackerel length range and LW (5.3-18.8 cm, W=0.00758 L^3.0311); Marmara minimum 9.2 cm | Van, Gümüş & Süer (2019) NESciences 4(1); Dürrani (2023) JAES 8(3) | Article copyright; values cited |
+| Bluefish length range and LW (12.3-43.7 cm, W=0.0107 L^2.9574) | Bal, Yanık & Türker (2015), South Marmara | Article copyright; values cited |
+| Bonito length range and LW (17.7-63.0 cm FL, W=0.01 FL^3.085) | Kahraman et al. (2014) as tabled in Genç et al. (2025) Turk. J. Marit. Mar. Sci. 11(1) | Article copyright; values cited (the 2014 paper itself was not opened) |
+| Valid names (AphiaID 126820, 151482, 127021) | WoRMS REST API | WoRMS terms |

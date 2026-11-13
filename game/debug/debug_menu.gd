@@ -50,7 +50,7 @@ func _ready() -> void:
 	_panel = PanelContainer.new()
 	_panel.anchor_left = 1.0
 	_panel.anchor_right = 1.0
-	_panel.offset_left = -560.0
+	_panel.offset_left = -548.0
 	_panel.offset_right = -16.0
 	_panel.offset_top = 96.0
 	_panel.visible = false
@@ -113,7 +113,7 @@ func _process(delta: float) -> void:
 func _add(grid: GridContainer, id: String, on_press: Callable) -> void:
 	var b := Button.new()
 	b.add_theme_font_size_override("font_size", 18)
-	b.custom_minimum_size = Vector2(260, 64)
+	b.custom_minimum_size = Vector2(250, 64)
 	b.pressed.connect(func() -> void:
 		on_press.call()
 		_refresh())

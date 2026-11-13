@@ -89,3 +89,25 @@ DBG_SIZE_MEDIUM,medium,orta,mediano
 DBG_SIZE_LARGE,large,büyük,grande
 DBG_FORCE_BITE,Force a bite,Isırma zorla,Forzar picada
 FISH_OVERMATCHED,This fish is too big for this tackle,Bu balık bu takım için fazla büyük,Este pez es demasiado grande para este equipo
+SPECIES_HORSE_MACKEREL,Horse mackerel,İstavrit,Jurel mediterráneo
+SPECIES_BLUEFISH,Bluefish,Lüfer,Anjova
+SPECIES_BONITO,Atlantic bonito,Palamut,Bonito
+SPOT_GALATA_BRIDGE,Galata Bridge,Galata Köprüsü,Puente de Gálata
+POS_GALATA_KARAKOY_EAST,"Karaköy end, Bosphorus side","Karaköy ucu, Boğaz tarafı","Extremo de Karaköy, lado del Bósforo"
+POS_GALATA_EMINONU_EAST,"Eminönü end, Bosphorus side","Eminönü ucu, Boğaz tarafı","Extremo de Eminönü, lado del Bósforo"
+POS_GALATA_KARAKOY_WEST,"Karaköy end, Golden Horn side","Karaköy ucu, Haliç tarafı","Extremo de Karaköy, lado del Cuerno de Oro"
+POS_GALATA_EMINONU_WEST,"Eminönü end, Golden Horn side","Eminönü ucu, Haliç tarafı","Extremo de Eminönü, lado del Cuerno de Oro"
+DATA_NOTE,"Real place. Coordinates, water temperature, sizes, legal sizes and seasons have sources; depths, behaviour and tackle are design fills.","Gerçek yer. Koordinat, su sıcaklığı, boylar, yasal boylar ve mevsimler kaynaklı; derinlikler, davranış ve takımlar tasarım dolgusu.","Lugar real. Coordenadas, temperatura del agua, tallas, tallas legales y temporadas tienen fuente; profundidades, comportamiento y equipo son relleno de diseño."
+TACKLE_ROD_LRF,Light rod,Hafif olta,Caña ligera
+TACKLE_ROD_SPIN,Medium spin rod,Orta spin oltası,Caña de spinning media
+TACKLE_REEL_LRF,Light reel,Hafif makara,Carrete ligero
+TACKLE_REEL_SPIN,Medium reel,Orta makara,Carrete medio
+TACKLE_LINE_LRF,Thin braid,İnce örgü misina,Trenzado fino
+TACKLE_LINE_SPIN,Medium braid,Orta örgü misina,Trenzado medio
+TACKLE_LEADER_LRF,Light leader,Hafif lider,Bajo de línea ligero
+TACKLE_LEADER_SPIN,Medium leader,Orta lider,Bajo de línea medio
+TACKLE_LEADER_WIRE,Wire leader,Çelik lider,Bajo de acero
+TACKLE_LURE_LRF,Soft plastic,Silikon yem,Señuelo blando
+TACKLE_LURE_SPIN,Minnow,Minnow yem,Minnow
+ANGLER_DEFAULT,Angler,Balıkçı,Pescador
+FISH_UNDERSIZE,Below the legal size of %.0f cm: release it.,Yasal boyun (%.0f cm) altında: denize geri bırak.,Por debajo de la talla legal de %.0f cm: devuélvelo al agua.

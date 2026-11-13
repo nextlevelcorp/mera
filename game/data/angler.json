@@ -1,0 +1,19 @@
+[
+ {
+  "id": "default",
+  "name_key": "ANGLER_DEFAULT",
+  "casting_distance": 10,
+  "casting_accuracy": 10,
+  "strike_timing": 10,
+  "fight_control": 10,
+  "knot_strength": 10,
+  "patience": 10,
+  "species_knowledge": 10,
+  "spot_knowledge": 10,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ }
+]

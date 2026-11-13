@@ -1,9 +1,10 @@
 extends Control
-## The fishing loop of the 0.1 slice on demo data (PRD F4-F11, F14): rig,
+## The fishing loop of the 0.1 slice at the first real spot, the Galata Bridge
+## (PRD F4-F11, F14): rig,
 ## cast, wait and read, bite and strike, fight, land, log, cast again. A thin
 ## view: CatchModel, WaitSim and FightController own every rule; this scene
-## reads their state, draws it and sends input. Demo data in res://data/demo
-## is design fill, not a real place or real fish.
+## reads their state, draws it and sends input. Data in res://data: sourced
+## values carry their source, the rest is labelled design fill.
 ##
 ## Controls, landscape, thumbs on the corners (spec 6.1):
 ##   ready   right: hold Cast, let go at the top of the power swing
@@ -12,7 +13,7 @@ extends Control
 ##           (up = more drag) and Pull (rod against the fish's run)
 
 const MAIN_SCENE := "res://scenes/main.tscn"
-const DEMO_DIR := "res://data/demo"
+const DATA_DIR := "res://data"
 const DEBUG_MENU := "res://debug/debug_menu.gd"
 const TOUCH_MIN := 96.0
 const NEAR_DRAW_M := 4.6  ## drawing depth of the angler's feet; the camera cannot see nearer
@@ -31,7 +32,7 @@ var phase: int = Phase.READY
 var conditions := {"slot": "evening", "month": 10, "wind_dir": "SW", "wind_ms": 3}
 var clarity_override := -1.0
 var rig := "lrf"
-var position_id := "pier_end"
+var position_id := ""
 var save: Dictionary
 var save_status := ""
 var save_enabled := true
@@ -117,9 +118,9 @@ func _ready() -> void:
 ## Everything except the portrait guard, so tests can run it without a viewport.
 ## save_path empty: do not read or write a save (tests).
 func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
-	var loaded := DataStore.load_all(DEMO_DIR)
+	var loaded := DataStore.load_all(DATA_DIR)
 	if not loaded["ok"]:
-		push_error("Demo data failed to load: %s" % str(loaded["errors"]))
+		push_error("Game data failed to load: %s" % str(loaded["errors"]))
 		return
 	_db = loaded["database"]
 	var errors: Array[String] = []
@@ -132,6 +133,8 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 		rig = save["last_rig"]
 	if _position_index(save["last_position"]) >= 0:
 		position_id = save["last_position"]
+	else:
+		position_id = _db["spot"][0]["positions"][0]["id"]
 	_rng.seed = 7
 	_water = WaterView.new()
 	add_child(_water)
@@ -160,7 +163,7 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 
 ## Recomputes the environment from the conditions and updates the water.
 func apply_conditions() -> void:
-	_ctx = _base_context("istavrit")
+	_ctx = _base_context(_db["spot"][0]["species"][0]["species_id"])
 	_env = CatchModel.environment(_k, _ctx["spot"], _ctx["position"], conditions)
 	if _water:
 		if _sound:
@@ -888,10 +891,13 @@ func _show_result() -> void:
 			lines.append(tr("FISH_FIRST"))
 		elif _result.get("length_record", false) or _result.get("weight_record", false):
 			lines.append(tr("FISH_RECORD"))
+		var rule: Dictionary = _fight_ctx["species"].get("regulation", {})
+		if rule.has("min_length_cm") and float(_result["length_cm"]) < float(rule["min_length_cm"]):
+			lines.append(tr("FISH_UNDERSIZE") % float(rule["min_length_cm"]))
 	lines.append(tr("FIGHT_DETAIL") % [_hud["time_s"], _hud["max_tension_kg"], _hud["line_strength_kg"]])
 	if _hud["cap_applied"]:
 		lines.append(tr("FIGHT_CAP"))
-	lines.append(tr("FIGHT_NOTE"))
+	lines.append(tr("DATA_NOTE"))
 	_result_detail.text = "\n".join(lines)
 	_reel_pressed = false
 	_pull_pressed = false
@@ -908,7 +914,7 @@ func _update_log() -> void:
 		else:
 			lines.append(tr("LOG_EMPTY_ROW") % species_name)
 	lines.append("")
-	lines.append(tr("FIGHT_NOTE"))
+	lines.append(tr("DATA_NOTE"))
 	_log_text.text = "\n".join(lines)
 
 
@@ -916,7 +922,7 @@ func _update_texts() -> void:
 	if _status_label == null or _ctx.is_empty():
 		return
 	var pos: Dictionary = _ctx["position"]
-	_status_label.text = tr("FISH_STATUS") % [tr("SLOT_%s" % String(conditions["slot"]).to_upper()), conditions["wind_dir"], int(conditions["wind_ms"]), tr(pos["name_key"])]
+	_status_label.text = tr(_db["spot"][0]["name_key"]) + " · " + tr("FISH_STATUS") % [tr("SLOT_%s" % String(conditions["slot"]).to_upper()), conditions["wind_dir"], int(conditions["wind_ms"]), tr(pos["name_key"])]
 	_rig_cycle.text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_ctx["rod"]["name_key"])]
 	_position_cycle.text = "%s: %s" % [tr("FISH_POSITION"), tr(pos["name_key"])]
 	var cast_check := CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], pos, conditions, 1.0)

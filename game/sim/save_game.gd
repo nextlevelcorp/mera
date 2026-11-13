@@ -15,7 +15,7 @@ const STATUS_RESET := "reset"
 
 
 static func fresh() -> Dictionary:
-	return {"version": VERSION, "log": {}, "last_rig": "lrf", "last_position": "pier_end"}
+	return {"version": VERSION, "log": {}, "last_rig": "lrf", "last_position": ""}
 
 
 ## data: whatever was parsed from the file (null when there is no file).
