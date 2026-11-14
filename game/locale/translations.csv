@@ -116,3 +116,6 @@ TACKLE_REEL_CAPARI,Sabiki reel,Çapari makarası,Carrete de sabiki
 TACKLE_LINE_CAPARI,Monofilament line,Monofilament misina,Sedal monofilamento
 TACKLE_LEADER_CAPARI,Sabiki rig line,Çapari takım misinası,Línea del aparejo sabiki
 TACKLE_LURE_CAPARI,"Sabiki rig (çapari), small feathered hooks","Çapari takımı, küçük tüylü iğneler","Aparejo sabiki (çapari), anzuelos pequeños con pluma"
+DBG_MOTION,Motion direction,Hareket yönü,Dirección del movimiento
+DBG_NORMAL,normal,normal,normal
+DBG_INVERTED,inverted,ters,invertida

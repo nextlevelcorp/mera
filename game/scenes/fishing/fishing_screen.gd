@@ -65,6 +65,16 @@ var _flight_s := 0.0
 var _flight_total_s := 1.0
 var _tip_kick := 0.0
 var _tip_vel := 0.0
+var _rod := RodSpring.new()
+var _rope: VerletRope
+var _end_pos := Vector2.ZERO
+var _has_line := false
+var _rod_back := 0.0
+var _crank := 0.0
+var _motion: DeviceMotion
+var _gesture := MotionGesture.new()
+var _motion_state := {}
+var _tap_jig := 0.0
 var _speed_on := false
 var _toast_s := 0.0
 var _lift_t := 0.0
@@ -150,6 +160,8 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	_build_audio()
 	_sound = SoundDirector.new()
 	add_child(_sound)
+	_motion = DeviceMotion.new()
+	add_child(_motion)
 	apply_conditions()
 	_build_debug()
 	_set_phase(Phase.READY)
@@ -211,6 +223,9 @@ func _set_phase(p: int) -> void:
 		_log_panel.visible = false
 	if p != Phase.WAIT:
 		_speed_on = false
+	if p == Phase.WAIT or p == Phase.FIGHT:
+		_gesture.calibrated = false
+	_rope = null
 	_update_texts()
 
 
@@ -286,7 +301,7 @@ func force_bite(species_id: String, u: float = -1.0) -> void:
 
 
 func _step_wait(delta: float) -> void:
-	var input := {"strike": _strike_queued}
+	var input := {"strike": _strike_queued, "jig": jig_amount()}
 	_strike_queued = false
 	_wait_state = _wait.advance(delta, input, SPEED_UP if _speed_on else 1.0)
 	for i in range(_last_event_count, _wait.events.size()):
@@ -299,15 +314,23 @@ func _step_wait(delta: float) -> void:
 		_set_phase(Phase.READY)
 
 
+## How hard the lure is being worked: phone twitches, or taps on the water
+## for players without motion sensors.
+func jig_amount() -> float:
+	return maxf(float(_motion_state.get("jig", 0.0)), _tap_jig)
+
+
 func _on_wait_event(e: Dictionary) -> void:
 	var world := Vector2(_lure_x(float(e["lure_distance_m"])), NEAR_DRAW_M + float(e["lure_distance_m"]))
 	match e["event"]:
 		"nibble":
 			_tip_vel -= 6.0
+			_rod.kick(1.5)
 			_fx.add_ring(world, 0.35, 0.8, 0.35)
 			_play("nibble")
 		"take":
 			_tip_vel -= 22.0
+			_rod.kick(6.0)
 			_fx.add_ring(world, 0.7, 1.2, 0.9)
 			_fx.splash(WaterView.project(world, 0.0, _overlay.size), world, 0.35)
 			_play("take")
@@ -346,7 +369,7 @@ func _start_fight(hooked: Dictionary) -> void:
 func current_input() -> Dictionary:
 	return {
 		"reel": FightController.reel_from_pad(_reel_pressed, _reel_y, _reel_pad.size.y),
-		"rod": FightController.rod_from_button(_pull_pressed),
+		"rod": maxf(FightController.rod_from_button(_pull_pressed), float(_motion_state.get("pull", 0.0))),
 		"drag_kg": FightController.drag_from_slider(_drag_ratio, _controller.drag_max_kg),
 	}
 
@@ -416,7 +439,7 @@ func _step_lift(delta: float) -> void:
 ## Screen position of the hook (fish's mouth) and of the tail while lifted.
 func _lift_points() -> PackedVector2Array:
 	var size := _overlay.size
-	var tip := _rod_tip(0.7)
+	var tip := _rod.tip()
 	var hang := tip + Vector2(0.0, size.y * 0.30)
 	var r := smoothstep(0.0, LIFT_RISE_S, _lift_t)
 	var mouth := _lift_from.lerp(hang, r) + Vector2(0.0, -size.y * 0.08 * sin(PI * r))
@@ -466,7 +489,6 @@ func _draw_lifted_fish(tip: Vector2) -> void:
 	outline.append(tail + back * fin - across * fin * 0.8)
 	right.reverse()
 	outline.append_array(right)
-	_overlay.draw_line(tip, mouth, Color(1, 1, 1, 0.9), 1.5, true)
 	if Geometry2D.triangulate_polygon(outline).size() > 0:
 		_overlay.draw_colored_polygon(outline, Color(0.62, 0.68, 0.72))
 	outline.append(outline[0])
@@ -484,12 +506,14 @@ func _fight_effects(delta: float) -> void:
 	if state != _last_state:
 		if state == "run":
 			_fx.add_ring(pos, 0.5, 1.6, 0.5)
+			_rod.kick(4.0)
 		_last_state = state
 	_splash_clock -= delta
 	if _splash_clock <= 0.0 and (state == "thrash" or (_hud["in_landing"] and state != "rest")):
 		_splash_clock = 0.45
 		_fx.splash(WaterView.project(pos, 0.0, _overlay.size), pos, 0.7)
 		_snd("splash_heavy", -8.0)
+		_rod.kick(2.5 if int(_time * 7.0) % 2 == 0 else -2.5)
 
 
 ## Where the fish is on the water: out along the line by the simulation's
@@ -500,11 +524,155 @@ func _fish_world() -> Vector2:
 	return Vector2(_lure_x(d) + side, NEAR_DRAW_M + d)
 
 
+
+# ------------------------------------------------------------------ physics of the view
+
+## Phone motion (owner request 2026-11-14): a flick back strikes in the wait,
+## tilting back pulls the rod in the fight, small twitches work the lure.
+func _update_motion(delta: float) -> void:
+	_motion_state = {}
+	if _motion == null or not _motion.available:
+		return
+	_motion_state = _gesture.add_sample(delta, _motion.pitch_rate, _motion.pitch)
+	if phase == Phase.WAIT and _motion_state["strike"]:
+		strike()
+	if phase == Phase.FIGHT and _motion_state["strike"]:
+		_rod.kick(-5.0)
+
+
+## Taps on the water during the wait twitch the lure: the touch version of
+## working it with the phone.
+func _unhandled_input(event: InputEvent) -> void:
+	if phase != Phase.WAIT:
+		return
+	var pressed: bool = (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed)
+	if pressed:
+		_tap_jig = minf(_tap_jig + 0.35, 1.0)
+		_rod.kick(-1.2)
+
+
+## Wind across the screen in px/s^2: the part of the wind blowing from the
+## left or right of where the angler faces, with gusts (pillar 3: noise).
+func wind_accel() -> float:
+	if _ctx.is_empty():
+		return 0.0
+	var dirs := CatchModel.WIND_DIRECTIONS
+	var from_deg := dirs.find(String(conditions["wind_dir"])) * 45.0
+	var facing_deg := dirs.find(String(_ctx["position"]["facing"])) * 45.0
+	var to_rad := deg_to_rad(from_deg + 180.0)
+	var right_rad := deg_to_rad(facing_deg + 90.0)
+	var lateral := cos(to_rad - right_rad)
+	var gust := 0.75 + 0.2 * sin(_time * 0.83) + 0.15 * sin(_time * 2.31 + 1.7) + 0.08 * sin(_time * 5.7)
+	return lateral * float(conditions["wind_ms"]) * 22.0 * gust
+
+
+## Where the line ends on screen for the current phase.
+func _line_end(size: Vector2) -> Vector2:
+	match phase:
+		Phase.FLIGHT:
+			var s := clampf(_flight_s / _flight_total_s, 0.0, 1.0)
+			var d := float(_cast["cast_m"]) * s
+			var h := 4.0 * float(_cast["cast_m"]) * 0.25 * s * (1.0 - s) + 2.0 * (1.0 - s)
+			return WaterView.project(Vector2(_lure_x(d), NEAR_DRAW_M + d), h, size)
+		Phase.WAIT:
+			var dw := float(_wait_state.get("lure_distance_m", 0.0))
+			return WaterView.project(Vector2(_lure_x(dw), NEAR_DRAW_M + dw), 0.03 * sin(_time * 2.1), size)
+		Phase.FIGHT:
+			return WaterView.project(_fish_world(), 0.0, size)
+		Phase.LIFT, Phase.RESULT:
+			if _lifted():
+				return _lift_points()[0]
+			if not _hud.is_empty():
+				return WaterView.project(_fish_world(), 0.0, size)
+	return Vector2.ZERO
+
+
+func _lifted() -> bool:
+	return phase == Phase.LIFT or (phase == Phase.RESULT and _result.get("outcome", "") == FightSim.OUTCOME_LANDED)
+
+
+func _line_present() -> bool:
+	match phase:
+		Phase.FLIGHT, Phase.WAIT, Phase.FIGHT, Phase.LIFT:
+			return true
+		Phase.RESULT:
+			var o: String = _result.get("outcome", "")
+			return o == FightSim.OUTCOME_LANDED
+	return false
+
+
+## Steps the spring rod and the Verlet line once per frame. The load on the
+## rod tip points along the line; its size comes from the simulation (fight
+## tension, a take, a hanging fish); wind pushes the line sideways.
+func _step_rod_and_line(delta: float) -> void:
+	if _overlay == null:
+		return
+	var size := _overlay.size
+	if size.x < 2.0:
+		return
+	var butt := Vector2(size.x * 0.66, size.y * 0.95)
+	var rest_tip := Vector2(size.x * 0.76, size.y * 0.30)
+	var base := (rest_tip - butt).angle()
+	var length := butt.distance_to(rest_tip)
+	# Pulling the rod back (button or phone) raises it towards upright.
+	var back := 0.0
+	match phase:
+		Phase.FIGHT:
+			back = float(current_input()["rod"])
+		Phase.CHARGE:
+			back = 0.9 * power_at(_charge_s)
+		Phase.WAIT:
+			back = 0.4 * float(_motion_state.get("pull", 0.0))
+	_rod_back = lerpf(_rod_back, back, minf(delta * 10.0, 1.0))
+	base -= 0.45 * _rod_back
+	_has_line = _line_present()
+	_end_pos = _line_end(size) if _has_line else Vector2.ZERO
+	var tip := _rod.tip() if _rod.tip() != Vector2.ZERO else rest_tip
+	var dir := (_end_pos - tip).normalized() if _has_line else Vector2.DOWN
+	var amount := 0.03
+	match phase:
+		Phase.WAIT:
+			amount = 0.06 + 0.5 * clampf(_tip_kick, 0.0, 1.2)
+		Phase.FIGHT:
+			amount = clampf(float(_hud.get("tension_ratio", 0.0)), 0.0, 1.3)
+		Phase.LIFT, Phase.RESULT:
+			amount = 0.7 if _lifted() else 0.03
+		Phase.FLIGHT:
+			amount = 0.05
+	var load := dir * amount + Vector2(wind_accel() * 0.0004, 0.0)
+	_rod.step(delta, butt, base, length, load)
+	tip = _rod.tip()
+	# Line: taut when tension is high, sagging and wind-blown when slack.
+	if not _has_line:
+		_rope = null
+		return
+	var dist := tip.distance_to(_end_pos)
+	var slack := 1.02
+	match phase:
+		Phase.WAIT:
+			slack = 1.02 - 0.015 * clampf(_tip_kick, 0.0, 1.0)
+		Phase.FIGHT:
+			slack = lerpf(1.04, 1.0, clampf(float(_hud.get("tension_ratio", 0.0)) * 2.5, 0.0, 1.0))
+		Phase.FLIGHT, Phase.LIFT, Phase.RESULT:
+			slack = 1.01
+	if _rope == null:
+		_rope = VerletRope.new(tip, _end_pos, 18, slack)
+	_rope.set_total_length(dist * slack)
+	_rope.step(delta, tip, _end_pos, Vector2(wind_accel(), 160.0))
+	var crank_speed := 0.0
+	if phase == Phase.FIGHT:
+		crank_speed = 14.0 * float(current_input()["reel"])
+	elif phase == Phase.WAIT and _wait_state.get("phase", "") == WaitSim.PHASE_FISHING:
+		crank_speed = 3.0 * (SPEED_UP if _speed_on else 1.0)
+	_crank = fmod(_crank + crank_speed * delta, TAU)
+
+
 # ------------------------------------------------------------------ frame
 
 func _process(delta: float) -> void:
 	_time += delta
 	_stats.add(delta)
+	_update_motion(delta)
 	match phase:
 		Phase.CHARGE:
 			_charge_s += delta
@@ -527,6 +695,8 @@ func _process(delta: float) -> void:
 		target = 0.9
 	_tip_vel += ((target - _tip_kick) * 60.0 - _tip_vel * 9.0) * delta
 	_tip_kick += _tip_vel * delta
+	_tap_jig = maxf(_tap_jig - delta * 0.8, 0.0)
+	_step_rod_and_line(delta)
 	_toast_s = maxf(_toast_s - delta, 0.0)
 	_toast_label.visible = _toast_s > 0.0
 	_fx.step(delta)
@@ -546,56 +716,41 @@ func _draw_overlay() -> void:
 		var rx := r / (maxf(world.y, 0.5) * aspect * WaterView.FOV) * size.x
 		var ry := WaterView.CAM_HEIGHT * r / (world.y * world.y * WaterView.FOV) * size.y
 		_ellipse(centre, rx, ry, Color(1, 1, 1, 0.55 * SplashFx.ring_alpha(ring)))
-	var bend := 0.0
-	var lifted: bool = phase == Phase.LIFT or (phase == Phase.RESULT and _result.get("outcome", "") == FightSim.OUTCOME_LANDED)
-	match phase:
-		Phase.FIGHT, Phase.RESULT:
-			bend = clampf(float(_hud.get("tension_ratio", 0.0)), 0.0, 1.2)
-		Phase.LIFT:
-			bend = 0.7
-		Phase.WAIT:
-			bend = clampf(_tip_kick, -0.2, 1.2)
-		Phase.CHARGE:
-			bend = -0.25 * power_at(_charge_s)
-	var tip := _rod_tip(bend)
+	var tip := _rod.tip()
 	match phase:
 		Phase.FLIGHT:
-			var s := clampf(_flight_s / _flight_total_s, 0.0, 1.0)
-			var d := float(_cast["cast_m"]) * s
-			var h := 4.0 * float(_cast["cast_m"]) * 0.25 * s * (1.0 - s) + 2.0 * (1.0 - s)
-			var lure := WaterView.project(Vector2(_lure_x(d), NEAR_DRAW_M + d), h, size)
-			_draw_line_to(tip, lure, 0.6, false)
-			_overlay.draw_circle(lure, 4.0, Color(0.95, 0.75, 0.3))
+			_draw_line(false)
+			_overlay.draw_circle(_end_pos, 4.0, Color(0.95, 0.75, 0.3))
 		Phase.WAIT:
-			var dw := float(_wait_state.get("lure_distance_m", 0.0))
-			var lure := WaterView.project(Vector2(_lure_x(dw), NEAR_DRAW_M + dw), 0.03 * sin(_time * 2.1), size)
-			_draw_line_to(tip, lure, clampf(bend, 0.0, 1.0) * 0.6, false)
-			_overlay.draw_circle(lure, 3.0, Color(0.95, 0.75, 0.3))
+			_draw_line(false)
+			_overlay.draw_circle(_end_pos, 3.0, Color(0.95, 0.75, 0.3))
 		Phase.FIGHT, Phase.RESULT:
-			if lifted:
-				_draw_lifted_fish(_rod_tip(0.7))
+			if _lifted():
+				_draw_line(false)
+				_draw_lifted_fish(tip)
 			elif not _hud.is_empty():
-				_draw_fight(size, tip, bend)
+				_draw_fight(size)
 		Phase.LIFT:
+			_draw_line(false)
 			_draw_lifted_fish(tip)
 	for p: Dictionary in _fx.particles:
 		_overlay.draw_circle(p["pos"], p["size"], Color(0.92, 0.96, 1.0, 0.85 * float(p["life"]) / float(p["max_life"])))
 	if _on_bridge():
 		_draw_bridge(size)
-	_draw_rod(size, _rod_tip(0.7) if lifted else tip, 0.7 if lifted else bend)
+	_draw_rod()
+	_draw_hands(size)
 	if phase == Phase.FIGHT or (phase == Phase.RESULT and not _hud.is_empty()):
 		_draw_tension_bar(size)
 	if phase == Phase.CHARGE:
 		_draw_power(size)
 
 
-func _draw_fight(size: Vector2, tip: Vector2, ratio: float) -> void:
+func _draw_fight(size: Vector2) -> void:
 	var outcome: String = _hud["outcome"]
 	var line_gone := outcome == FightSim.OUTCOME_LINE_BREAK or outcome == FightSim.OUTCOME_LEADER_CUT
 	var pos := _fish_world()
-	var fish_screen := WaterView.project(pos, 0.0, size)
-	if not line_gone:
-		_draw_line_to(tip, fish_screen, ratio, float(_hud["strain_ratio"]) > 0.0)
+	if not line_gone and phase == Phase.FIGHT:
+		_draw_line(float(_hud["strain_ratio"]) > 0.0)
 	if _hud["fish_visible"] and not line_gone and _fish:
 		var pts := PackedVector2Array()
 		for w: Vector2 in _fish.outline():
@@ -622,6 +777,16 @@ func _draw_bridge(size: Vector2) -> void:
 	var deck := Color(0.32, 0.31, 0.3).lerp(Color(0.08, 0.08, 0.09), 1.0 - light)
 	var rail_y := size.y * 0.80
 	var deck_y := size.y * 0.90
+	# At dusk and night the lamps lay a broken streak of light on the water.
+	var lamp_glow := 1.0 - light
+	if lamp_glow > 0.2:
+		var lx := size.x * 0.27 + 30.0   # under the right-hand lamp head
+		for j in 14:
+			var t := float(j) / 13.0
+			var y := lerpf(size.y * 0.42, rail_y - 8.0, t)
+			var wobble := sin(_time * 1.7 + j * 1.3) * (4.0 + 10.0 * t)
+			var w := lerpf(3.0, 22.0, t) * (0.6 + 0.4 * sin(_time * 2.3 + j * 2.1))
+			_overlay.draw_rect(Rect2(lx + wobble - w * 0.5, y, w, 2.0 + 3.0 * t), Color(1.0, 0.82, 0.5, (0.3 + 0.5 * lamp_glow) * (1.0 - 0.3 * t)))
 	_overlay.draw_rect(Rect2(0, deck_y, size.x, size.y - deck_y), deck)
 	_overlay.draw_rect(Rect2(0, deck_y, size.x, 4), deck.lightened(0.15))
 	# Other anglers' rods leaning over the rail on the left (Zengin 2009: hundreds a day).
@@ -648,24 +813,74 @@ func _draw_bridge(size: Vector2) -> void:
 			_overlay.draw_circle(Vector2(lamp_x + side * 30.0, size.y * 0.18), 9.0, Color(1.0, 0.85, 0.55, 0.4 + 0.5 * glow))
 
 
-func _rod_tip(bend: float) -> Vector2:
-	var size := _overlay.size
-	return Vector2(size.x * (0.74 - 0.10 * bend), size.y * (0.32 + 0.12 * bend))
+## The rod from the spring chain: thick at the butt, thin at the tip, with a
+## highlight on the lit side (shading follows the time of day).
+func _draw_rod() -> void:
+	var pts := _rod.points()
+	if pts.size() < 2:
+		return
+	var light := float(_env.get("light", 0.6))
+	var body := Color(0.08, 0.08, 0.1)
+	var shine := Color(0.75, 0.78, 0.85, 0.15 + 0.45 * light)
+	var n := pts.size() - 1
+	for i in n:
+		var w := lerpf(10.0, 2.5, float(i) / n)
+		_overlay.draw_line(pts[i], pts[i + 1], body, w, true)
+	for i in n:
+		var d := (pts[i + 1] - pts[i]).normalized()
+		var side := Vector2(-d.y, d.x) * lerpf(2.5, 0.6, float(i) / n)
+		_overlay.draw_line(pts[i] - side, pts[i + 1] - side, shine, 1.0, true)
+	# Guides along the blank.
+	for i in range(3, n, 2):
+		_overlay.draw_circle(pts[i], lerpf(4.0, 2.0, float(i) / n), Color(0.6, 0.62, 0.66, 0.8))
 
 
-func _draw_rod(size: Vector2, tip: Vector2, bend: float) -> void:
-	var butt := Vector2(size.x * 0.97, size.y * 1.02)
-	var mid := butt.lerp(tip, 0.55) + Vector2(-0.04 * size.x * bend, 0.0)
-	_overlay.draw_polyline(PackedVector2Array([butt, mid, tip]), Color(0.1, 0.1, 0.12), 7.0, true)
+## The line along the Verlet rope; warm-coloured and thicker while straining.
+func _draw_line(strained: bool) -> void:
+	if _rope == null:
+		return
+	_overlay.draw_polyline(_rope.points, Color(1.0, 0.85, 0.5, 0.95) if strained else Color(1, 1, 1, 0.85), 2.0 if strained else 1.4, true)
 
 
-func _draw_line_to(tip: Vector2, end: Vector2, ratio: float, strained: bool) -> void:
-	var points := PackedVector2Array()
-	var sag := Vector2(0.0, 46.0 * clampf(1.0 - ratio * 1.6, 0.0, 1.0))
-	for i in 25:
-		var t := i / 24.0
-		points.append(tip.lerp(end, t) + sag * sin(t * PI))
-	_overlay.draw_polyline(points, Color(1.0, 0.85, 0.5, 0.95) if strained else Color(1, 1, 1, 0.85), 2.0 if strained else 1.5, true)
+## First-person hands (owner request 2026-11-14): the right hand holds the
+## rod above the reel seat, the left turns the reel handle, which spins while
+## line comes in. Drawn shapes, lit by the time of day.
+func _draw_hands(size: Vector2) -> void:
+	var pts := _rod.points()
+	if pts.size() < 4:
+		return
+	var light := float(_env.get("light", 0.6))
+	var skin := Color(0.86, 0.66, 0.52).darkened(0.65 * (1.0 - light))
+	var skin_dark := skin.darkened(0.25)
+	var sleeve := Color(0.16, 0.22, 0.3).darkened(0.5 * (1.0 - light))
+	var axis := (pts[2] - pts[0]).normalized()
+	var across := Vector2(-axis.y, axis.x)   # points to the lower-left of the rod
+	# Reel under the rod at the seat.
+	var seat: Vector2 = pts[1].lerp(pts[2], 0.2)
+	var reel := seat - across * 42.0
+	_overlay.draw_line(seat, reel, Color(0.25, 0.26, 0.28), 6.0, true)
+	_overlay.draw_circle(reel, 24.0, Color(0.32, 0.33, 0.36).darkened(0.5 * (1.0 - light)))
+	_overlay.draw_circle(reel, 14.0, Color(0.55, 0.57, 0.6).darkened(0.5 * (1.0 - light)))
+	var handle := reel + Vector2(cos(_crank), sin(_crank)) * 30.0
+	_overlay.draw_line(reel, handle, Color(0.2, 0.2, 0.22), 5.0, true)
+	# Left hand on the handle knob, forearm from the lower left.
+	_overlay.draw_line(handle, Vector2(size.x * 0.40, size.y * 1.08), sleeve, 46.0, true)
+	_draw_fist(handle, axis, skin, skin_dark, 26.0)
+	# Right hand round the grip above the seat, forearm from the lower right.
+	var grip: Vector2 = pts[2].lerp(pts[3], 0.3)
+	_overlay.draw_line(grip, Vector2(size.x * 0.92, size.y * 1.1), sleeve, 58.0, true)
+	_draw_fist(grip, axis, skin, skin_dark, 32.0)
+
+
+## A closed hand around a rod or handle: palm, four finger rolls across the
+## axis and a thumb along it.
+func _draw_fist(centre: Vector2, axis: Vector2, skin: Color, shade: Color, r: float) -> void:
+	var across := Vector2(-axis.y, axis.x)
+	_overlay.draw_circle(centre + across * r * 0.25, r, skin)
+	for k in 4:
+		var off := axis * (r * (0.75 - 0.5 * k))
+		_overlay.draw_line(centre + off - across * r * 0.3, centre + off + across * r * 0.95, shade, r * 0.16, true)
+	_overlay.draw_line(centre - across * r * 0.4, centre + axis * r * 0.9 - across * r * 0.55, skin.lightened(0.08), r * 0.42, true)
 
 
 func _ellipse(centre: Vector2, rx: float, ry: float, color: Color) -> void:
@@ -735,6 +950,8 @@ func _on_drag_input(event: InputEvent) -> void:
 
 
 func _on_main_down() -> void:
+	if _motion:
+		_motion.request_permission()
 	if phase == Phase.READY:
 		begin_charge()
 	elif phase == Phase.WAIT:
@@ -1005,6 +1222,11 @@ func debug_info() -> String:
 		var s := _controller.sim
 		lines.append("fight W %.2f kg Fmax %.2f line %.2f hook_hold %.2f landing_q %.2f" % [s.weight_kg, s.f_max, s.b_eff, s.hook_hold, s.landing_q])
 		lines.append("estimated fight %.0f s%s" % [_controller.estimated_fight_s, " (over the 90 s cap)" if _controller.overmatched else ""])
+	if _motion and _motion.available:
+		lines.append("motion pitch %.0f deg rate %.1f rad/s pull %.2f jig %.2f (%s)" % [rad_to_deg(_motion.pitch), _motion.pitch_rate, float(_motion_state.get("pull", 0.0)), float(_motion_state.get("jig", 0.0)), _motion.permission])
+	else:
+		lines.append("motion: no sensor data (%s); tap water to jig: %.2f" % [_motion.permission if _motion else "-", _tap_jig])
+	lines.append("wind across screen %.0f px/s2; rod bend %.2f rad" % [wind_accel(), _rod.total_bend()])
 	lines.append("fps avg %.0f, worst 1%% %.0f over %.0f s" % [_stats.average_fps(), _stats.low_1pct_fps(), _stats.seconds()])
 	return "\n".join(lines)
 
