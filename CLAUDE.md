@@ -82,3 +82,15 @@ CONDITIONAL SKILLS (read the file when the task touches the topic)
 
 ENGINE NOTE
 The game runs on Godot 4.4 (GDScript). The Three.js and Rapier skills hold general rules that also apply to Godot; using Three.js or Rapier.js in the game is an engine change and needs the owner's explicit decision first (see NEEDS MY GO-AHEAD FIRST).
+
+# Temel Çalışma Kuralları (Karpathy & Caveman)
+- Gereksiz nezaket cümleleri kurma, kısa ve net yanıt ver (Caveman modu).
+- Kod yazmadan önce varsayımlarını belirt, belirsizlik varsa sor.
+- Sadece istenen değişikliği yap, çalışan diğer kodlara dokunma.
+
+# Dinamik Skill Yönlendirmeleri (Sadece İlgili Görevde Oku)
+- **3D Sahne, Shader ve Aydınlatma:** `.claude/skills/threejs-graphics.md` dosyasını oku.
+- **Oyun Döngüsü ve Mekanikler:** `.claude/skills/threejs-game.md` dosyasını oku.
+- **Fizik Motoru ve Çarpışmalar:** `.claude/skills/rapier.md` dosyasını oku.
+- **3D Model Optimizasyonu (.glb/.gltf):** `.claude/skills/gltf-transform.md` dosyasını oku.
+- **Oyun İçi UI / Menü Tasarımı:** `.claude/skills/design-skills.md` dosyasını oku.
