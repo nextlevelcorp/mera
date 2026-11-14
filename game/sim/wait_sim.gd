@@ -39,6 +39,7 @@ var _refresh_left := 0.0
 var _rates := {}          # species_id -> {rate_interest, commit, window_s, stages}
 var _boost_until := {}    # species_id -> time_s
 var _take := {}           # species_id, window_s, elapsed_s
+var _jig := 0.0           # 0..1, the player working the lure (phone twitches)
 
 
 ## ctx: a CatchModel context (species is replaced per species); species_records:
@@ -61,11 +62,12 @@ func is_over() -> bool:
 	return phase == PHASE_HOOKED or phase == PHASE_RETRIEVED
 
 
-## Frame-rate independent: input {"strike": bool} is applied on the first tick
+## Frame-rate independent: input {"strike": bool, "jig": 0..1}; strike is applied on the first tick
 ## of this frame only. speed (1 or more) runs the wait faster (PRD F6); it is
 ## ignored while a take is on, so the strike window keeps its real length.
 func advance(frame_s: float, input: Dictionary, speed: float = 1.0) -> Dictionary:
 	var strike: bool = input.get("strike", false)
+	_jig = clampf(float(input.get("jig", 0.0)), 0.0, 1.0)
 	var scale := speed if phase == PHASE_FISHING else 1.0
 	_accum += minf(maxf(frame_s, 0.0), MAX_FRAME_S) * maxf(scale, 1.0)
 	if strike:
@@ -104,6 +106,8 @@ func step() -> void:
 		var id: String = sp["id"]
 		var r: Dictionary = _rates[id]
 		var boost := 1.0 + CatchModel.n(float(sp["schooling"])) if time_s < float(_boost_until.get(id, -1.0)) else 1.0
+		# Working the lure makes it move like prey: more interest (design fill).
+		boost *= 1.0 + float(_k.get("JIG_GAIN", 0.0)) * _jig
 		if _rng.randf() < float(r["rate_interest"]) * boost * DT:
 			if _rng.randf() < float(r["commit"]):
 				_open_take(id)

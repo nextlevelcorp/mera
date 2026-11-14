@@ -152,7 +152,7 @@ Scope: one real spot with 3-4 standing positions, lure spinning/LRF only, 3 spec
 
 **F18. Settings and accessibility basics (P1).** Readable text size; adjustable text scale; sound cues have visual counterparts.
 
-**P2 (designed for, not built in 0.1):** bait/float fishing, walkable top-down world, gyro rod angle, XP, money and tackle unlocks, shop, season changes, waves simulation, more spots and species.
+**P2 (designed for, not built in 0.1):** bait/float fishing, walkable top-down world, gyro rod angle (brought into 0.1 by the owner on 2026-11-14 as phone-motion strike, pull and jig, with touch kept as the equal alternative), XP, money and tackle unlocks, shop, season changes, waves simulation, more spots and species.
 
 ### 7.2 Version 0.5 (the MVP, scope from spec 4.6; criteria detailed after the slice passes)
 

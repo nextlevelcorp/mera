@@ -294,6 +294,7 @@ visible_m = K.VIS_BASE + K.VIS_RANGE * visibility                               
 | CAST_WEIGHT_REF_G | 30 g | CAST_FIT_MIN | 0.3 | CAST_SKILL_BASE | 0.6 |
 | CAST_HEADWIND | 0.3 | AIM_SIGMA_BASE / SKILL | 0.15 / 0.12 rad | WAIT_RETRIEVE_M_PER_S | 0.4 m/s |
 | WAIT_END_M | 3 m | SHOAL_BOOST_S | 60 s | CAP_LAND_DISTANCE_M | 5 m |
+| JIG_GAIN | 0.6 | | | | |
 
 `WAIT_RETRIEVE_M_PER_S` is how fast the lure comes back while the player waits; the cast ends when the lure is `WAIT_END_M` from the shore. `SHOAL_BOOST_S` is the 60 s shoal follow-up of 5.3. All three were added with the real-time wait (2026-11-13).
 
