@@ -49,3 +49,15 @@ COMMANDS (run from repo root; GODOT = Godot binary, version pinned in .godot-ver
 - Web export: mkdir -p build/web && $GODOT --headless --path game --export-release Web
 - Serve: python3 -m http.server -d build/web 8000
 - Cloud setup: scripts/install_godot.sh installs Godot and the web templates.
+
+# Temel Çalışma Kuralları (Karpathy & Caveman)
+- Gereksiz nezaket cümleleri kurma, kısa ve net yanıt ver (Caveman modu).
+- Kod yazmadan önce varsayımlarını belirt, belirsizlik varsa sor.
+- Sadece istenen değişikliği yap, çalışan diğer kodlara dokunma.
+
+# Dinamik Skill Yönlendirmeleri (Sadece İlgili Görevde Oku)
+- **3D Sahne, Shader ve Aydınlatma:** `.claude/skills/threejs-graphics.md` dosyasını oku.
+- **Oyun Döngüsü ve Mekanikler:** `.claude/skills/threejs-game.md` dosyasını oku.
+- **Fizik Motoru ve Çarpışmalar:** `.claude/skills/rapier.md` dosyasını oku.
+- **3D Model Optimizasyonu (.glb/.gltf):** `.claude/skills/gltf-transform.md` dosyasını oku.
+- **Oyun İçi UI / Menü Tasarımı:** `.claude/skills/design-skills.md` dosyasını oku.
