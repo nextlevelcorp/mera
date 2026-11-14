@@ -282,7 +282,7 @@ func test_recorded_sounds_load_and_are_listed_with_a_licence() -> void:
 	var refs := FileAccess.get_file_as_string("res://../docs/reference_docs.md")
 	if refs == "":
 		refs = FileAccess.get_file_as_string(ProjectSettings.globalize_path("res://").path_join("../docs/reference_docs.md"))
-	for name_id: String in SoundDirector.WAVES + SoundDirector.ONE_SHOTS + ["wind_loop", "reel_loop"]:
+	for name_id: String in SoundDirector.WAVES + SoundDirector.ONE_SHOTS + ["wind_loop", "reel_loop", "drag_click"]:
 		var path := "%s/%s.ogg" % [SoundDirector.AUDIO_DIR, name_id]
 		assert_true(ResourceLoader.exists(path), "%s exists" % path)
 		assert_true(load(path) is AudioStreamOggVorbis, "%s loads as Ogg Vorbis" % path)

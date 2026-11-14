@@ -5,18 +5,26 @@ extends Node
 ##   wind loop     volume from the wind speed
 ##   waves         single waves at random, more often and louder with chop
 ##   gusts         now and then when the wind is 5 m/s or more
-##   reel loop     during the fight; line going out (drag slipping) plays it
-##                 faster and louder, line coming in plays it slower
-##   one-shots     lure landing, splashes
+##   reel loop     line coming in: slower with less effort
+##   drag clicker  line going out against the drag: faster and louder with speed
+##   rod creak     tension above 75 % of the line's strength, now and then
+##   one-shots     cast swish, lure landing, splashes, line zip on a fast run
 ## Visual only in the sense of pillar 4: calm sounds while waiting, the reel
 ## takes over in the fight. The browser starts audio after the first tap.
 
 const AUDIO_DIR := "res://audio"
 const WAVES: Array[String] = ["wave_01", "wave_02", "wave_03", "wave_04"]
-const ONE_SHOTS: Array[String] = ["lure_drop", "splash", "splash_heavy", "wind_gust"]
+const ONE_SHOTS: Array[String] = ["lure_drop", "splash", "splash_heavy", "wind_gust", "cast_swish", "rod_creak", "line_zip"]
+const CREAK_SHARE := 0.75
+const ZIP_SPEED_M_S := 1.2
 
 var _wind: AudioStreamPlayer
 var _reel: AudioStreamPlayer
+var _drag: AudioStreamPlayer
+var _drag_target_db := -80.0
+var _drag_target_pitch := 1.0
+var _creak_clock := 0.0
+var _zip_clock := 0.0
 var _waves: Array[AudioStreamPlayer] = []
 var _shots := {}
 var _rng := RandomNumberGenerator.new()
@@ -33,6 +41,8 @@ func _ready() -> void:
 	_wind = _player(_load("wind_loop"), true)
 	_reel = _player(_load("reel_loop"), true)
 	_reel.volume_db = -80.0
+	_drag = _player(_load("drag_click"), true)
+	_drag.volume_db = -80.0
 	for w: String in WAVES:
 		_waves.append(_player(_load(w), false))
 	for s: String in ONE_SHOTS:
@@ -51,15 +61,27 @@ func set_conditions(wind_ms: float, chop: float) -> void:
 ## line_rate_m_s: positive while line goes out, negative while it comes in;
 ## 0 or fight over silences the reel.
 func set_reel(line_rate_m_s: float, active: bool) -> void:
+	_reel_target_db = -80.0
+	_drag_target_db = -80.0
 	if not active or absf(line_rate_m_s) < 0.02:
-		_reel_target_db = -80.0
 		return
 	if line_rate_m_s > 0.0:
-		_reel_target_db = linear_to_db(clampf(0.35 + line_rate_m_s * 0.35, 0.3, 1.0))
-		_reel_target_pitch = clampf(1.0 + line_rate_m_s * 0.25, 1.0, 1.6)
+		# Line going out: the drag clicks, faster as the fish takes line faster.
+		_drag_target_db = linear_to_db(clampf(0.35 + line_rate_m_s * 0.35, 0.3, 1.0))
+		_drag_target_pitch = clampf(0.9 + line_rate_m_s * 0.35, 0.9, 2.0)
+		if line_rate_m_s >= ZIP_SPEED_M_S and _zip_clock <= 0.0:
+			_zip_clock = 2.5
+			play("line_zip", linear_to_db(0.6))
 	else:
 		_reel_target_db = linear_to_db(clampf(0.2 + -line_rate_m_s * 0.25, 0.15, 0.6))
 		_reel_target_pitch = clampf(0.75 + -line_rate_m_s * 0.1, 0.75, 1.0)
+
+
+## tension_ratio: tension over line strength. The rod creaks when it is high.
+func set_tension(tension_ratio: float) -> void:
+	if tension_ratio >= CREAK_SHARE and _creak_clock <= 0.0:
+		_creak_clock = _rng.randf_range(1.6, 3.0)
+		play("rod_creak", linear_to_db(clampf((tension_ratio - 0.5) * 1.6, 0.3, 0.9)))
 
 
 func play(name_id: String, volume_db: float = 0.0) -> void:
@@ -83,8 +105,16 @@ func _process(delta: float) -> void:
 		_gust_clock = _rng.randf_range(9.0, 20.0)
 		if _wind_ms >= 5.0:
 			play("wind_gust", linear_to_db(clampf(_wind_ms / 12.0, 0.3, 0.9)))
+	_creak_clock -= delta
+	_zip_clock -= delta
 	# Ease the reel towards its target so the sound follows the line smoothly.
 	var k := minf(delta * 8.0, 1.0)
+	_drag.volume_db = lerpf(_drag.volume_db, _drag_target_db, k)
+	_drag.pitch_scale = lerpf(_drag.pitch_scale, _drag_target_pitch, k)
+	if _drag.volume_db > -60.0 and not _drag.playing:
+		_drag.play()
+	elif _drag.volume_db <= -70.0 and _drag.playing:
+		_drag.stop()
 	_reel.volume_db = lerpf(_reel.volume_db, _reel_target_db, k)
 	_reel.pitch_scale = lerpf(_reel.pitch_scale, _reel_target_pitch, k)
 	if _reel.volume_db > -60.0 and not _reel.playing:

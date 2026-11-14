@@ -31,6 +31,10 @@ Converted to mono 22.05 kHz Ogg Vorbis; cuts and loops made with ffmpeg and nump
 | `splash.ogg` | https://opengameart.org/content/fisheefects | Memoraphile | CC0 | first 1.0 s |
 | `splash_heavy.ogg` | https://opengameart.org/content/ocean-splash | Thimras | CC0 | mono, normalised |
 | `lure_drop.ogg` | https://opengameart.org/content/object-dropping-into-water-0 | angeloyazar | CC0 | 0.15-0.65 s (first drop), gain raised |
+| `cast_swish.ogg` | https://opengameart.org/content/swish-bamboo-stick-weapon-swhoshes | qubodup (own recording of a bamboo stick) | CC0 | 5.1-5.7 s of the montage preview; owner go-ahead 2026-11-14 |
+| `drag_click.ogg` | https://opengameart.org/content/mechanical-sounds (`rattle1.wav`) | BMacZero | CC0 | mono; looped and pitched with line-out speed in the game |
+| `rod_creak.ogg` | https://opengameart.org/content/tree-creaking | AntumDeluge, cleaned from a recording by Department64 (original page not checked) | CC0 as stated on the page | first 2.5 s |
+| `line_zip.ogg` | https://opengameart.org/content/zipper | AntumDeluge (recording of a jacket zipper) | CC0 | mono |
 
 ## Spot and species research sources (2026-11-13, `spot_research.md`)
 No value from these is in `game/data/` yet.

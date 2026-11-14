@@ -47,5 +47,30 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "capari_rig",
+  "name_key": "TACKLE_LURE_CAPARI",
+  "type": "sabiki",
+  "length_cm": 2,
+  "weight_g": 20,
+  "flash": 15,
+  "action": 6,
+  "scent": 1,
+  "durability": 8,
+  "imitates": [
+   "small_fish",
+   "plankton"
+  ],
+  "run_depth_min_m": 0,
+  "run_depth_max_m": 30,
+  "sink_rate_m_per_s": 1.0,
+  "hook_gape_mm": 5,
+  "hook_pattern": "multi_hook_sabiki",
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]

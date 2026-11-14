@@ -236,6 +236,7 @@ func release_cast() -> void:
 
 
 func cast_with_power(power: float) -> void:
+	_snd("cast_swish", -3.0)
 	_cast = CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], _ctx["position"], conditions, power)
 	_cast["cast_m"] = maxf(float(_cast["cast_m"]), float(_k["WAIT_END_M"]) + 2.0)
 	_aim_x = clampf(_rng.randfn(0.0, float(_cast["aim_sigma_rad"])), -0.5, 0.5)
@@ -363,6 +364,7 @@ func _step_fight(delta: float) -> void:
 	var d := float(_hud["distance_m"])
 	if _sound and delta > 0.0 and _last_distance >= 0.0:
 		_sound.set_reel((d - _last_distance) / delta, _hud["outcome"] == "")
+		_sound.set_tension(float(_hud["tension_ratio"]))
 	_last_distance = d
 	_fight_effects(delta)
 	if _hud["outcome"] != "":
@@ -578,6 +580,8 @@ func _draw_overlay() -> void:
 			_draw_lifted_fish(tip)
 	for p: Dictionary in _fx.particles:
 		_overlay.draw_circle(p["pos"], p["size"], Color(0.92, 0.96, 1.0, 0.85 * float(p["life"]) / float(p["max_life"])))
+	if _on_bridge():
+		_draw_bridge(size)
 	_draw_rod(size, _rod_tip(0.7) if lifted else tip, 0.7 if lifted else bend)
 	if phase == Phase.FIGHT or (phase == Phase.RESULT and not _hud.is_empty()):
 		_draw_tension_bar(size)
@@ -601,6 +605,47 @@ func _draw_fight(size: Vector2, tip: Vector2, ratio: float) -> void:
 			_overlay.draw_colored_polygon(pts, shade)
 		else:
 			_overlay.draw_polyline(pts, shade, 3.0, true)
+
+
+## True when the standing position is on a bridge deck (Galata): the
+## foreground then shows the rail and the other anglers along it.
+func _on_bridge() -> bool:
+	return not _ctx.is_empty() and "bridge piers" in (_ctx["position"].get("structure_tags", []) as Array)
+
+
+## Bridge foreground: deck edge, a steel rail with posts, a lamp standard and
+## the rods of neighbouring anglers. Drawn shapes only (design direction:
+## art option A); darker with less light.
+func _draw_bridge(size: Vector2) -> void:
+	var light := float(_env.get("light", 0.6))
+	var steel := Color(0.16, 0.18, 0.2).lerp(Color(0.04, 0.05, 0.06), 1.0 - light)
+	var deck := Color(0.32, 0.31, 0.3).lerp(Color(0.08, 0.08, 0.09), 1.0 - light)
+	var rail_y := size.y * 0.80
+	var deck_y := size.y * 0.90
+	_overlay.draw_rect(Rect2(0, deck_y, size.x, size.y - deck_y), deck)
+	_overlay.draw_rect(Rect2(0, deck_y, size.x, 4), deck.lightened(0.15))
+	# Other anglers' rods leaning over the rail on the left (Zengin 2009: hundreds a day).
+	for i in 3:
+		var base := Vector2(size.x * (0.02 + 0.07 * i), rail_y + 4)
+		var tip := base + Vector2(size.x * (0.10 + 0.02 * i), -size.y * (0.30 + 0.04 * sin(_time * 0.6 + i)))
+		_overlay.draw_line(base, tip, steel.lightened(0.1), 3.0, true)
+		_overlay.draw_line(tip, tip + Vector2(size.x * 0.01, size.y * 0.25), Color(1, 1, 1, 0.25), 1.0, true)
+	# Rail: top bar, mid bar, posts.
+	_overlay.draw_rect(Rect2(0, rail_y - 6, size.x, 12), steel)
+	_overlay.draw_rect(Rect2(0, rail_y + size.y * 0.045, size.x, 6), steel)
+	var post_gap := 110.0
+	var x := fmod(post_gap * 0.5, post_gap)
+	while x < size.x:
+		_overlay.draw_rect(Rect2(x - 4, rail_y - 6, 8, deck_y - rail_y + 6), steel)
+		x += post_gap
+	# Lamp standard at the left.
+	var lamp_x := size.x * 0.27
+	_overlay.draw_rect(Rect2(lamp_x - 6, size.y * 0.18, 12, deck_y - size.y * 0.18), steel)
+	_overlay.draw_rect(Rect2(lamp_x - 34, size.y * 0.16, 68, 10), steel)
+	var glow := 1.0 - light
+	if glow > 0.2:
+		for side in [-1.0, 1.0]:
+			_overlay.draw_circle(Vector2(lamp_x + side * 30.0, size.y * 0.18), 9.0, Color(1.0, 0.85, 0.55, 0.4 + 0.5 * glow))
 
 
 func _rod_tip(bend: float) -> Vector2:

@@ -31,6 +31,10 @@
 | Valid names: Trachurus mediterraneus (AphiaID 126820), Pomatomus saltatrix (151482), Dicentrarchus labrax (126975) | WoRMS REST API, 2026-11-13 | R | `scientific_name` |
 | GBIF occurrences in a Marmara-Istanbul box (40.7-41.4 N, 28.0-29.9 E): bluefish 14, horse mackerel 4, sea bass 0; mostly iNaturalist research-grade observations | GBIF occurrence API, 2026-11-13 | R | Presence check only; too few to set abundance |
 
+## Depth at the bridge (2026-11-14)
+
+English Wikipedia (Golden Horn) gives a maximum depth of about 35 m where the Golden Horn flows into the Bosphorus. That bounds the Galata profiles but does not give depths at the rail; the four profiles (5-8 m at the rail, 12-22 m at 40 m out, deeper on the Bosphorus side) remain design fills.
+
 ## What the web cannot give
 
 - **Depth profiles at standing positions.** Charts are protected (SHODB); EMODnet is about 115 m per cell. Without a visit these stay design fills, labelled as such.

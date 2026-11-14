@@ -3,7 +3,7 @@ extends RefCounted
 ## Builds the context of a fight (the same dictionary CatchModel and FightSim
 ## take) from a loaded database. Used by the fight screen with the demo data.
 
-const TACKLES := ["lrf", "spin"]
+const TACKLES := ["lrf", "spin", "capari"]
 
 ## database: DataStore.load_all(...)["database"]; species_id, tackle (lrf or
 ## spin), position_id; u is a 0..1 draw for the fish size. play_overrides
@@ -38,7 +38,7 @@ static func build(database: Dictionary, species_id: String, tackle: String, posi
 
 ## Lure id of a rig (the demo has one lure per rig).
 static func lure_id(tackle: String) -> String:
-	return "lrf_soft" if tackle == "lrf" else "spin_minnow"
+	return {"lrf": "lrf_soft", "spin": "spin_minnow", "capari": "capari_rig"}.get(tackle, "lrf_soft")
 
 
 static func _by_id(records: Array, id: String) -> Dictionary:

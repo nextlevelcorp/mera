@@ -30,5 +30,21 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "capari_rod",
+  "name_key": "TACKLE_ROD_CAPARI",
+  "length_m": 3.0,
+  "power": 8,
+  "action": 10,
+  "cast_weight_min_g": 10,
+  "cast_weight_max_g": 40,
+  "sensitivity": 12,
+  "durability": 12,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]

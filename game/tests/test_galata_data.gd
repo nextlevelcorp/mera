@@ -70,3 +70,12 @@ func test_every_species_can_be_fought_on_both_rigs() -> void:
 				c.advance(1.0 / 30.0, {"reel": 1.0, "rod": 0.0, "drag_kg": float(ctx["reel"]["drag_max_kg"]) / 3.0})
 				guard += 1
 			assert_true(c.hud()["outcome"] != "", "%s on %s ends: %s" % [sp["id"], tackle, c.hud()["outcome"]])
+
+
+func test_sabiki_rig_catches_horse_mackerel() -> void:
+	var cond := {"slot": "evening", "month": 10, "wind_dir": "NE", "wind_ms": 3}
+	var ctx := FightSetup.build(_db, "istavrit", "capari", "karakoy_east", 0.5, cond)
+	assert_eq(ctx["lure"]["type"], "sabiki", "the çapari rig uses the sabiki lure")
+	assert_true(not CatchModel.cast(_k, ctx["rod"], ctx["lure"], ctx["angler"], ctx["position"], cond, 1.0)["lure_out_of_range"], "the sabiki weight suits the çapari rod")
+	var w := WaitSim.new(ctx, _k, _db["species"], 10.0, 1)
+	assert_true(float(w._rates["istavrit"]["rate_interest"]) > 0.0, "horse mackerel are interested in the sabiki")

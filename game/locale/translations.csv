@@ -111,3 +111,8 @@ TACKLE_LURE_LRF,Soft plastic,Silikon yem,Señuelo blando
 TACKLE_LURE_SPIN,Minnow,Minnow yem,Minnow
 ANGLER_DEFAULT,Angler,Balıkçı,Pescador
 FISH_UNDERSIZE,Below the legal size of %.0f cm: release it.,Yasal boyun (%.0f cm) altında: denize geri bırak.,Por debajo de la talla legal de %.0f cm: devuélvelo al agua.
+TACKLE_ROD_CAPARI,Sabiki rod (çapari),Çapari kamışı,Caña de sabiki (çapari)
+TACKLE_REEL_CAPARI,Sabiki reel,Çapari makarası,Carrete de sabiki
+TACKLE_LINE_CAPARI,Monofilament line,Monofilament misina,Sedal monofilamento
+TACKLE_LEADER_CAPARI,Sabiki rig line,Çapari takım misinası,Línea del aparejo sabiki
+TACKLE_LURE_CAPARI,"Sabiki rig (çapari), small feathered hooks","Çapari takımı, küçük tüylü iğneler","Aparejo sabiki (çapari), anzuelos pequeños con pluma"

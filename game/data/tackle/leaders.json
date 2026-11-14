@@ -40,5 +40,19 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "capari_leader",
+  "name_key": "TACKLE_LEADER_CAPARI",
+  "type": "mono",
+  "length_m": 1.2,
+  "breaking_strain_kg": 3.5,
+  "visibility": 6,
+  "abrasion_resistance": 8,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]

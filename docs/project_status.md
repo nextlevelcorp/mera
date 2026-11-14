@@ -25,6 +25,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Galata open items (2026-11-14): çapari rig, bridge foreground, cast/drag/creak/zip sounds, depth profiles bounded. Played in the debug web build: rig panel switches to the çapari rig (longest cast about 54 m), bridge rail and lamp drawn, forced horse mackerel landed and flagged under 13 cm. A natural wait with "Faster ×4" ran at normal speed in that run; the speed-up works headless, so the click most likely landed while the lure was still in the air (button hidden). Recheck on the phone.
 - Galata Bridge data (2026-11-13): first real spot in the game. Owner decisions: start at the Galata Bridge; species become horse mackerel, bluefish and bonito (no source places sea bass there). Played in the browser: a forced small bonito landed and flagged under the 25 cm legal size; catch log updated. A natural wait at Galata was checked headless (October evening, light rig: median 25 s), not in the browser.
 - Spot research, first pass (2026-11-13): `spot_research.md`. Waiting for the owner's choice of first spot and species.
 - Fishing loop on demo data (2026-11-13): played in the web debug build with software GL: cast, wait, forced bites, strike, fights (horse mackerel 23 cm landed, bluefish 35 cm landed with the fish body and splashes near the shore, sea bass 93 cm "landed" by the 90 s rule from 69 m out), result, catch log, rig and position kept after a page reload; release build shows no debug button; English, Spanish and 844×390 checked. Not measured on a phone.

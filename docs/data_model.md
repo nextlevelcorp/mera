@@ -126,7 +126,7 @@ Standing position (inside a spot):
 | Reel | `size` (int), `drag_max_kg` (float), `retrieve_m_per_s` (float), `smoothness` (int20), `line_capacity_m` (float) | drag limit, retrieve speed, smoothness (tension spike). `line_capacity_m`: MVP |
 | Line | `type` (`mono`, `braid`, `fluorocarbon`), `diameter_mm`, `breaking_strain_kg` (float), `stretch`, `visibility`, `abrasion_resistance` (int20) | breaking strain, stretch |
 | Leader | `type`, `length_m`, `breaking_strain_kg` (float), `visibility`, `abrasion_resistance` (int20) | breaking strain, visibility (commit), abrasion |
-| Lure | `type` (`soft_plastic`, `metal_jig`, `spoon`, `minnow`, `popper`), `length_cm`, `weight_g` (float), `flash`, `action`, `scent`, `durability` (int20), `imitates` (diet tags), `run_depth_min_m`, `run_depth_max_m`, `sink_rate_m_per_s` (float), `hook_gape_mm` (float), `hook_pattern` | length, weight, flash, action, imitates, depths, hook gape |
+| Lure | `type` (`soft_plastic`, `metal_jig`, `spoon`, `minnow`, `popper`, `sabiki` for a multi-hook çapari rig, added 2026-11-14), `length_cm`, `weight_g` (float), `flash`, `action`, `scent`, `durability` (int20), `imitates` (diet tags), `run_depth_min_m`, `run_depth_max_m`, `sink_rate_m_per_s` (float), `hook_gape_mm` (float), `hook_pattern` | length, weight, flash, action, imitates, depths, hook gape |
 | Bait (MVP, not in 0.1) | `type`, `size_cm`, `scent`, `durability`, `target_diet_tags`, `effective_depth_min_m`, `effective_depth_max_m` | none |
 | Float, sinker (MVP) | `float_type`, `buoyancy_g`, `sinker_weight_g` | none |
 
