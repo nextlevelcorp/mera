@@ -119,3 +119,6 @@ TACKLE_LURE_CAPARI,"Sabiki rig (çapari), small feathered hooks","Çapari takım
 DBG_MOTION,Motion direction,Hareket yönü,Dirección del movimiento
 DBG_NORMAL,normal,normal,normal
 DBG_INVERTED,inverted,ters,invertida
+DBG_WATER_DETAIL,Water detail,Su detayı,Detalle del agua
+DBG_ON,on,açık,activado
+DBG_OFF,off,kapalı,desactivado

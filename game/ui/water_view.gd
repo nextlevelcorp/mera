@@ -22,7 +22,11 @@ const SUNS := {
 	"night": [Vector3(0.15, 0.45, 0.9), Color(0.35, 0.4, 0.55)],
 }
 
+## Far-shore lights by time of slot (generic city lights, design fill).
+const CITY_LIGHTS := {"dawn": 0.3, "day": 0.0, "evening": 0.35, "night": 1.0}
+
 var _material: ShaderMaterial
+var detail := true
 
 
 func _init() -> void:
@@ -52,7 +56,15 @@ func set_conditions(slot: String, chop: float, visibility: float, light: float) 
 	_material.set_shader_parameter("water_shallow", palette[3])
 	_material.set_shader_parameter("sun_dir", (sun[0] as Vector3).normalized())
 	_material.set_shader_parameter("sun_color", sun[1])
+	_material.set_shader_parameter("city_lights", CITY_LIGHTS[slot])
+	_material.set_shader_parameter("detail", 1.0 if detail else 0.0)
 	_update_aspect()
+
+
+## Debug menu: switch the extra water detail off and on to measure its cost.
+func set_detail(on: bool) -> void:
+	detail = on
+	_material.set_shader_parameter("detail", 1.0 if on else 0.0)
 
 
 func _update_aspect() -> void:
