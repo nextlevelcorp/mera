@@ -58,3 +58,19 @@ Single values entered by hand with their citation in each record's `provenance`;
 | Bluefish length range and LW (12.3-43.7 cm, W=0.0107 L^2.9574) | Bal, Yanık & Türker (2015), South Marmara | Article copyright; values cited |
 | Bonito length range and LW (17.7-63.0 cm FL, W=0.01 FL^3.085) | Kahraman et al. (2014) as tabled in Genç et al. (2025) Turk. J. Marit. Mar. Sci. 11(1) | Article copyright; values cited (the 2014 paper itself was not opened) |
 | Valid names (AphiaID 126820, 151482, 127021) | WoRMS REST API | WoRMS terms |
+
+## Agent skills and tooling (2026-11-14, owner request)
+Files in `.claude/skills/`; licences and copyright lines in `.claude/skills/THIRD_PARTY_NOTICES.md`. None ships in the game export.
+
+| File | Source | Licence | Use |
+| --- | --- | --- | --- |
+| CLAUDE.md working principles | github.com/forrestchang/andrej-karpathy-skills @2c60614 | MIT (stated in README) | Paraphrased |
+| `caveman.md` | github.com/JuliusBrussee/caveman @b4ee71d | Apache 2.0 | Skill text unchanged, Mera notes added |
+| `compound-engineering.md` | github.com/EveryInc/compound-engineering-plugin @ee46dde | MIT | Paraphrased |
+| `game-studios.md` | github.com/Donchitos/Claude-Code-Game-Studios @abc0de7; threejs-game-skills | MIT | Paraphrased |
+| `threejs-graphics.md` | github.com/scottstts/Threejs-Awesome-Graphics-Agent-Skills @53eb5a2 | MIT | Paraphrased |
+| `threejs-game.md`, `rapier.md` (part) | github.com/majidmanzarpour/threejs-game-skills @8286774 | MIT | Paraphrased |
+| `founder-skill.md` | github.com/jakeschincariol/founder-skill | MIT | Paraphrased index |
+| `design-skills.md` | Anthropic frontend-design skill | Apache 2.0 | Paraphrased; the requested repository was not named |
+| `gltf-transform.md`, `rapier.md` (part) | gltf-transform.dev; rapier.rs | MIT; Apache 2.0 | Compiled from general knowledge |
+| `.mcp.json` firecrawl | npm firecrawl-mcp 3.35.0 | MIT | Agent tooling; the Firecrawl service needs an API key (free and paid plans) |
