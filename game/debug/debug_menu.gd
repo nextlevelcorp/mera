@@ -87,6 +87,7 @@ func _ready() -> void:
 		_screen.set_rig(t[(t.find(_screen.rig) + 1) % t.size()], _screen.position_id))
 	_add(grid, "species", func() -> void: _species_i = (_species_i + 1) % _species_ids.size())
 	_add(grid, "size", func() -> void: _size_i = (_size_i + 1) % SIZES.size())
+	_add(grid, "water", func() -> void: _screen._water.set_detail(not _screen._water.detail))
 	_add(grid, "motion", func() -> void:
 		if _screen._motion:
 			_screen._motion.invert = not _screen._motion.invert
@@ -118,6 +119,7 @@ func _add(grid: GridContainer, id: String, on_press: Callable) -> void:
 	var b := Button.new()
 	b.add_theme_font_size_override("font_size", 18)
 	b.custom_minimum_size = Vector2(250, 64)
+	b.clip_text = true
 	b.pressed.connect(func() -> void:
 		on_press.call()
 		_refresh())
@@ -138,6 +140,7 @@ func _refresh() -> void:
 	_buttons["rig"].text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_screen._ctx["rod"]["name_key"])]
 	_buttons["species"].text = "%s: %s" % [tr("FIGHT_SPECIES"), tr(_screen._species_by_id(_species_ids[_species_i])["name_key"])]
 	_buttons["size"].text = "%s: %s" % [tr("DBG_SIZE"), tr(SIZE_KEYS[_size_i])]
+	_buttons["water"].text = "%s: %s" % [tr("DBG_WATER_DETAIL"), tr("DBG_ON") if _screen._water.detail else tr("DBG_OFF")]
 	var inverted: bool = _screen._motion != null and _screen._motion.invert
 	_buttons["motion"].text = "%s: %s" % [tr("DBG_MOTION"), tr("DBG_INVERTED") if inverted else tr("DBG_NORMAL")]
 	_info.text = _screen.debug_info()

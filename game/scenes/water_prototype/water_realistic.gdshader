@@ -18,6 +18,13 @@ uniform vec3 bottom_color : source_color = vec3(0.55, 0.5, 0.38);
 uniform vec3 sun_color : source_color = vec3(1.0, 0.95, 0.85);
 uniform vec3 sun_dir = vec3(0.2, 0.75, 0.6);
 uniform float cloud_cover = 0.35;
+// 0 keeps the prototype's look; 1 adds wind slicks (smooth, mirror-like
+// patches where ripples die out). Switchable from the debug menu so the
+// frame-rate cost can be measured on the phone.
+uniform float detail = 0.0;
+// 0..1: lights of the far shore and their glow at dusk and night (generic
+// city lights, not a mapped skyline).
+uniform float city_lights = 0.0;
 
 const float CAM_HEIGHT = 2.2;
 const float FOV = 0.9;
@@ -63,6 +70,17 @@ float cloud_density(vec3 d, int octaves) {
 	return smoothstep(1.0 - cloud_cover, 1.15 - cloud_cover * 0.6, f) * smoothstep(0.0, 0.12, d.y);
 }
 
+// Lights along the far shore: one possible light per narrow screen column.
+float shore_light(float x, float t) {
+	float cell = floor(x * 240.0);
+	float r = hash(vec2(cell, 3.7));
+	float within = abs(fract(x * 240.0) - 0.5);
+	float twinkle = 0.75 + 0.25 * sin(t * (1.0 + 2.0 * r) + cell);
+	// Lights come in clusters (districts) with dark stretches between them.
+	float cluster = smoothstep(0.4, 0.7, noise(vec2(x * 9.0, 1.3)));
+	return step(0.6, r) * cluster * smoothstep(0.45, 0.1, within) * (0.4 + 0.6 * hash(vec2(cell, 9.1))) * twinkle;
+}
+
 vec3 sky_color(vec3 d, int octaves) {
 	float up = clamp(d.y, 0.0, 1.0);
 	vec3 c = mix(sky_horizon, sky_top, pow(up, 0.5));
@@ -85,6 +103,14 @@ void fragment() {
 		float ridge = 0.010 + 0.022 * noise(vec2(uv.x * 5.0, 3.0)) + 0.007 * noise(vec2(uv.x * 37.0, 7.0));
 		float land = 1.0 - smoothstep(ridge - 0.003, ridge, above);
 		c = mix(c, sky_horizon * 0.62, land * 0.85);
+		if (city_lights > 0.0) {
+			// Warm glow over the city, then the lights themselves on the land.
+			c += vec3(1.0, 0.62, 0.32) * city_lights * 0.12 * exp(-max(above, 0.0) * 35.0);
+			float cell = floor(uv.x * 240.0);
+			float light_y = hash(vec2(cell, 5.3)) * ridge * 0.9;
+			float dot_ = shore_light(uv.x, TIME) * smoothstep(0.0025, 0.0, abs(above - light_y)) * land;
+			c += vec3(1.0, 0.85, 0.55) * dot_ * city_lights * 1.6;
+		}
 		COLOR = vec4(c, 1.0);
 	} else {
 		float dist = CAM_HEIGHT / -ray.y;
@@ -102,7 +128,14 @@ void fragment() {
 		// Small wind ripples from noise.
 		vec2 q = p * 3.0 + vec2(TIME * 0.6, TIME * 0.4);
 		float n0 = noise(q);
-		slope += vec2(noise(q + vec2(0.15, 0.0)) - n0, noise(q + vec2(0.0, 0.15)) - n0) / 0.15 * (0.05 + 0.12 * chop);
+		float ripple = 0.05 + 0.12 * chop;
+		if (detail > 0.5) {
+			// Wind slicks: long patches stretched along the wind where surface
+			// films damp the small ripples; they read as smoother, brighter bands.
+			float slick = smoothstep(0.52, 0.72, fbm(p * vec2(0.035, 0.012) + vec2(0.0, TIME * 0.015), 3));
+			ripple *= mix(1.0, 0.2, slick * (1.0 - 0.6 * chop));
+		}
+		slope += vec2(noise(q + vec2(0.15, 0.0)) - n0, noise(q + vec2(0.0, 0.15)) - n0) / 0.15 * ripple;
 
 		// Far water is seen at a grazing angle: flatten the detail there.
 		float lod = 1.0 / (1.0 + dist * 0.04);
@@ -129,6 +162,13 @@ void fragment() {
 
 		// Haze towards the horizon.
 		col = mix(col, sky_horizon, smoothstep(30.0, 400.0, dist) * 0.6);
+		if (city_lights > 0.0) {
+			// Shore lights reflected as vertical streaks broken by the waves.
+			float wobble = slope.x * 0.012 + (noise(vec2(uv.x * 60.0, dist * 0.08 - TIME * 0.7)) - 0.5) * 0.004;
+			float broken = smoothstep(0.45, 0.75, noise(vec2(uv.x * 240.0, dist * 0.35 - TIME * 1.2)));
+			float streak = shore_light(uv.x + wobble, TIME) * smoothstep(40.0, 160.0, dist) * broken;
+			col += vec3(1.0, 0.75, 0.45) * streak * city_lights * fresnel * 1.2;
+		}
 		COLOR = vec4(col, 1.0);
 	}
 }

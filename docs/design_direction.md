@@ -159,3 +159,8 @@ Still open, not scheduled by the owner: runs at lower clarity and with casts und
 ## 7. Out of scope here
 
 Colour palette, character and tackle sprites, the exact screen layout of the rig editor and the log, and store art. They follow the art decision and the water prototype.
+
+## Water detail, 2026-11-14
+
+Added behind the `detail` switch (debug menu): wind slicks. Added by time of day: far-shore lights (`city_lights` 0 by day, 0.3 at dawn, 0.35 in the evening, 1.0 at night) with a sky glow and broken reflections. Cost per pixel: three extra noise reads for slicks, two to three for lights near the horizon. Not yet measured on the test phones; the owner measures with the switch on and off in the same build.
+
