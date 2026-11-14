@@ -1,0 +1,58 @@
+[
+ {
+  "id": "lrf_leader",
+  "name_key": "TACKLE_LEADER_LRF",
+  "type": "fluorocarbon",
+  "length_m": 1.5,
+  "breaking_strain_kg": 2.7,
+  "visibility": 4,
+  "abrasion_resistance": 12,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ },
+ {
+  "id": "spin_leader",
+  "name_key": "TACKLE_LEADER_SPIN",
+  "type": "fluorocarbon",
+  "length_m": 1.5,
+  "breaking_strain_kg": 7,
+  "visibility": 13,
+  "abrasion_resistance": 8,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ },
+ {
+  "id": "wire_leader",
+  "name_key": "TACKLE_LEADER_WIRE",
+  "type": "wire",
+  "length_m": 0.3,
+  "breaking_strain_kg": 8,
+  "visibility": 18,
+  "abrasion_resistance": 20,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ },
+ {
+  "id": "capari_leader",
+  "name_key": "TACKLE_LEADER_CAPARI",
+  "type": "mono",
+  "length_m": 1.2,
+  "breaking_strain_kg": 3.5,
+  "visibility": 6,
+  "abrasion_resistance": 8,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ }
+]

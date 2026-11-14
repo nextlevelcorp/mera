@@ -1,6 +1,8 @@
 # Audio sources: scan of free recordings
 
-**Status:** Shortlist for the owner to listen to, 2026-11-12. No audio file is in the repository and nothing is wired into the game. A file is committed only after the owner has heard it and its row is copied into `reference_docs.md`.
+**Status (2026-11-13):** the owner listened to the shortlist and approved it; ten files are in `game/audio/` (see `reference_docs.md`). Second scan for the gaps (cast, drag clicker, rod creak) below, waiting for the owner's choice.
+
+**Earlier status:** Shortlist for the owner to listen to, 2026-11-12. No audio file is in the repository and nothing is wired into the game. A file is committed only after the owner has heard it and its row is copied into `reference_docs.md`.
 
 Scope: sounds for the 0.1 slice as listed in `design_direction.md` section 4 (ambient waves and wind, reel, splash, bite cue). Owner decision: free real recordings first; a paid service is the fallback and needs a separate go-ahead.
 
@@ -58,3 +60,18 @@ The scan found enough CC0 material for ambient waves, wind and splashes, and one
 3. The paid fallback the owner named. It costs money and gives generated, not recorded, sound.
 
 Recommendation: listen to the shortlist first, then option 2 for the reel and cast, and option 3 only if both fail.
+
+## Second scan, 2026-11-13 (gaps)
+
+OpenGameArt advanced search, sound effects, CC0 only, for: whoosh, swish, swoosh, ratchet, clicker, zipper, creak, fishing rod, fishing line, line reel, winch, spool. Kenney, Pixabay, Sonniss and Freesound did not answer from the session. Candidates (licence read on the page on 2026-11-13; trimmed listening copies on a private page for the owner):
+
+| Use | Page | Author | Notes |
+| --- | --- | --- | --- |
+| Cast | https://opengameart.org/content/swish-bamboo-stick-weapon-swhoshes | qubodup | Own recording of a bamboo stick waved at the mic: closest to a rod swing |
+| Cast | https://opengameart.org/content/swishes-sound-pack | artisticdude | 13 short swishes made for an RPG; recorded or synthesised not stated |
+| Cast | https://opengameart.org/content/air-whoosh | pyranostudios | Whoosh loop |
+| Drag clicker | https://opengameart.org/content/mechanical-sounds | BMacZero | Ratchets and clicks |
+| Line running out | https://opengameart.org/content/zipper | AntumDeluge | Recording of a jacket zipper |
+| Rod creak | https://opengameart.org/content/tree-creaking | AntumDeluge, from Department64 | Cleaned copy of another author's recording; the original page was not checked |
+
+Still missing: a recording of a real reel's drag under load.

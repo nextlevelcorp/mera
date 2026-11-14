@@ -1,0 +1,76 @@
+[
+ {
+  "id": "lrf_soft",
+  "name_key": "TACKLE_LURE_LRF",
+  "type": "soft_plastic",
+  "length_cm": 5,
+  "weight_g": 3,
+  "flash": 5,
+  "action": 14,
+  "scent": 3,
+  "durability": 6,
+  "imitates": [
+   "small_fish",
+   "crustacean"
+  ],
+  "run_depth_min_m": 0.5,
+  "run_depth_max_m": 6,
+  "sink_rate_m_per_s": 0.3,
+  "hook_gape_mm": 6,
+  "hook_pattern": "jig_head",
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ },
+ {
+  "id": "spin_minnow",
+  "name_key": "TACKLE_LURE_SPIN",
+  "type": "minnow",
+  "length_cm": 12,
+  "weight_g": 18,
+  "flash": 14,
+  "action": 12,
+  "scent": 2,
+  "durability": 10,
+  "imitates": [
+   "small_fish"
+  ],
+  "run_depth_min_m": 0.5,
+  "run_depth_max_m": 2.5,
+  "sink_rate_m_per_s": 0.0,
+  "hook_gape_mm": 12,
+  "hook_pattern": "treble",
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ },
+ {
+  "id": "capari_rig",
+  "name_key": "TACKLE_LURE_CAPARI",
+  "type": "sabiki",
+  "length_cm": 2,
+  "weight_g": 20,
+  "flash": 15,
+  "action": 6,
+  "scent": 1,
+  "durability": 8,
+  "imitates": [
+   "small_fish",
+   "plankton"
+  ],
+  "run_depth_min_m": 0,
+  "run_depth_max_m": 30,
+  "sink_rate_m_per_s": 1.0,
+  "hook_gape_mm": 5,
+  "hook_pattern": "multi_hook_sabiki",
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ }
+]

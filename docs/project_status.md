@@ -9,7 +9,9 @@
 - Business model: MVP is free, no ads, no timers, with a waitlist. Later a one-time paid release. Ads, energy timers and pay-to-win are out (pillars 2 and 5). Risk: realistic-sim audience is small, so a paid model may cap reach.
 
 ## Reminders for the owner
-- Water, second round: on both iPhones open "Water prototype", press "At" a few times, and report average and worst-1% fps for "Water: Realistic" and "Water: Basic" at 720p (about a minute each, also at chop 1), and whether the look is right.
+- Water, fourth round, like-for-like (chop 1, 720p, clarity unknown): realistic and basic both average 60 fps on both phones; worst 1% realistic 54 (16e) and 56 (14), basic 56 and 57. Settings corrected by the owner to clarity 20, chop 1. The owner declined more water measurements for now.
+- Water, third round (superseded): realistic at chop 1, 720p: iPhone 16e 50 fps, iPhone 14 56 fps (metric unstated). Still needed: basic water on both phones at 720p, same chop, and the metric (average or worst 1%).
+- Water, second round (superseded): on both iPhones open "Water prototype", press "At" a few times, and report average and worst-1% fps for "Water: Realistic" and "Water: Basic" at 720p (about a minute each, also at chop 1), and whether the look is right.
 - Sound: listen to the shortlist in `audio_sources.md` and say which files to use. Reel-under-load and cast sounds are missing; choose between the single reel file, hand-picked Freesound downloads (the site blocks automated clients) or the paid fallback.
 - An Android phone (borrowed is fine) is needed before the tester round: vibration and mid-range performance are untested on iPhones.
 - Before 0.1: remove the water prototype or move it behind the debug menu.
@@ -23,6 +25,11 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Galata open items (2026-11-14): çapari rig, bridge foreground, cast/drag/creak/zip sounds, depth profiles bounded. Played in the debug web build: rig panel switches to the çapari rig (longest cast about 54 m), bridge rail and lamp drawn, forced horse mackerel landed and flagged under 13 cm. A natural wait with "Faster ×4" ran at normal speed in that run; the speed-up works headless, so the click most likely landed while the lure was still in the air (button hidden). Recheck on the phone.
+- Galata Bridge data (2026-11-13): first real spot in the game. Owner decisions: start at the Galata Bridge; species become horse mackerel, bluefish and bonito (no source places sea bass there). Played in the browser: a forced small bonito landed and flagged under the 25 cm legal size; catch log updated. A natural wait at Galata was checked headless (October evening, light rig: median 25 s), not in the browser.
+- Spot research, first pass (2026-11-13): `spot_research.md`. Waiting for the owner's choice of first spot and species.
+- Fishing loop on demo data (2026-11-13): played in the web debug build with software GL: cast, wait, forced bites, strike, fights (horse mackerel 23 cm landed, bluefish 35 cm landed with the fish body and splashes near the shore, sea bass 93 cm "landed" by the 90 s rule from 69 m out), result, catch log, rig and position kept after a page reload; release build shows no debug button; English, Spanish and 844×390 checked. Not measured on a phone.
+- Fight screen on demo data (2026-11-13): played end to end in the web build with software GL: landed (bluefish, medium tackle), line broke at 2.89 kg against a 2.11 kg line (light tackle, drag at maximum, reel and pull held with two touches). Fish silhouette visible near the shore after the drawing-depth fix. Not measured on a phone yet; sound, body animation, cast/bite return, save, debug menu and real spot data are still to do.
 - Spec and CLAUDE.md in repo.
 - Repo skeleton and an empty Godot 4.4.1 web build (title screen, portrait guard, en/tr/es).
 - CI workflow green on the PR (build job). Deploy job untested until the first push to `main`.
@@ -37,5 +44,6 @@
 - Network: owner added Steam, Play Store, App Store, fws.gov, PC Gamer hosts. Reddit, SteamDB, Eksi Sozluk (site-side 403), Roblox, Poki, CrazyGames, TUIK and others stay unreachable.
 - GitHub Pages source must be set to GitHub Actions for the deploy job to pass (repo is now public).
 - GUT test plugin: owner decided to skip for now; own runner stays.
-- Debug menu does not exist yet; required before any gameplay flow is reviewed.
+- Debug menu on Pages: `/debug/` after the next merge to main (owner approved 2026-11-13).
+- Sound candidates for the cast, drag clicker and rod creak are on a private listening page for the owner; none is committed until chosen.
 - Performance budget and test device are set in phase 2.

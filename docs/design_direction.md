@@ -121,6 +121,41 @@ Cost: unknown on the phones. Clouds add noise lookups per pixel to both the sky 
 
 Still missing: a real-place foreground, the fish and its splash during a fight, rain and fog.
 
+## 6c. Owner's report on the realistic water (2026-11-13)
+
+- **Realistic water, 720p: 50 fps** (the owner did not say whether this is the average or the worst 1%; recorded as reported).
+- **Look:** the owner says the look is going in the wanted direction.
+- **Not yet reported:** the basic water at 720p again on the same phones, the chop-1 measurement, and the phone-by-phone split. Both phones were not reported separately.
+- **Reading:** 50 fps is above the 30 fps floor and below the 60 fps goal. Earlier worst-1% figures for the basic water were 55 and 57 fps, so the realistic water costs roughly 5 fps or more at the same resolution, but the two numbers are not the same metric and cannot be compared exactly until the owner reports both as average and worst 1%.
+
+## 6d. Owner's per-phone numbers, realistic water at chop 1 (2026-11-13)
+
+| Phone | Water | Chop | Resolution | fps (metric not stated) |
+| --- | --- | --- | --- | --- |
+| iPhone 16e | Realistic | 1.0 | 720p | 50 |
+| iPhone 14 | Realistic | 1.0 | 720p | 56 |
+
+- The owner said these were taken at wave 1 with the realistic water. **The basic water has not been measured yet** on either phone; the earlier basic numbers (55 and 57 fps worst 1%, section 6b) were at chop 0.3.
+- Metric still open: average or worst 1%. Needed for the comparison.
+- Against the pass criteria (section 5): above the 30 fps floor on both phones at full resolution, and above the 60 fps goal only on neither phone. Recorded as measured at chop 1, the hardest setting.
+
+## 6e. First like-for-like comparison, realistic against basic at 720p (2026-11-13)
+
+Owner's table. Chop entered as "dalga 11", read as chop 1 (a typo for 1). Clarity was first entered as "berraklık 100" and corrected by the owner to 20. Both shaders were measured on the same phone in the same session.
+
+| Phone | Realistic average | Realistic worst 1% | Basic average | Basic worst 1% |
+| --- | --- | --- | --- | --- |
+| iPhone 16e | 60 | 54 | 60 | 56 |
+| iPhone 14 | 60 | 56 | 60 | 57 |
+
+Reading:
+- **Average is 60 on both shaders and both phones.** That is the browser's refresh cap, so the average hides the cost: both shaders have headroom that these numbers do not show.
+- **Worst 1% differs by 1 to 2 fps.** The realistic shader costs about 2 fps at the slow end on the iPhone 16e and 1 fps on the iPhone 14. Small in this condition.
+- **Earlier realistic figures do not match this table.** Section 6d gave 50 fps for the iPhone 16e and 56 for the iPhone 14 at chop 1 with the metric unstated. This table gives 54 worst-1% for the same phone and condition, so one of the two runs is not comparable. Likely a different scene state or background load. Not resolved.
+- **Clarity (corrected 2026-11-13):** the owner first wrote "berraklık 100", then corrected it: **clarity 20, chop 1** (the slider maximum). The numbers in this table are at clarity 20, chop 1, 720p. Clarity changes how much of the bottom is drawn, so the cost depends on it.
+
+Still open, not scheduled by the owner: runs at lower clarity and with casts under chop 1, to see whether the 60 fps cap hides a real cost.
+
 ## 7. Out of scope here
 
 Colour palette, character and tackle sprites, the exact screen layout of the rig editor and the log, and store art. They follow the art decision and the water prototype.

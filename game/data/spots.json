@@ -1,0 +1,280 @@
+[
+ {
+  "id": "galata_bridge",
+  "name_key": "SPOT_GALATA_BRIDGE",
+  "region": "Istanbul, Golden Horn mouth",
+  "lat": 41.02,
+  "lon": 28.973056,
+  "shore_type": "pier",
+  "water_class": "marine",
+  "typical_clarity": 7,
+  "pressure": 20,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   9.3,
+   8.2,
+   8.7,
+   11.3,
+   15.4,
+   20.2,
+   23.4,
+   24.2,
+   22.3,
+   18.8,
+   15.2,
+   12.0
+  ],
+  "species": [
+   {
+    "species_id": "istavrit",
+    "abundance_by_month": [
+     0.6,
+     0.6,
+     0.8,
+     0.9,
+     0.9,
+     0.7,
+     0.6,
+     0.6,
+     0.8,
+     0.9,
+     0.9,
+     0.7
+    ]
+   },
+   {
+    "species_id": "lufer",
+    "abundance_by_month": [
+     0.4,
+     0.2,
+     0.15,
+     0.1,
+     0.1,
+     0.1,
+     0.1,
+     0.15,
+     0.4,
+     0.8,
+     0.9,
+     0.7
+    ]
+   },
+   {
+    "species_id": "palamut",
+    "abundance_by_month": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.1,
+     0.6,
+     0.8,
+     0.6,
+     0.05
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "karakoy_east",
+    "name_key": "POS_GALATA_KARAKOY_EAST",
+    "map_x": 0.6,
+    "map_y": 0.25,
+    "facing": "E",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 8
+     },
+     {
+      "distance_m": 20,
+      "depth_m": 15
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 22
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 13,
+    "structure_tags": [
+     "bridge piers",
+     "ferry wash"
+    ],
+    "exposure_by_wind": {
+     "N": 0.3,
+     "NE": 0.5,
+     "E": 0.5,
+     "SE": 0.5,
+     "S": 0.4,
+     "SW": 0.3,
+     "W": 0.1,
+     "NW": 0.1
+    },
+    "current": 10,
+    "landing_difficulty": 0.6,
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "eminonu_east",
+    "name_key": "POS_GALATA_EMINONU_EAST",
+    "map_x": 0.6,
+    "map_y": 0.75,
+    "facing": "E",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 7
+     },
+     {
+      "distance_m": 20,
+      "depth_m": 13
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 20
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 11,
+    "structure_tags": [
+     "bridge piers",
+     "ferry piers"
+    ],
+    "exposure_by_wind": {
+     "N": 0.3,
+     "NE": 0.5,
+     "E": 0.5,
+     "SE": 0.4,
+     "S": 0.3,
+     "SW": 0.2,
+     "W": 0.1,
+     "NW": 0.1
+    },
+    "current": 9,
+    "landing_difficulty": 0.6,
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "karakoy_west",
+    "name_key": "POS_GALATA_KARAKOY_WEST",
+    "map_x": 0.4,
+    "map_y": 0.25,
+    "facing": "W",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 20,
+      "depth_m": 10
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 14
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 9,
+    "structure_tags": [
+     "bridge piers"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.1,
+     "E": 0.05,
+     "SE": 0.05,
+     "S": 0.1,
+     "SW": 0.2,
+     "W": 0.3,
+     "NW": 0.3
+    },
+    "current": 4,
+    "landing_difficulty": 0.6,
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "eminonu_west",
+    "name_key": "POS_GALATA_EMINONU_WEST",
+    "map_x": 0.4,
+    "map_y": 0.75,
+    "facing": "W",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 20,
+      "depth_m": 9
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 12
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 7,
+    "structure_tags": [
+     "bridge piers"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.1,
+     "E": 0.05,
+     "SE": 0.05,
+     "S": 0.1,
+     "SW": 0.2,
+     "W": 0.3,
+     "NW": 0.3
+    },
+    "current": 3,
+    "landing_difficulty": 0.6,
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q81523 (Galata Bridge), P625 and P2043, CC0",
+     "accessed": "2026-11-13"
+    },
+    "lon": {
+     "source": "Wikidata Q81523 (Galata Bridge), P625 and P2043, CC0",
+     "accessed": "2026-11-13"
+    },
+    "water_temp_by_month_c": {
+     "source": "MGM, Marmara Denizi deniz suyu sıcaklık 2025, 1970-2025 monthly means: https://mgm.gov.tr/FILES/resmi-istatistikler/denizSuyu/2025-Marmara.pdf",
+     "accessed": "2026-11-13"
+    },
+    "pressure": {
+     "source": "Zengin, M. (2009) Galata Köprüsünün Oltacıları, SÜMAE Yunus Araştırma Bülteni 9(3): https://dergipark.org.tr/en/download/article-file/204298 (514 anglers counted in spring 2008, 406 in autumn)",
+     "accessed": "2026-11-13"
+    }
+   }
+  }
+ }
+]

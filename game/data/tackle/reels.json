@@ -1,0 +1,44 @@
+[
+ {
+  "id": "lrf_reel",
+  "name_key": "TACKLE_REEL_LRF",
+  "size": 2000,
+  "drag_max_kg": 3,
+  "retrieve_m_per_s": 1.0,
+  "smoothness": 12,
+  "line_capacity_m": 150,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ },
+ {
+  "id": "spin_reel",
+  "name_key": "TACKLE_REEL_SPIN",
+  "size": 4000,
+  "drag_max_kg": 6,
+  "retrieve_m_per_s": 1.2,
+  "smoothness": 9,
+  "line_capacity_m": 200,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ },
+ {
+  "id": "capari_reel",
+  "name_key": "TACKLE_REEL_CAPARI",
+  "size": 3000,
+  "drag_max_kg": 5,
+  "retrieve_m_per_s": 0.8,
+  "smoothness": 10,
+  "line_capacity_m": 200,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ }
+]

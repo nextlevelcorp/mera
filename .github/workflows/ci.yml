@@ -72,6 +72,21 @@ jobs:
           test -s build/web/index.wasm
           test -s build/web/index.pck
 
+      - name: Export debug build to /debug/ (debug menu, mera_debug feature tag)
+        run: |
+          mkdir -p build/web/debug
+          "$GODOT" --headless --path game --export-release "Web Debug"
+          test -s build/web/debug/index.pck
+
+      - name: Release build carries no debug menu (PRD F15)
+        run: |
+          # A file packed into the pck leaves a .remap entry; the release preset excludes debug/*.
+          if grep -a -q "debug_menu.gd.remap" build/web/index.pck; then
+            echo "::error::The release export contains the debug menu."
+            exit 1
+          fi
+          grep -a -q "debug_menu.gd.remap" build/web/debug/index.pck
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

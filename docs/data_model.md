@@ -126,7 +126,7 @@ Standing position (inside a spot):
 | Reel | `size` (int), `drag_max_kg` (float), `retrieve_m_per_s` (float), `smoothness` (int20), `line_capacity_m` (float) | drag limit, retrieve speed, smoothness (tension spike). `line_capacity_m`: MVP |
 | Line | `type` (`mono`, `braid`, `fluorocarbon`), `diameter_mm`, `breaking_strain_kg` (float), `stretch`, `visibility`, `abrasion_resistance` (int20) | breaking strain, stretch |
 | Leader | `type`, `length_m`, `breaking_strain_kg` (float), `visibility`, `abrasion_resistance` (int20) | breaking strain, visibility (commit), abrasion |
-| Lure | `type` (`soft_plastic`, `metal_jig`, `spoon`, `minnow`, `popper`), `length_cm`, `weight_g` (float), `flash`, `action`, `scent`, `durability` (int20), `imitates` (diet tags), `run_depth_min_m`, `run_depth_max_m`, `sink_rate_m_per_s` (float), `hook_gape_mm` (float), `hook_pattern` | length, weight, flash, action, imitates, depths, hook gape |
+| Lure | `type` (`soft_plastic`, `metal_jig`, `spoon`, `minnow`, `popper`, `sabiki` for a multi-hook çapari rig, added 2026-11-14), `length_cm`, `weight_g` (float), `flash`, `action`, `scent`, `durability` (int20), `imitates` (diet tags), `run_depth_min_m`, `run_depth_max_m`, `sink_rate_m_per_s` (float), `hook_gape_mm` (float), `hook_pattern` | length, weight, flash, action, imitates, depths, hook gape |
 | Bait (MVP, not in 0.1) | `type`, `size_cm`, `scent`, `durability`, `target_diet_tags`, `effective_depth_min_m`, `effective_depth_max_m` | none |
 | Float, sinker (MVP) | `float_type`, `buoyancy_g`, `sinker_weight_g` | none |
 
@@ -250,7 +250,7 @@ Real-time rules, per simulation tick:
 - **Teeth (owner decision 2026-11-11):** a species with teeth cuts the leader at a constant hazard over the fight:
   `cut_rate = K.TEETH_RATE * n(sp.teeth) * (1 - n(leader.abrasion_resistance)) * (K.WIRE_CUT_FACTOR if leader.type == "wire" else 1)`, and `p_cut = 1 - exp(-cut_rate * min(t_fight, 90 s))`. A cut ends the fight at once. Wire is immune, but its visibility feeds stage 3 suspicion like any leader's.
 - **Landing phase** starts when `energy <= K.LAND_ENERGY * E0` and the fish is close.
-- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0`, otherwise the hook pulls out. This is a deliberate game rule, not realism. It is not rare: with the drag set to a third of the line strength, the closed-form estimate exceeds 90 s on light tackle for a 62 cm sea bass (109 s) and an 80 cm bluefish (133 s), and on medium tackle for an 80 cm bluefish (95 s) and an 80 cm sea bass (102 s); it stays under it for the small and mid-size fish tested (50 cm bluefish on light tackle: 83 s). The owner decided on 2026-11-11 that the rule stays and that the game warns the player (PRD F19, P1) when light tackle meets a big fish.
+- **90 s rule (PRD F8):** if a fight reaches 90 s it is resolved at once: landed if `energy <= 0.4 * E0` and the fish is within `K.CAP_LAND_DISTANCE_M` (5 m) of the shore, otherwise the hook pulls out. The distance condition was added by the owner on 2026-11-13 after a 93 cm sea bass was counted as landed 69 m out. This is a deliberate game rule, not realism. It is not rare: with the drag set to a third of the line strength, the closed-form estimate exceeds 90 s on light tackle for a 62 cm sea bass (109 s) and an 80 cm bluefish (133 s), and on medium tackle for an 80 cm bluefish (95 s) and an 80 cm sea bass (102 s); it stays under it for the small and mid-size fish tested (50 cm bluefish on light tackle: 83 s). The owner decided on 2026-11-11 that the rule stays and that the game warns the player (PRD F19, P1) when light tackle meets a big fish.
 
 Closed-form estimate at a constant drag, used in the worked examples and as the test oracle for the tick model:
 
@@ -292,7 +292,10 @@ visible_m = K.VIS_BASE + K.VIS_RANGE * visibility                               
 | STATE_SECONDS run / rest / thrash | 3-6 / 1-2 / 1-2 s | STRAIN_SHARE / LIMIT | 0.8 / 2 s | SLACK_SHARE / HAZARD | 0.1 / 0.15 /s |
 | LAND_DISTANCE_M | 2 m | THRASH_DISTANCE_M | 10 m | CAST_LEN_FACTOR | 12 |
 | CAST_WEIGHT_REF_G | 30 g | CAST_FIT_MIN | 0.3 | CAST_SKILL_BASE | 0.6 |
-| CAST_HEADWIND | 0.3 | AIM_SIGMA_BASE / SKILL | 0.15 / 0.12 rad | | |
+| CAST_HEADWIND | 0.3 | AIM_SIGMA_BASE / SKILL | 0.15 / 0.12 rad | WAIT_RETRIEVE_M_PER_S | 0.4 m/s |
+| WAIT_END_M | 3 m | SHOAL_BOOST_S | 60 s | CAP_LAND_DISTANCE_M | 5 m |
+
+`WAIT_RETRIEVE_M_PER_S` is how fast the lure comes back while the player waits; the cast ends when the lure is `WAIT_END_M` from the shore. `SHOAL_BOOST_S` is the 60 s shoal follow-up of 5.3. All three were added with the real-time wait (2026-11-13).
 
 Calibration targets from the PRD: best-case median wait for a take 20-40 s (the examples give 28 s); worst case at least 120 s (608 s); fights 20-90 s (30-60 s in the examples).
 
@@ -455,7 +458,8 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 | Validator (sections 2 and 4) | `game/sim/data_validator.gd` | Done; negative tests for each rule |
 | Loader | `game/sim/data_store.gd` | Done; returns errors, the caller decides how loudly to fail; not yet wired into start-up because no real data exists |
 | Stages 0-4 and 6, cast distance (5.0), closed-form fight (5.5 estimate) including teeth and the 90 s cap flag | `game/sim/catch_model.gd` | Done; the three worked examples (four runs) are unit tests and agree with this document and the workbook |
-| Real-time fight (5.5): fixed 30 Hz step, seeded, run / rest / thrash states, drag slip, line break and strain, teeth, slack hook pull-out, landing phase, 90 s rule | `game/sim/fight_sim.gd` | Done; tested against the closed-form estimate over 200 seeds per example. Takes `reel`, `rod`, `drag_kg` per tick; not connected to touch controls or a scene yet |
-| Shoal follow-up (5.3) | none | Not ported: needs the wait loop that owns the bite timer |
+| Real-time fight (5.5): fixed 30 Hz step, seeded, run / rest / thrash states, drag slip, line break and strain, teeth, slack hook pull-out, landing phase, 90 s rule | `game/sim/fight_sim.gd` | Done; tested against the closed-form estimate over 200 seeds per example. Takes `reel`, `rod`, `drag_kg` per tick; driven by the fishing screen |
+| Real-time wait, bite and strike (5.3, 5.4): interest events as a Poisson process per species, nibble or take, strike window and timing quality, hook roll, shoal follow-up, slow retrieve, attempt log | `game/sim/wait_sim.gd` | Done; seeded, 30 Hz; best-case median wait over repeated casts 27 s and worst case 714 s (PRD F6 test). The window does not shrink on a slow frame: during a take at most two ticks run per frame |
+| Fight on screen | `game/sim/fight_controller.gd`, `game/scenes/fishing/` | Done; overmatched-tackle flag (PRD F19) from the closed-form estimate |
 | Fixtures (illustrative design fills, not real data) | `game/tests/fixtures/` | Excluded from the export |
-| Real species and spot data | `game/data/species.json`, `spots.json`, `tackle/` | Not written: waits for the owner's choice of spot and species and the licence reads |
+| Real species and spot data | `game/data/species.json`, `spots.json`, `tackle/` | Galata Bridge and three species written 2026-11-13; sources per field in each record's provenance and in `reference_docs.md`; tackle and angler are design fills |

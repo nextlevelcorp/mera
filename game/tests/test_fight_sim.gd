@@ -133,6 +133,8 @@ func test_cap_resolves_an_overmatched_fight() -> void:
 		if result["cap_applied"]:
 			capped += 1
 			assert_true(result["outcome"] in [FightSim.OUTCOME_LANDED, FightSim.OUTCOME_HOOK_PULLED], "the cap ends in landed or hook pulled")
+			if result["outcome"] == FightSim.OUTCOME_LANDED:
+				assert_true(float(result["distance_m"]) <= float(_k["CAP_LAND_DISTANCE_M"]), "the cap lands only a fish near the shore (%.1f m)" % result["distance_m"])
 	assert_eq(finished, 50, "every fight ends")
 	assert_true(capped > 0, "the 90 s rule fires for this fight")
 
