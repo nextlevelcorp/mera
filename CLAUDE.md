@@ -38,7 +38,9 @@ DESIGN PILLARS (reject work that breaks one)
 5. Collection and mastery, not hypercasual one-tap rounds.
 
 ENGINEERING RULES
-- Branch from main. One draft pull request per thread. Never merge, force-push, or change CI or export settings without my approval.
+- Branch from main. One pull request per update, so I can test each one on my phone.
+- Standing approval (owner, 2026-11-14): after every update, merge the pull request yourself, so the change is live on GitHub Pages for me to test. Merge only when all of these hold: tests pass, the CI run for the head commit is green, the web build was played and what was seen is reported, and nothing in the update needs my go-ahead (see NEEDS MY GO-AHEAD FIRST). Squash-merge, then bring the working branch level with main by merging main into it. Say in the final message that it was merged and where to test (game and /debug/ links).
+- Still never without my approval: force-push, rewrite published history, change CI or export settings, or merge an update that adds a dependency, spends money, changes scope or pillars, touches player data or is a release step. Open those as a draft pull request and wait.
 - Simulation logic is deterministic and separated from rendering, so it can be unit-tested headless.
 - Game data lives in data files with a schema and a source field, never hard-coded in scene scripts.
 - Every user-facing string goes through the localisation table (en, tr, es). English is the source language.
