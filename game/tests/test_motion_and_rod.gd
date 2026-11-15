@@ -102,3 +102,24 @@ func test_rod_stays_stable_with_long_frames() -> void:
 	assert_true(absf(rod.total_bend()) < 0.5, "long frames do not blow the rod up: %.2f rad" % rod.total_bend())
 	for a: float in rod.angles:
 		assert_true(absf(a) < 0.59, "no joint sits at the clamp")
+
+
+func test_hand_tremor_is_not_working_the_lure() -> void:
+	var g := MotionGesture.new()
+	g.calibrate(0.0)
+	var r := {}
+	for i in 300:
+		r = g.add_sample(1.0 / 60.0, 0.4 * sin(i * 1.3), 0.0)
+	assert_true(float(r["jig"]) < 0.05, "a steady hand does not jig: %.2f" % r["jig"])
+
+
+func test_a_phone_held_still_becomes_the_rest_pose() -> void:
+	var g := MotionGesture.new()
+	g.calibrate(0.0)
+	var pull := 0.0
+	for i in 60 * 120:   # two minutes at a new, steady angle
+		pull = float(g.add_sample(1.0 / 60.0, 0.0, 0.5)["pull"])
+	assert_true(pull < 0.2, "after holding still the new pose is the rest pose: %.2f" % pull)
+	var first := MotionGesture.new()
+	first.calibrate(0.0)
+	assert_true(float(first.add_sample(1.0 / 60.0, 0.0, 0.5)["pull"]) > 0.5, "but the same tilt pulls at once at first")

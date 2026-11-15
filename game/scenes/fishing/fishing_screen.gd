@@ -80,6 +80,12 @@ var _dangle_vel := Vector2.ZERO
 var _line_rate := 0.0
 var _paid_m := 0.0
 var _motion_chip: Button
+var _neighbours := NeighborAnglers.new(5)
+var _last_contact_s := -99.0   ## when a fish last touched the lure (_time)
+var _strike_flash := 0.0
+var _mon_label: Label
+var _mon_pull: ProgressBar
+var _mon_jig: ProgressBar
 var _motion: DeviceMotion
 var _gesture := MotionGesture.new()
 var _motion_state := {}
@@ -197,6 +203,8 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 func apply_conditions() -> void:
 	_ctx = _base_context(_db["spot"][0]["species"][0]["species_id"])
 	_env = CatchModel.environment(_k, _ctx["spot"], _ctx["position"], conditions)
+	# Neighbours get bites about as often as a bite comes here and now.
+	_neighbours.set_pace(WaitSim.new(_ctx, _k, _db["species"], 15.0, 1).median_wait_s() * 1.3)
 	if _water:
 		if _sound:
 			_sound.set_conditions(float(conditions["wind_ms"]), float(_env["chop"]))
@@ -356,11 +364,13 @@ func _on_wait_event(e: Dictionary) -> void:
 	var world := Vector2(_lure_x(float(e["lure_distance_m"])), NEAR_DRAW_M + float(e["lure_distance_m"]))
 	match e["event"]:
 		"nibble":
+			_last_contact_s = _time
 			_tip_vel -= 6.0
 			_rod.kick(1.5)
 			_fx.add_ring(world, 0.35, 0.8, 0.35)
 			_play("nibble")
 		"take":
+			_last_contact_s = _time
 			_tip_vel -= 22.0
 			_rod.kick(6.0)
 			_fx.add_ring(world, 0.7, 1.2, 0.9)
@@ -568,8 +578,17 @@ func _update_motion(delta: float) -> void:
 	if _motion == null or not _motion.available:
 		return
 	_motion_state = _gesture.add_sample(delta, _motion.pitch_rate, _motion.pitch)
+	if _motion_state["strike"]:
+		_strike_flash = 0.6
 	if phase == Phase.WAIT and _motion_state["strike"]:
-		strike()
+		# A flick strikes when a fish is on or just touched the lure; with
+		# nothing there it just twitches the lure (no 'nothing there' penalty).
+		var contact: bool = _wait_state.get("phase", "") == WaitSim.PHASE_TAKE or _time - _last_contact_s < 1.2
+		if contact:
+			strike()
+		else:
+			_tap_jig = minf(_tap_jig + 0.6, 1.0)
+			_rod.kick(-2.0)
 	if phase == Phase.FIGHT and _motion_state["strike"]:
 		_rod.kick(-5.0)
 
@@ -669,8 +688,9 @@ func _step_rod_and_line(delta: float) -> void:
 	match phase:
 		Phase.FIGHT:
 			back = float(current_input()["rod"])
-		Phase.WAIT:
-			back = 0.4 * float(_motion_state.get("pull", 0.0))
+		Phase.READY, Phase.WAIT:
+			# The rod follows the phone's tilt, so the mapping is visible at once.
+			back = 0.8 * float(_motion_state.get("pull", 0.0))
 	_rod_back = lerpf(_rod_back, back, minf(delta * 10.0, 1.0))
 	base -= 0.45 * _rod_back
 	var tip := _rod.tip() if _rod.tip() != Vector2.ZERO else rest_tip
@@ -727,14 +747,15 @@ func _step_rod_and_line(delta: float) -> void:
 		Phase.READY, Phase.CHARGE:
 			slack = 1.0
 		Phase.WAIT:
-			slack = 1.02 - 0.015 * clampf(_tip_kick, 0.0, 1.0)
+			# An angler keeps the line nearly tight; wind gives it a slight belly.
+			slack = 1.006 - 0.004 * clampf(_tip_kick, 0.0, 1.0) + 0.00015 * absf(wind_accel())
 		Phase.FIGHT:
-			slack = lerpf(1.04, 1.0, clampf(float(_hud.get("tension_ratio", 0.0)) * 2.5, 0.0, 1.0))
+			slack = lerpf(1.015, 1.0, clampf(float(_hud.get("tension_ratio", 0.0)) * 2.5, 0.0, 1.0))
 		Phase.FLIGHT:
 			# Line leaves the spool faster than the lure pulls it straight: a loose belly early on.
-			slack = 1.0 + 0.06 * (1.0 - clampf(_flight_s / maxf(_flight_total_s, 0.001), 0.0, 1.0))
+			slack = 1.0 + 0.03 * (1.0 - clampf(_flight_s / maxf(_flight_total_s, 0.001), 0.0, 1.0))
 		Phase.LIFT, Phase.RESULT:
-			slack = 1.01
+			slack = 1.004
 	if _rope == null:
 		_rope = VerletRope.new(tip, _end_pos, 18, slack)
 	_rope.set_total_length(dist * slack)
@@ -771,6 +792,10 @@ func _process(delta: float) -> void:
 	_tip_kick += _tip_vel * delta
 	_tap_jig = maxf(_tap_jig - delta * 0.8, 0.0)
 	_step_rod_and_line(delta)
+	if _on_bridge():
+		_neighbours.update(delta)
+		for e: Dictionary in _neighbours.take_events():
+			_snd("splash", -24.0)   # a neighbour lifts a fish: a distant splash
 	_toast_s = maxf(_toast_s - delta, 0.0)
 	_toast_label.visible = _toast_s > 0.0
 	_fx.step(delta)
@@ -867,12 +892,8 @@ func _draw_bridge(size: Vector2) -> void:
 			_overlay.draw_rect(Rect2(lx + wobble - w * 0.5, y, w, 2.0 + 3.0 * t), Color(1.0, 0.82, 0.5, (0.3 + 0.5 * lamp_glow) * (1.0 - 0.3 * t)))
 	_overlay.draw_rect(Rect2(0, deck_y, size.x, size.y - deck_y), deck)
 	_overlay.draw_rect(Rect2(0, deck_y, size.x, 4), deck.lightened(0.15))
-	# Other anglers' rods leaning over the rail on the left (Zengin 2009: hundreds a day).
-	for i in 3:
-		var base := Vector2(size.x * (0.02 + 0.07 * i), rail_y + 4)
-		var tip := base + Vector2(size.x * (0.10 + 0.02 * i), -size.y * (0.30 + 0.04 * sin(_time * 0.6 + i)))
-		_overlay.draw_line(base, tip, steel.lightened(0.1), 3.0, true)
-		_overlay.draw_line(tip, tip + Vector2(size.x * 0.01, size.y * 0.25), Color(1, 1, 1, 0.25), 1.0, true)
+	# Other anglers along the rail, fishing too (Zengin 2009: hundreds a day).
+	_neighbours.draw(_overlay, size, rail_y, light, _time)
 	# Rail: top bar, mid bar, posts.
 	_overlay.draw_rect(Rect2(0, rail_y - 6, size.x, 12), steel)
 	_overlay.draw_rect(Rect2(0, rail_y + size.y * 0.045, size.x, 6), steel)
@@ -892,10 +913,28 @@ func _draw_bridge(size: Vector2) -> void:
 
 
 ## The line along the Verlet rope; warm-coloured and thicker while straining.
+## The line as a thin thread: thicker and clearer near the rod, finer and
+## fainter far out (distance), with the odd glint where the sun catches it.
+## Warm and thicker while it strains.
 func _draw_line(strained: bool) -> void:
 	if _rope == null:
 		return
-	_overlay.draw_polyline(_rope.points, Color(1.0, 0.85, 0.5, 0.95) if strained else Color(1, 1, 1, 0.85), 2.0 if strained else 1.4, true)
+	var pts := _rope.points
+	var n := pts.size() - 1
+	var light := float(_env.get("light", 0.6))
+	var base := Color(1.0, 0.86, 0.58) if strained else Color(0.84, 0.91, 1.0).lerp(Color(1.0, 0.82, 0.62), 0.5 * (1.0 - light))
+	for i in n:
+		var t := float(i) / n
+		var w := lerpf(1.7, 0.6, pow(t, 0.7)) * (1.4 if strained else 1.0)
+		var col := base
+		col.a = lerpf(0.85, 0.35, pow(t, 0.9))
+		var ph := sin(_time * 2.7 + i * 1.9)
+		if ph > 0.92:
+			col = col.lerp(Color(1, 1, 1, 1), (ph - 0.92) / 0.08 * (0.35 + 0.65 * light))
+		_overlay.draw_line(pts[i], pts[i + 1], col, w, true)
+	# Where the line meets the water: a small ripple, so it reads as cutting the surface.
+	if _has_line and (phase == Phase.WAIT or phase == Phase.FIGHT):
+		_ring_at(_end_pos, 5.0 + 2.0 * sin(_time * 3.1), Color(1, 1, 1, 0.3))
 
 
 ## While charging: where the lure would land at the current power and aim
@@ -910,6 +949,12 @@ func _draw_aim_marker(size: Vector2) -> void:
 	var ry := WaterView.CAM_HEIGHT * 0.8 / (world.y * world.y * WaterView.FOV) * size.y
 	_ellipse(centre, maxf(rx, 6.0), maxf(ry, 2.0), Color(1, 1, 1, 0.6))
 	_ellipse(centre, maxf(rx, 6.0) * 0.4, maxf(ry, 2.0) * 0.4, Color(1, 1, 1, 0.45))
+
+
+func _ring_at(centre: Vector2, r: float, color: Color) -> void:
+	_overlay.draw_set_transform(centre, 0.0, Vector2(1.0, 0.3))
+	_overlay.draw_arc(Vector2.ZERO, r, 0.0, TAU, 14, color, 1.0, true)
+	_overlay.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _ellipse(centre: Vector2, rx: float, ry: float, color: Color) -> void:
@@ -1221,6 +1266,24 @@ func _build_settings() -> void:
 	box.add_child(_plain_label(tr("SET_MOTION"), 20))
 	_sens_slider = _slider(0.5, 2.0, 0.1, func(v: float) -> void: _change_setting("motion_sens", v))
 	box.add_child(_sens_slider)
+	# Live view of what the phone reports, so a wrong reading can be seen.
+	_mon_label = _plain_label("", 16)
+	_mon_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_mon_label)
+	_mon_pull = ProgressBar.new()
+	_mon_pull.max_value = 1.0
+	_mon_pull.show_percentage = false
+	_mon_pull.custom_minimum_size = Vector2(0, 16)
+	box.add_child(_mon_pull)
+	_mon_jig = ProgressBar.new()
+	_mon_jig.max_value = 1.0
+	_mon_jig.show_percentage = false
+	_mon_jig.custom_minimum_size = Vector2(0, 16)
+	box.add_child(_mon_jig)
+	box.add_child(_button(tr("SET_RECENTER"), 20, func() -> void: _gesture.calibrated = false))
+	var help := _plain_label(tr("SET_MOTION_HELP"), 15)
+	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(help)
 	_flip_check = CheckButton.new()
 	_flip_check.text = tr("SET_INVERT")
 	_flip_check.add_theme_font_size_override("font_size", 22)
@@ -1344,6 +1407,17 @@ func _update_log() -> void:
 func _update_texts() -> void:
 	if _status_label == null or _ctx.is_empty():
 		return
+	_strike_flash = maxf(_strike_flash - get_process_delta_time(), 0.0)
+	_status_label.modulate.a = 0.0 if _settings_panel.visible else 1.0
+	if _mon_label and _settings_panel.visible:
+		if _motion and _motion.available:
+			_mon_label.text = tr("SET_MON_TEXT") % [rad_to_deg(float(_motion_state.get("tilt", 0.0))), _motion.pitch_rate, 100.0 * float(_motion_state.get("pull", 0.0)), 100.0 * float(_motion_state.get("jig", 0.0))]
+			if _strike_flash > 0.0:
+				_mon_label.text += "  " + tr("SET_MON_STRIKE")
+			_mon_pull.value = float(_motion_state.get("pull", 0.0))
+			_mon_jig.value = float(_motion_state.get("jig", 0.0))
+		else:
+			_mon_label.text = tr("SET_MON_NONE")
 	if _motion_chip and _motion:
 		var st := _motion.status()
 		_motion_chip.visible = st != DeviceMotion.STATUS_NONE and phase != Phase.RESULT
