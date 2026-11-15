@@ -1,5 +1,7 @@
 # Anonymous counters: proposal (PRD F16, section 6)
 
+**Decision (owner, 2026-11-15): option A, no counters.** Nothing below is to be built unless the owner reopens it.
+
 **Status:** 2026-11-15. A proposal for the owner. **No code, no network call and no dependency has been added.** Nothing here may be built until the owner approves it (CLAUDE.md: new dependencies, player data, costs).
 
 ## What is needed

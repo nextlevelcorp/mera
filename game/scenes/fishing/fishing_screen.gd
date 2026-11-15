@@ -107,6 +107,11 @@ var _stats := FrameStats.new(60.0)
 var _reel_pressed := false
 var _reel_y := 0.0
 var _pull_pressed := false
+var _steer := 0.0
+var _was_jumping := false
+var _was_landing := false
+var _was_kicking := false
+var _steer_hint_shown := false
 var _drag_ratio := 0.33
 var _strike_queued := false
 
@@ -401,7 +406,12 @@ func _start_fight(hooked: Dictionary) -> void:
 	var u: float = forced_u if forced_u >= 0.0 else float(hooked["u"])
 	forced_u = -1.0
 	var d: float = hooked["distance_m"]
-	_fight_ctx = _base_context(hooked["species_id"], {"cast_m": d, "hook_distance_m": d, "timing_quality": hooked["timing_quality"]})
+	var overrides := {"cast_m": d, "hook_distance_m": d, "timing_quality": hooked["timing_quality"]}
+	# What the player did with the lure is what the "why" view explains.
+	for key: String in ["lure_depth_m", "retrieve_speed"]:
+		if hooked.has(key):
+			overrides[key] = hooked[key]
+	_fight_ctx = _base_context(hooked["species_id"], overrides)
 	_fight_ctx["play"]["fish_length_cm"] = FightController.draw_length_cm(_fight_ctx["species"], u)
 	_drag_ratio = clampf(float(_fight_ctx["play"]["drag_kg"]) / float(_fight_ctx["reel"]["drag_max_kg"]), 0.0, 1.0)
 	_controller = FightController.new(_fight_ctx, _k, _seed_counter)
@@ -412,6 +422,10 @@ func _start_fight(hooked: Dictionary) -> void:
 	_last_distance = -1.0
 	_reel_pressed = false
 	_pull_pressed = false
+	_steer = 0.0
+	_was_jumping = false
+	_was_landing = false
+	_was_kicking = false
 	_snd("splash", -6.0)
 	_set_phase(Phase.FIGHT)
 
@@ -421,6 +435,7 @@ func current_input() -> Dictionary:
 		"reel": FightController.reel_from_pad(_reel_pressed, _reel_y, _reel_pad.size.y),
 		"rod": maxf(FightController.rod_from_button(_pull_pressed), float(_motion_state.get("pull", 0.0))),
 		"drag_kg": FightController.drag_from_slider(_drag_ratio, _controller.drag_max_kg),
+		"steer": _steer if _pull_pressed else 0.0,
 	}
 
 
@@ -456,14 +471,22 @@ func _finish_fight() -> void:
 		_result.merge(SaveGame.record_catch(save, sp["id"], _result["length_cm"], _result["weight_kg"], Time.get_date_string_from_system()))
 		_store()
 		_play("landed")
-		_lift_t = 0.0
-		_lift_from = WaterView.project(_fish_world(), 0.0, _overlay.size)
-		_swing = 1.1
-		_swing_v = 0.0
-		_fx.splash(_lift_from, _fish_world(), 0.9)
-		_snd("splash", -2.0)
+		if _hud["in_landing"]:
+			# The player reeled it up: it is already hanging at the rail.
+			_lift_t = LIFT_RISE_S
+		else:
+			_lift_t = 0.0
+			_lift_from = WaterView.project(_fish_world(), 0.0, _overlay.size)
+			_swing = 1.1
+			_swing_v = 0.0
+			_fx.splash(_lift_from, _fish_world(), 0.9)
+			_snd("splash", -2.0)
 		_set_phase(Phase.LIFT)
 		return
+	if outcome == FightSim.OUTCOME_LOST_AT_EDGE:
+		# It drops back into the water.
+		_fx.splash(_lift_from, _fish_world(), 0.9)
+		_snd("splash", -2.0)
 	_show_result()
 	_set_phase(Phase.RESULT)
 
@@ -474,12 +497,15 @@ func _step_lift(delta: float) -> void:
 	_lift_t += delta
 	var gravity_term := -12.0 * sin(_swing)
 	var kick := 0.0
-	if _lift_t > LIFT_RISE_S:
+	if _landing_now():
+		if _hud["kicking"]:
+			kick = 16.0 * sin(_time * 9.0)
+	elif _lift_t > LIFT_RISE_S:
 		kick = 9.0 * sin(_lift_t * 7.3) * maxf(0.0, sin(_lift_t * 1.7))
 	_swing_v += (gravity_term - 1.6 * _swing_v + kick) * delta
 	_swing += _swing_v * delta
 	_drip_clock -= delta
-	if _drip_clock <= 0.0 and _lift_t > LIFT_RISE_S * 0.5:
+	if _drip_clock <= 0.0 and (_lift_t > LIFT_RISE_S * 0.5 or _landing_now()):
 		_drip_clock = 0.18
 		var tail := _lift_points()[1]
 		_fx.splash(tail, _fish_world(), 0.12)
@@ -493,11 +519,16 @@ func _lift_points() -> PackedVector2Array:
 	var size := _overlay.size
 	var tip := _rod.tip()
 	var hang := tip + Vector2(0.0, size.y * 0.30)
-	var r := smoothstep(0.0, LIFT_RISE_S, _lift_t)
+	var r := float(_hud["lift"]) if _landing_now() else smoothstep(0.0, LIFT_RISE_S, _lift_t)
 	var mouth := _lift_from.lerp(hang, r) + Vector2(0.0, -size.y * 0.08 * sin(PI * r))
 	var length_px := _lift_length_px()
 	var dir := Vector2(sin(_swing), cos(_swing))
 	return PackedVector2Array([mouth, mouth + dir * length_px])
+
+
+## The fight's landing: the fish hangs on the line and the player reels it up.
+func _landing_now() -> bool:
+	return phase == Phase.FIGHT and not _hud.is_empty() and bool(_hud["in_landing"])
 
 
 func _lift_length_px() -> float:
@@ -514,6 +545,8 @@ func _draw_lifted_fish(tip: Vector2) -> void:
 	var dir := (pts[1] - mouth).normalized()
 	var side := Vector2(-dir.y, dir.x)
 	var flap := 0.18 if _lift_t > LIFT_RISE_S else 0.05
+	if _landing_now():
+		flap = 0.3 if _hud["kicking"] else 0.04
 	var left := PackedVector2Array()
 	var right := PackedVector2Array()
 	var spine := PackedVector2Array()
@@ -555,6 +588,34 @@ func _fight_effects(delta: float) -> void:
 	var state: String = _hud["fish_state"]
 	if _fish:
 		_fish.step(delta, pos, "landing" if _hud["in_landing"] else state)
+	# A jump: the fish leaves the water; the player should ease the rod.
+	var jumping: bool = _hud["jumping"]
+	if jumping != _was_jumping:
+		_fx.splash(WaterView.project(pos, 0.0, _overlay.size), pos, 1.0)
+		_fx.add_ring(pos, 0.6, 2.0, 0.8)
+		_snd("splash_heavy", -3.0)
+		if jumping:
+			Input.vibrate_handheld(40)
+			_rod.kick(5.0)
+		_was_jumping = jumping
+	# The landing begins: the fish comes out of the water on the line.
+	if _hud["in_landing"] and not _was_landing:
+		_was_landing = true
+		_lift_from = WaterView.project(pos, 0.0, _overlay.size)
+		_swing = 0.5
+		_swing_v = 0.0
+		_fx.splash(_lift_from, pos, 0.8)
+		_snd("splash", -3.0)
+	if _hud["in_landing"]:
+		_step_lift(delta)
+		if _hud["kicking"] and not _was_kicking:
+			_rod.kick(4.0)
+			Input.vibrate_handheld(30)
+		_was_kicking = _hud["kicking"]
+		return
+	if state == "run" and not _steer_hint_shown and float(_hud["time_s"]) > 1.0:
+		_steer_hint_shown = true
+		_toast(tr("FIGHT_STEER_HINT"), 4.0)
 	if state != _last_state:
 		if state == "run":
 			_fx.add_ring(pos, 0.5, 1.6, 0.5)
@@ -572,8 +633,16 @@ func _fight_effects(delta: float) -> void:
 ## distance (plus the drawing offset), drifting sideways with its state.
 func _fish_world() -> Vector2:
 	var d := float(_hud.get("distance_m", 0.0))
-	var side := sin(_time * 0.7) * 0.12 * d + (0.08 * d if _hud.get("fish_state", "") == "run" else 0.0)
+	var side := float(_hud.get("side_m", 0.0)) + sin(_time * 0.7) * 0.04 * d
 	return Vector2(_lure_x(d) + side, NEAR_DRAW_M + d)
+
+
+## Height of the fish above the water during a jump, in metres.
+func _jump_height() -> float:
+	if _hud.is_empty() or not _hud["jumping"]:
+		return 0.0
+	var total := float(_k["JUMP_S"])
+	return 0.9 * sin(PI * clampf(1.0 - float(_hud["jump_left_s"]) / total, 0.0, 1.0))
 
 
 
@@ -641,7 +710,9 @@ func _line_end(size: Vector2) -> Vector2:
 			var dw := float(_wait_state.get("lure_distance_m", 0.0))
 			return WaterView.project(Vector2(_lure_x(dw), NEAR_DRAW_M + dw), 0.03 * sin(_time * 2.1), size)
 		Phase.FIGHT:
-			return WaterView.project(_fish_world(), 0.0, size)
+			if _landing_now():
+				return _lift_points()[0]
+			return WaterView.project(_fish_world(), _jump_height(), size)
 		Phase.LIFT, Phase.RESULT:
 			if _lifted():
 				return _lift_points()[0]
@@ -676,7 +747,7 @@ func _step_rod_and_line(delta: float) -> void:
 	# Breathing: the whole rig rises and falls slowly (pillar 3: oscillation).
 	var breath := Vector2(sin(_time * 0.9) * 1.5, sin(_time * TAU * 0.25) * 3.0)
 	var butt := Vector2(size.x * 0.66, size.y * 0.95) + breath
-	var rest_tip := Vector2(size.x * 0.76, size.y * 0.30)
+	var rest_tip := Vector2(size.x * (0.76 + 0.07 * (_steer if phase == Phase.FIGHT and _pull_pressed else 0.0)), size.y * 0.30)
 	var base := (rest_tip - butt).angle()
 	var length := butt.distance_to(rest_tip)
 	# The cast swing: back over the shoulder while charging, a forward snap on release.
@@ -837,7 +908,7 @@ func _draw_overlay() -> void:
 			_draw_line(false)
 			_overlay.draw_circle(_end_pos, 3.0, Color(0.95, 0.75, 0.3))
 		Phase.FIGHT, Phase.RESULT:
-			if _lifted():
+			if _lifted() or _landing_now():
 				_draw_line(false)
 				_draw_lifted_fish(tip)
 			elif not _hud.is_empty():
@@ -862,11 +933,19 @@ func _draw_fight(size: Vector2) -> void:
 	var pos := _fish_world()
 	if not line_gone and phase == Phase.FIGHT:
 		_draw_line(float(_hud["strain_ratio"]) > 0.0)
-	if _hud["fish_visible"] and not line_gone and _fish:
+	var jump_h := _jump_height()
+	# Which way it runs: a small arrow at the line's end, so side strain can be read.
+	if phase == Phase.FIGHT and _hud["fish_state"] == "run" and not line_gone:
+		var at := WaterView.project(pos, 0.0, size) + Vector2(0.0, -26.0)
+		var hd := float(_hud["heading"])
+		_overlay.draw_colored_polygon(PackedVector2Array([at + Vector2(hd * 16.0, 0.0), at + Vector2(-hd * 6.0, -9.0), at + Vector2(-hd * 6.0, 9.0)]), Color(1, 1, 1, 0.85))
+	if (_hud["fish_visible"] or jump_h > 0.0) and not line_gone and _fish:
 		var pts := PackedVector2Array()
 		for w: Vector2 in _fish.outline():
-			pts.append(WaterView.project(_fish.head + (w - _fish.head) * FISH_DRAW_SCALE, 0.0, size))
+			pts.append(WaterView.project(_fish.head + (w - _fish.head) * FISH_DRAW_SCALE, jump_h, size))
 		var shade := Color(0.05, 0.08, 0.1, 0.55 + 0.3 * float(_env.get("visibility", 0.5)))
+		if jump_h > 0.0:
+			shade = Color(0.62, 0.68, 0.72).darkened(0.5 * (1.0 - float(_env.get("light", 0.6))))
 		if Geometry2D.triangulate_polygon(pts).size() > 0:
 			_overlay.draw_colored_polygon(pts, shade)
 		else:
@@ -1124,13 +1203,16 @@ func _build_hud() -> void:
 	_drag_label.offset_bottom = 14.0
 	_drag_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_pull_button = _button(tr("FIGHT_PULL"), 28, Callable())
-	_place_bottom(_pull_button, true, Vector2(200, 200), 16.0)
+	_place_bottom(_pull_button, true, Vector2(210, 210), 16.0)
 	_pull_button.button_down.connect(func() -> void: _pull_pressed = true)
 	_pull_button.button_up.connect(func() -> void: _pull_pressed = false)
 	# A second finger does not emulate a mouse, so listen to raw touch as well.
 	_pull_button.gui_input.connect(func(event: InputEvent) -> void:
 		if event is InputEventScreenTouch:
-			_pull_pressed = event.pressed)
+			_pull_pressed = event.pressed
+		# Where the thumb sits sideways on the button is the side strain.
+		if event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouse:
+			_steer = FightController.steer_from_pad(event.position.x, _pull_button.size.x))
 	add_child(_pull_button)
 
 	# Cast / strike: the same right-corner button.
@@ -1238,7 +1320,7 @@ func _show_why() -> void:
 	var stats := {
 		"max_tension_kg": float(_hud["max_tension_kg"]), "drag_kg": float(_hud["drag_set_kg"]),
 		"line_strength_kg": float(_hud["line_strength_kg"]), "distance_m": float(_hud["distance_m"]),
-		"cap_applied": bool(_hud["cap_applied"]),
+		"cap_applied": bool(_hud["cap_applied"]), "thrown_on_jump": bool(_hud["thrown_on_jump"]),
 	}
 	var lines := WhyReport.lines(resolved, _fight_ctx, tr(_fight_ctx["species"]["name_key"]), tr("SLOT_%s" % String(conditions["slot"]).to_upper()), String(_result["outcome"]), stats)
 	var texts: Array[String] = []
@@ -1447,6 +1529,16 @@ func _update_texts() -> void:
 			_depth_label.text = tr("WAIT_HUD") % [float(_wait_state.get("depth_m", 0.0)), float(_wait_state.get("water_depth_m", 0.0)), float(_wait_state.get("retrieve_ms", 0.0))]
 		Phase.FIGHT:
 			_tension_label.text = "%.2f / %.2f kg" % [_hud["tension_kg"], _hud["line_strength_kg"]]
+			var landing: bool = _hud["in_landing"]
+			_drag_slider.visible = not landing
+			_pull_button.visible = not landing
+			_hint_label.visible = landing or _hud["jumping"] or _controller.overmatched
+			if landing:
+				_hint_label.text = tr("LAND_WAIT") if _hud["kicking"] else tr("LAND_REEL")
+			elif _hud["jumping"]:
+				_hint_label.text = tr("FIGHT_JUMP_HINT")
+			else:
+				_hint_label.text = tr("FISH_OVERMATCHED")
 			_distance_label.text = "%.1f m" % _hud["distance_m"]
 			_drag_label.text = "%.1f kg" % _hud["drag_set_kg"]
 

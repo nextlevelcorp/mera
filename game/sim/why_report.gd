@@ -58,6 +58,8 @@ static func _outcome_line(resolved: Dictionary, outcome: String, stats: Dictiona
 		FightSim.OUTCOME_HOOK_PULLED:
 			if bool(stats.get("cap_applied", false)):
 				return {"key": "WHY_OUT_HOOK_CAP", "args": [float(stats.get("distance_m", 0.0))]}
+			if bool(stats.get("thrown_on_jump", false)):
+				return {"key": "WHY_OUT_JUMP", "args": [100.0 * float(resolved["hook"]["hook"])]}
 			return {"key": "WHY_OUT_HOOK_SLACK", "args": [100.0 * float(resolved["hook"]["hook"])]}
 		FightSim.OUTCOME_LOST_AT_EDGE:
 			return {"key": "WHY_OUT_LOST_AT_EDGE", "args": [100.0 * float(resolved["landing"]["landing_q"])]}

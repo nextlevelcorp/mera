@@ -79,3 +79,26 @@ func test_pulling_the_rod_brings_the_fish_in_while_the_drag_holds() -> void:
 	var slipping := FightSim.new(ctx, _k, 0.9, 3)
 	slipping.step({"reel": 0.0, "rod": 1.0, "drag_kg": 0.01})
 	assert_true(slipping.distance_m >= float(ctx["play"]["hook_distance_m"]), "while the drag slips, pulling gains nothing")
+
+
+func test_the_hooked_fish_carries_the_depth_and_speed_it_was_caught_at() -> void:
+	var screen = load("res://scenes/fishing/fishing_screen.tscn").instantiate()
+	screen.setup("")
+	screen.cast_with_power(0.8)
+	screen._land_lure()
+	for i in 120:
+		screen._wait.advance(1.0 / 30.0, {"reel": 0.0})   # let a sinker sink for 4 s
+	var deep: float = screen._wait.depth_m
+	screen._wait.force_take(screen._db["spot"][0]["species"][0]["species_id"])
+	for i in 400:
+		if screen._wait.phase == WaitSim.PHASE_HOOKED:
+			break
+		if screen._wait.phase != WaitSim.PHASE_TAKE:
+			screen._wait.force_take(screen._db["spot"][0]["species"][0]["species_id"])
+		screen._wait.advance(1.0 / 30.0, {"reel": 0.0})
+		screen._wait.advance(0.0, {"reel": 0.0, "strike": screen._wait.snapshot()["take_progress"] > 0.4})
+	assert_eq(screen._wait.phase, WaitSim.PHASE_HOOKED, "a forced take is hooked sooner or later")
+	screen._start_fight(screen._wait.hooked)
+	assert_true(deep > 0.5, "the lure sank (%.2f m)" % deep)
+	assert_true(absf(float(screen._fight_ctx["play"]["lure_depth_m"]) - screen._wait.depth_m) < 0.6, "the why view sees the real lure depth, not the fixed 3 m")
+	screen.free()

@@ -61,6 +61,8 @@ func hud() -> Dictionary:
 		"in_landing": s["in_landing"],
 		"fish_state": s["fish_state"], "time_s": s["time_s"],
 		"outcome": s["outcome"], "cap_applied": s["cap_applied"],
+		"side_m": s["side_m"], "heading": s["heading"], "jumping": s["jumping"], "jump_left_s": s["jump_left_s"],
+		"thrown_on_jump": s["thrown_on_jump"], "lift": s["lift"], "kicking": s["kicking"],
 		"max_tension_kg": max_tension_kg, "drag_set_kg": float(_last_input.get("drag_kg", 0.0)),
 	}
 
@@ -81,6 +83,15 @@ static func drag_from_slider(slider_ratio: float, drag_max: float) -> float:
 ## Right pad: pulling the rod tip against the fish's run.
 static func rod_from_button(pressed: bool) -> float:
 	return 1.0 if pressed else 0.0
+
+
+## Right pad: how far the thumb sits left or right of the pad's middle is the
+## side strain (-1 left, 1 right); the middle third is neutral.
+static func steer_from_pad(x: float, width: float) -> float:
+	if width <= 0.0:
+		return 0.0
+	var v := clampf((x - width * 0.5) / (width * 0.5), -1.0, 1.0)
+	return 0.0 if absf(v) < 0.33 else v
 
 
 ## A fish length for a species, small fish common, big fish rare (data_model.md 5.5).
