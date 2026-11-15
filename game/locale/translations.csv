@@ -125,3 +125,23 @@ DBG_OFF,off,kapalı,desactivado
 MOTION_ON,Phone motion: on,Telefon hareketi: açık,Movimiento del teléfono: activado
 MOTION_TAP,Phone motion: tap to allow,Telefon hareketi: izin için dokun,Movimiento del teléfono: toca para permitir
 MOTION_DENIED,Phone motion: blocked (allow it in Safari settings),Telefon hareketi: engelli (Safari ayarlarından izin ver),Movimiento del teléfono: bloqueado (permítelo en los ajustes de Safari)
+WHY_BUTTON,Why?,Neden?,¿Por qué?
+WHY_TITLE,Why this happened,Neden böyle oldu,Por qué pasó esto
+WHY_GOOD,good,iyi,bueno
+WHY_FAIR,fair,orta,regular
+WHY_POOR,poor,zayıf,malo
+WHY_DEPTH,Depth: the water is %.1f m deep where you cast; %s feeds at %.0f-%.0f m; your lure ran at %.0f m. Fit: %s.,Derinlik: attığın yerde su %.1f m derin; %s %.0f-%.0f m arasında besleniyor; yemin %.0f m'de gitti. Uyum: %s.,Profundidad: donde lanzaste el agua tiene %.1f m; %s se alimenta entre %.0f y %.0f m; tu señuelo trabajó a %.0f m. Ajuste: %s.
+WHY_TIME,Feeding time: %s is %.0f%% active in the %s slot. Fit: %s.,Yeme saati: %s için etkinlik %.0f%% (%s diliminde). Uyum: %s.,Hora de comida: %s está %.0f%% activo en la franja %s. Ajuste: %s.
+WHY_TACKLE,Tackle: a %.0f cm lure for a %.0f mm mouth (fit: %s); hook gape %.0f mm (fit: %s).,"Takım: %.0f cm'lik yem, %.0f mm'lik ağız için (uyum: %s); iğne açıklığı %.0f mm (uyum: %s).",Equipo: señuelo de %.0f cm para una boca de %.0f mm (ajuste: %s); abertura del anzuelo %.0f mm (ajuste: %s).
+WHY_TENSION,Line: peak tension %.2f kg of %.2f kg (%.0f%%); drag set to %.1f kg.,Misina: en yüksek gerginlik %.2f kg / %.2f kg (%.0f%%); fren %.1f kg.,Sedal: tensión máxima %.2f kg de %.2f kg (%.0f%%); freno a %.1f kg.
+WHY_OUT_LANDED,The line held and the fish tired near the shore.,Misina dayandı ve balık kıyıya yakın yoruldu.,El sedal aguantó y el pez se cansó cerca de la orilla.
+WHY_OUT_LINE_BREAK,The line broke: tension reached %.2f kg against %.2f kg of line. The drag was set to %.1f kg; a lower drag lets the fish take line instead.,"Misina koptu: gerginlik %.2f kg'a çıktı, misina %.2f kg taşıyor. Fren %.1f kg'daydı; daha düşük fren balığın misina almasına izin verir.",El sedal se rompió: la tensión llegó a %.2f kg frente a %.2f kg de sedal. El freno estaba a %.1f kg; un freno más bajo deja que el pez saque sedal.
+WHY_OUT_LEADER_CUT,"Its teeth cut the leader (teeth %.0f of 20). A wire leader is immune, but fish see it more.","Dişleri lideri kesti (diş %.0f / 20). Çelik lider kesilmez, ama balık onu daha çok görür.","Sus dientes cortaron el bajo (dientes %.0f de 20). Un bajo de acero es inmune, pero los peces lo ven más."
+WHY_OUT_HOOK_CAP,"The 90 s rule ended the fight with the fish still %.0f m out, so the hook pulled.","90 sn kuralı savaşı balık hâlâ %.0f m uzaktayken bitirdi, kanca çıktı.","La regla de 90 s terminó la pelea con el pez aún a %.0f m, así que el anzuelo se soltó."
+WHY_OUT_HOOK_SLACK,The hook came out while the line was slack (hook hold %.0f%%). Keep pressure when the fish is not running.,Misina gevşekken kanca çıktı (kanca tutma %.0f%%). Balık kaçmıyorken misinayı gergin tut.,El anzuelo se soltó con el sedal flojo (sujeción %.0f%%). Mantén tensión cuando el pez no corre.
+WHY_OUT_LOST_AT_EDGE,The fish was lost at the edge: landing success was %.0f%% for this fish at this position.,Balık kenarda kaçtı: bu konumda bu balık için karaya alma başarısı %.0f%%'ydi.,El pez se perdió en la orilla: el éxito de la subida fue %.0f%% para este pez en esta posición.
+SET_BUTTON,Settings,Ayarlar,Ajustes
+SET_TITLE,Settings,Ayarlar,Ajustes
+SET_VOLUME,Sound volume,Ses seviyesi,Volumen del sonido
+SET_MOTION,Motion sensitivity,Hareket hassasiyeti,Sensibilidad del movimiento
+SET_INVERT,Reverse motion direction,Hareket yönünü ters çevir,Invertir la dirección del movimiento

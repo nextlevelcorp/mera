@@ -15,7 +15,38 @@ const STATUS_RESET := "reset"
 
 
 static func fresh() -> Dictionary:
-	return {"version": VERSION, "log": {}, "last_rig": "lrf", "last_position": ""}
+	return {"version": VERSION, "log": {}, "last_rig": "lrf", "last_position": "", "settings": default_settings()}
+
+
+## Player settings kept on the phone only. volume 0..1 (sound), motion_sens
+## 0.5..2 (1 = default thresholds), motion_flip (reverse the motion direction
+## relative to what the browser's platform needs).
+static func default_settings() -> Dictionary:
+	return {"volume": 0.8, "motion_sens": 1.0, "motion_flip": false}
+
+
+## The settings of a save with defaults filled in and values clamped, so an
+## older save (no settings) or a hand-edited one still gives usable values.
+static func settings_of(save: Dictionary) -> Dictionary:
+	var out := default_settings()
+	var raw: Variant = save.get("settings")
+	if typeof(raw) != TYPE_DICTIONARY:
+		return out
+	var r: Dictionary = raw
+	if typeof(r.get("volume")) in [TYPE_INT, TYPE_FLOAT]:
+		out["volume"] = clampf(float(r["volume"]), 0.0, 1.0)
+	if typeof(r.get("motion_sens")) in [TYPE_INT, TYPE_FLOAT]:
+		out["motion_sens"] = clampf(float(r["motion_sens"]), 0.5, 2.0)
+	if typeof(r.get("motion_flip")) == TYPE_BOOL:
+		out["motion_flip"] = r["motion_flip"]
+	return out
+
+
+static func set_setting(save: Dictionary, key: String, value: Variant) -> void:
+	var s := settings_of(save)
+	if s.has(key):
+		s[key] = value
+	save["settings"] = settings_of({"settings": s})
 
 
 ## data: whatever was parsed from the file (null when there is no file).

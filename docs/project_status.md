@@ -25,6 +25,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Why view and settings (2026-11-15): played in the debug web build (software GL) in tr, es and en, at 1280x720 and 844x390: the "Why?" panel after a line break (peak tension 2.84 kg against 2.10 kg, drag 2.8 kg) and after a landed fish; the settings panel with volume, motion sensitivity and the reverse switch. Open: the lure depth in the "why" line is a fixed design fill (3 m) because the player cannot control the retrieve depth yet; a count-down control would make it real. Not tested on a phone.
 - Motion fix, cast sequence, rod, reel and hands (2026-11-15): played in the debug web build (software GL) at 1280x720 and 844x390 with a stubbed iPhone permission API and synthetic motion: permission asked once from a real browser tap and granted; chip shows "on"; wind-up, snap, line pay-out, landing, aim marker, reeling (handle turning, rod bending, 0.52 kg) all seen; a flick struck a forced take (take 8.5 s, hooked 8.7 s). Not seen: a real iPhone prompt; frame rate on the phones.
 - Merge workflow (2026-11-14): owner gave standing approval to merge every update after green checks; recorded in CLAUDE.md.
 - Water detail (2026-11-14): slicks, shore lights and reflections, checked in the debug web build at dusk, night and day with software GL; no shader errors in the console. Frame-rate cost unmeasured: on the phone, open Debug, note fps with "Water detail: on", switch it off, note again.

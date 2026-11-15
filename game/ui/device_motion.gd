@@ -59,6 +59,9 @@ var supported := false
 ## Some browsers report gravity with the opposite sign (iPhone Safari does);
 ## set from the browser on start, and flippable from the debug menu.
 var invert := false
+## What the platform needs without the player's setting (true on iPhone).
+var default_invert := false
+var _flip := false
 
 var _web := false
 var _js: JavaScriptObject
@@ -74,7 +77,14 @@ func _ready() -> void:
 		if _js:
 			ios = bool(_js.ios)
 			supported = bool(_js.api)
-			invert = ios
+			default_invert = ios
+			invert = default_invert != _flip
+
+
+## The player's "reverse motion direction" setting, on top of the platform's.
+func set_flip(flip: bool) -> void:
+	_flip = flip
+	invert = default_invert != _flip
 
 
 ## Kept for completeness: the real request happens in the JS touch listener.
