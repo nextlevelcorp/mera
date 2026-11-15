@@ -70,7 +70,16 @@ var _rope: VerletRope
 var _end_pos := Vector2.ZERO
 var _has_line := false
 var _rod_back := 0.0
-var _crank := 0.0
+var _cast_motion := CastMotion.new()
+var _rig := AnglerRig.new()
+var _aim := 0.0
+var _press_x := 0.0
+var _cast_pose := 0.0
+var _dangle := Vector2.ZERO
+var _dangle_vel := Vector2.ZERO
+var _line_rate := 0.0
+var _paid_m := 0.0
+var _motion_chip: Button
 var _motion: DeviceMotion
 var _gesture := MotionGesture.new()
 var _motion_state := {}
@@ -235,6 +244,7 @@ func begin_charge() -> void:
 	if phase != Phase.READY:
 		return
 	_charge_s = 0.0
+	_aim = 0.0
 	_set_phase(Phase.CHARGE)
 
 
@@ -247,14 +257,19 @@ static func power_at(charge_s: float) -> float:
 func release_cast() -> void:
 	if phase != Phase.CHARGE:
 		return
-	cast_with_power(maxf(power_at(_charge_s), 0.15))
+	cast_with_power(maxf(power_at(_charge_s), 0.15), _aim)
 
 
-func cast_with_power(power: float) -> void:
+## aim: radians from the thumb swipe (CastMotion.aim_from_drag); the skill
+## error of CatchModel.cast is added on top.
+func cast_with_power(power: float, aim: float = 0.0) -> void:
 	_snd("cast_swish", -3.0)
+	_cast_motion.release(power)
+	_rod.kick(-6.0)
 	_cast = CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], _ctx["position"], conditions, power)
 	_cast["cast_m"] = maxf(float(_cast["cast_m"]), float(_k["WAIT_END_M"]) + 2.0)
-	_aim_x = clampf(_rng.randfn(0.0, float(_cast["aim_sigma_rad"])), -0.5, 0.5)
+	_aim_x = clampf(aim + _rng.randfn(0.0, float(_cast["aim_sigma_rad"])), -0.5, 0.5)
+	_paid_m = 0.0
 	_flight_s = 0.0
 	_flight_total_s = 0.6 + float(_cast["cast_m"]) / 30.0
 	_seed_counter += 1
@@ -270,6 +285,7 @@ func _land_lure() -> void:
 	_fx.splash(WaterView.project(world, 0.0, _overlay.size), world, 0.4)
 	_fx.add_ring(world, 0.6, 1.4, 0.6)
 	_snd("lure_drop", -4.0)
+	_snd("drag_click", -18.0)   # the bail snaps shut
 	_set_phase(Phase.WAIT)
 
 
@@ -385,9 +401,11 @@ func set_fight_input(reel_pressed: bool, reel_y: float, pull_pressed: bool, drag
 func _step_fight(delta: float) -> void:
 	_hud = _controller.advance(delta, current_input())
 	var d := float(_hud["distance_m"])
-	if _sound and delta > 0.0 and _last_distance >= 0.0:
-		_sound.set_reel((d - _last_distance) / delta, _hud["outcome"] == "")
-		_sound.set_tension(float(_hud["tension_ratio"]))
+	if delta > 0.0 and _last_distance >= 0.0:
+		_line_rate = (d - _last_distance) / delta
+		if _sound:
+			_sound.set_reel(_line_rate, _hud["outcome"] == "")
+			_sound.set_tension(float(_hud["tension_ratio"]))
 	_last_distance = d
 	_fight_effects(delta)
 	if _hud["outcome"] != "":
@@ -569,6 +587,8 @@ func wind_accel() -> float:
 ## Where the line ends on screen for the current phase.
 func _line_end(size: Vector2) -> Vector2:
 	match phase:
+		Phase.READY, Phase.CHARGE:
+			return _dangle
 		Phase.FLIGHT:
 			var s := clampf(_flight_s / _flight_total_s, 0.0, 1.0)
 			var d := float(_cast["cast_m"]) * s
@@ -593,7 +613,7 @@ func _lifted() -> bool:
 
 func _line_present() -> bool:
 	match phase:
-		Phase.FLIGHT, Phase.WAIT, Phase.FIGHT, Phase.LIFT:
+		Phase.READY, Phase.CHARGE, Phase.FLIGHT, Phase.WAIT, Phase.FIGHT, Phase.LIFT:
 			return true
 		Phase.RESULT:
 			var o: String = _result.get("outcome", "")
@@ -610,27 +630,47 @@ func _step_rod_and_line(delta: float) -> void:
 	var size := _overlay.size
 	if size.x < 2.0:
 		return
-	var butt := Vector2(size.x * 0.66, size.y * 0.95)
+	# Breathing: the whole rig rises and falls slowly (pillar 3: oscillation).
+	var breath := Vector2(sin(_time * 0.9) * 1.5, sin(_time * TAU * 0.25) * 3.0)
+	var butt := Vector2(size.x * 0.66, size.y * 0.95) + breath
 	var rest_tip := Vector2(size.x * 0.76, size.y * 0.30)
 	var base := (rest_tip - butt).angle()
 	var length := butt.distance_to(rest_tip)
+	# The cast swing: back over the shoulder while charging, a forward snap on release.
+	if phase == Phase.CHARGE:
+		_cast_motion.charge(delta, power_at(_charge_s))
+	else:
+		_cast_motion.settle(delta)
+	# Seen from the angler: winding up turns the rod upright and past the
+	# head, so the tip leaves the top of the screen; the forward snap points
+	# it away over the water, so it looks shorter and drops towards the horizon.
+	var back_share := clampf(_cast_motion.angle / CastMotion.WINDUP_MAX, 0.0, 1.0)
+	var fwd_share := clampf(-_cast_motion.angle / 0.6, 0.0, 1.0)
+	base = lerpf(base, -PI * 0.5 - 0.08, back_share) + 0.18 * fwd_share
+	length *= (1.0 + 0.4 * back_share) * (1.0 - 0.3 * fwd_share)
 	# Pulling the rod back (button or phone) raises it towards upright.
 	var back := 0.0
 	match phase:
 		Phase.FIGHT:
 			back = float(current_input()["rod"])
-		Phase.CHARGE:
-			back = 0.9 * power_at(_charge_s)
 		Phase.WAIT:
 			back = 0.4 * float(_motion_state.get("pull", 0.0))
 	_rod_back = lerpf(_rod_back, back, minf(delta * 10.0, 1.0))
 	base -= 0.45 * _rod_back
+	var tip := _rod.tip() if _rod.tip() != Vector2.ZERO else rest_tip
+	# Before the cast the lure hangs from the tip and swings like a pendulum.
+	var hang := tip + Vector2(0.0, 52.0)
+	if _dangle == Vector2.ZERO:
+		_dangle = hang
+	_dangle_vel += ((hang - _dangle) * 45.0 - _dangle_vel * 3.5 + Vector2(wind_accel() * 0.3, 0.0)) * minf(delta, 0.1)
+	_dangle += _dangle_vel * minf(delta, 0.1)
 	_has_line = _line_present()
 	_end_pos = _line_end(size) if _has_line else Vector2.ZERO
-	var tip := _rod.tip() if _rod.tip() != Vector2.ZERO else rest_tip
 	var dir := (_end_pos - tip).normalized() if _has_line else Vector2.DOWN
 	var amount := 0.03
 	match phase:
+		Phase.READY, Phase.CHARGE:
+			amount = 0.04
 		Phase.WAIT:
 			amount = 0.06 + 0.5 * clampf(_tip_kick, 0.0, 1.2)
 		Phase.FIGHT:
@@ -642,6 +682,25 @@ func _step_rod_and_line(delta: float) -> void:
 	var load := dir * amount + Vector2(wind_accel() * 0.0004, 0.0)
 	_rod.step(delta, butt, base, length, load)
 	tip = _rod.tip()
+	# Line paid out from the open spool during the flight.
+	var line_out := 0.0
+	if phase == Phase.FLIGHT:
+		var paid := CastMotion.paid_out(_flight_s, _flight_total_s, float(_cast["cast_m"]))
+		line_out = (paid - _paid_m) / maxf(delta, 0.001)
+		_paid_m = paid
+	elif phase == Phase.FIGHT:
+		line_out = maxf(_line_rate, 0.0)
+	var crank_target := 0.0
+	if phase == Phase.FIGHT:
+		crank_target = 14.0 * float(current_input()["reel"])
+	elif phase == Phase.WAIT and _wait_state.get("phase", "") == WaitSim.PHASE_FISHING:
+		crank_target = 3.0 * (SPEED_UP if _speed_on else 1.0)
+	_cast_pose = lerpf(_cast_pose, 1.0 if phase in [Phase.CHARGE, Phase.FLIGHT] else 0.0, minf(delta * 6.0, 1.0))
+	_rig.light = float(_env.get("light", 0.6))
+	_rig.tension = clampf(float(_hud.get("tension_ratio", 0.0)), 0.0, 1.2) if phase == Phase.FIGHT else 0.0
+	_rig.bail_open = phase == Phase.FLIGHT or phase == Phase.CHARGE
+	_rig.cast_pose = _cast_pose
+	_rig.update(delta, crank_target, line_out)
 	# Line: taut when tension is high, sagging and wind-blown when slack.
 	if not _has_line:
 		_rope = null
@@ -649,22 +708,21 @@ func _step_rod_and_line(delta: float) -> void:
 	var dist := tip.distance_to(_end_pos)
 	var slack := 1.02
 	match phase:
+		Phase.READY, Phase.CHARGE:
+			slack = 1.0
 		Phase.WAIT:
 			slack = 1.02 - 0.015 * clampf(_tip_kick, 0.0, 1.0)
 		Phase.FIGHT:
 			slack = lerpf(1.04, 1.0, clampf(float(_hud.get("tension_ratio", 0.0)) * 2.5, 0.0, 1.0))
-		Phase.FLIGHT, Phase.LIFT, Phase.RESULT:
+		Phase.FLIGHT:
+			# Line leaves the spool faster than the lure pulls it straight: a loose belly early on.
+			slack = 1.0 + 0.06 * (1.0 - clampf(_flight_s / maxf(_flight_total_s, 0.001), 0.0, 1.0))
+		Phase.LIFT, Phase.RESULT:
 			slack = 1.01
 	if _rope == null:
 		_rope = VerletRope.new(tip, _end_pos, 18, slack)
 	_rope.set_total_length(dist * slack)
 	_rope.step(delta, tip, _end_pos, Vector2(wind_accel(), 160.0))
-	var crank_speed := 0.0
-	if phase == Phase.FIGHT:
-		crank_speed = 14.0 * float(current_input()["reel"])
-	elif phase == Phase.WAIT and _wait_state.get("phase", "") == WaitSim.PHASE_FISHING:
-		crank_speed = 3.0 * (SPEED_UP if _speed_on else 1.0)
-	_crank = fmod(_crank + crank_speed * delta, TAU)
 
 
 # ------------------------------------------------------------------ frame
@@ -718,6 +776,11 @@ func _draw_overlay() -> void:
 		_ellipse(centre, rx, ry, Color(1, 1, 1, 0.55 * SplashFx.ring_alpha(ring)))
 	var tip := _rod.tip()
 	match phase:
+		Phase.READY, Phase.CHARGE:
+			_draw_line(false)
+			_overlay.draw_circle(_end_pos, 4.0, Color(0.95, 0.75, 0.3))
+			if phase == Phase.CHARGE:
+				_draw_aim_marker(size)
 		Phase.FLIGHT:
 			_draw_line(false)
 			_overlay.draw_circle(_end_pos, 4.0, Color(0.95, 0.75, 0.3))
@@ -737,8 +800,7 @@ func _draw_overlay() -> void:
 		_overlay.draw_circle(p["pos"], p["size"], Color(0.92, 0.96, 1.0, 0.85 * float(p["life"]) / float(p["max_life"])))
 	if _on_bridge():
 		_draw_bridge(size)
-	_draw_rod()
-	_draw_hands(size)
+	_rig.draw(_overlay, _rod.points(), size)
 	if phase == Phase.FIGHT or (phase == Phase.RESULT and not _hud.is_empty()):
 		_draw_tension_bar(size)
 	if phase == Phase.CHARGE:
@@ -813,28 +875,6 @@ func _draw_bridge(size: Vector2) -> void:
 			_overlay.draw_circle(Vector2(lamp_x + side * 30.0, size.y * 0.18), 9.0, Color(1.0, 0.85, 0.55, 0.4 + 0.5 * glow))
 
 
-## The rod from the spring chain: thick at the butt, thin at the tip, with a
-## highlight on the lit side (shading follows the time of day).
-func _draw_rod() -> void:
-	var pts := _rod.points()
-	if pts.size() < 2:
-		return
-	var light := float(_env.get("light", 0.6))
-	var body := Color(0.08, 0.08, 0.1)
-	var shine := Color(0.75, 0.78, 0.85, 0.15 + 0.45 * light)
-	var n := pts.size() - 1
-	for i in n:
-		var w := lerpf(10.0, 2.5, float(i) / n)
-		_overlay.draw_line(pts[i], pts[i + 1], body, w, true)
-	for i in n:
-		var d := (pts[i + 1] - pts[i]).normalized()
-		var side := Vector2(-d.y, d.x) * lerpf(2.5, 0.6, float(i) / n)
-		_overlay.draw_line(pts[i] - side, pts[i + 1] - side, shine, 1.0, true)
-	# Guides along the blank.
-	for i in range(3, n, 2):
-		_overlay.draw_circle(pts[i], lerpf(4.0, 2.0, float(i) / n), Color(0.6, 0.62, 0.66, 0.8))
-
-
 ## The line along the Verlet rope; warm-coloured and thicker while straining.
 func _draw_line(strained: bool) -> void:
 	if _rope == null:
@@ -842,45 +882,18 @@ func _draw_line(strained: bool) -> void:
 	_overlay.draw_polyline(_rope.points, Color(1.0, 0.85, 0.5, 0.95) if strained else Color(1, 1, 1, 0.85), 2.0 if strained else 1.4, true)
 
 
-## First-person hands (owner request 2026-11-14): the right hand holds the
-## rod above the reel seat, the left turns the reel handle, which spins while
-## line comes in. Drawn shapes, lit by the time of day.
-func _draw_hands(size: Vector2) -> void:
-	var pts := _rod.points()
-	if pts.size() < 4:
-		return
-	var light := float(_env.get("light", 0.6))
-	var skin := Color(0.86, 0.66, 0.52).darkened(0.65 * (1.0 - light))
-	var skin_dark := skin.darkened(0.25)
-	var sleeve := Color(0.16, 0.22, 0.3).darkened(0.5 * (1.0 - light))
-	var axis := (pts[2] - pts[0]).normalized()
-	var across := Vector2(-axis.y, axis.x)   # points to the lower-left of the rod
-	# Reel under the rod at the seat.
-	var seat: Vector2 = pts[1].lerp(pts[2], 0.2)
-	var reel := seat - across * 42.0
-	_overlay.draw_line(seat, reel, Color(0.25, 0.26, 0.28), 6.0, true)
-	_overlay.draw_circle(reel, 24.0, Color(0.32, 0.33, 0.36).darkened(0.5 * (1.0 - light)))
-	_overlay.draw_circle(reel, 14.0, Color(0.55, 0.57, 0.6).darkened(0.5 * (1.0 - light)))
-	var handle := reel + Vector2(cos(_crank), sin(_crank)) * 30.0
-	_overlay.draw_line(reel, handle, Color(0.2, 0.2, 0.22), 5.0, true)
-	# Left hand on the handle knob, forearm from the lower left.
-	_overlay.draw_line(handle, Vector2(size.x * 0.40, size.y * 1.08), sleeve, 46.0, true)
-	_draw_fist(handle, axis, skin, skin_dark, 26.0)
-	# Right hand round the grip above the seat, forearm from the lower right.
-	var grip: Vector2 = pts[2].lerp(pts[3], 0.3)
-	_overlay.draw_line(grip, Vector2(size.x * 0.92, size.y * 1.1), sleeve, 58.0, true)
-	_draw_fist(grip, axis, skin, skin_dark, 32.0)
-
-
-## A closed hand around a rod or handle: palm, four finger rolls across the
-## axis and a thumb along it.
-func _draw_fist(centre: Vector2, axis: Vector2, skin: Color, shade: Color, r: float) -> void:
-	var across := Vector2(-axis.y, axis.x)
-	_overlay.draw_circle(centre + across * r * 0.25, r, skin)
-	for k in 4:
-		var off := axis * (r * (0.75 - 0.5 * k))
-		_overlay.draw_line(centre + off - across * r * 0.3, centre + off + across * r * 0.95, shade, r * 0.16, true)
-	_overlay.draw_line(centre - across * r * 0.4, centre + axis * r * 0.9 - across * r * 0.55, skin.lightened(0.08), r * 0.42, true)
+## While charging: where the lure would land at the current power and aim
+## (the skill error is not shown; it is added at release).
+func _draw_aim_marker(size: Vector2) -> void:
+	var c := CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], _ctx["position"], conditions, maxf(power_at(_charge_s), 0.15))
+	var d := maxf(float(c["cast_m"]), float(_k["WAIT_END_M"]) + 2.0)
+	var world := Vector2(-0.3 + tan(_aim) * d, NEAR_DRAW_M + d)
+	var centre := WaterView.project(world, 0.0, size)
+	var aspect := size.x / maxf(size.y, 1.0)
+	var rx := 0.8 / (world.y * aspect * WaterView.FOV) * size.x
+	var ry := WaterView.CAM_HEIGHT * 0.8 / (world.y * world.y * WaterView.FOV) * size.y
+	_ellipse(centre, maxf(rx, 6.0), maxf(ry, 2.0), Color(1, 1, 1, 0.6))
+	_ellipse(centre, maxf(rx, 6.0) * 0.4, maxf(ry, 2.0) * 0.4, Color(1, 1, 1, 0.45))
 
 
 func _ellipse(centre: Vector2, rx: float, ry: float, color: Color) -> void:
@@ -958,6 +971,15 @@ func _on_main_down() -> void:
 		strike()
 
 
+## Thumb travel sideways while holding Cast aims the cast.
+func _on_main_input(event: InputEvent) -> void:
+	var pressed: bool = (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed)
+	if pressed:
+		_press_x = event.position.x
+	elif phase == Phase.CHARGE and (event is InputEventScreenDrag or (event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))):
+		_aim = CastMotion.aim_from_drag(event.position.x - _press_x, _overlay.size.x if _overlay else 1280.0)
+
+
 func _on_main_up() -> void:
 	if phase == Phase.CHARGE:
 		release_cast()
@@ -975,6 +997,22 @@ func _build_hud() -> void:
 	add_child(_status_label)
 	_status_label.position = Vector2(192, 20)
 	_status_label.size = Vector2(700, 30)
+
+	# Motion status: shown only where the browser can send motion. A tap on it
+	# (like any tap) lets iPhone Safari ask for permission.
+	_motion_chip = _button("", 16, func() -> void:
+		if _motion:
+			_motion.request_permission())
+	_motion_chip.anchor_left = 1.0
+	_motion_chip.anchor_right = 1.0
+	_motion_chip.offset_left = -360.0
+	_motion_chip.offset_right = -16.0
+	_motion_chip.offset_top = 100.0
+	_motion_chip.offset_bottom = 150.0
+	_motion_chip.custom_minimum_size = Vector2(0, 54)
+	_motion_chip.clip_text = true
+	_motion_chip.visible = false
+	add_child(_motion_chip)
 
 	_tension_label = _label(24)
 	add_child(_tension_label)
@@ -1027,6 +1065,7 @@ func _build_hud() -> void:
 	_place_bottom(_main_button, true, Vector2(220, 200), 16.0)
 	_main_button.button_down.connect(_on_main_down)
 	_main_button.button_up.connect(_on_main_up)
+	_main_button.gui_input.connect(_on_main_input)
 	add_child(_main_button)
 
 	# Wait controls on the left.
@@ -1183,6 +1222,10 @@ func _update_log() -> void:
 func _update_texts() -> void:
 	if _status_label == null or _ctx.is_empty():
 		return
+	if _motion_chip and _motion:
+		var st := _motion.status()
+		_motion_chip.visible = st != DeviceMotion.STATUS_NONE and phase != Phase.RESULT
+		_motion_chip.text = tr({DeviceMotion.STATUS_ON: "MOTION_ON", DeviceMotion.STATUS_TAP: "MOTION_TAP", DeviceMotion.STATUS_DENIED: "MOTION_DENIED"}.get(st, "MOTION_ON"))
 	var pos: Dictionary = _ctx["position"]
 	_status_label.text = tr(_db["spot"][0]["name_key"]) + " · " + tr("FISH_STATUS") % [tr("SLOT_%s" % String(conditions["slot"]).to_upper()), conditions["wind_dir"], int(conditions["wind_ms"]), tr(pos["name_key"])]
 	_rig_cycle.text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_ctx["rod"]["name_key"])]
