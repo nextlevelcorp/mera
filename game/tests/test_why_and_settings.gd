@@ -166,3 +166,11 @@ func test_why_panel_explains_a_lost_fish() -> void:
 	assert_true(screen._why_text.text.contains("2.60"), "the peak tension is named")
 	assert_true(not screen._why_text.text.contains("WHY_"), "no raw translation key leaks through")
 	screen.free()
+
+
+func test_motion_monitor_text_formats_in_every_language() -> void:
+	for locale: String in ["en", "tr", "es"]:
+		TranslationServer.set_locale(locale)
+		var problem := _format_problem(TranslationServer.translate("SET_MON_TEXT"), [12.0, 0.4, 35.0, 10.0])
+		assert_eq(problem, "", "SET_MON_TEXT in %s: %s" % [locale, problem])
+	TranslationServer.set_locale("en")

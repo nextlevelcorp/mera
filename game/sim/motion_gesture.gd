@@ -25,6 +25,9 @@ const PULL_RATE_SHARE := 0.5      ## how much tipping speed adds to the pull
 const JIG_FULL_RATE := 2.0        ## rad/s mean twitch speed for a full jig
 const JIG_SMOOTH_S := 0.6         ## time constant of the jig average
 const REST_FOLLOW_S := 5.0        ## the rest pose follows slow drift forwards
+const STILL_RATE := 0.3           ## rad/s below which the phone counts as held still
+const STILL_FOLLOW_S := 40.0      ## held still, the rest pose slowly becomes this pose
+const JIG_DEADZONE := 0.6         ## rad/s of hand tremor that is not working the lure
 
 ## Player setting: 1 keeps the thresholds below; 2 reacts to half the speed
 ## and tilt; 0.5 needs twice as much.
@@ -57,11 +60,13 @@ func add_sample(dt: float, pitch_rate: float, pitch: float) -> Dictionary:
 	# rest pose, so a tired arm does not leave a pull switched on.
 	if rel < 0.0:
 		neutral += rel * minf(dt / REST_FOLLOW_S, 1.0)
+	elif absf(pitch_rate) < STILL_RATE:
+		neutral += rel * minf(dt / STILL_FOLLOW_S, 1.0)
 	var angle_pull := clampf((rel * sens - PULL_DEADZONE) / (PULL_FULL - PULL_DEADZONE), 0.0, 1.0)
 	var rate_pull := PULL_RATE_SHARE * clampf(pitch_rate * sens / STRIKE_RATE, 0.0, 1.0)
 	var pull := clampf(angle_pull + rate_pull, 0.0, 1.0)
 	# Jig: average twitch speed below the strike threshold.
-	var twitch := minf(absf(pitch_rate), STRIKE_RATE)
+	var twitch := maxf(minf(absf(pitch_rate), STRIKE_RATE) - JIG_DEADZONE, 0.0)
 	_jig_avg += (twitch - _jig_avg) * minf(dt / JIG_SMOOTH_S, 1.0)
-	var jig := clampf(_jig_avg * sens / JIG_FULL_RATE, 0.0, 1.0)
+	var jig := clampf(_jig_avg * sens / (JIG_FULL_RATE - JIG_DEADZONE), 0.0, 1.0)
 	return {"strike": strike, "strike_speed": pitch_rate if strike else 0.0, "pull": pull, "jig": jig, "tilt": rel}

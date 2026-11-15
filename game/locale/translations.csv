@@ -145,3 +145,8 @@ SET_TITLE,Settings,Ayarlar,Ajustes
 SET_VOLUME,Sound volume,Ses seviyesi,Volumen del sonido
 SET_MOTION,Motion sensitivity,Hareket hassasiyeti,Sensibilidad del movimiento
 SET_INVERT,Reverse motion direction,Hareket yönünü ters çevir,Invertir la dirección del movimiento
+SET_MON_TEXT,Tilt %.0f° · speed %.1f rad/s · pull %.0f%% · lure work %.0f%%,Eğim %.0f° · hız %.1f rad/s · çekme %.0f%% · yem oynatma %.0f%%,Inclinación %.0f° · velocidad %.1f rad/s · tirón %.0f%% · trabajo del señuelo %.0f%%
+SET_MON_STRIKE,Strike!,Tak!,¡Clavada!
+SET_MON_NONE,No motion data from this device yet (tap the screen once).,Bu cihazdan henüz hareket verisi yok (ekrana bir kez dokun).,Aún no hay datos de movimiento de este dispositivo (toca la pantalla una vez).
+SET_RECENTER,Set the current pose as the rest pose,Şu anki duruşu dinlenme duruşu yap,Usar la postura actual como reposo
+SET_MOTION_HELP,Flick the phone back to strike when a fish touches. Tilt it back to pull in a fight. Small twitches work the lure. The rod on screen follows your tilt.,Balık dokununca telefonu hızla geriye çek: Tak. Savaşta geriye eğ: çekme. Küçük sarsmalar yemi oynatır. Ekrandaki kamış eğimini izler.,Echa el teléfono atrás cuando un pez toque: clavada. Inclínalo atrás en la pelea: tirón. Pequeños movimientos trabajan el señuelo. La caña sigue tu inclinación.
