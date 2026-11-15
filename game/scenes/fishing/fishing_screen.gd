@@ -125,6 +125,14 @@ var _result_panel: Control
 var _result_label: Label
 var _result_detail: Label
 var _log_panel: Control
+var _why_panel: Control
+var _why_text: Label
+var _why_button: Button
+var _settings_panel: Control
+var _settings_button: Button
+var _vol_slider: HSlider
+var _sens_slider: HSlider
+var _flip_check: CheckButton
 var _log_text: Label
 var _debug_menu: Control
 
@@ -166,12 +174,15 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	_build_rig_panel()
 	_build_result()
 	_build_log()
+	_build_why()
+	_build_settings()
 	_build_audio()
 	_sound = SoundDirector.new()
 	add_child(_sound)
 	_motion = DeviceMotion.new()
 	add_child(_motion)
 	apply_conditions()
+	_apply_settings()
 	_build_debug()
 	_set_phase(Phase.READY)
 	if save_status == SaveGame.STATUS_RESET:
@@ -227,6 +238,11 @@ func _set_phase(p: int) -> void:
 	_log_button.visible = p in [Phase.READY, Phase.RESULT]
 	_distance_label.visible = p in [Phase.WAIT, Phase.FIGHT]
 	_result_panel.visible = p == Phase.RESULT
+	_settings_button.visible = p in [Phase.READY, Phase.WAIT]
+	if p != Phase.RESULT:
+		_why_panel.visible = false
+	if p != Phase.READY and p != Phase.WAIT:
+		_settings_panel.visible = false
 	if p != Phase.READY:
 		_rig_panel.visible = false
 		_log_panel.visible = false
@@ -1123,6 +1139,8 @@ func _build_result() -> void:
 	_result_detail = _plain_label("", 22)
 	_result_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_result_detail)
+	_why_button = _button(tr("WHY_BUTTON"), 24, _show_why)
+	box.add_child(_why_button)
 	var again := _button(tr("FISH_CAST_AGAIN"), 28, func() -> void:
 		_hud = {}
 		_set_phase(Phase.READY))
@@ -1140,6 +1158,110 @@ func _build_log() -> void:
 	_log_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(_log_text)
 	box.add_child(_button(tr("FISH_CLOSE"), 24, func() -> void: _log_panel.visible = false))
+
+
+func _build_why() -> void:
+	var box := _panel(Vector2(780, 0))
+	_why_panel = box.get_parent()
+	_why_panel.visible = false
+	box.add_child(_plain_label(tr("WHY_TITLE"), 30))
+	_why_text = _plain_label("", 18)
+	_why_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_why_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	box.add_child(_why_text)
+	box.add_child(_button(tr("FISH_CLOSE"), 24, func() -> void:
+		_why_panel.visible = false
+		_result_panel.visible = true))
+
+
+## The catch attempt explained (PRD F10): the stage numbers behind the result
+## in words the player can act on.
+func _show_why() -> void:
+	if _fight_ctx.is_empty() or _controller == null:
+		return
+	var resolved := CatchModel.resolve(_fight_ctx, _k)
+	var stats := {
+		"max_tension_kg": float(_hud["max_tension_kg"]), "drag_kg": float(_hud["drag_set_kg"]),
+		"line_strength_kg": float(_hud["line_strength_kg"]), "distance_m": float(_hud["distance_m"]),
+		"cap_applied": bool(_hud["cap_applied"]),
+	}
+	var lines := WhyReport.lines(resolved, _fight_ctx, tr(_fight_ctx["species"]["name_key"]), tr("SLOT_%s" % String(conditions["slot"]).to_upper()), String(_result["outcome"]), stats)
+	var texts: Array[String] = []
+	for l: Dictionary in lines:
+		var args: Array = []
+		for a: Variant in l["args"]:
+			args.append(tr(a) if (typeof(a) == TYPE_STRING and (a as String).begins_with("WHY_")) else a)
+		texts.append(tr(l["key"]) % args if not args.is_empty() else tr(l["key"]))
+	texts.append(tr("DATA_NOTE"))
+	_why_text.text = "\n\n".join(texts)
+	_result_panel.visible = false
+	_why_panel.visible = true
+
+
+func _build_settings() -> void:
+	_settings_button = _button(tr("SET_BUTTON"), 20, func() -> void:
+		_rig_panel.visible = false
+		_log_panel.visible = false
+		_settings_panel.visible = not _settings_panel.visible)
+	_settings_button.anchor_left = 1.0
+	_settings_button.anchor_right = 1.0
+	_settings_button.offset_left = -296.0
+	_settings_button.offset_right = -156.0
+	_settings_button.offset_top = 16.0
+	_settings_button.offset_bottom = 88.0
+	_settings_button.custom_minimum_size = Vector2(0, 72)
+	add_child(_settings_button)
+	var box := _panel(Vector2(640, 0))
+	_settings_panel = box.get_parent()
+	_settings_panel.visible = false
+	box.add_child(_plain_label(tr("SET_TITLE"), 30))
+	box.add_child(_plain_label(tr("SET_VOLUME"), 20))
+	_vol_slider = _slider(0.0, 1.0, 0.05, func(v: float) -> void: _change_setting("volume", v))
+	box.add_child(_vol_slider)
+	box.add_child(_plain_label(tr("SET_MOTION"), 20))
+	_sens_slider = _slider(0.5, 2.0, 0.1, func(v: float) -> void: _change_setting("motion_sens", v))
+	box.add_child(_sens_slider)
+	_flip_check = CheckButton.new()
+	_flip_check.text = tr("SET_INVERT")
+	_flip_check.add_theme_font_size_override("font_size", 22)
+	_flip_check.custom_minimum_size = Vector2(0, TOUCH_MIN * 0.8)
+	_flip_check.toggled.connect(func(on: bool) -> void:
+		_change_setting("motion_flip", on)
+		_store())
+	box.add_child(_flip_check)
+	box.add_child(_button(tr("FISH_CLOSE"), 24, func() -> void: _settings_panel.visible = false))
+
+
+func _slider(lo: float, hi: float, step: float, on_change: Callable) -> HSlider:
+	var s := HSlider.new()
+	s.min_value = lo
+	s.max_value = hi
+	s.step = step
+	s.custom_minimum_size = Vector2(0, 56)
+	s.value_changed.connect(on_change)
+	s.drag_ended.connect(func(_changed: bool) -> void: _store())
+	return s
+
+
+func _change_setting(key: String, value: Variant) -> void:
+	SaveGame.set_setting(save, key, value)
+	_apply_settings()
+
+
+## Puts the saved settings to work: sound volume, motion sensitivity and
+## direction. Also moves the controls to the saved values.
+func _apply_settings() -> void:
+	var st := SaveGame.settings_of(save)
+	AudioServer.set_bus_volume_db(0, linear_to_db(maxf(float(st["volume"]), 0.0001)))
+	_gesture.sensitivity = float(st["motion_sens"])
+	if _motion:
+		_motion.set_flip(bool(st["motion_flip"]))
+	if _vol_slider and not is_equal_approx(_vol_slider.value, float(st["volume"])):
+		_vol_slider.set_value_no_signal(float(st["volume"]))
+	if _sens_slider and not is_equal_approx(_sens_slider.value, float(st["motion_sens"])):
+		_sens_slider.set_value_no_signal(float(st["motion_sens"]))
+	if _flip_check and _flip_check.button_pressed != bool(st["motion_flip"]):
+		_flip_check.set_pressed_no_signal(bool(st["motion_flip"]))
 
 
 func _build_audio() -> void:
