@@ -13,6 +13,9 @@
 
 Add every data, art, audio and tool source here with its licence before it is used (spec 5.4, 7.8).
 
+## 3D sea textures (2026-11-15)
+No image, model or HDRI asset is used yet: the ripple normal map, the cloud and noise map and the sea mesh are generated in code (`game/ui/sea/sea_maps.gd`, Godot's `FastNoiseLite`, MIT as part of the engine). The owner approved CC0 assets for the later 3D steps (2026-11-15); each one gets a row here when it is committed.
+
 ## Fight screen demo data (2026-11-13)
 `game/data/demo/` holds invented species, spot, angler and tackle records copied from the test fixtures; every record is `design_fill: true` and names use `DEMO_` keys. No external source, no licence to record. Replace with sourced records before 0.1.
 
