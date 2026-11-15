@@ -68,3 +68,42 @@ func test_projection_matches_the_shader_camera() -> void:
 	assert_true(far.y < near.y and far.y > 720 * 0.38, "farther water is higher on screen but below the horizon")
 	assert_near(near.y, (0.38 + 2.2 / (10.0 * 0.9)) * 720.0, "same formula as the shader")
 	scene.free()
+
+
+## The 3D sea's camera must put things where the 2D overlay draws them.
+## (Same projection Camera3D builds for a frustum camera that keeps height.)
+func test_3d_camera_matches_the_overlay_projection() -> void:
+	var cam := WaterView.make_camera()
+	for view: Vector2 in [Vector2(1280, 720), Vector2(1560, 720)]:
+		var proj := Projection.create_frustum_aspect(cam.size, view.x / view.y, cam.frustum_offset, cam.near, cam.far)
+		var view_m := Transform3D(Basis(), cam.position).affine_inverse()
+		for p: Vector3 in [Vector3(0, 0, 10), Vector3(3, 0, 25), Vector3(-6, 0.5, 40), Vector3(1, 2.0, 8)]:
+			var want := WaterView.project(Vector2(p.x, p.z), p.y, view)
+			var clip := proj * Vector4(Vector3(view_m * Vector3(p.x, p.y, -p.z)).x, Vector3(view_m * Vector3(p.x, p.y, -p.z)).y, Vector3(view_m * Vector3(p.x, p.y, -p.z)).z, 1.0)
+			var ndc := Vector2(clip.x / clip.w, clip.y / clip.w)
+			var got := Vector2((ndc.x * 0.5 + 0.5) * view.x, (0.5 - ndc.y * 0.5) * view.y)
+			assert_near(got.x, want.x, "x of %s at %s" % [str(p), str(view)], 0.5)
+			assert_near(got.y, want.y, "y of %s at %s" % [str(p), str(view)], 0.5)
+	cam.free()
+
+
+func test_sea_maps_and_grid() -> void:
+	var r := SeaMaps.ripple()
+	var c := SeaMaps.cloud()
+	assert_eq(r.get_width(), 256, "ripple normal map size")
+	assert_true(c.get_image().has_mipmaps(), "cloud map has mipmaps")
+	assert_true(SeaMaps.ripple() == r, "made once and shared")
+	var mesh := SeaMaps.build_grid(20, 10)
+	var aabb := mesh.get_aabb()
+	assert_true(aabb.position.z < -6000.0, "the sea reaches the horizon")
+	assert_true(aabb.end.z > -1.0, "and starts under the angler")
+
+
+func test_water_view_takes_the_conditions() -> void:
+	var w := WaterView.new()
+	w.set_conditions("night", 0.6, 0.3, 0.2)
+	assert_near(float(w.shader_parameter("chop")), 0.6, "chop reaches the sea")
+	assert_near(float(w.shader_parameter("city_lights")), 1.0, "night lights the shore")
+	w.set_detail(false)
+	assert_near(float(w.shader_parameter("detail")), 0.0, "detail can be switched off")
+	w.free()
