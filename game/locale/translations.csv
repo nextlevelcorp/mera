@@ -152,3 +152,8 @@ SET_RECENTER,Set the current pose as the rest pose,Şu anki duruşu dinlenme dur
 SET_MOTION_HELP,Flick the phone back to strike when a fish touches. Tilt it back to pull in a fight. Small twitches work the lure. The rod on screen follows your tilt.,Balık dokununca telefonu hızla geriye çek: Tak. Savaşta geriye eğ: çekme. Küçük sarsmalar yemi oynatır. Ekrandaki kamış eğimini izler.,Echa el teléfono atrás cuando un pez toque: clavada. Inclínalo atrás en la pelea: tirón. Pequeños movimientos trabajan el señuelo. La caña sigue tu inclinación.
 WAIT_HUD,Lure depth %.1f m of %.0f m · retrieve %.1f m/s,Yem derinliği %.1f m / %.0f m · sarım %.1f m/sn,Profundidad del señuelo %.1f m de %.0f m · recogida %.1f m/s
 DBG_MONTH,Month,Ay,Mes
+FIGHT_STEER_HINT,"If it runs sideways, slide Pull the other way",Yana koşarsa Çek'i ters yöne kaydır,"Si corre de lado, desliza Tirar hacia el otro lado"
+FIGHT_JUMP_HINT,"It jumps! Ease the rod, keep reeling","Sıçradı! Kamışı gevşet, sarmaya devam et","¡Salta! Afloja la caña, sigue recogiendo"
+LAND_REEL,Calm: reel it up,Sakin: yukarı sar,Tranquilo: súbelo
+LAND_WAIT,Kicking: wait!,Çırpınıyor: bekle!,Colea: ¡espera!
+WHY_OUT_JUMP,The fish jumped and threw the hook while the rod was pulled hard (hook hold %.0f%%). Ease the rod when it jumps and keep reeling.,"Balık sıçradı ve kamış sert çekilirken kancayı attı (kanca tutma %.0f%%). Sıçrayınca kamışı gevşet, sarmaya devam et.",El pez saltó y soltó el anzuelo con la caña tirando fuerte (sujeción %.0f%%). Afloja la caña cuando salte y sigue recogiendo.

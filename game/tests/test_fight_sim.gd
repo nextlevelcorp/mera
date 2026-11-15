@@ -76,14 +76,88 @@ func test_fight_length_tracks_the_closed_form_estimate() -> void:
 		assert_true(absf(r["mean_landed_s"] - est) <= 0.25 * est, "example %s: mean landed fight %s s is within 25%% of the estimate %s s" % [name, str(r["mean_landed_s"]), str(est)])
 
 
-func test_landing_rate_tracks_the_closed_form_estimate() -> void:
+func _careful(drag: float) -> Callable:
+	# Reels, but waits while the hanging fish kicks.
+	return func(state: Dictionary) -> Dictionary: return {"reel": 0.0 if state["kicking"] else 1.0, "rod": 0.0, "drag_kg": drag}
+
+
+## The landing is the player's: the closed-form estimate sits between a
+## careless landing (reeling through the kicks) and a careful one.
+func test_landing_rate_brackets_the_closed_form_estimate() -> void:
 	_setup()
 	for name in ["B", "C2"]:
-		var r := _survey(name, _steady)
-		# The estimate's chain includes the hook stage; a fight starts after it.
-		var est_p: float = r["est"]["chain"]["p_land_given_take"] / r["est"]["hook"]["hook"]
-		var rate := float(r["landed"]) / SEEDS
-		assert_true(absf(rate - est_p) <= 0.1, "example %s: landing rate %s is within 0.1 of the estimate %s (%s)" % [name, str(rate), str(est_p), str(r["counts"])])
+		var careless := _survey(name, _steady)
+		var careful := _survey(name, _careful)
+		var est_p: float = careless["est"]["chain"]["p_land_given_take"] / careless["est"]["hook"]["hook"]
+		var lo := float(careless["landed"]) / SEEDS
+		var hi := float(careful["landed"]) / SEEDS
+		assert_true(hi > lo or (name == "B" and hi >= lo), "example %s: waiting out the kicks lands more fish (%s against %s)" % [name, str(hi), str(lo)])
+		assert_true(lo <= est_p + 0.1 and hi >= est_p - 0.1, "example %s: estimate %s lies between careless %s and careful %s" % [name, str(est_p), str(lo), str(hi)])
+
+
+func test_a_landing_needs_the_player_to_reel() -> void:
+	_setup()
+	var ctx: Dictionary = _h._ctx(_examples["A"])
+	var fight := FightSim.new(ctx, _k, 0.9, 3)
+	var state := fight.run(func(s: Dictionary) -> Dictionary: return {"reel": 0.0 if s["in_landing"] and float(s["time_s"]) < 60.0 else 1.0, "rod": 0.0, "drag_kg": 1.0})
+	assert_true(float(state["time_s"]) >= 60.0 or state["outcome"] != FightSim.OUTCOME_LANDED, "a fish left hanging is not landed by itself")
+	var f2 := FightSim.new(ctx, _k, 0.9, 3)
+	var seen := 0.0
+	while not f2.is_over():
+		var s := f2.step({"reel": 1.0, "rod": 0.0, "drag_kg": 1.0})
+		assert_true(float(s["lift"]) >= seen, "the lift only goes up")
+		seen = float(s["lift"])
+
+
+func test_runs_go_sideways_and_side_strain_holds_them() -> void:
+	_setup()
+	var ctx: Dictionary = _h._ctx(_examples["C2"])
+	var free := 0.0
+	var held := 0.0
+	var e_free := 0.0
+	var e_held := 0.0
+	for seed_value in range(1, 41):
+		var a := FightSim.new(ctx, _k, 0.64, seed_value)
+		var b := FightSim.new(ctx, _k, 0.64, seed_value)
+		for i in 90:
+			var sa := a.step({"reel": 0.3, "rod": 1.0, "drag_kg": 1.2})
+			var sb := b.step({"reel": 0.3, "rod": 1.0, "drag_kg": 1.2, "steer": -float(b.heading)})
+			assert_true(absf(float(sa["side_m"])) <= float(_k["SIDE_MAX_SHARE"]) * float(sa["distance_m"]) + 0.001, "sideways stays inside the fan")
+			if a.is_over() or b.is_over():
+				break
+		free += absf(a.side_m)
+		held += absf(b.side_m)
+		e_free += a.energy
+		e_held += b.energy
+	assert_true(free > 0.5, "a running fish moves sideways (%.2f m over 40 fights)" % free)
+	assert_true(held < free * 0.6, "side strain holds it (%.2f against %.2f)" % [held, free])
+	assert_true(e_held < e_free, "and tires it faster")
+
+
+func test_a_hard_pull_on_a_jump_can_throw_the_hook() -> void:
+	_setup()
+	var ctx: Dictionary = _h._ctx(_examples["C2"])
+	var jumps := 0
+	var thrown_hard := 0
+	var thrown_eased := 0
+	for seed_value in range(1, 201):
+		for hard in [true, false]:
+			var f := FightSim.new(ctx, _k, 0.5, seed_value)
+			var s := f.snapshot()
+			while not f.is_over():
+				s = f.step({"reel": 1.0, "rod": 1.0 if (hard or not s["jumping"]) else 0.0, "drag_kg": 1.2})
+			if hard:
+				for e: Dictionary in f.events:
+					if e["event"] == "jump":
+						jumps += 1
+			if s["thrown_on_jump"]:
+				if hard:
+					thrown_hard += 1
+				else:
+					thrown_eased += 1
+	assert_true(jumps > 10, "fish jump near the surface (%d jumps)" % jumps)
+	assert_true(thrown_hard > 0, "pulling through the jumps throws some hooks (%d)" % thrown_hard)
+	assert_eq(thrown_eased, 0, "easing the rod on a jump never throws the hook")
 
 
 func test_drag_above_line_strength_breaks_on_the_first_run() -> void:

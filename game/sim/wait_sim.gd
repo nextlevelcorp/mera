@@ -179,7 +179,8 @@ func _strike() -> void:
 	var hk := CatchModel.hook(_k, sp, _ctx["rod"], _ctx["line"], _ctx["lure"], timing)
 	var roll := _rng.randf()
 	if roll < float(hk["hook"]):
-		hooked = {"species_id": id, "u": _rng.randf(), "timing_quality": timing, "hook": hk["hook"], "distance_m": lure_distance_m}
+		hooked = {"species_id": id, "u": _rng.randf(), "timing_quality": timing, "hook": hk["hook"], "distance_m": lure_distance_m,
+				"lure_depth_m": float(_ctx["play"]["lure_depth_m"]), "retrieve_speed": float(_ctx["play"]["retrieve_speed"])}
 		_log("hooked", {"species_id": id, "timing_quality": timing, "stage_hook": hk, "roll": roll})
 		phase = PHASE_HOOKED
 		_take = {}

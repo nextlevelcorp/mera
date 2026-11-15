@@ -182,3 +182,25 @@ func test_wait_hud_text_formats_in_every_language() -> void:
 		var problem := _format_problem(TranslationServer.translate("WAIT_HUD"), [3.2, 8.0, 0.6])
 		assert_eq(problem, "", "WAIT_HUD in %s: %s" % [locale, problem])
 	TranslationServer.set_locale("en")
+
+
+func test_a_thrown_hook_on_a_jump_has_its_own_reason() -> void:
+	var ctx := _ctx("lufer", "spin")
+	var resolved := CatchModel.resolve(ctx, _k)
+	var stats := _stats()
+	stats["thrown_on_jump"] = true
+	var last: Dictionary = WhyReport.lines(resolved, ctx, "X", "Y", FightSim.OUTCOME_HOOK_PULLED, stats)[4]
+	assert_eq(last["key"], "WHY_OUT_JUMP", "the reason names the jump")
+	for locale: String in ["en", "tr", "es"]:
+		TranslationServer.set_locale(locale)
+		for key: String in ["WHY_OUT_JUMP", "FIGHT_STEER_HINT", "FIGHT_JUMP_HINT", "LAND_REEL", "LAND_WAIT"]:
+			assert_true(TranslationServer.translate(key) != key, "%s has a %s translation" % [key, locale])
+		assert_eq(_format_problem(TranslationServer.translate("WHY_OUT_JUMP"), last["args"]), "", "WHY_OUT_JUMP formats in %s" % locale)
+	TranslationServer.set_locale("en")
+
+
+func test_side_strain_reads_the_thumb_on_the_pull_pad() -> void:
+	assert_eq(FightController.steer_from_pad(105.0, 210.0), 0.0, "the middle is neutral")
+	assert_true(FightController.steer_from_pad(10.0, 210.0) < -0.8, "far left pulls left")
+	assert_true(FightController.steer_from_pad(200.0, 210.0) > 0.8, "far right pulls right")
+	assert_eq(FightController.steer_from_pad(500.0, 210.0), 1.0, "clamped")
