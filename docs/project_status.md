@@ -25,6 +25,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Motion fix, cast sequence, rod, reel and hands (2026-11-15): played in the debug web build (software GL) at 1280x720 and 844x390 with a stubbed iPhone permission API and synthetic motion: permission asked once from a real browser tap and granted; chip shows "on"; wind-up, snap, line pay-out, landing, aim marker, reeling (handle turning, rod bending, 0.52 kg) all seen; a flick struck a forced take (take 8.5 s, hooked 8.7 s). Not seen: a real iPhone prompt; frame rate on the phones.
 - Merge workflow (2026-11-14): owner gave standing approval to merge every update after green checks; recorded in CLAUDE.md.
 - Water detail (2026-11-14): slicks, shore lights and reflections, checked in the debug web build at dusk, night and day with software GL; no shader errors in the console. Frame-rate cost unmeasured: on the phone, open Debug, note fps with "Water detail: on", switch it off, note again.
 - Rod, line, wind, hands and phone motion (2026-11-14): played in the debug web build with software GL and synthetic devicemotion events: a forced take was struck by a simulated flick, tilting back raised the rod and tension (0.52 to 0.92 kg), the rod bends towards the line and settles, both hands and the reel are drawn, lamp light shows on the water at night. Not tested on a real phone: sensor sign and thresholds, iPhone permission prompt, frame rate.

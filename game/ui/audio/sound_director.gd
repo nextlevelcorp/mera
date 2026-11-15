@@ -14,7 +14,7 @@ extends Node
 
 const AUDIO_DIR := "res://audio"
 const WAVES: Array[String] = ["wave_01", "wave_02", "wave_03", "wave_04"]
-const ONE_SHOTS: Array[String] = ["lure_drop", "splash", "splash_heavy", "wind_gust", "cast_swish", "rod_creak", "line_zip"]
+const ONE_SHOTS: Array[String] = ["lure_drop", "splash", "splash_heavy", "wind_gust", "cast_swish", "rod_creak", "line_zip", "drag_click"]
 const CREAK_SHARE := 0.75
 const ZIP_SPEED_M_S := 1.2
 

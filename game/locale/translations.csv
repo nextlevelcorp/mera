@@ -122,3 +122,6 @@ DBG_INVERTED,inverted,ters,invertida
 DBG_WATER_DETAIL,Water detail,Su detayı,Detalle del agua
 DBG_ON,on,açık,activado
 DBG_OFF,off,kapalı,desactivado
+MOTION_ON,Phone motion: on,Telefon hareketi: açık,Movimiento del teléfono: activado
+MOTION_TAP,Phone motion: tap to allow,Telefon hareketi: izin için dokun,Movimiento del teléfono: toca para permitir
+MOTION_DENIED,Phone motion: blocked (allow it in Safari settings),Telefon hareketi: engelli (Safari ayarlarından izin ver),Movimiento del teléfono: bloqueado (permítelo en los ajustes de Safari)
