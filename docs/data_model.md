@@ -296,6 +296,8 @@ visible_m = K.VIS_BASE + K.VIS_RANGE * visibility                               
 | WAIT_END_M | 3 m | SHOAL_BOOST_S | 60 s | CAP_LAND_DISTANCE_M | 5 m |
 | JIG_GAIN | 0.6 | | | | |
 
+`RISE_PER_M` (0.5), `DIVE_M_PER_S` (1.0) and `LIFT_M_PER_S` (0.8) are design fills added 2026-11-15: how fast a reeled sinker rises per m/s of retrieve, how fast a diving lure changes depth, and how many m/s of line a rod pull gains while the drag holds (5.5). In the real-time wait the player's reel effort sets retrieve speed and, with the lure's sink rate, the live lure depth that stages 2 and 3 read; with no reel input the wait uses `WAIT_RETRIEVE_M_PER_S` and the play's fixed depth and speed. Slot, month and wind come from the phone's clock and a date-and-hour seed in the real game.
+
 `WAIT_RETRIEVE_M_PER_S` is how fast the lure comes back while the player waits; the cast ends when the lure is `WAIT_END_M` from the shore. `SHOAL_BOOST_S` is the 60 s shoal follow-up of 5.3. All three were added with the real-time wait (2026-11-13).
 
 Calibration targets from the PRD: best-case median wait for a take 20-40 s (the examples give 28 s); worst case at least 120 s (608 s); fights 20-90 s (30-60 s in the examples).

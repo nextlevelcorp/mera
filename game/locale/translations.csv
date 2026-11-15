@@ -150,3 +150,5 @@ SET_MON_STRIKE,Strike!,Tak!,¡Clavada!
 SET_MON_NONE,No motion data from this device yet (tap the screen once).,Bu cihazdan henüz hareket verisi yok (ekrana bir kez dokun).,Aún no hay datos de movimiento de este dispositivo (toca la pantalla una vez).
 SET_RECENTER,Set the current pose as the rest pose,Şu anki duruşu dinlenme duruşu yap,Usar la postura actual como reposo
 SET_MOTION_HELP,Flick the phone back to strike when a fish touches. Tilt it back to pull in a fight. Small twitches work the lure. The rod on screen follows your tilt.,Balık dokununca telefonu hızla geriye çek: Tak. Savaşta geriye eğ: çekme. Küçük sarsmalar yemi oynatır. Ekrandaki kamış eğimini izler.,Echa el teléfono atrás cuando un pez toque: clavada. Inclínalo atrás en la pelea: tirón. Pequeños movimientos trabajan el señuelo. La caña sigue tu inclinación.
+WAIT_HUD,Lure depth %.1f m of %.0f m · retrieve %.1f m/s,Yem derinliği %.1f m / %.0f m · sarım %.1f m/sn,Profundidad del señuelo %.1f m de %.0f m · recogida %.1f m/s
+DBG_MONTH,Month,Ay,Mes

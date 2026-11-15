@@ -65,6 +65,10 @@ func _ready() -> void:
 		var c: Dictionary = _screen.conditions
 		c["slot"] = SLOTS[(SLOTS.find(c["slot"]) + 1) % SLOTS.size()]
 		_screen.apply_conditions())
+	_add(grid, "month", func() -> void:
+		var c: Dictionary = _screen.conditions
+		c["month"] = int(c["month"]) % 12 + 1
+		_screen.apply_conditions())
 	_add(grid, "wind", func() -> void:
 		var c: Dictionary = _screen.conditions
 		c["wind_ms"] = WINDS[(WINDS.find(int(c["wind_ms"])) + 1) % WINDS.size()]
@@ -118,7 +122,7 @@ func _process(delta: float) -> void:
 func _add(grid: GridContainer, id: String, on_press: Callable) -> void:
 	var b := Button.new()
 	b.add_theme_font_size_override("font_size", 18)
-	b.custom_minimum_size = Vector2(250, 64)
+	b.custom_minimum_size = Vector2(250, 52)
 	b.clip_text = true
 	b.pressed.connect(func() -> void:
 		on_press.call()
@@ -132,6 +136,7 @@ func _refresh() -> void:
 		return
 	var c: Dictionary = _screen.conditions
 	_buttons["slot"].text = "%s: %s" % [tr("DBG_SLOT"), tr("SLOT_%s" % String(c["slot"]).to_upper())]
+	_buttons["month"].text = "%s: %d" % [tr("DBG_MONTH"), int(c["month"])]
 	_buttons["wind"].text = "%s: %d m/s" % [tr("DBG_WIND"), int(c["wind_ms"])]
 	_buttons["dir"].text = "%s: %s" % [tr("DBG_WIND_DIR"), c["wind_dir"]]
 	var clarity: float = CLARITIES[_clarity_i]

@@ -40,6 +40,19 @@ var _rates := {}          # species_id -> {rate_interest, commit, window_s, stag
 var _boost_until := {}    # species_id -> time_s
 var _take := {}           # species_id, window_s, elapsed_s
 var _jig := 0.0           # 0..1, the player working the lure (phone twitches)
+var _reel := 0.0          # 0..1, the player's retrieve effort (controlled mode)
+
+## Controlled retrieve (owner request 2026-11-15): the player decides when the
+## lure moves. Not reeling, a sinker sinks (the count-down); reeling brings it
+## in at reel effort times the reel's speed and, for a sinker, lifts it; a
+## diving lure (sink rate 0) dives deeper the faster it is reeled. The
+## retrieve speed and the depth feed stages 2 and 3 of the catch model. Without
+## a "reel" input the lure is retrieved at a constant WAIT_RETRIEVE_M_PER_S at the
+## play's fixed depth and speed (the original mode, kept for tests and for the
+## neighbours' pace).
+var controlled := false
+var depth_m := 0.0
+var retrieve_ms := 0.0
 
 
 ## ctx: a CatchModel context (species is replaced per species); species_records:
@@ -68,6 +81,8 @@ func is_over() -> bool:
 func advance(frame_s: float, input: Dictionary, speed: float = 1.0) -> Dictionary:
 	var strike: bool = input.get("strike", false)
 	_jig = clampf(float(input.get("jig", 0.0)), 0.0, 1.0)
+	controlled = input.has("reel")
+	_reel = clampf(float(input.get("reel", 0.0)), 0.0, 1.0)
 	var scale := speed if phase == PHASE_FISHING else 1.0
 	_accum += minf(maxf(frame_s, 0.0), MAX_FRAME_S) * maxf(scale, 1.0)
 	if strike:
@@ -93,7 +108,12 @@ func step() -> void:
 			_end_take()
 		return
 
-	lure_distance_m = maxf(lure_distance_m - float(_k["WAIT_RETRIEVE_M_PER_S"]) * DT, 0.0)
+	if controlled:
+		retrieve_ms = _reel * float(_ctx["reel"]["retrieve_m_per_s"])
+		lure_distance_m = maxf(lure_distance_m - retrieve_ms * DT, 0.0)
+		_update_depth()
+	else:
+		lure_distance_m = maxf(lure_distance_m - float(_k["WAIT_RETRIEVE_M_PER_S"]) * DT, 0.0)
 	if lure_distance_m <= float(_k["WAIT_END_M"]):
 		phase = PHASE_RETRIEVED
 		_log("retrieved", {})
@@ -130,6 +150,8 @@ func snapshot() -> Dictionary:
 	var window := float(_take.get("window_s", 0.0))
 	return {
 		"time_s": time_s, "phase": phase, "lure_distance_m": lure_distance_m,
+		"depth_m": depth_m, "retrieve_ms": retrieve_ms, "controlled": controlled,
+		"water_depth_m": CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m),
 		"take_progress": float(_take.get("elapsed_s", 0.0)) / window if window > 0.0 else 0.0,
 		"hooked": hooked,
 	}
@@ -181,9 +203,31 @@ func _end_take() -> void:
 	phase = PHASE_FISHING
 
 
+## Depth follows the lure's kind and how it is reeled; never below the
+## surface, never deeper than the lure runs or the water allows.
+func _update_depth() -> void:
+	var lure: Dictionary = _ctx["lure"]
+	var water := CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m)
+	var ceiling := minf(float(lure["run_depth_max_m"]), water * 0.9)
+	var sink := float(lure["sink_rate_m_per_s"])
+	if sink > 0.0:
+		# A sinker: falls while slack, rises as it is reeled in.
+		depth_m += (sink * (1.0 - _reel) - float(_k["RISE_PER_M"]) * retrieve_ms) * DT
+	else:
+		# A diving lure: heads for a depth that grows with reel speed.
+		var lo := float(lure["run_depth_min_m"])
+		var target := lo + (float(lure["run_depth_max_m"]) - lo) * _reel if _reel > 0.05 else 0.0
+		depth_m = move_toward(depth_m, target, float(_k["DIVE_M_PER_S"]) * DT)
+	depth_m = clampf(depth_m, 0.0, maxf(ceiling, 0.0))
+
+
 func _refresh_rates() -> void:
 	_refresh_left = RATE_REFRESH_S
 	_ctx["play"]["cast_m"] = lure_distance_m
+	if controlled:
+		# What the player does is what the model sees (data_model 5.2, 5.3).
+		_ctx["play"]["lure_depth_m"] = depth_m
+		_ctx["play"]["retrieve_speed"] = 1.0 + 19.0 * _reel
 	for sp: Dictionary in _species:
 		var c := _ctx.duplicate()
 		c["species"] = sp
