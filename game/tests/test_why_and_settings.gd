@@ -174,3 +174,11 @@ func test_motion_monitor_text_formats_in_every_language() -> void:
 		var problem := _format_problem(TranslationServer.translate("SET_MON_TEXT"), [12.0, 0.4, 35.0, 10.0])
 		assert_eq(problem, "", "SET_MON_TEXT in %s: %s" % [locale, problem])
 	TranslationServer.set_locale("en")
+
+
+func test_wait_hud_text_formats_in_every_language() -> void:
+	for locale: String in ["en", "tr", "es"]:
+		TranslationServer.set_locale(locale)
+		var problem := _format_problem(TranslationServer.translate("WAIT_HUD"), [3.2, 8.0, 0.6])
+		assert_eq(problem, "", "WAIT_HUD in %s: %s" % [locale, problem])
+	TranslationServer.set_locale("en")

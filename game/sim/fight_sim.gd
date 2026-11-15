@@ -145,10 +145,13 @@ func step(input: Dictionary) -> Dictionary:
 	# Line out or line in.
 	if slipping:
 		distance_m += run_speed * effort * sqrt(energy_share) * (demand - drag) / demand * DT
-	elif reel > 0.0 and drag > 0.0:
+	elif (reel > 0.0 or rod > 0.0) and drag > 0.0:
 		# Line comes in whenever the drag holds; the harder the fish pulls
-		# against the drag setting, the slower it comes.
-		distance_m -= reel * retrieve_m_per_s * (1.0 - fish_pull / drag) * DT
+		# against the drag setting, the slower it comes. Lifting the rod
+		# (pumping) brings the fish in too, at LIFT_M_PER_S (owner feedback
+		# 2026-11-15: pulling felt useless); it only works while the drag holds.
+		var held := 1.0 - fish_pull / drag
+		distance_m -= (reel * retrieve_m_per_s + rod * float(_k["LIFT_M_PER_S"])) * held * DT
 	distance_m = maxf(distance_m, 0.0)
 
 	# Tiring.

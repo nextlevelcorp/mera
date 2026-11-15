@@ -84,6 +84,7 @@ var _neighbours := NeighborAnglers.new(5)
 var _last_contact_s := -99.0   ## when a fish last touched the lure (_time)
 var _strike_flash := 0.0
 var _mon_label: Label
+var _depth_label: Label
 var _mon_pull: ProgressBar
 var _mon_jig: ProgressBar
 var _motion: DeviceMotion
@@ -162,6 +163,9 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	var loaded_save := SaveFile.load_save(save_path) if save_enabled else SaveGame.from_data(null)
 	save = loaded_save["save"]
 	save_status = loaded_save["status"]
+	if save_enabled:
+		# Real place, real time: the slot, month and wind come from the phone's clock.
+		conditions = SessionConditions.from_clock(Time.get_datetime_dict_from_system())
 	if save["last_rig"] in FightSetup.TACKLES:
 		rig = save["last_rig"]
 	if _position_index(save["last_position"]) >= 0:
@@ -232,7 +236,7 @@ func _base_context(species_id: String, overrides: Dictionary = {}) -> Dictionary
 func _set_phase(p: int) -> void:
 	phase = p
 	var fight := p == Phase.FIGHT
-	_reel_pad.visible = fight
+	_reel_pad.visible = fight or p == Phase.WAIT   # in the wait the left thumb sets the retrieve
 	_drag_slider.visible = fight
 	_pull_button.visible = fight
 	_tension_label.visible = fight
@@ -245,6 +249,7 @@ func _set_phase(p: int) -> void:
 	_rig_button.visible = p == Phase.READY
 	_log_button.visible = p in [Phase.READY, Phase.RESULT]
 	_distance_label.visible = p in [Phase.WAIT, Phase.FIGHT]
+	_depth_label.visible = p == Phase.WAIT
 	_result_panel.visible = p == Phase.RESULT
 	_settings_button.visible = p in [Phase.READY, Phase.WAIT]
 	if p != Phase.RESULT:
@@ -256,6 +261,8 @@ func _set_phase(p: int) -> void:
 		_log_panel.visible = false
 	if p != Phase.WAIT:
 		_speed_on = false
+	if p == Phase.WAIT:
+		_reel_pressed = false
 	if p == Phase.WAIT or p == Phase.FIGHT:
 		_gesture.calibrated = false
 	_rope = null
@@ -341,7 +348,8 @@ func force_bite(species_id: String, u: float = -1.0) -> void:
 
 
 func _step_wait(delta: float) -> void:
-	var input := {"strike": _strike_queued, "jig": jig_amount()}
+	var input := {"strike": _strike_queued, "jig": jig_amount(),
+		"reel": FightController.reel_from_pad(_reel_pressed, _reel_y, _reel_pad.size.y)}
 	_strike_queued = false
 	_wait_state = _wait.advance(delta, input, SPEED_UP if _speed_on else 1.0)
 	for i in range(_last_event_count, _wait.events.size()):
@@ -730,7 +738,7 @@ func _step_rod_and_line(delta: float) -> void:
 	if phase == Phase.FIGHT:
 		crank_target = 14.0 * float(current_input()["reel"])
 	elif phase == Phase.WAIT and _wait_state.get("phase", "") == WaitSim.PHASE_FISHING:
-		crank_target = 3.0 * (SPEED_UP if _speed_on else 1.0)
+		crank_target = 14.0 * float(_wait_state.get("retrieve_ms", 0.0)) / maxf(float(_ctx["reel"]["retrieve_m_per_s"]), 0.1)
 	_cast_pose = lerpf(_cast_pose, 1.0 if phase in [Phase.CHARGE, Phase.FLIGHT] else 0.0, minf(delta * 6.0, 1.0))
 	_rig.light = float(_env.get("light", 0.6))
 	_rig.tension = clampf(float(_hud.get("tension_ratio", 0.0)), 0.0, 1.2) if phase == Phase.FIGHT else 0.0
@@ -1083,6 +1091,10 @@ func _build_hud() -> void:
 	add_child(_distance_label)
 	_top_center(_distance_label, 132.0, 40.0)
 	_distance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_depth_label = _label(22)
+	add_child(_depth_label)
+	_top_center(_depth_label, 172.0, 30.0)
+	_depth_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast_label = _label(30)
 	add_child(_toast_label)
 	_top_center(_toast_label, 200.0, 44.0)
@@ -1131,13 +1143,11 @@ func _build_hud() -> void:
 
 	# Wait controls on the left.
 	_reel_in_button = _button(tr("FISH_REEL_IN"), 24, reel_in)
-	_place_bottom(_reel_in_button, false, Vector2(200, TOUCH_MIN), 16.0)
+	_top_left(_reel_in_button, 128.0)
 	add_child(_reel_in_button)
 	_speed_button = _button(tr("FISH_SPEED"), 24, func() -> void: _speed_on = not _speed_on)
 	_speed_button.toggle_mode = true
-	_place_bottom(_speed_button, false, Vector2(200, TOUCH_MIN), 16.0)
-	_speed_button.offset_bottom -= TOUCH_MIN + 16.0
-	_speed_button.offset_top -= TOUCH_MIN + 16.0
+	_top_left(_speed_button, 232.0)
 	add_child(_speed_button)
 
 	# Ready controls on the left.
@@ -1434,6 +1444,7 @@ func _update_texts() -> void:
 	match phase:
 		Phase.WAIT:
 			_distance_label.text = "%.1f m" % float(_wait_state.get("lure_distance_m", 0.0))
+			_depth_label.text = tr("WAIT_HUD") % [float(_wait_state.get("depth_m", 0.0)), float(_wait_state.get("water_depth_m", 0.0)), float(_wait_state.get("retrieve_ms", 0.0))]
 		Phase.FIGHT:
 			_tension_label.text = "%.2f / %.2f kg" % [_hud["tension_kg"], _hud["line_strength_kg"]]
 			_distance_label.text = "%.1f m" % _hud["distance_m"]
@@ -1501,6 +1512,18 @@ func _place_bottom(control: Control, right_side: bool, control_size: Vector2, dx
 		control.offset_right = dx + control_size.x
 	control.offset_bottom = -16.0
 	control.offset_top = -16.0 - control_size.y
+
+
+## A 200 px wide, 96 px high button at the top left, y px down.
+func _top_left(control: Control, y: float) -> void:
+	control.anchor_left = 0.0
+	control.anchor_right = 0.0
+	control.anchor_top = 0.0
+	control.anchor_bottom = 0.0
+	control.offset_left = 16.0
+	control.offset_right = 216.0
+	control.offset_top = y
+	control.offset_bottom = y + TOUCH_MIN
 
 
 func _top_center(control: Control, y: float, height: float) -> void:
