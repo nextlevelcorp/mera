@@ -3,15 +3,16 @@ extends Node3D
 ## The bridge the angler stands on, in 3D (owner, 2026-11-16: graphics): the
 ## deck, the steel rail running away to the left, lamp standards with lit
 ## lamps at dusk and night, and the neighbouring anglers as lit figures with
-## rods. The view looks out over the rail at an angle, so the rail and the
-## row of anglers recede towards the far shore, as in any photo of the Galata
-## Bridge. Shapes and materials are made in code (no model assets yet).
+## rods. The rail runs square to the water; while getting ready the angler
+## looks along it (WaterView.BRIDGE_YAW), so the rail and the row of anglers
+## recede towards the far shore, as in any photo of the Galata Bridge. Shapes and materials are made in code (no model assets yet).
 ## Visual only. Local frame: +X along the rail away from the angler, +Y up,
 ## +Z towards the water; the origin is on the deck under the rail.
 
-const RAIL_P := Vector2(0.35, 1.0)          ## a point of the rail: x right, z out (water metres)
-const RAIL_F := Vector2(-0.5524, 0.8336)    ## along the rail, away from the angler
-const RAIL_N := Vector2(0.8336, 0.5524)     ## towards the water
+const RAIL_Z := 0.844                       ## the rail runs along x, this far out from the angler
+const RAIL_P := Vector2(0.0, RAIL_Z)        ## a point of the rail: x right, z out (water metres)
+const RAIL_F := Vector2(-1.0, 0.0)          ## along the rail, to the angler's left
+const RAIL_N := Vector2(0.0, 1.0)           ## towards the water
 const DECK_Y := 0.6
 const RAIL_H := 1.05
 const LENGTH := 150.0
@@ -103,11 +104,6 @@ func tip_water(i: int) -> Vector3:
 func lure_water(i: int, cast_m: float, side: float) -> Vector2:
 	var t := tip_water(i)
 	return Vector2(t.x, t.z) + RAIL_N * cast_m * 0.85 + RAIL_F * side * cast_m
-
-
-## x of the rail at z metres out: the water is to the right of it.
-static func rail_x_at(z: float) -> float:
-	return RAIL_P.x + (z - RAIL_P.y) * RAIL_F.x / RAIL_F.y
 
 
 # ------------------------------------------------------------------ building

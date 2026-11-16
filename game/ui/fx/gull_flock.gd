@@ -72,10 +72,10 @@ func draw(ci: CanvasItem, size: Vector2, light: float) -> void:
 	var tip_col := col.darkened(0.45)
 	for g: Dictionary in gulls:
 		var pos: Vector3 = g["pos"]
-		if pos.z < 3.0:
+		if WaterView.view_depth(Vector2(pos.x, pos.z)) < 3.0:
 			continue
 		var at := WaterView.project(Vector2(pos.x, pos.z), pos.y, size)
-		var span := clampf(size.y * 1.3 / (pos.z * WaterView.FOV), 3.0, 60.0) * 0.5
+		var span := clampf(size.y * 1.3 / (WaterView.view_depth(Vector2(pos.x, pos.z)) * WaterView.FOV), 3.0, 60.0) * 0.5
 		var dir: Vector2 = g["dir"]
 		var side := clampf(dir.x, -1.0, 1.0)   # banking: wings foreshorten when flying across
 		var flap := sin(float(g["phase"])) * 0.55

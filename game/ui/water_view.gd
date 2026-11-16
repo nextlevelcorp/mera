@@ -33,6 +33,16 @@ const EXPOSURE := {"dawn": 1.0, "day": 0.95, "evening": 1.0, "night": 1.2}
 ## Far-shore lights by time of slot (generic city lights, design fill).
 const CITY_LIGHTS := {"dawn": 0.3, "day": 0.0, "evening": 0.35, "night": 1.0}
 
+## The view's turn to the left of straight out over the water, in radians.
+## The world is square to the rail (z out over the water); the angler looks
+## along the bridge while getting ready (BRIDGE_YAW) and turns to the water
+## to cast and fish (0). project() and the 3D camera share it.
+const BRIDGE_YAW := 0.9856
+## The sun and moon stand this far to the left of straight out, so they are in
+## view both along the bridge and facing the water.
+const SUN_YAW := 0.49
+static var view_yaw := 0.0
+
 var detail := true
 var camera: Camera3D
 var bridge: Bridge3D
@@ -87,7 +97,7 @@ func _init() -> void:
 	bridge = Bridge3D.new()
 	root.add_child(bridge)
 	rig3d = Rig3D.new()
-	root.add_child(rig3d)
+	camera.add_child(rig3d)
 	_sun.shadow_enabled = true
 	_sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	_sun.directional_shadow_max_distance = 40.0
@@ -109,7 +119,7 @@ static func make_camera() -> Camera3D:
 func set_conditions(slot: String, chop: float, visibility: float, light: float) -> void:
 	var palette: Array = PALETTES[slot]
 	var sun: Array = SUNS[slot]
-	var sun_dir := (sun[0] as Vector3).normalized()
+	var sun_dir := (sun[0] as Vector3).normalized().rotated(Vector3.UP, SUN_YAW)
 	for m: ShaderMaterial in [_sky, _sea]:
 		m.set_shader_parameter("sky_top", palette[0])
 		m.set_shader_parameter("sky_horizon", palette[1])
@@ -132,6 +142,11 @@ func set_conditions(slot: String, chop: float, visibility: float, light: float) 
 		_sun.look_at_from_position(Vector3.ZERO, -sun_dir, Vector3.UP if absf(sun_dir.x) + absf(sun_dir.z) > 0.01 else Vector3.FORWARD)
 
 
+func set_view_yaw(yaw: float) -> void:
+	view_yaw = yaw
+	camera.rotation.y = yaw
+
+
 ## Debug menu: switch the extra water detail off and on to measure its cost.
 func set_detail(on: bool) -> void:
 	detail = on
@@ -147,7 +162,15 @@ func shader_parameter(name_id: String) -> Variant:
 ## away), at height h above the surface. Same camera as the shader.
 static func project(world: Vector2, h: float, view_size: Vector2) -> Vector2:
 	var aspect := view_size.x / maxf(view_size.y, 1.0)
-	var z := maxf(world.y, 0.5)
-	var u := 0.5 + world.x / (z * aspect * FOV)
+	var c := cos(view_yaw)
+	var sn := sin(view_yaw)
+	var x := world.x * c + world.y * sn
+	var z := maxf(world.y * c - world.x * sn, 0.5)
+	var u := 0.5 + x / (z * aspect * FOV)
 	var v := HORIZON + (CAM_HEIGHT - h) / (z * FOV)
 	return Vector2(u * view_size.x, v * view_size.y)
+
+
+## Distance of a water point in front of the view (negative: behind it).
+static func view_depth(world: Vector2) -> float:
+	return world.y * cos(view_yaw) - world.x * sin(view_yaw)
