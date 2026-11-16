@@ -81,6 +81,10 @@ var _line_rate := 0.0
 var _paid_m := 0.0
 var _motion_chip: Button
 var _neighbours := NeighborAnglers.new(5)
+var _shoals: ShoalField
+var _gulls: GullFlock
+var _boil_clock := 0.0
+var _shoal_hint_shown := false
 var _last_contact_s := -99.0   ## when a fish last touched the lure (_time)
 var _strike_flash := 0.0
 var _mon_label: Label
@@ -178,6 +182,9 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	else:
 		position_id = _db["spot"][0]["positions"][0]["id"]
 	_rng.seed = 7
+	# Shoals of the hour: the same for everyone at the same place and time.
+	_shoals = ShoalField.new(_k, int(conditions["month"]) * 1000 + int(Time.get_datetime_dict_from_system()["hour"]) if save_enabled else 77)
+	_gulls = GullFlock.new(_shoals.shoals.size())
 	_water = WaterView.new()
 	add_child(_water)
 	_overlay = Control.new()
@@ -207,6 +214,26 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 
 
 # ------------------------------------------------------------------ state
+
+## Shoals drift, gulls work over them, and the water boils where they feed.
+func _step_shoals(delta: float) -> void:
+	_shoals.advance(delta)
+	_gulls.update(delta, _shoals)
+	for hit: Vector2 in _gulls.take_dives():
+		_fx.add_ring(hit, 0.3, 1.2, 0.7)
+		_fx.splash(WaterView.project(hit, 0.0, _overlay.size), hit, 0.25)
+	_boil_clock -= delta
+	if _boil_clock <= 0.0:
+		_boil_clock = 0.22
+		for s: Dictionary in _shoals.shoals:
+			var power := ShoalField.strength(s)
+			if _rng.randf() < power:
+				var at: Vector2 = (s["pos"] as Vector2) + Vector2.from_angle(_rng.randf() * TAU) * float(s["radius"]) * sqrt(_rng.randf()) * 0.8
+				_fx.add_ring(at, 0.15, 0.5 + 0.5 * _rng.randf(), 0.5)
+	if phase == Phase.READY and not _shoal_hint_shown and _time > 4.0:
+		_shoal_hint_shown = true
+		_toast(tr("FISH_SHOAL_HINT"), 5.0)
+
 
 ## Recomputes the environment from the conditions and updates the water.
 func apply_conditions() -> void:
@@ -315,6 +342,9 @@ func cast_with_power(power: float, aim: float = 0.0) -> void:
 func _land_lure() -> void:
 	var cast_m: float = _cast["cast_m"]
 	_wait = WaitSim.new(_ctx, _k, _db["species"], cast_m, _seed_counter * 7919)
+	_wait.shoals = _shoals
+	_wait.lure_x0 = -0.3
+	_wait.lure_x_per_m = tan(_aim_x)
 	_wait_state = _wait.snapshot()
 	_last_event_count = 0
 	var world := Vector2(_lure_x(cast_m), NEAR_DRAW_M + cast_m)
@@ -871,6 +901,7 @@ func _process(delta: float) -> void:
 	_tip_kick += _tip_vel * delta
 	_tap_jig = maxf(_tap_jig - delta * 0.8, 0.0)
 	_step_rod_and_line(delta)
+	_step_shoals(delta)
 	if _on_bridge():
 		_neighbours.update(delta)
 		for e: Dictionary in _neighbours.take_events():
@@ -916,8 +947,10 @@ func _draw_overlay() -> void:
 		Phase.LIFT:
 			_draw_line(false)
 			_draw_lifted_fish(tip)
+	_gulls.draw(_overlay, size, float(_env.get("light", 0.6)))
 	for p: Dictionary in _fx.particles:
 		_overlay.draw_circle(p["pos"], p["size"], Color(0.92, 0.96, 1.0, 0.85 * float(p["life"]) / float(p["max_life"])))
+	_water.bridge.visible = _on_bridge()
 	if _on_bridge():
 		_draw_bridge(size)
 	_rig.draw(_overlay, _rod.points(), size)
@@ -958,45 +991,19 @@ func _on_bridge() -> bool:
 	return not _ctx.is_empty() and "bridge piers" in (_ctx["position"].get("structure_tags", []) as Array)
 
 
-## Bridge foreground: deck edge, a steel rail with posts, a lamp standard and
-## the rods of neighbouring anglers. Drawn shapes only (design direction:
-## art option A); darker with less light.
+## The bridge itself is 3D (Bridge3D); the overlay adds the neighbours' lines
+## and the fish they lift.
 func _draw_bridge(size: Vector2) -> void:
-	var light := float(_env.get("light", 0.6))
-	var steel := Color(0.16, 0.18, 0.2).lerp(Color(0.04, 0.05, 0.06), 1.0 - light)
-	var deck := Color(0.32, 0.31, 0.3).lerp(Color(0.08, 0.08, 0.09), 1.0 - light)
-	var rail_y := size.y * 0.80
-	var deck_y := size.y * 0.90
-	# At dusk and night the lamps lay a broken streak of light on the water.
-	var lamp_glow := 1.0 - light
-	if lamp_glow > 0.2:
-		var lx := size.x * 0.27 + 30.0   # under the right-hand lamp head
-		for j in 14:
-			var t := float(j) / 13.0
-			var y := lerpf(size.y * 0.42, rail_y - 8.0, t)
-			var wobble := sin(_time * 1.7 + j * 1.3) * (4.0 + 10.0 * t)
-			var w := lerpf(3.0, 22.0, t) * (0.6 + 0.4 * sin(_time * 2.3 + j * 2.1))
-			_overlay.draw_rect(Rect2(lx + wobble - w * 0.5, y, w, 2.0 + 3.0 * t), Color(1.0, 0.82, 0.5, (0.3 + 0.5 * lamp_glow) * (1.0 - 0.3 * t)))
-	_overlay.draw_rect(Rect2(0, deck_y, size.x, size.y - deck_y), deck)
-	_overlay.draw_rect(Rect2(0, deck_y, size.x, 4), deck.lightened(0.15))
-	# Other anglers along the rail, fishing too (Zengin 2009: hundreds a day).
-	_neighbours.draw(_overlay, size, rail_y, light, _time)
-	# Rail: top bar, mid bar, posts.
-	_overlay.draw_rect(Rect2(0, rail_y - 6, size.x, 12), steel)
-	_overlay.draw_rect(Rect2(0, rail_y + size.y * 0.045, size.x, 6), steel)
-	var post_gap := 110.0
-	var x := fmod(post_gap * 0.5, post_gap)
-	while x < size.x:
-		_overlay.draw_rect(Rect2(x - 4, rail_y - 6, 8, deck_y - rail_y + 6), steel)
-		x += post_gap
-	# Lamp standard at the left.
-	var lamp_x := size.x * 0.27
-	_overlay.draw_rect(Rect2(lamp_x - 6, size.y * 0.18, 12, deck_y - size.y * 0.18), steel)
-	_overlay.draw_rect(Rect2(lamp_x - 34, size.y * 0.16, 68, 10), steel)
-	var glow := 1.0 - light
-	if glow > 0.2:
-		for side in [-1.0, 1.0]:
-			_overlay.draw_circle(Vector2(lamp_x + side * 30.0, size.y * 0.18), 9.0, Color(1.0, 0.85, 0.55, 0.4 + 0.5 * glow))
+	var bridge := _water.bridge
+	bridge.pose(_neighbours.people, _time)
+	var tips := PackedVector2Array()
+	var lures := PackedVector2Array()
+	for i in _neighbours.people.size():
+		var p: Dictionary = _neighbours.people[i]
+		var t := bridge.tip_water(i)
+		tips.append(WaterView.project(Vector2(t.x, t.z), t.y, size))
+		lures.append(WaterView.project(bridge.lure_water(i, float(p["cast_m"]), float(p["side"])), 0.0, size))
+	_neighbours.draw_lines(_overlay, size, float(_env.get("light", 0.6)), tips, lures)
 
 
 ## The line along the Verlet rope; warm-coloured and thicker while straining.
@@ -1550,7 +1557,7 @@ func debug_info() -> String:
 	if not _cast.is_empty():
 		lines.append("cast %.1f m of %.1f max (fit %.2f, headwind %.2f)" % [_cast["cast_m"], _cast["cast_max_m"], _cast["weight_fit"], _cast["headwind"]])
 	if _wait:
-		lines.append("median wait here %.0f s" % _wait.median_wait_s())
+		lines.append("median wait here %.0f s; shoal boost x%.2f (nearest shoal %.0f m from the lure)" % [_wait.median_wait_s(), _wait.shoal_boost(), _shoals.nearest_m(_wait.lure_x0 + _wait.lure_x_per_m * _wait.lure_distance_m, _wait.lure_distance_m)])
 		for e: Dictionary in _wait.events.slice(maxi(_wait.events.size() - 4, 0)):
 			lines.append("%.1fs %s %s" % [e["time_s"], e["event"], e.get("species_id", "")])
 		var last_take := {}
