@@ -13,6 +13,13 @@ Adapted from the Karpathy-inspired guidelines at https://github.com/forrestchang
 ### Caveman mode (token saving)
 Chat replies are terse: answer first, then reason, then next step. No greeting, hedging, recap or closing offer. Keep every technical fact, number, path, command and error exact; never drop a negation. Still reply in Turkish. Write full, normal sentences for: security warnings, irreversible actions, questions and options to the owner, and everything persisted (code, comments, commits, docs, data, PRs, in-game strings). Full rules: .claude/skills/caveman.md.
 
+START HERE (handoff, 2026-11-16)
+Read in this order before any work: this file; `docs/project_status.md` (system status, decisions the owner owes, roadmap R1-R15); `docs/architecture.md` (the single technical reference: layers, the two views, what is implemented and what is only designed); then the reference for the topic at hand: `docs/data_model.md` (data, catch model, save), `docs/prd.md` (scope and acceptance), `docs/design_direction.md` (art, audio, performance), `docs/reference_docs.md` (sources and licences). `docs/changelog.md` is the history.
+- The game is two views of one world: a walkable top-down 2D world (designed, not started) and first-person 3D fishing (built). Do not rebuild what works: the simulations in `game/sim/`, the 3D sea, bridge and rig in `game/ui/sea/`, the 144 tests.
+- New work follows the roadmap order unless the owner says otherwise. Each task: scope in, out, done-when; a test for every rule; play it in the browser; update the status table and the changelog; one pull request.
+- One home per topic: add to the reference that owns it, link from the others, never copy. Mark every feature Implemented, Partial, Designed, Not started or Blocked.
+- Where a new rule is needed, put it in `game/sim/` as pure seeded code with constants in `game/data/constants.json` labelled design fill, and document the formula in `data_model.md`.
+
 PROJECT
 Mera is a realistic shore-fishing RPG set at real places. Phone-first web build now, native iOS and Android later. Godot 4.4, GDScript. Repository: nextlevelcorp/mera. The full specification is docs/project_spec.md; read it before any design or code decision. If the spec and a task disagree, stop and ask.
 
