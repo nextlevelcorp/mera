@@ -98,3 +98,25 @@ func test_reel_handle_has_inertia_and_spool_turns_back_when_line_goes_out() -> v
 	for i in 30:
 		rig.update(1.0 / 60.0, 0.0, 1.5)
 	assert_true(rig.spool < before, "line going out turns the spool backwards")
+
+
+func test_3d_rig_lands_where_the_2d_rig_was_drawn() -> void:
+	var rod := RodSpring.new()
+	for i in 30:
+		rod.step(1.0 / 60.0, Vector2(845, 684), -1.33, 480.0, Vector2(0.1, 0.2))
+	var rig := AnglerRig.new()
+	rig.update(0.016, 6.0, 0.0)
+	var r3 := Rig3D.new()
+	var size := Vector2(1280, 720)
+	r3.pose(rig, rod.points(), size)
+	assert_true(r3.visible, "posed")
+	for t: float in [0.0, 0.3, 1.0]:
+		var p2 := rig.at(t)
+		var p3 := r3._lift(p2, Rig3D._depth(t))
+		var back := WaterView.project(Vector2(p3.x, -p3.z), p3.y, size)
+		assert_near(back.x, p2.x, "x at %.1f of the rod" % t, 0.5)
+		assert_near(back.y, p2.y, "y at %.1f of the rod" % t, 0.5)
+	assert_true((r3._blank.mesh as ArrayMesh).get_surface_count() == 1, "the blank has a mesh")
+	r3.pose(rig, PackedVector2Array(), size)
+	assert_true(not r3.visible, "nothing to pose, nothing shown")
+	r3.free()

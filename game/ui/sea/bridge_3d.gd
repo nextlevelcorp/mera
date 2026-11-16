@@ -144,6 +144,14 @@ func _build_lamps(steel: StandardMaterial3D) -> void:
 			_lights.append(light)
 		x += 20.0
 		n += 1
+	# The lamp behind the angler: lights the hands, the rod and the near rail.
+	var near := OmniLight3D.new()
+	near.light_color = Color(1.0, 0.8, 0.52)
+	near.omni_range = 9.0
+	near.omni_attenuation = 1.2
+	near.position = Vector3(-3.0, 4.2, -1.2)
+	add_child(near)
+	_lights.append(near)
 
 
 func _build_person(i: int) -> void:

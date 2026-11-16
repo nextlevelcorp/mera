@@ -953,7 +953,7 @@ func _draw_overlay() -> void:
 	_water.bridge.visible = _on_bridge()
 	if _on_bridge():
 		_draw_bridge(size)
-	_rig.draw(_overlay, _rod.points(), size)
+	_water.rig3d.pose(_rig, _rod.points(), size)
 	if phase == Phase.FIGHT or (phase == Phase.RESULT and not _hud.is_empty()):
 		_draw_tension_bar(size)
 	if phase == Phase.CHARGE:
