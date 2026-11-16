@@ -51,6 +51,11 @@ var _reel := 0.0          # 0..1, the player's retrieve effort (controlled mode)
 ## play's fixed depth and speed (the original mode, kept for tests and for the
 ## neighbours' pace).
 var controlled := false
+## Bait shoals (ShoalField) and where the lure is sideways: x = lure_x0 +
+## lure_x_per_m * distance. Without a field nothing changes.
+var shoals: ShoalField
+var lure_x0 := 0.0
+var lure_x_per_m := 0.0
 var depth_m := 0.0
 var retrieve_ms := 0.0
 
@@ -128,6 +133,8 @@ func step() -> void:
 		var boost := 1.0 + CatchModel.n(float(sp["schooling"])) if time_s < float(_boost_until.get(id, -1.0)) else 1.0
 		# Working the lure makes it move like prey: more interest (design fill).
 		boost *= 1.0 + float(_k.get("JIG_GAIN", 0.0)) * _jig
+		# A lure in a feeding shoal is among fish (design fill).
+		boost *= shoal_boost()
 		if _rng.randf() < float(r["rate_interest"]) * boost * DT:
 			if _rng.randf() < float(r["commit"]):
 				_open_take(id)
@@ -155,6 +162,10 @@ func snapshot() -> Dictionary:
 		"take_progress": float(_take.get("elapsed_s", 0.0)) / window if window > 0.0 else 0.0,
 		"hooked": hooked,
 	}
+
+
+func shoal_boost() -> float:
+	return shoals.boost_at(lure_x0 + lure_x_per_m * lure_distance_m, lure_distance_m) if shoals else 1.0
 
 
 ## Median wait for any take at the current lure distance, for the "why" view.

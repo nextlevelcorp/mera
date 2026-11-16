@@ -20,7 +20,6 @@ var events: Array[Dictionary] = []
 
 var _rng := RandomNumberGenerator.new()
 var _mean_wait_s := 60.0
-var _hull := PackedVector2Array()
 var _line := PackedVector2Array()
 
 
@@ -108,80 +107,42 @@ func _draw_wait() -> float:
 
 # ------------------------------------------------------------------ drawing
 
-## rail_y: screen y of the rail's top bar. light: 0..1 from the scene.
-func draw(ci: CanvasItem, size: Vector2, rail_y: float, light: float, time: float) -> void:
-	var dusk := 1.0 - light
-	var cloth := Color(0.12, 0.14, 0.19).lerp(Color(0.03, 0.035, 0.05), dusk)
-	var skin := Color(0.5, 0.38, 0.3).lerp(Color(0.05, 0.05, 0.06), dusk)
-	var rod_col := Color(0.07, 0.07, 0.09)
-	var line_col := Color(1, 1, 1, 0.22 + 0.18 * light)
-	# Back to front: the smallest, furthest figure first.
-	var order := range(COUNT)
-	order.reverse()
-	for idx: int in order:
-		_person(ci, people[idx], size, rail_y, cloth, skin, rod_col, line_col, time, light)
-
-
-func _person(ci: CanvasItem, p: Dictionary, size: Vector2, rail_y: float, cloth: Color, skin: Color, rod_col: Color, line_col: Color, time: float, light: float) -> void:
-	var s: float = p["scale"]
-	var h := size.y * 0.30 * s
-	var feet := Vector2(size.x * float(p["x"]), rail_y + 14.0)
-	var sway := sin(time * 0.7 + float(p["tint"]) * 6.0) * 1.5 * s
-	var shoulder := feet + Vector2(sway, -h * 0.82)
-	var head := shoulder + Vector2(sway * 0.5, -h * 0.17)
-	var vest := cloth.lerp(Color(0.2, 0.28, 0.4) if float(p["tint"]) < 0.5 else Color(0.34, 0.2, 0.16), 0.55 * light)
-	# Legs and torso, seen from behind.
-	var w := h * 0.17
-	_hull.clear()
-	_hull.append_array(PackedVector2Array([
-		feet + Vector2(-w * 0.55, 0.0), feet + Vector2(w * 0.55, 0.0), shoulder + Vector2(w * 0.95, h * 0.04),
-		shoulder + Vector2(w * 0.7, -h * 0.02), shoulder + Vector2(-w * 0.7, -h * 0.02), shoulder + Vector2(-w * 0.95, h * 0.04)]))
-	ci.draw_colored_polygon(_hull, vest)
-	ci.draw_circle(head, h * 0.085, skin)
-	ci.draw_arc(head, h * 0.09, PI, TAU, 8, cloth, h * 0.05, true)   # cap
-	# Hands at the rail, the rod from there out over the water.
-	var hands := shoulder + Vector2(w * 0.9, h * 0.26)
-	var bend: float = float(p["bend"]) + 0.15 * float(p["kick"])
-	var reach := size.x * float(p["reach"]) * 1.1
-	var tip_dir := Vector2(0.62, -0.78).normalized()
-	var tip_free := hands + tip_dir * reach
-	var droop := Vector2(0.0, size.y * 0.16 * bend * s) + Vector2(size.x * 0.02 * bend * s, 0.0)
-	var tip := tip_free + droop + Vector2(0.0, sin(float(p["bob"]) * 1.1) * 1.5 * s)
-	var mid := hands.lerp(tip, 0.55) + droop * 0.25
-	ci.draw_line(shoulder + Vector2(w * 0.6, h * 0.04), hands, vest.lightened(0.1), h * 0.07, true)
-	ci.draw_polyline(PackedVector2Array([hands, mid, tip]), rod_col, maxf(2.0 * s, 1.5), true)
-	# Line to the water, with a belly while slack and a straight pull in a fight.
-	var d := float(p["cast_m"])
-	var lure := WaterView.project(Vector2(-6.0 + 14.0 * float(p["x"]) + float(p["side"]) * d, NEAR_M + d), 0.0, size)
-	var state := int(p["state"])
-	if state == S.LIFT:
-		var up := smoothstep(0.0, LIFT_S, float(p["t"]))
-		lure = lure.lerp(tip + Vector2(0.0, h * 0.22), up)
-	# A quadratic curve tip -> lure; the belly shrinks as the line comes tight.
-	var belly := (1.0 - clampf(bend * 1.4, 0.0, 1.0)) * size.y * 0.04
-	var ctrl := tip.lerp(lure, 0.5) + Vector2(0.0, belly)
-	_line.resize(9)
-	for k in 9:
-		var t := float(k) / 8.0
-		_line[k] = tip.lerp(ctrl, t).lerp(ctrl.lerp(lure, t), t)
-	ci.draw_polyline(_line, line_col, 1.0, true)
-	if state == S.FIGHT:
-		_ring(ci, lure, 5.0 + 3.0 * sin(float(p["t"]) * 7.0), Color(1, 1, 1, 0.35))
-	if state == S.LIFT or state == S.RECAST and float(p["t"]) < 0.5:
-		var fish_col := Color(0.82, 0.86, 0.9, 0.95).darkened(0.5 * (1.0 - light))
-		var n := int(p["fish"])
-		for k in n:
-			var at := tip.lerp(lure, 0.2 + 0.25 * k) + Vector2(0.0, 6.0 * k)
-			ci.draw_circle(at, 4.0 * s + 1.0, fish_col)
-			ci.draw_line(at + Vector2(3, 0), at + Vector2(7, -2), fish_col, 1.5, true)
-	elif state == S.IDLE or state == S.NIBBLE:
-		ci.draw_circle(lure, 1.6, Color(0.95, 0.75, 0.3, 0.7))
+## The neighbours' lines and fish on the 2D overlay; their bodies and rods
+## are 3D (Bridge3D). tips and lures are screen points per person.
+func draw_lines(ci: CanvasItem, size: Vector2, light: float, tips: PackedVector2Array, lures: PackedVector2Array) -> void:
+	var line_col := Color(1, 1, 1, 0.10 + 0.22 * light)
+	for i in mini(people.size(), tips.size()):
+		var p: Dictionary = people[i]
+		var tip := tips[i]
+		var lure := lures[i]
+		var state := int(p["state"])
+		var hang := size.y * 0.55 / maxf(float(i) * 0.9 + 2.0, 1.0)
+		if state == S.LIFT:
+			lure = lure.lerp(tip + Vector2(0.0, hang), smoothstep(0.0, LIFT_S, float(p["t"])))
+		elif state == S.RECAST:
+			lure = tip + Vector2(0.0, hang)
+		# A quadratic curve tip -> lure; the belly shrinks as the line comes tight.
+		var belly := (1.0 - clampf(float(p["bend"]) * 1.4, 0.0, 1.0)) * size.y * 0.07
+		var ctrl := tip.lerp(lure, 0.5) + Vector2(0.0, belly)
+		_line.resize(9)
+		for k in 9:
+			var t := float(k) / 8.0
+			_line[k] = tip.lerp(ctrl, t).lerp(ctrl.lerp(lure, t), t)
+		ci.draw_polyline(_line, line_col, 1.0, true)
+		if state == S.FIGHT:
+			_ring(ci, lure, 5.0 + 3.0 * sin(float(p["t"]) * 7.0), Color(1, 1, 1, 0.35))
+		if state == S.LIFT or state == S.RECAST and float(p["t"]) < 0.5:
+			var fish_col := Color(0.82, 0.86, 0.9, 0.95).darkened(0.5 * (1.0 - light))
+			var r := clampf(hang * 0.06, 2.0, 7.0)
+			for k in int(p["fish"]):
+				var at := tip.lerp(lure, 0.45 + 0.25 * k)
+				var wag := sin(float(p["t"]) * 14.0 + k) * r * 0.6
+				ci.draw_line(at + Vector2(wag, -r * 1.4), at + Vector2(-wag, r * 1.4), fish_col, r, true)
+		elif state == S.IDLE or state == S.NIBBLE:
+			ci.draw_circle(lure, 1.6, Color(0.95, 0.75, 0.3, 0.7))
 
 
 func _ring(ci: CanvasItem, centre: Vector2, r: float, color: Color) -> void:
 	ci.draw_set_transform(centre, 0.0, Vector2(1.0, 0.3))
 	ci.draw_arc(Vector2.ZERO, r, 0.0, TAU, 12, color, 1.0, true)
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-
-
-const NEAR_M := 4.6

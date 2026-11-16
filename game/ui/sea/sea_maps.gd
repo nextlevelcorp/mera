@@ -61,3 +61,38 @@ static func build_grid(rows: int = 150, cols: int = 90, near_m: float = 0.5, far
 			st.add_index(i + cols)
 			st.add_index(i + cols + 1)
 	return st.commit()
+
+
+static var _grain: ImageTexture
+static var _grain_n: ImageTexture
+
+
+## Fine grain for paving and worn paint: an albedo/roughness map and its normal map.
+static func grain() -> ImageTexture:
+	_make_grain()
+	return _grain
+
+
+static func grain_normal() -> ImageTexture:
+	_make_grain()
+	return _grain_n
+
+
+static func _make_grain() -> void:
+	if _grain != null:
+		return
+	var noise := FastNoiseLite.new()
+	noise.seed = 41
+	noise.noise_type = FastNoiseLite.TYPE_SIMPLEX_SMOOTH
+	noise.frequency = 0.16
+	noise.fractal_type = FastNoiseLite.FRACTAL_FBM
+	noise.fractal_octaves = 4
+	var img := noise.get_seamless_image(256, 256)
+	img.convert(Image.FORMAT_RGBA8)
+	var bump := img.duplicate() as Image
+	bump.bump_map_to_normal_map(2.5)
+	bump.generate_mipmaps()
+	img.adjust_bcs(1.0, 0.3, 1.0)
+	img.generate_mipmaps()
+	_grain = ImageTexture.create_from_image(img)
+	_grain_n = ImageTexture.create_from_image(bump)

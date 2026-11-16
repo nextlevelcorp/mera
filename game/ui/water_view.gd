@@ -25,7 +25,7 @@ const SUNS := {
 	"dawn": [Vector3(0.3, 0.12, -1.0), Color(1.0, 0.72, 0.5), 1.0],
 	"day": [Vector3(0.2, 0.75, -0.6), Color(1.0, 0.96, 0.88), 1.0],
 	"evening": [Vector3(-0.25, 0.10, -1.0), Color(1.0, 0.55, 0.3), 1.0],
-	"night": [Vector3(0.15, 0.45, -0.9), Color(0.35, 0.4, 0.55), 0.06],
+	"night": [Vector3(0.15, 0.45, -0.9), Color(0.35, 0.4, 0.55), 0.035],
 }
 ## Tonemap exposure per slot (design fill, tuned by eye on screenshots).
 const EXPOSURE := {"dawn": 1.0, "day": 0.95, "evening": 1.0, "night": 1.2}
@@ -35,6 +35,7 @@ const CITY_LIGHTS := {"dawn": 0.3, "day": 0.0, "evening": 0.35, "night": 1.0}
 
 var detail := true
 var camera: Camera3D
+var bridge: Bridge3D
 var _sea: ShaderMaterial
 var _sky: ShaderMaterial
 var _env: Environment
@@ -82,6 +83,11 @@ func _init() -> void:
 	root.add_child(mesh)
 	camera = make_camera()
 	root.add_child(camera)
+	bridge = Bridge3D.new()
+	root.add_child(bridge)
+	_sun.shadow_enabled = true
+	_sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
+	_sun.directional_shadow_max_distance = 40.0
 
 
 ## A camera that sees exactly what project() computes: at CAM_HEIGHT, looking
@@ -117,7 +123,8 @@ func set_conditions(slot: String, chop: float, visibility: float, light: float) 
 	_sea.set_shader_parameter("detail", 1.0 if detail else 0.0)
 	_env.tonemap_exposure = EXPOSURE[slot]
 	_sun.light_color = sun[1]
-	_sun.light_energy = 0.3 + 0.9 * light
+	_sun.light_energy = (0.25 + 1.6 * light) * (0.25 if slot == "night" else 1.0)
+	bridge.set_light(light)
 	if sun_dir.y > 0.0:
 		_sun.look_at_from_position(Vector3.ZERO, -sun_dir, Vector3.UP if absf(sun_dir.x) + absf(sun_dir.z) > 0.01 else Vector3.FORWARD)
 
