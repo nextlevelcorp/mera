@@ -36,6 +36,7 @@ const CITY_LIGHTS := {"dawn": 0.3, "day": 0.0, "evening": 0.35, "night": 1.0}
 var detail := true
 var camera: Camera3D
 var bridge: Bridge3D
+var rig3d: Rig3D
 var _sea: ShaderMaterial
 var _sky: ShaderMaterial
 var _env: Environment
@@ -85,6 +86,8 @@ func _init() -> void:
 	root.add_child(camera)
 	bridge = Bridge3D.new()
 	root.add_child(bridge)
+	rig3d = Rig3D.new()
+	root.add_child(rig3d)
 	_sun.shadow_enabled = true
 	_sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	_sun.directional_shadow_max_distance = 40.0
