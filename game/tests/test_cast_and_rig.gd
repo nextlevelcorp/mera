@@ -113,7 +113,7 @@ func test_3d_rig_lands_where_the_2d_rig_was_drawn() -> void:
 	for t: float in [0.0, 0.3, 1.0]:
 		var p2 := rig.at(t)
 		var p3 := r3._lift(p2, Rig3D._depth(t))
-		var back := WaterView.project(Vector2(p3.x, -p3.z), p3.y, size)
+		var back := WaterView.project(Vector2(p3.x, -p3.z), p3.y + WaterView.CAM_HEIGHT, size)
 		assert_near(back.x, p2.x, "x at %.1f of the rod" % t, 0.5)
 		assert_near(back.y, p2.y, "y at %.1f of the rod" % t, 0.5)
 	assert_true((r3._blank.mesh as ArrayMesh).get_surface_count() == 1, "the blank has a mesh")

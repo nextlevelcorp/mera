@@ -156,6 +156,9 @@ Reading:
 
 Still open, not scheduled by the owner: runs at lower clarity and with casts under chop 1, to see whether the 60 fps cap hides a real cost.
 
+## 6f. 3D direction (2026-11-15 and 16)
+The owner chose photorealistic 3D for the fishing view (option A: inside Godot, web kept) and approved CC0 assets; art option A (drawn shapes) now applies only to what is still on the 2D overlay. What is built, the budgets and the asset rules are in `architecture.md` sections 5 and 6. Phone measurement so far: 58 fps average and worst 1% with the 3D sea, detail on or off (owner, 2026-11-15); the bridge, shadows, lamp lights and 3D rig are not measured yet. The top-down world's art style is open (decision D1 in `project_status.md`).
+
 ## 7. Out of scope here
 
 Colour palette, character and tackle sprites, the exact screen layout of the rig editor and the log, and store art. They follow the art decision and the water prototype.

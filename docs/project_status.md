@@ -1,6 +1,50 @@
 # Project status
 
-**Phase**: 2 Design. PRD approved by the owner on 2026-11-11; data model approved; schema, validator, catch model, cast model and real-time fight built with tests (`data_model.md` section 11); design direction proposed (`design_direction.md`). Phase 0 second pass done (`research.md`: market evidence moderate, demand for the concept still weak); skeleton exists ahead of it at the owner's request. No gameplay code until phase 1 is approved.
+**Phase**: 3 Build. The fishing slice (one spot, three species, full cast-bite-fight-land loop in first-person 3D) is playable on GitHub Pages; the top-down world and the systems around it are designed in `architecture.md` and not started. Earlier phase notes are kept below as history.
+
+## System status (2026-11-16)
+| System | Status | Where |
+| --- | --- | --- |
+| Data schema, validator, loader | Implemented | `data_model.md` 1-4 |
+| Catch model, cast, wait and strike, fight, landing, why view | Implemented | `data_model.md` 5 |
+| Controlled retrieve and lure depth, shoals and gulls, clock-based conditions | Implemented | `changelog.md` |
+| First-person 3D: sea, sky, bridge, neighbours, rod, reel, hands | Implemented; hands simple | `architecture.md` 5, 6 |
+| 3D fish, line, rings, gulls | Designed (still a 2D overlay) | `architecture.md` 5, R6 |
+| Phone motion (strike, pull, jig), settings | Implemented; owner: "a bit better", not tuned | `changelog.md` |
+| Sound (CC0 beds and one-shots) | Implemented for fishing | `reference_docs.md` |
+| Save v1 (log, settings) | Implemented | `data_model.md` 12 |
+| Save v2, inventory, economy, progression, quests, crafting | Designed | `architecture.md` 7, `data_model.md` 12 |
+| Core autoloads and the world-fishing hand-over | Designed | `architecture.md` 3 |
+| Top-down world, NPCs | Not started | `architecture.md` 4 |
+| Float and bait fishing | Designed outline; scope open (D2) | `architecture.md` 5 |
+| Native iOS and Android | Not started | `architecture.md` 9 |
+| CC0 models and PBR textures | Blocked on network hosts (D3) | `architecture.md` 6 |
+
+## Decisions the owner still owes
+- **D1. Top-down art**: style of tiles and characters (pixel art or painted), and the source: a CC0 tileset (for example Kenney), generated art, or commissioned art (costs money). Recommendation: start R4 with grey boxes, pick the style on a real phone screen.
+- **D2. Scope order**: bait and float fishing, quests and crafting are not in the MVP of spec 4.6 (bait and float are a PRD non-goal). Recommendation: economy and progression first (they are M4), quests after, float fishing as the first post-MVP presentation, crafting last.
+- **D3. Network hosts for CC0 assets**: `polyhaven.com`, `dl.polyhaven.org`, `ambientcg.com` on the environment's allowlist, or the owner uploads the files.
+- **D4. The 0.1 tester round** (5 anglers, 5 non-anglers, `prd.md` 9): run it on the fishing slice as planned, or wait for the world prototype? Recommendation: run it now; it tests the core loop, which is what must hold.
+- Still open from before: phone frame rate with shadows, lamps and the 3D rig (read the debug fps line); what feels wrong in the phone motion; an Android phone for testing.
+
+## Roadmap (ordered by dependency; one pull request each)
+| # | Task | Needs | Output | Done when | Files |
+| --- | --- | --- | --- | --- | --- |
+| R1 | Split `fishing_screen.gd` into session, HUD and overlay | - | Same behaviour in four files | All tests pass unchanged; played once | `scenes/fishing/` |
+| R2 | Core autoloads `Db`, `Profile`, `Game`; `main.tscn` routes modes; `FishingRequest` and `FishingResult` | R1 | Fishing starts from a request and returns a result | Test builds a request, plays a forced fight headless, checks the result | `game/core/`, `architecture.md` 3 |
+| R3 | Save v2 with migration; `Inventory` and money (pure) | R2 | Fish go to the bag; lost lures leave it | Migration test from a v1 file; inventory tests | `sim/save_game.gd`, `data_model.md` 12 |
+| R4 | World prototype: one grey-box area (Galata Bridge and the Karaköy quay), player, camera, markers, hand-over both ways | R2, D1 for final art | Walk, fish, come back | Played on the phone; frame rate measured | `scenes/world/`, `architecture.md` 4 |
+| R5 | Stage interface; `Bridge3D` as the first stage, a quay as the second | R1 | Positions choose their stage | Two stages render; tests for tips and lures per stage | `ui/sea/` |
+| R6 | 3D fish, 3D line, rings in the sea shader, 3D gulls | R1 | No overlay drawing in the water | Rings hidden by the rail; fps measured before and after | `ui/sea/`, `ui/fx/` |
+| R7 | Asset pipeline; CC0 hand model and PBR textures for deck, rail, cork | D3 | Realistic hands and close surfaces | Licence rows written; download size and fps reported | `game/assets/`, `reference_docs.md` |
+| R8 | Economy: fishmonger and tackle shop | R3, R4 | Sell fish, buy tackle | Price tests; played | `sim/economy.gd`, `data/shop.json` |
+| R9 | Progression: experience, skills, spot unlocks | R3 | Skills change cast and strike numbers | Tests show the attribute path; why view names the skill | `sim/progress.gd` |
+| R10 | NPCs with schedules; world anglers become the 3D neighbours | R4 | People in the world | Seeded schedule tests; played | `scenes/world/actors/`, `data/npcs.json` |
+| R11 | Quests | R8, R10 | Journal and rewards | Condition tests over recorded results | `sim/quests.gd`, `data/quests.json` |
+| R12 | Float and bait presentation | R1, D2 | A second way to fish | Simulation tests; data sourced or labelled | `sim/`, `data/tackle/` |
+| R13 | World audio layers and buses | R4 | Ambience per area, beds continue across modes | Listened on the phone | `ui/audio/` |
+| R14 | Content: spots 2 and 3, species towards 15 | R5 | Sourced records | Data tests pass; sources recorded | `data/`, `spot_research.md` |
+| R15 | Native export spike (Android first), then release gates | R4 | An installable test build | Owner approval for each release step | `release_checklist.md` |
 
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
@@ -25,6 +69,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- View turn and architecture pass (2026-11-16): the fishing world is square to the rail; the view looks along the bridge when ready and turns to the water for the cast, wait and fight, so casts land clear of the neighbours; the ready buttons moved to the top left. 144 tests pass; played in the debug web build (software GL, 1280x720, night): bridge view, turn on the cast, wait and a forced fight facing the water; no console errors. Not fixed in this pass, moved to the roadmap: realistic hands (R7), 3D fish, line, rings and gulls (R6). The reel pad still covers part of the neighbours in the bridge view.
 - 3D rod, reel and hands (2026-11-16): 143 tests pass; both web exports build; played in the debug web build (software GL, 1280x720) in four time slots and through a forced bluefish fight to the landing: the 3D rod bends with the fish, the reel and hands sit where the 2D ones were, the line meets the tip; no console errors. Known limits: the hands are simple shapes (palm and capsule fingers), the fish and the line are still 2D, the phone frame rate with the three 3D steps is unmeasured.
 - Shoals, gulls and the 3D bridge (2026-11-16): 142 tests pass; both web exports build; played in the debug web build (software GL, 1280x720): dawn, day, evening and night show the deck, rail, lamps, neighbours with shadows and gulls over the water; a forced bite was fought and reeled up with the overlay aligned; no console errors. Not checked: phone frame rate with shadows and two lamp lights (owner: read the debug fps again), and whether casting at the gulls is felt in play (unit test shows 1.5 times or more interest inside a shoal).
 - 3D sea and sky (2026-11-15): 136 tests pass; release and debug web exports build; played in the debug web build (software GL) at 1280x720 in all four slots and at 844x390 in a fight: waves, sun glitter, clouds, far shore and night lights render; the overlay (rod, line, rings, fish) stays aligned; no console errors. Frame rate not measured: software GL says nothing about a phone. **Owner check:** on the phone, open Debug and read the fps line with "Water detail" on and off (off also turns glow off).
@@ -46,6 +91,7 @@
 - CI workflow green on the PR (build job). Deploy job untested until the first push to `main`.
 
 ## Next
+See the roadmap at the top of this file. The lines below are the earlier plan, kept as history.
 - Phase 0 leftovers: Turkish-language evidence pass (Reddit, Eksi Sozluk, Donanimhaber, TUIK are unreachable from the session), shore-feature check of Euro Fishing / Sea Fishing Simulator / Real VR Fishing, fish-data licence, regional rules.
 - Demand test: waitlist (needs owner go-ahead: collects emails) plus 5 anglers + 5 non-anglers on the one-spot slice.
 - Phase 1: PRD, funnel, MVP scope, versioning plan.

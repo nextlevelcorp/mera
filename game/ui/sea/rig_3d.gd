@@ -4,7 +4,8 @@ extends Node3D
 ## 2026-11-16: graphics). AnglerRig and RodSpring still own the motion in
 ## screen space; every frame this lifts their points to 3D at a depth that
 ## grows along the rod, so the shapes land exactly where the 2D rig was drawn
-## (the line, drawn on the overlay, still meets the rod tip) while the sun,
+## (the line, drawn on the overlay, still meets the rod tip; the rig is a
+## child of the camera and its points are in camera space) while the sun,
 ## the lamps and the sky light them. Sizes are authored in the old screen
 ## pixels and scaled by depth. Visual only; shapes made in code.
 
@@ -128,7 +129,7 @@ func pose(rig: AnglerRig, pts: PackedVector2Array, size: Vector2) -> void:
 func _lift(p: Vector2, z: float) -> Vector3:
 	var aspect := _size.x / maxf(_size.y, 1.0)
 	return Vector3((p.x / _size.x - 0.5) * aspect * WaterView.FOV * z,
-			WaterView.CAM_HEIGHT - (p.y / _size.y - WaterView.HORIZON) * WaterView.FOV * z, -z)
+			-(p.y / _size.y - WaterView.HORIZON) * WaterView.FOV * z, -z)
 
 
 ## Metres per screen pixel at depth z.
@@ -188,7 +189,7 @@ func _set_tube(mi: MeshInstance3D) -> void:
 	var indices := PackedInt32Array()
 	verts.resize(n * SIDES + 2)
 	normals.resize(n * SIDES + 2)
-	var eye := Vector3(0.0, WaterView.CAM_HEIGHT, 0.0)
+	var eye := Vector3.ZERO   # the rig is a child of the camera
 	for i in n:
 		var c := _centres[i]
 		var tangent := (_centres[mini(i + 1, n - 1)] - _centres[maxi(i - 1, 0)]).normalized()
@@ -275,7 +276,7 @@ func _holder(mat: Material) -> MeshInstance3D:
 	mi.mesh = ArrayMesh.new()
 	mi.material_override = mat
 	# The shapes are rebuilt every frame; skip the bounds test.
-	mi.custom_aabb = AABB(Vector3(-6, 0, -6), Vector3(12, 6, 12))
+	mi.custom_aabb = AABB(Vector3(-6, -6, -6), Vector3(12, 12, 12))
 	add_child(mi)
 	return mi
 

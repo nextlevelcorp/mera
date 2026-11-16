@@ -14,8 +14,8 @@ var shoals: Array[Dictionary] = []   ## {pos: Vector2, vel: Vector2, radius, lef
 var _k: Dictionary
 var _rng := RandomNumberGenerator.new()
 ## The shoals keep to the water side of this line: x >= min_x_at_zero + min_x_per_m * z.
-var _min_x0 := 0.0
-var _min_x_per_m := -0.45
+var _min_x0 := -3.0
+var _min_x_per_m := -0.6
 
 
 func _init(k: Dictionary, seed_value: int) -> void:

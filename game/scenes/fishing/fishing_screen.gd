@@ -85,6 +85,7 @@ var _shoals: ShoalField
 var _gulls: GullFlock
 var _boil_clock := 0.0
 var _shoal_hint_shown := false
+var _view_yaw := WaterView.BRIDGE_YAW
 var _last_contact_s := -99.0   ## when a fish last touched the lure (_time)
 var _strike_flash := 0.0
 var _mon_label: Label
@@ -901,6 +902,10 @@ func _process(delta: float) -> void:
 	_tip_kick += _tip_vel * delta
 	_tap_jig = maxf(_tap_jig - delta * 0.8, 0.0)
 	_step_rod_and_line(delta)
+	# Getting ready the angler looks along the bridge; to cast and fish they
+	# turn to the water (owner, 2026-11-16).
+	_view_yaw = lerpf(_view_yaw, WaterView.BRIDGE_YAW if phase == Phase.READY else 0.0, minf(delta * 5.0, 1.0))
+	_water.set_view_yaw(_view_yaw)
 	_step_shoals(delta)
 	if _on_bridge():
 		_neighbours.update(delta)
@@ -919,11 +924,14 @@ func _draw_overlay() -> void:
 	var size := _overlay.size
 	for ring: Dictionary in _fx.rings:
 		var world: Vector2 = ring["world"]
+		if WaterView.view_depth(world) < 1.0:
+			continue
 		var r := SplashFx.ring_radius(ring)
 		var centre := WaterView.project(world, 0.0, size)
 		var aspect := size.x / maxf(size.y, 1.0)
-		var rx := r / (maxf(world.y, 0.5) * aspect * WaterView.FOV) * size.x
-		var ry := WaterView.CAM_HEIGHT * r / (world.y * world.y * WaterView.FOV) * size.y
+		var depth := WaterView.view_depth(world)
+		var rx := r / (depth * aspect * WaterView.FOV) * size.x
+		var ry := WaterView.CAM_HEIGHT * r / (depth * depth * WaterView.FOV) * size.y
 		_ellipse(centre, rx, ry, Color(1, 1, 1, 0.55 * SplashFx.ring_alpha(ring)))
 	var tip := _rod.tip()
 	match phase:
@@ -1243,15 +1251,13 @@ func _build_hud() -> void:
 	_rig_button = _button(tr("FISH_RIG"), 24, func() -> void:
 		_log_panel.visible = false
 		_rig_panel.visible = not _rig_panel.visible)
-	_place_bottom(_rig_button, false, Vector2(200, TOUCH_MIN), 16.0)
+	_top_left(_rig_button, 128.0)
 	add_child(_rig_button)
 	_log_button = _button(tr("FISH_LOG"), 24, func() -> void:
 		_rig_panel.visible = false
 		_log_panel.visible = not _log_panel.visible
 		_update_log())
-	_place_bottom(_log_button, false, Vector2(200, TOUCH_MIN), 16.0)
-	_log_button.offset_bottom -= TOUCH_MIN + 16.0
-	_log_button.offset_top -= TOUCH_MIN + 16.0
+	_top_left(_log_button, 232.0)
 	add_child(_log_button)
 
 
