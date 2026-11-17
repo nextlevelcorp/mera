@@ -18,7 +18,7 @@
 | Progression: three skills with levels that raise the model's angler attributes | Implemented (R9) | `data_model.md` 15 |
 | Bag screen, quests, crafting, spot unlocks | Designed | `architecture.md` 7, `data_model.md` 12 |
 | Core (`Db`, `Profile`, `Game` request and result) | Implemented; mode switch with a world Designed | `architecture.md` 3 |
-| Top-down world (one grey-box area, walking, markers, hand-over both ways) | Partial | `architecture.md` 4 |
+| Top-down world (one area, textured ground and water shaders, 2D lights, kiosks, walking, markers, shops, hand-over both ways) | Partial | `architecture.md` 4 |
 | World NPCs, neighbours in the world, world clock, more areas | Not started | `architecture.md` 4 |
 | Float and bait fishing | Designed outline; scope open (D2) | `architecture.md` 5 |
 | Native iOS and Android | Not started | `architecture.md` 9 |
@@ -26,7 +26,7 @@
 | CC0 first-person hand model | Blocked: no reachable CC0 source | `reference_docs.md` |
 
 ## Owner decisions (2026-11-17)
-- **D1 top-down art**: start with grey boxes (R4) and choose the style on a real phone screen.
+- **D1 top-down art**: start with grey boxes (R4) and choose the style on a real phone screen. Update 2026-11-17: the owner asked for the 2D graphics; a realistic textured look from the 3D view's CC0 sets is built (`design_direction.md` 6f). Say if you want another style.
 - **D2 scope order**: economy and progression first, then quests; float and bait fishing is the first presentation after the MVP; crafting last.
 - **D3 CC0 assets**: `polyhaven.com`, `dl.polyhaven.org` and `ambientcg.com` are on the environment's network allowlist. In practice only `dl.polyhaven.org` serves files (polyhaven.com answers 403; ambientCG files redirect to `acg-download.struffelproductions.com`). Each asset still gets its row in `reference_docs.md` before it is committed.
 - **D5 hand model (owner)**: a first-person hand model needs a CC0 file the build environment can reach. Tried 2026-11-17: `quaternius.com` is reachable (its pages say CC0), but every pack download goes to `drive.google.com` or `quaternius.itch.io`, neither on the network list, and none of its 84 pack pages is a first-person hands pack (its characters are low-poly, stylised, not photoreal). So adding that host did not unblock anything. Options now: (b) you upload a `.glb` hand or arm model and its licence (recommended); (a2) add `drive.google.com` and `drive.usercontent.google.com` so Quaternius files can be fetched, accepting that their style is low-poly; (c) keep the procedural hands, which I could improve (skin shading, knuckles, nails) without any download.
@@ -80,6 +80,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Top-down world art (2026-11-17): 191 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL) at 1280x720 by dawn, day, evening and night and at 844x390 by day: cobbles without a visible repeat, water with glints and foam at the stone edges, lamps lighting the plaza at night, the two kiosks and the player at twice life size; no console errors. Not checked: the frame rate on a phone with two canvas shaders and the 2D lights.
 - R9 progression (2026-11-17): 191 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): a cast and a forced horse mackerel landed, the result panel read "Experience: Casting +2 · Strike +5 · Knots +2"; no console errors. Not seen in the browser: a level-up toast (20 points are needed; unit tests cover it) and the skills line in the catch log.
 - R8 economy (2026-11-17): 184 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): in the world, +3 fish from the debug menu, walked to the fishmonger with the arrow keys, "Go in" opened it with three fish and their prices (23, 95 and 224 TL), "Sell all" paid 342 TL and the wallet read 442 TL with no fish left; no console errors. Not played in the browser: the tackle shop's Buy buttons, a broken line taking a lure, and the empty-bag message (unit tests cover them), the shops at 844x390, and on a phone. Found while playing: the lira sign is missing from the default font (shown as a box), so money is written TL.
 - R7 textures (2026-11-17): 173 tests pass with no script errors in the output; both web exports build (pack 1.7 MB, up from 0.5); played in the debug web build (software GL, 1280x720): the bridge deck shows paving slabs and the rail steel texture by day and dusk, and the quay shows cobbles and coping; no console errors. Not measured: the phone frame rate and memory with six texture sets (about 12 MB decoded, an estimate), the quay at night.

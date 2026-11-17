@@ -92,7 +92,10 @@ func test_the_world_screen_hands_a_request_to_fishing_and_takes_the_result_back(
 	world.profile_path = ""
 	world.conditions = {"slot": "dawn", "month": 5, "wind_dir": "NE", "wind_ms": 4}
 	world.setup()
-	assert_eq(world.modulate, WorldScreen.TINT["dawn"], "the world is tinted for the slot")
+	assert_eq(world._canvas_tint.color, WorldScreen.TINT["dawn"], "the world is tinted for the slot")
+	assert_true(world._lamps.size() == world.area.lamps.size() and world._lamps[0].visible, "the lamps glow at dawn")
+	assert_eq(world._water_mats.size(), 2, "both water rects have the water shader")
+	assert_true(world._surfaces.has("plaza") and world._surfaces.has("walkway"), "the ground is textured")
 	assert_true(world.fishing_request().is_empty(), "no request away from a marker")
 	world.walk.teleport(world.area.markers[2]["pos"] + Vector2(0.0, 0.5))
 	world._process(0.016)
@@ -109,10 +112,11 @@ func test_the_world_screen_hands_a_request_to_fishing_and_takes_the_result_back(
 	assert_eq(world.conditions["slot"], "dawn", "the request carries a copy")
 	world.pause()
 	assert_true(not world.visible and not world._cam.enabled, "the world sleeps while fishing")
+	assert_true(not world._canvas_tint.visible, "and its tint does not darken the fishing view")
 	var result := Game.empty_result()
 	result["casts"] = 3
 	world.resume(result)
-	assert_true(world.visible and world._cam.enabled, "and wakes up")
+	assert_true(world.visible and world._cam.enabled and world._canvas_tint.visible, "and wakes up")
 	assert_true(world._toast_s > 0.0 and world._toast.text.contains("3"), "with the trip in a toast")
 	world.free()
 
