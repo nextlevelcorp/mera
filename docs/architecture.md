@@ -9,7 +9,7 @@ Mera has two views of one world (spec 5.1). **World mode**: a top-down 2D shore 
 | --- | --- | --- | --- |
 | Simulation | `game/sim/` | Pure GDScript, no Node, no `randf()`, seeded, 30 Hz fixed steps. Owns every rule | Implemented for fishing; Designed for inventory, economy, progression, quests |
 | Static data | `game/data/` | JSON with `schema.json`, validated at load, every value sourced or `design_fill` | Implemented (1 spot, 3 species, 3 rigs) |
-| Player data | `game/sim/save_game.gd`, `game/save/` | Versioned dictionary, migrations, atomic write | Implemented v1 (log, records, settings, last rig); v2 Designed (`data_model.md` 12) |
+| Player data | `game/sim/save_game.gd`, `game/sim/inventory.gd`, `game/save/`, `game/core/profile.gd` | Versioned dictionary, migrations, atomic write, one writer | Implemented v2 (log, settings, last rig, bag, money field, counters); later slices Designed (`data_model.md` 12) |
 | Core | `game/core/` (new) | Autoloads that own mode, data, profile and audio; the only code that changes scenes | Designed |
 | Views | `game/scenes/`, `game/ui/` | Read simulation state, send input, hold no rules | Implemented for fishing; Not started for the world |
 | Tests | `game/tests/` | Headless runner, every rule and every fixed bug has a test | Implemented (144 tests) |
@@ -19,7 +19,7 @@ Dependencies point one way: views -> core -> sim and data. `sim/` never imports 
 ## 2. Repository layout
 | Path | Purpose | State |
 | --- | --- | --- |
-| `game/sim/` | `catch_model`, `wait_sim`, `fight_sim`, `fight_controller`, `fight_setup`, `why_report`, `shoal_field`, `session_conditions`, `motion_gesture`, `save_game`, `data_store`, `data_validator` | Implemented |
+| `game/sim/` | `fishing_session`, `inventory`, `catch_model`, `wait_sim`, `fight_sim`, `fight_controller`, `fight_setup`, `why_report`, `shoal_field`, `session_conditions`, `motion_gesture`, `save_game`, `data_store`, `data_validator` | Implemented |
 | `game/data/` | `schema.json`, `constants.json`, `species.json`, `spots.json`, `tackle/`, `angler.json`, `demo/` | Implemented |
 | `game/scenes/fishing/` | `fishing_screen.gd` (`FishingScreen`: phases, simulations, view physics), `fishing_hud.gd` (`FishingHud`: controls, panels, raw thumb state), `fishing_overlay.gd` (`FishingOverlay`: the 2D layer) | Implemented; split 2026-11-17 (R1) |
 | `game/ui/water_view.gd`, `game/ui/sea/` | The 3D fishing scene: sea and sky shaders, `Bridge3D`, `Rig3D`, `SeaMaps` | Implemented |
@@ -36,7 +36,7 @@ Dependencies point one way: views -> core -> sim and data. `sim/` never imports 
 ## 3. Core: modes, scenes and the hand-over between the two views (Designed)
 **Core classes** (`game/core/`, Implemented 2026-11-17 as static holders rather than autoload nodes, so the headless test runner and the game reach them the same way; `Game` becomes a node when the world needs signals and a scene stack):
 - `Db`: loads and validates `game/data` once (`DataStore.load_all`), exposes `Db.database()`, `Db.record(kind, id)`, `Db.constants()`, `Db.ok()` and `Db.errors`. Implemented; the fishing screen uses it.
-- `Profile`: owns the save dictionary; the only writer. `Profile.open(path)`, `Profile.save`, `Profile.flush()` are Implemented. Designed for R3: `Profile.apply(result)` moves a `FishingResult` into the inventory, experience and quests (today the fishing screen writes the catch log itself at the moment of landing, so a closed tab loses nothing).
+- `Profile`: owns the save dictionary; the only writer. `Profile.open(path)`, `Profile.save`, `Profile.flush()` are Implemented. `Profile.apply(result)` (Implemented, R3) moves a `FishingResult` into the bag and the counters when the player leaves; experience and quests join it later. The catch log is still written by the fishing screen at the moment of landing, so a closed tab loses the bag entry of that session but not the log.
 - `Game`: the contract. `Game.fishing_request(...)` and `Game.empty_result()` are Implemented; `FishingScreen.request`, `result()`, `leave()` and the `finished(result)` signal use them, and `scenes/main.gd` opens the fishing view over the title and takes the result back. Designed for R4: the mode (`enum Mode { TITLE, WORLD, FISHING }`), the session objects both views read (`conditions`, `shoals: ShoalField` per spot, the world clock) and the scene stack. A caller that shows 2D behind the fishing view must hide it: a canvas item covers the 3D scene (found when the title's background hid the sea).
 
 **Scene tree at run time**: `Main` (root scene) with children `World` (kept loaded), `Fishing` (added on demand), `Ui` (a `CanvasLayer` stack for screens and toasts). Entering fishing sets `World.process_mode = PROCESS_MODE_DISABLED` and hides it; leaving reverses that. The world is not reloaded, so its state survives without serialising it.
@@ -74,7 +74,7 @@ FishingResult  = { catches: [{species_id, length_cm, weight_kg, kept}], lost: [{
 | HUD | Godot controls built in code in `fishing_screen.gd` | Implemented |
 
 **Designed next steps for this mode**
-- *Split the screen*: `FishingHud` and `FishingOverlay` are out (R1, Implemented). Both hold a reference to the screen and read its state; the HUD calls it for what a press means. Still to do in R2: `FishingSession` (phases and the simulations, no drawing), leaving `fishing_screen.gd` as the wiring; it was left in place in R1 because the tests and the debug menu reach the session state on the screen, and R2 changes how a session starts anyway. Behaviour must not change; the existing loop tests are the guard.
+- *Split the screen*: `FishingHud` and `FishingOverlay` are out (R1, Implemented). Both hold a reference to the screen and read its state; the HUD calls it for what a press means. `FishingSession` (`game/sim/fishing_session.gd`, Implemented in R2, pure) owns the rule-bearing steps: context, cast, the wait and fight it starts, and the trip record. The phases stay on the screen on purpose: they follow the view's timing (lure flight, the lift, the result panel). Behaviour must not change; the existing loop tests are the guard.
 - *Stages* (R5): `Bridge3D` becomes one implementation of a stage interface (`build()`, `set_light(light)`, `pose(neighbours, time)`, `tip_water(i)`, `lure_water(i, cast_m, side)`, `ready_yaw`). A position in `spots.json` names its stage (`bridge`, `quay`, `rocks`, `beach`); `WaterView` instantiates it.
 - *3D fish, line, rings, gulls* (R6): fish as a mesh built from `FishBody`'s spine with per-species colour; line as a ribbon mesh through the `VerletRope` points lifted like `Rig3D` does; rings and boils as up to 8 ring uniforms in `sea.gdshader` (so the rail hides them correctly); gulls as quads in the 3D scene.
 - *Presentations* (R12): the lure retrieve exists (`WaitSim` controlled mode). Float and bottom fishing are new presentations with their own small simulations feeding the same stages 1 to 4; needs `float` and `sinker` in the schema and bait data. PRD 4 lists bait and float fishing as a non-goal for the MVP: the owner decides when (decision D2).
@@ -90,7 +90,7 @@ FishingResult  = { catches: [{species_id, length_cm, weight_kg, kept}], lost: [{
 Each is a pure class in `game/sim/`, a data file, a slice of the save and one screen. None exists yet except the catch log.
 | System | Sim class | Data | Save slice | Notes |
 | --- | --- | --- | --- | --- |
-| Inventory | `Inventory` (add, remove, count, capacity) | `items.json` (tackle pieces, lures, bait, fish as items) | `inventory.items[{id, count, meta}]` | A lure lost to a line break leaves the bag: tackle choices get a cost |
+| Inventory | `Inventory` (add, remove, count, fish entries): Implemented; capacity and `items.json` Designed | `items.json` (tackle pieces, lures, bait, fish as items) | `inventory.items[{id, count, meta}]` | Fish go to the bag today. A lure lost to a line break is only counted until the shop exists (R8); then it leaves a stock, so tackle choices get a cost |
 | Economy | `Economy` (price of a fish from species, weight, legal size; shop prices) | `shop.json` | `money` | Sell at the fishmonger, buy at the tackle shop; no real money anywhere |
 | Progression | `Progress` (experience per action, skill levels feeding the `angler` attributes the cast and hook stages already read) | `angler.json`, `progress.json` | `angler{xp, skills}` | Spot unlocks from the log (funnel steps S5, S6 in the PRD) |
 | Quests | `Quests` (conditions over `FishingResult.events`, rewards) | `quests.json` | `quests{active, done}` | Given by NPCs; plain data, no scripting |

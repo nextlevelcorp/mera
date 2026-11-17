@@ -12,8 +12,8 @@
 | 3D fish, line, rings, gulls | Designed (still a 2D overlay) | `architecture.md` 5, R6 |
 | Phone motion (strike, pull, jig), settings | Implemented; owner: "a bit better", not tuned | `changelog.md` |
 | Sound (CC0 beds and one-shots) | Implemented for fishing | `reference_docs.md` |
-| Save v1 (log, settings) | Implemented | `data_model.md` 12 |
-| Save v2, inventory, economy, progression, quests, crafting | Designed | `architecture.md` 7, `data_model.md` 12 |
+| Save v2 (log, settings, bag, money field, counters), migration from v1 | Implemented | `data_model.md` 12 |
+| Bag screen, economy, progression, quests, crafting | Designed | `architecture.md` 7, `data_model.md` 12 |
 | Core (`Db`, `Profile`, `Game` request and result) | Implemented; mode switch with a world Designed | `architecture.md` 3 |
 | Top-down world, NPCs | Not started | `architecture.md` 4 |
 | Float and bait fishing | Designed outline; scope open (D2) | `architecture.md` 5 |
@@ -36,8 +36,8 @@
 | # | Task | Needs | Output | Done when | Files |
 | --- | --- | --- | --- | --- | --- |
 | R1 | Split `fishing_screen.gd`: HUD and overlay out **(done 2026-11-17)**; the session logic moves in R2 | - | Same behaviour in three files | All tests pass unchanged; played once | `scenes/fishing/` |
-| R2 | Core `Db`, `Profile`, `Game`; the title opens fishing with a `FishingRequest` and gets a `FishingResult` back **(done 2026-11-17)**. Still to do (R2b): the session (phases and simulations) leaves the screen as `FishingSession` | R1 | Fishing starts from a request and returns a result | Test builds a request, plays a forced fight headless, checks the result | `game/core/`, `architecture.md` 3 |
-| R3 | Save v2 with migration; `Inventory` and money (pure) | R2 | Fish go to the bag; lost lures leave it | Migration test from a v1 file; inventory tests | `sim/save_game.gd`, `data_model.md` 12 |
+| R2 | Core `Db`, `Profile`, `Game`; the title opens fishing with a `FishingRequest` and gets a `FishingResult` back and the rule-bearing steps live in `FishingSession` **(done 2026-11-17)** | R1 | Fishing starts from a request and returns a result | Test builds a request, plays a forced fight headless, checks the result | `game/core/`, `architecture.md` 3 |
+| R3 | Save v2 with migration; `Inventory`, money field and counters **(done 2026-11-17)**; lure stock moves to R8 | R2 | Fish go to the bag; lost lures are counted | Migration test from a v1 file; inventory tests | `sim/save_game.gd`, `data_model.md` 12 |
 | R4 | World prototype: one grey-box area (Galata Bridge and the Karaköy quay), player, camera, markers, hand-over both ways | R2, D1 for final art | Walk, fish, come back | Played on the phone; frame rate measured | `scenes/world/`, `architecture.md` 4 |
 | R5 | Stage interface; `Bridge3D` as the first stage, a quay as the second | R1 | Positions choose their stage | Two stages render; tests for tips and lures per stage | `ui/sea/` |
 | R6 | 3D fish, 3D line, rings in the sea shader, 3D gulls | R1 | No overlay drawing in the water | Rings hidden by the rail; fps measured before and after | `ui/sea/`, `ui/fx/` |
@@ -74,6 +74,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R2 second part and R3 (2026-11-17): 153 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): a forced horse mackerel was fought and reeled up, Back showed "Last trip: 1 casts, 1 fish landed" and "In the bag: 1 fish"; fishing opened again. Not played: a version 1 save from a real phone migrating (unit test only; the owner's phone has one, so the first load there is the real check).
 - R2 first part (2026-11-17): 148 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): title, fishing, a forced fight, Back shows "Last trip: 1 casts, 0 fish landed" on the title, fishing opens again with the 3D scene. Found and fixed while playing: the title's background covered the 3D scene.
 - R1 screen split (2026-11-17): 144 tests pass unchanged; both web exports build; played in the debug web build (software GL, 1280x720): bridge view, cast with the turn to the water, wait with the reel pad, a forced horse mackerel fought, reeled up and landed, result panel; no console errors. The why, log, rig and settings panels were not opened by hand in this pass (their tests pass).
 - View turn and architecture pass (2026-11-16): the fishing world is square to the rail; the view looks along the bridge when ready and turns to the water for the cast, wait and fight, so casts land clear of the neighbours; the ready buttons moved to the top left. 144 tests pass; played in the debug web build (software GL, 1280x720, night): bridge view, turn on the cast, wait and a forced fight facing the water; no console errors. Not fixed in this pass, moved to the roadmap: realistic hands (R7), 3D fish, line, rings and gulls (R6). The reel pad still covers part of the neighbours in the bridge view.

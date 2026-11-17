@@ -33,7 +33,8 @@ func _open_fishing() -> void:
 		screen.queue_free()
 		$Column.visible = true
 		$Background.visible = true
-		_note.text = tr("TRIP_SUMMARY") % [int(result["casts"]), (result["catches"] as Array).size()])
+		Profile.apply(result)
+		_note.text = tr("TRIP_SUMMARY") % [int(result["casts"]), (result["catches"] as Array).size()] + "\n" + tr("BAG_SUMMARY") % Inventory.fish_count(Profile.save))
 	$Column.visible = false
 	$Background.visible = false   # a canvas item would cover the 3D scene
 	add_child(screen)

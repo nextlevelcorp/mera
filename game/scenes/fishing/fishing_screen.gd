@@ -32,7 +32,7 @@ signal finished(result: Dictionary)
 
 ## The FishingRequest (Game.fishing_request) this session was started with; set before setup().
 var request := {}
-var _trip := Game.empty_result()
+var _session: FishingSession
 
 var phase: int = Phase.READY
 var conditions := {"slot": "evening", "month": 10, "wind_dir": "SW", "wind_ms": 3}
@@ -75,7 +75,6 @@ var _log_text: Label:
 	get: return _ui.log_text
 var _fx := SplashFx.new(9)
 var _rng := RandomNumberGenerator.new()
-var _seed_counter := 1
 var _time := 0.0
 var _splash_clock := 0.0
 var _last_state := ""
@@ -171,6 +170,7 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	# Shoals of the hour: the same for everyone at the same place and time.
 	_shoals = ShoalField.new(_k, int(conditions["month"]) * 1000 + int(Time.get_datetime_dict_from_system()["hour"]) if save_enabled else 77)
 	_gulls = GullFlock.new(_shoals.shoals.size())
+	_session = FishingSession.new(_db, _k, rig, position_id, conditions, _shoals)
 	_water = WaterView.new()
 	add_child(_water)
 	_overlay = FishingOverlay.new(self)
@@ -236,12 +236,10 @@ func set_rig(new_rig: String, new_position: String) -> void:
 
 
 func _base_context(species_id: String, overrides: Dictionary = {}) -> Dictionary:
-	var ctx := FightSetup.build(_db, species_id, rig, position_id, 0.5, conditions, overrides)
-	if clarity_override > 0.0:
-		var spot: Dictionary = (ctx["spot"] as Dictionary).duplicate()
-		spot["typical_clarity"] = clarity_override
-		ctx["spot"] = spot
-	return ctx
+	_session.rig = rig
+	_session.position_id = position_id
+	_session.clarity_override = clarity_override
+	return _session.context(species_id, overrides)
 
 
 func _set_phase(p: int) -> void:
@@ -306,25 +304,19 @@ func release_cast() -> void:
 ## error of CatchModel.cast is added on top.
 func cast_with_power(power: float, aim: float = 0.0) -> void:
 	_snd("cast_swish", -3.0)
-	_trip["casts"] = int(_trip["casts"]) + 1
 	_cast_motion.release(power)
 	_rod.kick(-6.0)
-	_cast = CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], _ctx["position"], conditions, power)
-	_cast["cast_m"] = maxf(float(_cast["cast_m"]), float(_k["WAIT_END_M"]) + 2.0)
+	_cast = _session.cast(_ctx, power)
 	_aim_x = clampf(aim + _rng.randfn(0.0, float(_cast["aim_sigma_rad"])), -0.5, 0.5)
 	_paid_m = 0.0
 	_flight_s = 0.0
 	_flight_total_s = 0.6 + float(_cast["cast_m"]) / 30.0
-	_seed_counter += 1
 	_set_phase(Phase.FLIGHT)
 
 
 func _land_lure() -> void:
 	var cast_m: float = _cast["cast_m"]
-	_wait = WaitSim.new(_ctx, _k, _db["species"], cast_m, _seed_counter * 7919)
-	_wait.shoals = _shoals
-	_wait.lure_x0 = -0.3
-	_wait.lure_x_per_m = tan(_aim_x)
+	_wait = _session.start_wait(_ctx, cast_m, _aim_x)
 	_wait_state = _wait.snapshot()
 	_last_event_count = 0
 	var world := Vector2(_lure_x(cast_m), NEAR_DRAW_M + cast_m)
@@ -413,21 +405,13 @@ func _on_wait_event(e: Dictionary) -> void:
 # ------------------------------------------------------------------ fight
 
 func _start_fight(hooked: Dictionary) -> void:
-	var u: float = forced_u if forced_u >= 0.0 else float(hooked["u"])
+	_fight_ctx = _session.fight_context(hooked, forced_u)
 	forced_u = -1.0
-	var d: float = hooked["distance_m"]
-	var overrides := {"cast_m": d, "hook_distance_m": d, "timing_quality": hooked["timing_quality"]}
-	# What the player did with the lure is what the "why" view explains.
-	for key: String in ["lure_depth_m", "retrieve_speed"]:
-		if hooked.has(key):
-			overrides[key] = hooked[key]
-	_fight_ctx = _base_context(hooked["species_id"], overrides)
-	_fight_ctx["play"]["fish_length_cm"] = FightController.draw_length_cm(_fight_ctx["species"], u)
 	_ui.drag_ratio = clampf(float(_fight_ctx["play"]["drag_kg"]) / float(_fight_ctx["reel"]["drag_max_kg"]), 0.0, 1.0)
-	_controller = FightController.new(_fight_ctx, _k, _seed_counter)
+	_controller = _session.start_fight(_fight_ctx)
 	_hud = _controller.hud()
 	_fish = FishBody.new(float(_fight_ctx["play"]["fish_length_cm"]) / 100.0, _fish_world())
-	_fx = SplashFx.new(_seed_counter)
+	_fx = SplashFx.new(_session.seed_counter)
 	_last_state = ""
 	_last_distance = -1.0
 	_ui.reel_pressed = false
@@ -477,11 +461,7 @@ func _finish_fight() -> void:
 	var outcome: String = _hud["outcome"]
 	var sp: Dictionary = _fight_ctx["species"]
 	_result = {"outcome": outcome, "species_id": sp["id"], "length_cm": float(_fight_ctx["play"]["fish_length_cm"]), "weight_kg": _controller.sim.weight_kg}
-	(_trip["events"] as Array).append({"type": outcome, "species_id": sp["id"]})
-	if outcome == FightSim.OUTCOME_LANDED:
-		(_trip["catches"] as Array).append({"species_id": sp["id"], "length_cm": _result["length_cm"], "weight_kg": _result["weight_kg"], "kept": true})
-	elif outcome in [FightSim.OUTCOME_LINE_BREAK, FightSim.OUTCOME_LEADER_CUT]:
-		(_trip["lost"] as Array).append({"item_id": _fight_ctx["lure"]["id"], "reason": outcome})
+	_session.record_outcome(outcome, _fight_ctx, _controller.sim.weight_kg)
 	if outcome == FightSim.OUTCOME_LANDED:
 		_result.merge(SaveGame.record_catch(save, sp["id"], _result["length_cm"], _result["weight_kg"], Time.get_date_string_from_system()))
 		_store()
@@ -817,7 +797,7 @@ func _step_rod_and_line(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
-	_trip["time_s"] = float(_trip["time_s"]) + delta
+	_session.add_time(delta)
 	_stats.add(delta)
 	_update_motion(delta)
 	match phase:
@@ -1020,7 +1000,7 @@ func leave() -> void:
 
 ## The session so far as a FishingResult (Game.empty_result).
 func result() -> Dictionary:
-	return _trip.duplicate(true)
+	return _session.result()
 
 
 func _toast(text: String, seconds: float) -> void:
