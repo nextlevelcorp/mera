@@ -19,7 +19,8 @@
 | Bag screen, quests, crafting, spot unlocks | Designed | `architecture.md` 7, `data_model.md` 12 |
 | Core (`Db`, `Profile`, `Game` request and result) | Implemented; mode switch with a world Designed | `architecture.md` 3 |
 | Top-down world (one area, textured ground and water shaders, 2D lights, kiosks, walking, markers, shops, hand-over both ways) | Partial | `architecture.md` 4 |
-| World NPCs, neighbours in the world, world clock, more areas | Not started | `architecture.md` 4 |
+| World people: four anglers with routines by slot, two vendors, neighbours carried into the fishing view | Implemented (R10) | `data_model.md` 16 |
+| Talking to people, world clock, more areas | Not started | `architecture.md` 4 |
 | Float and bait fishing | Designed outline; scope open (D2) | `architecture.md` 5 |
 | Native iOS and Android | Not started | `architecture.md` 9 |
 | CC0 PBR textures on the stages (six sets) | Implemented (R7, 2026-11-17) | `reference_docs.md` |
@@ -50,7 +51,7 @@
 | R7 | Asset pipeline; PBR textures for deck, rail, quay **(done 2026-11-17)**; CC0 hand model **(Blocked)** | D3 | Realistic close surfaces; hands pending | Licence rows written; download size and fps reported | `game/assets/`, `reference_docs.md` |
 | R8 | Economy: fishmonger and tackle shop **(done 2026-11-17)** | R3, R4 | Sell fish, buy tackle | Price tests; played | `sim/economy.gd`, `data/shop.json` |
 | R9 | Progression: experience and skills **(done 2026-11-17; spot unlocks wait for a second spot)** | R3 | Skills change cast and strike numbers | Tests show the attribute path; the result names the experience | `sim/progress.gd` |
-| R10 | NPCs with schedules; world anglers become the 3D neighbours | R4 | People in the world | Seeded schedule tests; played | `scenes/world/actors/`, `data/npcs.json` |
+| R10 | NPCs with schedules; world anglers become the 3D neighbours **(done 2026-11-17; talking comes with R11)** | R4 | People in the world | Seeded schedule tests; played | `sim/npc_roster.gd`, `data/npcs.json` |
 | R11 | Quests | R8, R10 | Journal and rewards | Condition tests over recorded results | `sim/quests.gd`, `data/quests.json` |
 | R12 | Float and bait presentation | R1, D2 | A second way to fish | Simulation tests; data sourced or labelled | `sim/`, `data/tackle/` |
 | R13 | World audio layers and buses | R4 | Ambience per area, beds continue across modes | Listened on the phone | `ui/audio/` |
@@ -80,6 +81,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R10 people (2026-11-17): 196 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720) in the evening: four anglers at the east rail with rods over the water, the debug jump to the Karaköy east marker, "Fish here", and the fishing view with four neighbours along the rail; no console errors. Not seen in the browser: someone walking in after a time change (unit test covers the walk), the vendors up close, 844x390.
 - Top-down world art (2026-11-17): 191 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL) at 1280x720 by dawn, day, evening and night and at 844x390 by day: cobbles without a visible repeat, water with glints and foam at the stone edges, lamps lighting the plaza at night, the two kiosks and the player at twice life size; no console errors. Not checked: the frame rate on a phone with two canvas shaders and the 2D lights.
 - R9 progression (2026-11-17): 191 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): a cast and a forced horse mackerel landed, the result panel read "Experience: Casting +2 · Strike +5 · Knots +2"; no console errors. Not seen in the browser: a level-up toast (20 points are needed; unit tests cover it) and the skills line in the catch log.
 - R8 economy (2026-11-17): 184 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): in the world, +3 fish from the debug menu, walked to the fishmonger with the arrow keys, "Go in" opened it with three fish and their prices (23, 95 and 224 TL), "Sell all" paid 342 TL and the wallet read 442 TL with no fish left; no console errors. Not played in the browser: the tackle shop's Buy buttons, a broken line taking a lure, and the empty-bag message (unit tests cover them), the shops at 844x390, and on a phone. Found while playing: the lira sign is missing from the default font (shown as a box), so money is written TL.

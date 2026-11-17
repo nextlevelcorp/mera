@@ -38,6 +38,7 @@ var lamp_step := 20.0
 var lamp_height := 5.2
 
 var _people: Array[Node3D] = []
+var _jackets: Array[StandardMaterial3D] = []
 var _rods: Array = []          # per person: [lower MeshInstance3D, upper MeshInstance3D]
 var _tips: Array[Vector3] = [] # local tip of each rod
 var _lamp_mat: StandardMaterial3D
@@ -80,6 +81,22 @@ func set_light(light: float) -> void:
 	for l: OmniLight3D in _lights:
 		l.light_energy = 5.0 * dark
 		l.visible = lights_enabled and dark > 0.02
+
+
+## The anglers beside the player, from the world (FishingRequest.neighbours):
+## as many figures as colours, in those jackets; the rest are hidden.
+func set_people(colors: Array) -> void:
+	for i in _people.size():
+		_people[i].visible = i < colors.size()
+		if i < colors.size():
+			_jackets[i].albedo_color = (colors[i] as Color) * 1.5
+
+
+func visible_people() -> int:
+	var n := 0
+	for p: Node3D in _people:
+		n += 1 if p.visible else 0
+	return n
 
 
 ## Poses the neighbours' rods from NeighborAnglers.people.
@@ -166,6 +183,7 @@ func _build_person(i: int) -> void:
 	person.scale = Vector3.ONE * tall
 	add_child(person)
 	var jacket := _material(JACKETS[i % JACKETS.size()], 0.0, 0.85, 3.0)
+	_jackets.append(jacket)
 	var trousers := _material(Color(0.09, 0.1, 0.13), 0.0, 0.9, 3.0)
 	var skin := _material(Color(0.62, 0.45, 0.36), 0.0, 0.6, 0.0)
 	var dark := _material(Color(0.07, 0.07, 0.08), 0.0, 0.7, 0.0)

@@ -197,3 +197,10 @@ SKILL_KNOTS,Knots,Düğüm,Nudos
 SKILL_LINE,%s level %d (%d XP),%s seviye %d (%d TP),%s nivel %d (%d PX)
 LEVEL_UP,%s is now level %d,%s artık seviye %d,%s sube a nivel %d
 XP_GAINED,Experience: %s,Tecrübe: %s,Experiencia: %s
+NPC_HASAN,Hasan,Hasan,Hasan
+NPC_NURI,Nuri,Nuri,Nuri
+NPC_CEMIL,Cemil,Cemil,Cemil
+NPC_AYTEN,Ayten,Ayten,Ayten
+NPC_RECEP,Recep,Recep,Recep
+NPC_SELMA,Selma,Selma,Selma
+WORLD_NPC_FISHING,%s is fishing,%s balık tutuyor,%s está pescando

@@ -174,6 +174,9 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	# Shoals of the hour: the same for everyone at the same place and time.
 	_shoals = ShoalField.new(_k, int(conditions["month"]) * 1000 + int(Time.get_datetime_dict_from_system()["hour"]) if save_enabled else 77)
 	_gulls = GullFlock.new(_shoals.shoals.size())
+	if request.has("neighbours"):
+		# The anglers beside this spot in the world, and no one else.
+		_neighbours.people.resize(mini((request["neighbours"] as Array).size(), NeighborAnglers.COUNT))
 	_session = FishingSession.new(_db, _k, rig, position_id, conditions, _shoals)
 	_session.save = save
 	_water = WaterView.new()
@@ -996,6 +999,11 @@ func _ready_yaw() -> float:
 func apply_stage() -> void:
 	if _water:
 		_water.set_stage(stage_kind())
+		if _water.stage and request.has("neighbours"):
+			var colors: Array = []
+			for nb: Dictionary in request["neighbours"]:
+				colors.append(nb["jacket"])
+			_water.stage.set_people(colors)
 
 
 
