@@ -28,16 +28,16 @@ Dependencies point one way: views -> core -> sim and data. `sim/` never imports 
 | `game/ui/device_motion.gd`, `device_guard.gd`, `frame_stats.gd` | Phone motion bridge, portrait guard, fps statistics | Implemented |
 | `game/debug/` | Debug menu, excluded from the release export | Implemented |
 | `game/scenes/water_prototype/` | First 2D water test scene; keeps the old shader | Legacy, remove after the owner agrees |
-| `game/core/` | `game.gd`, `db.gd`, `profile.gd` autoloads | Designed |
+| `game/core/` | `db.gd`, `profile.gd`, `game.gd` (static holders) | Implemented (data, save, request and result); mode and world session Designed |
 | `game/scenes/world/` | Top-down world: `world.tscn`, `areas/`, `actors/` | Not started |
 | `game/ui/screens/` | Bag, shop, quest journal, map as pushed screens | Not started |
 | `game/assets/` | Imported CC0 models and textures, one folder per asset with its licence row | Not started |
 
 ## 3. Core: modes, scenes and the hand-over between the two views (Designed)
-**Autoloads** (plain nodes registered in `project.godot`, kept to three so start-up stays simple):
-- `Db`: loads and validates `game/data` once (`DataStore.load_all`), exposes `Db.record(kind, id)`, `Db.constants`. Fails loudly on bad data (PRD F12). Today each screen loads the data itself; move that here.
-- `Profile`: owns the save dictionary; the only writer. `Profile.apply(result: Dictionary)` takes a `FishingResult`; `Profile.changed` signal; `Profile.flush()` writes through `SaveFile`.
-- `Game`: owns the mode and the session. `enum Mode { TITLE, WORLD, FISHING }`; signals `mode_changed(mode)`, `fishing_finished(result)`. Holds the session objects both views read: `conditions` (from `SessionConditions`), `shoals: ShoalField` per spot, world clock.
+**Core classes** (`game/core/`, Implemented 2026-11-17 as static holders rather than autoload nodes, so the headless test runner and the game reach them the same way; `Game` becomes a node when the world needs signals and a scene stack):
+- `Db`: loads and validates `game/data` once (`DataStore.load_all`), exposes `Db.database()`, `Db.record(kind, id)`, `Db.constants()`, `Db.ok()` and `Db.errors`. Implemented; the fishing screen uses it.
+- `Profile`: owns the save dictionary; the only writer. `Profile.open(path)`, `Profile.save`, `Profile.flush()` are Implemented. Designed for R3: `Profile.apply(result)` moves a `FishingResult` into the inventory, experience and quests (today the fishing screen writes the catch log itself at the moment of landing, so a closed tab loses nothing).
+- `Game`: the contract. `Game.fishing_request(...)` and `Game.empty_result()` are Implemented; `FishingScreen.request`, `result()`, `leave()` and the `finished(result)` signal use them, and `scenes/main.gd` opens the fishing view over the title and takes the result back. Designed for R4: the mode (`enum Mode { TITLE, WORLD, FISHING }`), the session objects both views read (`conditions`, `shoals: ShoalField` per spot, the world clock) and the scene stack. A caller that shows 2D behind the fishing view must hide it: a canvas item covers the 3D scene (found when the title's background hid the sea).
 
 **Scene tree at run time**: `Main` (root scene) with children `World` (kept loaded), `Fishing` (added on demand), `Ui` (a `CanvasLayer` stack for screens and toasts). Entering fishing sets `World.process_mode = PROCESS_MODE_DISABLED` and hides it; leaving reverses that. The world is not reloaded, so its state survives without serialising it.
 
@@ -122,7 +122,8 @@ One flow serves them all: fishing ends -> `FishingResult` -> `Profile.apply` -> 
 | 2026-11-16 | Motion stays in screen space, 3D shapes are lifted from it | Keeps 140 tests of motion valid and the overlay aligned |
 | 2026-11-16 | Fishing world is square to the shore; the view turns (along the shore when ready, to the water to cast) | Owner: the cast should not go where the neighbours fish; first the scene, then a first-person cast |
 | 2026-11-16 | Walkable top-down world is the main game (PRD M5 decided) | Owner |
-| 2026-11-16 | Three autoloads (`Db`, `Profile`, `Game`), world kept loaded while fishing | Smallest structure that carries state between the views |
+| 2026-11-16 | Three core classes (`Db`, `Profile`, `Game`), world kept loaded while fishing | Smallest structure that carries state between the views |
+| 2026-11-17 | The core classes are static holders, not autoload nodes | The headless test runner starts from a script, so tests and the game must reach them the same way |
 | 2026-11-16 | CC0 PBR textures and a CC0 hand model will be adopted | Tech lead's call at the owner's request; procedural hands read as fake |
 
 ## 11. Build decisions (2026-11-11 onwards)

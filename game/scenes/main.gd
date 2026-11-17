@@ -22,4 +22,18 @@ func _ready() -> void:
 	_prototype.text = tr("PROTO_OPEN")
 	_prototype.pressed.connect(func() -> void: get_tree().change_scene_to_file.call_deferred(WATER_PROTOTYPE))
 	_fishing.text = tr("FISH_OPEN")
-	_fishing.pressed.connect(func() -> void: get_tree().change_scene_to_file.call_deferred(FISHING_SCREEN))
+	_fishing.pressed.connect(_open_fishing)
+
+
+## Fishing mode opens over the title and hands its result back (architecture.md 3).
+func _open_fishing() -> void:
+	var screen: FishingScreen = (load(FISHING_SCREEN) as PackedScene).instantiate()
+	screen.request = Game.fishing_request()
+	screen.finished.connect(func(result: Dictionary) -> void:
+		screen.queue_free()
+		$Column.visible = true
+		$Background.visible = true
+		_note.text = tr("TRIP_SUMMARY") % [int(result["casts"]), (result["catches"] as Array).size()])
+	$Column.visible = false
+	$Background.visible = false   # a canvas item would cover the 3D scene
+	add_child(screen)
