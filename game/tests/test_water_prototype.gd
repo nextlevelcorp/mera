@@ -97,6 +97,7 @@ func test_sea_maps_and_grid() -> void:
 	var aabb := mesh.get_aabb()
 	assert_true(aabb.position.z < -6000.0, "the sea reaches the horizon")
 	assert_true(aabb.end.z > -1.0, "and starts under the angler")
+	assert_true(aabb.position.x < -6000.0 and aabb.end.x > 6000.0, "and far to both sides, so a view turned along the bridge has water to its edge")
 
 
 func test_water_view_takes_the_conditions() -> void:

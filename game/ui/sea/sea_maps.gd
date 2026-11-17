@@ -39,18 +39,21 @@ static func cloud() -> ImageTexture:
 	return _cloud
 
 
-## The sea surface: rows spaced geometrically from under the angler to the
-## horizon, each row as wide as the view at that distance plus a margin, so
-## vertices are dense where waves are seen and sparse far away.
-static func build_grid(rows: int = 150, cols: int = 90, near_m: float = 0.5, far_m: float = 7000.0) -> ArrayMesh:
+## The sea surface as a fan around the angler: rings spaced geometrically
+## from under the angler to the horizon, and columns spread evenly over the
+## angles the view can turn to (the look along the bridge is 56 degrees off
+## the water, plus half the field of view). A rectangular grid left a wedge
+## of sky showing where the view turned past its edge. Vertices are dense
+## close by, where waves are seen, and sparse far away.
+static func build_grid(rows: int = 150, cols: int = 150, near_m: float = 0.5, far_m: float = 7000.0, half_angle_deg: float = 105.0) -> ArrayMesh:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var half := deg_to_rad(half_angle_deg)
 	for r in rows:
-		var z := near_m * pow(far_m / near_m, float(r) / float(rows - 1))
-		var half := 1.5 * z + 12.0
+		var d := near_m * pow(far_m / near_m, float(r) / float(rows - 1))
 		for c in cols:
-			var x := lerpf(-half, half, float(c) / float(cols - 1))
-			st.add_vertex(Vector3(x, 0.0, -z))
+			var a := lerpf(-half, half, float(c) / float(cols - 1))
+			st.add_vertex(Vector3(d * sin(a), 0.0, -d * cos(a)))
 	for r in rows - 1:
 		for c in cols - 1:
 			var i := r * cols + c
