@@ -15,7 +15,8 @@
 | Sound (CC0 beds and one-shots) | Implemented for fishing | `reference_docs.md` |
 | Save v2 (log, settings, bag, money field, counters), migration from v1 | Implemented | `data_model.md` 12 |
 | Economy: fish prices, selling, releasing undersize fish, the tackle shop, lure stock | Implemented (R8) | `data_model.md` 14 |
-| Bag screen, progression, quests, crafting | Designed | `architecture.md` 7, `data_model.md` 12 |
+| Progression: three skills with levels that raise the model's angler attributes | Implemented (R9) | `data_model.md` 15 |
+| Bag screen, quests, crafting, spot unlocks | Designed | `architecture.md` 7, `data_model.md` 12 |
 | Core (`Db`, `Profile`, `Game` request and result) | Implemented; mode switch with a world Designed | `architecture.md` 3 |
 | Top-down world (one grey-box area, walking, markers, hand-over both ways) | Partial | `architecture.md` 4 |
 | World NPCs, neighbours in the world, world clock, more areas | Not started | `architecture.md` 4 |
@@ -48,7 +49,7 @@
 | R6 | 3D fish, rings in the sea shader, 3D gulls **(done 2026-11-17 except the line, which stays 2D on purpose)** | R1 | No fish, ring or gull drawing on the overlay | Rings hidden by the rail; fps measured before and after (the owner's) | `ui/sea/`, `ui/fx/` |
 | R7 | Asset pipeline; PBR textures for deck, rail, quay **(done 2026-11-17)**; CC0 hand model **(Blocked)** | D3 | Realistic close surfaces; hands pending | Licence rows written; download size and fps reported | `game/assets/`, `reference_docs.md` |
 | R8 | Economy: fishmonger and tackle shop **(done 2026-11-17)** | R3, R4 | Sell fish, buy tackle | Price tests; played | `sim/economy.gd`, `data/shop.json` |
-| R9 | Progression: experience, skills, spot unlocks | R3 | Skills change cast and strike numbers | Tests show the attribute path; why view names the skill | `sim/progress.gd` |
+| R9 | Progression: experience and skills **(done 2026-11-17; spot unlocks wait for a second spot)** | R3 | Skills change cast and strike numbers | Tests show the attribute path; the result names the experience | `sim/progress.gd` |
 | R10 | NPCs with schedules; world anglers become the 3D neighbours | R4 | People in the world | Seeded schedule tests; played | `scenes/world/actors/`, `data/npcs.json` |
 | R11 | Quests | R8, R10 | Journal and rewards | Condition tests over recorded results | `sim/quests.gd`, `data/quests.json` |
 | R12 | Float and bait presentation | R1, D2 | A second way to fish | Simulation tests; data sourced or labelled | `sim/`, `data/tackle/` |
@@ -79,6 +80,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R9 progression (2026-11-17): 191 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): a cast and a forced horse mackerel landed, the result panel read "Experience: Casting +2 · Strike +5 · Knots +2"; no console errors. Not seen in the browser: a level-up toast (20 points are needed; unit tests cover it) and the skills line in the catch log.
 - R8 economy (2026-11-17): 184 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): in the world, +3 fish from the debug menu, walked to the fishmonger with the arrow keys, "Go in" opened it with three fish and their prices (23, 95 and 224 TL), "Sell all" paid 342 TL and the wallet read 442 TL with no fish left; no console errors. Not played in the browser: the tackle shop's Buy buttons, a broken line taking a lure, and the empty-bag message (unit tests cover them), the shops at 844x390, and on a phone. Found while playing: the lira sign is missing from the default font (shown as a box), so money is written TL.
 - R7 textures (2026-11-17): 173 tests pass with no script errors in the output; both web exports build (pack 1.7 MB, up from 0.5); played in the debug web build (software GL, 1280x720): the bridge deck shows paving slabs and the rail steel texture by day and dusk, and the quay shows cobbles and coping; no console errors. Not measured: the phone frame rate and memory with six texture sets (about 12 MB decoded, an estimate), the quay at night.
 - R6 follow-up (2026-11-17): 171 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): the new debug switches are in the menu and the wedge of sky beside the bridge view is gone at day; no console errors. **Owner measurement needed, in a fight, 60 s each:** debug fps with everything on, then with Shadows off, then Glow off, then Lamp lights off, then all three off. Last figures: 57 average, 34 worst 1% (R6 merged); 58 and 47 before R6; the shadow map size and the night shadow skip are untested changes aimed at this.

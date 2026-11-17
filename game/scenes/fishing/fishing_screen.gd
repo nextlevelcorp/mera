@@ -33,6 +33,8 @@ signal finished(result: Dictionary)
 ## The FishingRequest (Game.fishing_request) this session was started with; set before setup().
 var request := {}
 var _session: FishingSession
+## Experience earned since the last cast, for the result panel (Progress).
+var _xp := {"gained": {}, "level_ups": []}
 
 var phase: int = Phase.READY
 var conditions := {"slot": "evening", "month": 10, "wind_dir": "SW", "wind_ms": 3}
@@ -173,6 +175,7 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	_shoals = ShoalField.new(_k, int(conditions["month"]) * 1000 + int(Time.get_datetime_dict_from_system()["hour"]) if save_enabled else 77)
 	_gulls = GullFlock.new(_shoals.shoals.size())
 	_session = FishingSession.new(_db, _k, rig, position_id, conditions, _shoals)
+	_session.save = save
 	_water = WaterView.new()
 	add_child(_water)
 	_overlay = FishingOverlay.new(self)
@@ -283,6 +286,26 @@ func _set_phase(p: int) -> void:
 
 # ------------------------------------------------------------------ cast
 
+## Experience for what the player just did; kept for the result panel and
+## saved at once. A level up is announced.
+func _award(event: Dictionary) -> void:
+	var r := Progress.award(save, _k, event)
+	for skill: String in r["gained"]:
+		_xp["gained"][skill] = int(_xp["gained"].get(skill, 0)) + int(r["gained"][skill])
+	for skill: String in r["level_ups"]:
+		_xp["level_ups"].append(skill)
+		_toast(tr("LEVEL_UP") % [tr("SKILL_%s" % skill.to_upper()), Progress.level(_k, Progress.xp(save, skill))], 3.0)
+	_store()
+
+
+## The skills as one line: name, level and experience.
+func skills_text() -> String:
+	var parts: Array[String] = []
+	for skill: String in Progress.SKILLS:
+		parts.append(tr("SKILL_LINE") % [tr("SKILL_%s" % skill.to_upper()), Progress.level(_k, Progress.xp(save, skill)), Progress.xp(save, skill)])
+	return " · ".join(parts)
+
+
 ## The lure the current rig fishes with, and how many are left in the bag.
 func lure_id() -> String:
 	return FightSetup.lure_id(rig)
@@ -322,6 +345,8 @@ func cast_with_power(power: float, aim: float = 0.0) -> void:
 	_cast_motion.release(power)
 	_rod.kick(-6.0)
 	_cast = _session.cast(_ctx, power)
+	_xp = {"gained": {}, "level_ups": []}
+	_award({"type": "cast", "power": power})
 	_aim_x = clampf(aim + _rng.randfn(0.0, float(_cast["aim_sigma_rad"])), -0.5, 0.5)
 	_paid_m = 0.0
 	_flight_s = 0.0
@@ -420,6 +445,7 @@ func _on_wait_event(e: Dictionary) -> void:
 # ------------------------------------------------------------------ fight
 
 func _start_fight(hooked: Dictionary) -> void:
+	_award({"type": "hooked", "timing": float(hooked["timing_quality"])})
 	_fight_ctx = _session.fight_context(hooked, forced_u)
 	forced_u = -1.0
 	_ui.drag_ratio = clampf(float(_fight_ctx["play"]["drag_kg"]) / float(_fight_ctx["reel"]["drag_max_kg"]), 0.0, 1.0)
@@ -483,6 +509,7 @@ func _finish_fight() -> void:
 	if _result["lure_lost"]:
 		_store()
 	if outcome == FightSim.OUTCOME_LANDED:
+		_award({"type": "landed", "peak_ratio": _controller.max_tension_kg / maxf(_controller.sim.b_eff, 0.001)})
 		_result.merge(SaveGame.record_catch(save, sp["id"], _result["length_cm"], _result["weight_kg"], Time.get_date_string_from_system()))
 		_store()
 		_play("landed")
@@ -1142,6 +1169,11 @@ func _show_result() -> void:
 		var rule: Dictionary = _fight_ctx["species"].get("regulation", {})
 		if rule.has("min_length_cm") and float(_result["length_cm"]) < float(rule["min_length_cm"]):
 			lines.append(tr("FISH_UNDERSIZE") % float(rule["min_length_cm"]))
+	var xp_parts: Array[String] = []
+	for skill: String in _xp["gained"]:
+		xp_parts.append("%s +%d" % [tr("SKILL_%s" % skill.to_upper()), int(_xp["gained"][skill])])
+	if not xp_parts.is_empty():
+		lines.append(tr("XP_GAINED") % " · ".join(xp_parts))
 	if _result.get("lure_lost", false):
 		lines.append(tr("LURE_LOST") % lure_stock())
 	lines.append(tr("FIGHT_DETAIL") % [_hud["time_s"], _hud["max_tension_kg"], _hud["line_strength_kg"]])
@@ -1163,6 +1195,8 @@ func _update_log() -> void:
 			lines.append(tr("LOG_ROW") % [species_name, int(e["count"]), float(e["best_length_cm"]), float(e["best_weight_kg"]), e["first_seen"]])
 		else:
 			lines.append(tr("LOG_EMPTY_ROW") % species_name)
+	lines.append("")
+	lines.append(skills_text())
 	lines.append("")
 	lines.append(tr("DATA_NOTE"))
 	_ui.log_text.text = "\n".join(lines)

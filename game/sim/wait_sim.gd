@@ -249,7 +249,7 @@ func _refresh_rates() -> void:
 		var attr := CatchModel.attraction(_k, sp, c["lure"], c["play"], env, depth)
 		var com := CatchModel.commit(_k, sp, c["spot"], c["rod"], c["leader"], env, pres["presence"], attr["attraction"])
 		_rates[sp["id"]] = {
-			"rate_interest": com["rate_interest"], "commit": com["commit"], "window_s": com["strike_window_s"],
+			"rate_interest": com["rate_interest"], "commit": com["commit"], "window_s": float(com["strike_window_s"]) * Progress.strike_window_factor(_k, _ctx["angler"]),
 			"stages": {"water_depth_m": depth, "presence": pres, "attraction": attr, "commit": com},
 		}
 

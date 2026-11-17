@@ -19,7 +19,7 @@ Dependencies point one way: views -> core -> sim and data. `sim/` never imports 
 ## 2. Repository layout
 | Path | Purpose | State |
 | --- | --- | --- |
-| `game/sim/` | `economy`, `world_area`, `world_walk`, `fishing_session`, `inventory`, `catch_model`, `wait_sim`, `fight_sim`, `fight_controller`, `fight_setup`, `why_report`, `shoal_field`, `session_conditions`, `motion_gesture`, `save_game`, `data_store`, `data_validator` | Implemented |
+| `game/sim/` | `progress`, `economy`, `world_area`, `world_walk`, `fishing_session`, `inventory`, `catch_model`, `wait_sim`, `fight_sim`, `fight_controller`, `fight_setup`, `why_report`, `shoal_field`, `session_conditions`, `motion_gesture`, `save_game`, `data_store`, `data_validator` | Implemented |
 | `game/data/` | `schema.json`, `constants.json`, `species.json`, `spots.json`, `tackle/`, `angler.json`, `demo/` | Implemented |
 | `game/scenes/fishing/` | `fishing_screen.gd` (`FishingScreen`: phases, simulations, view physics), `fishing_hud.gd` (`FishingHud`: controls, panels, raw thumb state), `fishing_overlay.gd` (`FishingOverlay`: the 2D layer) | Implemented; split 2026-11-17 (R1) |
 | `game/ui/water_view.gd`, `game/ui/sea/` | The 3D fishing scene: sea and sky shaders, `Stage3D` with `Bridge3D` and `Quay3D`, `Rig3D`, `SeaMaps` | Implemented |
@@ -101,7 +101,7 @@ Each is a pure class in `game/sim/`, a data file, a slice of the save and one sc
 | --- | --- | --- | --- | --- |
 | Inventory | `Inventory` (add, remove, count, fish entries): Implemented; capacity and `items.json` Designed | `items.json` (tackle pieces, lures, bait, fish as items) | `inventory.items[{id, count, meta}]` | Fish and lures are in the bag; a lure lost to a line break or a bite-off leaves it (R8), so tackle choices have a cost |
 | Economy | `Economy` (fish prices from species, weight and legal size; selling, releasing, buying, lure stock, welcome stock): Implemented (R8) | `shop.json` | `money`, `welcome_stock` | The fishmonger and the tackle shop are in the world (`ShopPanel`); no real money anywhere; bag capacity, tackle other than lures and selling prices that move with supply are Designed |
-| Progression | `Progress` (experience per action, skill levels feeding the `angler` attributes the cast and hook stages already read) | `angler.json`, `progress.json` | `angler{xp, skills}` | Spot unlocks from the log (funnel steps S5, S6 in the PRD) |
+| Progression | `Progress` (experience per action, skill levels feeding the `angler` attributes the cast, strike and knot rules read): Implemented (R9) | `angler.json`, `constants.json` (`XP_*`) | `angler_xp {cast, strike, knots}` | Spot unlocks from the log (funnel steps S5, S6) Designed, once there is a second spot; a fight skill needs an angler term in `FightSim` first |
 | Quests | `Quests` (conditions over `FishingResult.events`, rewards) | `quests.json` | `quests{active, done}` | Given by NPCs; plain data, no scripting |
 | Crafting | `Rigs` (tie a rig from parts) | `recipes.json` | uses inventory | Beyond the spec's MVP; owner decision D2 |
 | Catch log | `SaveGame.record_catch` | species | `log` | Implemented |
