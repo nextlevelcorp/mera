@@ -19,7 +19,7 @@ Dependencies point one way: views -> core -> sim and data. `sim/` never imports 
 ## 2. Repository layout
 | Path | Purpose | State |
 | --- | --- | --- |
-| `game/sim/` | `fishing_session`, `inventory`, `catch_model`, `wait_sim`, `fight_sim`, `fight_controller`, `fight_setup`, `why_report`, `shoal_field`, `session_conditions`, `motion_gesture`, `save_game`, `data_store`, `data_validator` | Implemented |
+| `game/sim/` | `world_area`, `world_walk`, `fishing_session`, `inventory`, `catch_model`, `wait_sim`, `fight_sim`, `fight_controller`, `fight_setup`, `why_report`, `shoal_field`, `session_conditions`, `motion_gesture`, `save_game`, `data_store`, `data_validator` | Implemented |
 | `game/data/` | `schema.json`, `constants.json`, `species.json`, `spots.json`, `tackle/`, `angler.json`, `demo/` | Implemented |
 | `game/scenes/fishing/` | `fishing_screen.gd` (`FishingScreen`: phases, simulations, view physics), `fishing_hud.gd` (`FishingHud`: controls, panels, raw thumb state), `fishing_overlay.gd` (`FishingOverlay`: the 2D layer) | Implemented; split 2026-11-17 (R1) |
 | `game/ui/water_view.gd`, `game/ui/sea/` | The 3D fishing scene: sea and sky shaders, `Bridge3D`, `Rig3D`, `SeaMaps` | Implemented |
@@ -29,17 +29,18 @@ Dependencies point one way: views -> core -> sim and data. `sim/` never imports 
 | `game/debug/` | Debug menu, excluded from the release export | Implemented |
 | `game/scenes/water_prototype/` | First 2D water test scene; keeps the old shader | Legacy, remove after the owner agrees |
 | `game/core/` | `db.gd`, `profile.gd`, `game.gd` (static holders) | Implemented (data, save, request and result); mode and world session Designed |
-| `game/scenes/world/` | Top-down world: `world.tscn`, `areas/`, `actors/` | Not started |
+| `game/scenes/world/` | `world_screen.gd` (grey-box world); `actors/` for NPCs later | Partial (R4) |
+| `game/data/areas/` | One JSON per area: size, ground rectangles, rails, lamps, markers (design fill) | Implemented for the Galata Bridge |
 | `game/ui/screens/` | Bag, shop, quest journal, map as pushed screens | Not started |
 | `game/assets/` | Imported CC0 models and textures, one folder per asset with its licence row | Not started |
 
-## 3. Core: modes, scenes and the hand-over between the two views (Designed)
+## 3. Core: modes, scenes and the hand-over between the two views (Core Implemented; world hand-over Partial)
 **Core classes** (`game/core/`, Implemented 2026-11-17 as static holders rather than autoload nodes, so the headless test runner and the game reach them the same way; `Game` becomes a node when the world needs signals and a scene stack):
 - `Db`: loads and validates `game/data` once (`DataStore.load_all`), exposes `Db.database()`, `Db.record(kind, id)`, `Db.constants()`, `Db.ok()` and `Db.errors`. Implemented; the fishing screen uses it.
 - `Profile`: owns the save dictionary; the only writer. `Profile.open(path)`, `Profile.save`, `Profile.flush()` are Implemented. `Profile.apply(result)` (Implemented, R3) moves a `FishingResult` into the bag and the counters when the player leaves; experience and quests join it later. The catch log is still written by the fishing screen at the moment of landing, so a closed tab loses the bag entry of that session but not the log.
 - `Game`: the contract. `Game.fishing_request(...)` and `Game.empty_result()` are Implemented; `FishingScreen.request`, `result()`, `leave()` and the `finished(result)` signal use them, and `scenes/main.gd` opens the fishing view over the title and takes the result back. Designed for R4: the mode (`enum Mode { TITLE, WORLD, FISHING }`), the session objects both views read (`conditions`, `shoals: ShoalField` per spot, the world clock) and the scene stack. A caller that shows 2D behind the fishing view must hide it: a canvas item covers the 3D scene (found when the title's background hid the sea).
 
-**Scene tree at run time**: `Main` (root scene) with children `World` (kept loaded), `Fishing` (added on demand), `Ui` (a `CanvasLayer` stack for screens and toasts). Entering fishing sets `World.process_mode = PROCESS_MODE_DISABLED` and hides it; leaving reverses that. The world is not reloaded, so its state survives without serialising it.
+**Scene tree at run time** (Implemented 2026-11-17 in `scenes/main.gd`): `Main` (root scene) holds the title, a `WorldScreen` when the player walks and a `FishingScreen` when they fish, added on demand. `WorldScreen.pause()` hides the world, disables its processing and turns its `Camera2D` off, and `resume(result)` reverses that; the world is not reloaded, so its state survives without serialising it. The camera must be off while fishing: a `Camera2D` moves every other 2D control in the viewport. The title's canvas items are hidden while a 3D view is open. Designed: a `Ui` `CanvasLayer` stack for screens (bag, shop, journal) and the `Game` mode enum.
 
 **Contract between the views** (plain dictionaries, so tests can build them):
 ```
@@ -47,11 +48,13 @@ FishingRequest = { spot_id, position_id, rig, conditions, seed, neighbours: [npc
 FishingResult  = { catches: [{species_id, length_cm, weight_kg, kept}], lost: [{item_id, reason}],
                    casts, time_s, events: [{type, species_id?}] }
 ```
-**World to fishing**: the player stands on a `FishingMarker`, presses the action button, `Game.start_fishing(request)`: 0.35 s zoom of the 2D camera towards the marker's facing with a fade, the fishing scene opens in its "looking along the shore" view (`WaterView.BRIDGE_YAW`, already built), and the view turns to the water on the cast. The ambience beds (wind, waves) keep playing through the change; only the world layers fade. **Fishing to world**: "Back" builds the `FishingResult`, `Profile.apply` moves fish to the bag and updates log, experience and quests, the world clock advances by `time_s`, the fade reverses and the player stands on the marker.
+**World to fishing** (Implemented without the transition): the player stands at a marker, presses the action button, `WorldScreen` emits `fish_requested(request)` with the marker's position and the world's conditions, and `main.gd` opens the fishing scene in its "looking along the shore" view (`WaterView.BRIDGE_YAW`), which turns to the water on the cast. Designed: a 0.35 s zoom of the 2D camera towards the marker's facing with a fade. The ambience beds (wind, waves) keep playing through the change; only the world layers fade. **Fishing to world**: "Back" builds the `FishingResult`, `Profile.apply` moves fish to the bag and updates log, experience and quests, the world clock advances by `time_s`, the fade reverses and the player stands on the marker.
 
 **Why the two views feel like one place**: the same `conditions` tint the world (`CanvasModulate`) and light the sea; the same `ShoalField` puts gulls over the water in the world and in the 3D view, so birds seen while walking are the birds fished under; the anglers standing at a marker in the world are the neighbours along the rail in 3D (`NeighborAnglers` seeded from `neighbours`); the marker's `facing` is the wind frame the cast already uses.
 
-## 4. World mode: top-down 2D (Not started; design)
+## 4. World mode: top-down 2D (Partial: grey-box prototype of one area, 2026-11-17; the rest Designed)
+**Built in R4**: `game/sim/world_area.gd` (`WorldArea`: loads and validates `game/data/areas/<id>.json`, marker links to the spot's positions, blocked-ground test), `game/sim/world_walk.gd` (`WorldWalk`: walking at a fixed speed, sliding along blocked rectangles, nearest marker), `game/scenes/world/world_screen.gd` (`WorldScreen`: grey-box drawing with `_draw`, `Camera2D`, stick pad, action button, slot tint, toast), `game/debug/world_debug.gd` (time of day, jump to a marker). The first area is the Galata Bridge seen from above, compressed to 110 m, with the same four markers as the spot's positions (east and west walkway, Karaköy and Eminönü ends); the markers' facing matches the positions' facing (test). Not built from the list below: tile maps, y-sorting, the `Interactable` component, NPCs, the world clock, exits and more areas.
+
 - **Areas**: one scene per real place, `scenes/world/areas/<spot_id>.tscn`, built from `TileMapLayer` nodes (ground, shore, props, overhead) with y-sorting. An area declares its exits, markers and NPC spawn points as nodes; `game/data/areas/<spot_id>.json` carries the sourced facts (names, coordinates of positions, links to `spots.json`). Areas load one at a time; exits change area with a fade.
 - **Player**: `CharacterBody2D`, 8-direction movement at walking pace, virtual stick under the left thumb and one action button under the right (`godot-style.md`: controls pinned to the corners). `Camera2D` with limits and position smoothing. Keyboard and gamepad through `InputMap` actions for desktop testing.
 - **Interaction**: one component, `Interactable` (`Area2D` with a prompt key and `interact(actor)`), reused by fishing markers, NPCs, the shop door, signs and the fish bucket. The nearest one in range owns the action button.

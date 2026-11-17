@@ -1,0 +1,169 @@
+{
+ "id": "galata_bridge",
+ "spot_id": "galata_bridge",
+ "design_fill": true,
+ "note": "Grey-box layout, not to scale: the real bridge is about 490 m long (compressed to 110 m). Karaköy is at the top, Eminönü at the bottom; the two walkways run along the rails.",
+ "size_m": [
+  60.0,
+  110.0
+ ],
+ "px_per_m": 24.0,
+ "start_m": [
+  44.0,
+  12.0
+ ],
+ "rects": [
+  {
+   "kind": "plaza",
+   "rect": [
+    0.0,
+    0.0,
+    60.0,
+    20.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "plaza",
+   "rect": [
+    0.0,
+    90.0,
+    60.0,
+    20.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "water",
+   "rect": [
+    0.0,
+    20.0,
+    14.2,
+    70.0
+   ],
+   "blocked": true
+  },
+  {
+   "kind": "water",
+   "rect": [
+    45.8,
+    20.0,
+    14.2,
+    70.0
+   ],
+   "blocked": true
+  },
+  {
+   "kind": "walkway",
+   "rect": [
+    14.2,
+    20.0,
+    4.0,
+    70.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "walkway",
+   "rect": [
+    41.8,
+    20.0,
+    4.0,
+    70.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "road",
+   "rect": [
+    18.2,
+    20.0,
+    23.6,
+    70.0
+   ],
+   "blocked": true
+  }
+ ],
+ "rails": [
+  {
+   "from_m": [
+    14.2,
+    20.0
+   ],
+   "to_m": [
+    14.2,
+    90.0
+   ]
+  },
+  {
+   "from_m": [
+    45.8,
+    20.0
+   ],
+   "to_m": [
+    45.8,
+    90.0
+   ]
+  }
+ ],
+ "lamps_m": [
+  [
+   15.5,
+   30.0
+  ],
+  [
+   15.5,
+   55.0
+  ],
+  [
+   15.5,
+   80.0
+  ],
+  [
+   44.5,
+   30.0
+  ],
+  [
+   44.5,
+   55.0
+  ],
+  [
+   44.5,
+   80.0
+  ]
+ ],
+ "markers": [
+  {
+   "position_id": "karakoy_east",
+   "pos_m": [
+    45.0,
+    32.0
+   ],
+   "facing": "E"
+  },
+  {
+   "position_id": "eminonu_east",
+   "pos_m": [
+    45.0,
+    78.0
+   ],
+   "facing": "E"
+  },
+  {
+   "position_id": "karakoy_west",
+   "pos_m": [
+    15.0,
+    32.0
+   ],
+   "facing": "W"
+  },
+  {
+   "position_id": "eminonu_west",
+   "pos_m": [
+    15.0,
+    78.0
+   ],
+   "facing": "W"
+  }
+ ]
+}
