@@ -21,7 +21,7 @@ Dependencies point one way: views -> core -> sim and data. `sim/` never imports 
 | --- | --- | --- |
 | `game/sim/` | `catch_model`, `wait_sim`, `fight_sim`, `fight_controller`, `fight_setup`, `why_report`, `shoal_field`, `session_conditions`, `motion_gesture`, `save_game`, `data_store`, `data_validator` | Implemented |
 | `game/data/` | `schema.json`, `constants.json`, `species.json`, `spots.json`, `tackle/`, `angler.json`, `demo/` | Implemented |
-| `game/scenes/fishing/` | `fishing_screen.gd` (1,700 lines: phases, HUD, overlay drawing, input) | Implemented; to be split (R1) |
+| `game/scenes/fishing/` | `fishing_screen.gd` (`FishingScreen`: phases, simulations, view physics), `fishing_hud.gd` (`FishingHud`: controls, panels, raw thumb state), `fishing_overlay.gd` (`FishingOverlay`: the 2D layer) | Implemented; split 2026-11-17 (R1) |
 | `game/ui/water_view.gd`, `game/ui/sea/` | The 3D fishing scene: sea and sky shaders, `Bridge3D`, `Rig3D`, `SeaMaps` | Implemented |
 | `game/ui/fx/` | Screen-space motion and effects: `rod_spring`, `verlet_rope`, `angler_rig`, `cast_motion`, `fish_body`, `splash_fx`, `gull_flock`, `neighbor_anglers` | Implemented |
 | `game/ui/audio/` | `sound_director` (recorded CC0 beds and one-shots), `cue_synth` | Implemented |
@@ -74,7 +74,7 @@ FishingResult  = { catches: [{species_id, length_cm, weight_kg, kept}], lost: [{
 | HUD | Godot controls built in code in `fishing_screen.gd` | Implemented |
 
 **Designed next steps for this mode**
-- *Split the screen* (R1): `FishingSession` (phases and the simulations, no drawing), `FishingHud` (controls and texts), `FishingOverlay` (line, effects), leaving `fishing_screen.gd` as the wiring. Behaviour must not change; the existing loop tests are the guard.
+- *Split the screen*: `FishingHud` and `FishingOverlay` are out (R1, Implemented). Both hold a reference to the screen and read its state; the HUD calls it for what a press means. Still to do in R2: `FishingSession` (phases and the simulations, no drawing), leaving `fishing_screen.gd` as the wiring; it was left in place in R1 because the tests and the debug menu reach the session state on the screen, and R2 changes how a session starts anyway. Behaviour must not change; the existing loop tests are the guard.
 - *Stages* (R5): `Bridge3D` becomes one implementation of a stage interface (`build()`, `set_light(light)`, `pose(neighbours, time)`, `tip_water(i)`, `lure_water(i, cast_m, side)`, `ready_yaw`). A position in `spots.json` names its stage (`bridge`, `quay`, `rocks`, `beach`); `WaterView` instantiates it.
 - *3D fish, line, rings, gulls* (R6): fish as a mesh built from `FishBody`'s spine with per-species colour; line as a ribbon mesh through the `VerletRope` points lifted like `Rig3D` does; rings and boils as up to 8 ring uniforms in `sea.gdshader` (so the rail hides them correctly); gulls as quads in the 3D scene.
 - *Presentations* (R12): the lure retrieve exists (`WaitSim` controlled mode). Float and bottom fishing are new presentations with their own small simulations feeding the same stages 1 to 4; needs `float` and `sinker` in the schema and bait data. PRD 4 lists bait and float fishing as a non-goal for the MVP: the owner decides when (decision D2).

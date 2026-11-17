@@ -1,3 +1,4 @@
+class_name FishingScreen
 extends Control
 ## The fishing loop of the 0.1 slice at the first real spot, the Galata Bridge
 ## (PRD F4-F11, F14): rig,
@@ -15,7 +16,6 @@ extends Control
 const MAIN_SCENE := "res://scenes/main.tscn"
 const DATA_DIR := "res://data"
 const DEBUG_MENU := "res://debug/debug_menu.gd"
-const TOUCH_MIN := 96.0
 const NEAR_DRAW_M := 4.6  ## drawing depth of the angler's feet; the camera cannot see nearer
 ## The fish body is drawn this many times its size: at true scale a 20 cm fish
 ## seen head-on from the shore is a few pixels across and cannot be read.
@@ -50,7 +50,23 @@ var _hud := {}
 var _fight_ctx: Dictionary
 var _fish: FishBody
 var _water: WaterView
-var _overlay: Control
+var _overlay: FishingOverlay
+var _ui: FishingHud
+## Widgets the tests and the debug menu read; they live on the HUD.
+var _reel_pad: Control:
+	get: return _ui.reel_pad
+var _vol_slider: HSlider:
+	get: return _ui.vol_slider
+var _why_panel: Control:
+	get: return _ui.why_panel
+var _why_text: Label:
+	get: return _ui.why_text
+var _result_panel: Control:
+	get: return _ui.result_panel
+var _result_label: Label:
+	get: return _ui.result_label
+var _log_text: Label:
+	get: return _ui.log_text
 var _fx := SplashFx.new(9)
 var _rng := RandomNumberGenerator.new()
 var _seed_counter := 1
@@ -79,7 +95,6 @@ var _dangle := Vector2.ZERO
 var _dangle_vel := Vector2.ZERO
 var _line_rate := 0.0
 var _paid_m := 0.0
-var _motion_chip: Button
 var _neighbours := NeighborAnglers.new(5)
 var _shoals: ShoalField
 var _gulls: GullFlock
@@ -88,10 +103,6 @@ var _shoal_hint_shown := false
 var _view_yaw := WaterView.BRIDGE_YAW
 var _last_contact_s := -99.0   ## when a fish last touched the lure (_time)
 var _strike_flash := 0.0
-var _mon_label: Label
-var _depth_label: Label
-var _mon_pull: ProgressBar
-var _mon_jig: ProgressBar
 var _motion: DeviceMotion
 var _gesture := MotionGesture.new()
 var _motion_state := {}
@@ -109,48 +120,12 @@ var _sound: SoundDirector
 var _last_distance := -1.0
 var _stats := FrameStats.new(60.0)
 
-var _reel_pressed := false
-var _reel_y := 0.0
-var _pull_pressed := false
-var _steer := 0.0
 var _was_jumping := false
 var _was_landing := false
 var _was_kicking := false
 var _steer_hint_shown := false
-var _drag_ratio := 0.33
 var _strike_queued := false
 
-var _reel_pad: Control
-var _drag_slider: Control
-var _pull_button: Button
-var _main_button: Button
-var _reel_in_button: Button
-var _speed_button: Button
-var _rig_button: Button
-var _log_button: Button
-var _status_label: Label
-var _toast_label: Label
-var _hint_label: Label
-var _tension_label: Label
-var _distance_label: Label
-var _drag_label: Label
-var _rig_panel: Control
-var _rig_label: Label
-var _rig_cycle: Button
-var _position_cycle: Button
-var _result_panel: Control
-var _result_label: Label
-var _result_detail: Label
-var _log_panel: Control
-var _why_panel: Control
-var _why_text: Label
-var _why_button: Button
-var _settings_panel: Control
-var _settings_button: Button
-var _vol_slider: HSlider
-var _sens_slider: HSlider
-var _flip_check: CheckButton
-var _log_text: Label
 var _debug_menu: Control
 
 
@@ -188,17 +163,10 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	_gulls = GullFlock.new(_shoals.shoals.size())
 	_water = WaterView.new()
 	add_child(_water)
-	_overlay = Control.new()
-	_overlay.set_anchors_preset(Control.PRESET_FULL_RECT)
-	_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_overlay.draw.connect(_draw_overlay)
+	_overlay = FishingOverlay.new(self)
 	add_child(_overlay)
-	_build_hud()
-	_build_rig_panel()
-	_build_result()
-	_build_log()
-	_build_why()
-	_build_settings()
+	_ui = FishingHud.new(self)
+	add_child(_ui)
 	_build_audio()
 	_sound = SoundDirector.new()
 	add_child(_sound)
@@ -269,33 +237,33 @@ func _base_context(species_id: String, overrides: Dictionary = {}) -> Dictionary
 func _set_phase(p: int) -> void:
 	phase = p
 	var fight := p == Phase.FIGHT
-	_reel_pad.visible = fight or p == Phase.WAIT   # in the wait the left thumb sets the retrieve
-	_drag_slider.visible = fight
-	_pull_button.visible = fight
-	_tension_label.visible = fight
-	_status_label.visible = p in [Phase.READY, Phase.CHARGE, Phase.FLIGHT, Phase.WAIT]
-	_hint_label.visible = fight and _controller != null and _controller.overmatched
-	_main_button.visible = p in [Phase.READY, Phase.CHARGE, Phase.WAIT]
-	_main_button.text = tr("FISH_STRIKE") if p == Phase.WAIT else tr("FISH_CAST")
-	_reel_in_button.visible = p == Phase.WAIT
-	_speed_button.visible = p == Phase.WAIT
-	_rig_button.visible = p == Phase.READY
-	_log_button.visible = p in [Phase.READY, Phase.RESULT]
-	_distance_label.visible = p in [Phase.WAIT, Phase.FIGHT]
-	_depth_label.visible = p == Phase.WAIT
-	_result_panel.visible = p == Phase.RESULT
-	_settings_button.visible = p in [Phase.READY, Phase.WAIT]
+	_ui.reel_pad.visible = fight or p == Phase.WAIT   # in the wait the left thumb sets the retrieve
+	_ui.drag_slider.visible = fight
+	_ui.pull_button.visible = fight
+	_ui.tension_label.visible = fight
+	_ui.status_label.visible = p in [Phase.READY, Phase.CHARGE, Phase.FLIGHT, Phase.WAIT]
+	_ui.hint_label.visible = fight and _controller != null and _controller.overmatched
+	_ui.main_button.visible = p in [Phase.READY, Phase.CHARGE, Phase.WAIT]
+	_ui.main_button.text = tr("FISH_STRIKE") if p == Phase.WAIT else tr("FISH_CAST")
+	_ui.reel_in_button.visible = p == Phase.WAIT
+	_ui.speed_button.visible = p == Phase.WAIT
+	_ui.rig_button.visible = p == Phase.READY
+	_ui.log_button.visible = p in [Phase.READY, Phase.RESULT]
+	_ui.distance_label.visible = p in [Phase.WAIT, Phase.FIGHT]
+	_ui.depth_label.visible = p == Phase.WAIT
+	_ui.result_panel.visible = p == Phase.RESULT
+	_ui.settings_button.visible = p in [Phase.READY, Phase.WAIT]
 	if p != Phase.RESULT:
-		_why_panel.visible = false
+		_ui.why_panel.visible = false
 	if p != Phase.READY and p != Phase.WAIT:
-		_settings_panel.visible = false
+		_ui.settings_panel.visible = false
 	if p != Phase.READY:
-		_rig_panel.visible = false
-		_log_panel.visible = false
+		_ui.rig_panel.visible = false
+		_ui.log_panel.visible = false
 	if p != Phase.WAIT:
 		_speed_on = false
 	if p == Phase.WAIT:
-		_reel_pressed = false
+		_ui.reel_pressed = false
 	if p == Phase.WAIT or p == Phase.FIGHT:
 		_gesture.calibrated = false
 	_rope = null
@@ -385,7 +353,7 @@ func force_bite(species_id: String, u: float = -1.0) -> void:
 
 func _step_wait(delta: float) -> void:
 	var input := {"strike": _strike_queued, "jig": jig_amount(),
-		"reel": FightController.reel_from_pad(_reel_pressed, _reel_y, _reel_pad.size.y)}
+		"reel": FightController.reel_from_pad(_ui.reel_pressed, _ui.reel_y, _ui.reel_pad.size.y)}
 	_strike_queued = false
 	_wait_state = _wait.advance(delta, input, SPEED_UP if _speed_on else 1.0)
 	for i in range(_last_event_count, _wait.events.size()):
@@ -444,16 +412,16 @@ func _start_fight(hooked: Dictionary) -> void:
 			overrides[key] = hooked[key]
 	_fight_ctx = _base_context(hooked["species_id"], overrides)
 	_fight_ctx["play"]["fish_length_cm"] = FightController.draw_length_cm(_fight_ctx["species"], u)
-	_drag_ratio = clampf(float(_fight_ctx["play"]["drag_kg"]) / float(_fight_ctx["reel"]["drag_max_kg"]), 0.0, 1.0)
+	_ui.drag_ratio = clampf(float(_fight_ctx["play"]["drag_kg"]) / float(_fight_ctx["reel"]["drag_max_kg"]), 0.0, 1.0)
 	_controller = FightController.new(_fight_ctx, _k, _seed_counter)
 	_hud = _controller.hud()
 	_fish = FishBody.new(float(_fight_ctx["play"]["fish_length_cm"]) / 100.0, _fish_world())
 	_fx = SplashFx.new(_seed_counter)
 	_last_state = ""
 	_last_distance = -1.0
-	_reel_pressed = false
-	_pull_pressed = false
-	_steer = 0.0
+	_ui.reel_pressed = false
+	_ui.pull_pressed = false
+	_ui.steer = 0.0
 	_was_jumping = false
 	_was_landing = false
 	_was_kicking = false
@@ -463,19 +431,19 @@ func _start_fight(hooked: Dictionary) -> void:
 
 func current_input() -> Dictionary:
 	return {
-		"reel": FightController.reel_from_pad(_reel_pressed, _reel_y, _reel_pad.size.y),
-		"rod": maxf(FightController.rod_from_button(_pull_pressed), float(_motion_state.get("pull", 0.0))),
-		"drag_kg": FightController.drag_from_slider(_drag_ratio, _controller.drag_max_kg),
-		"steer": _steer if _pull_pressed else 0.0,
+		"reel": FightController.reel_from_pad(_ui.reel_pressed, _ui.reel_y, _ui.reel_pad.size.y),
+		"rod": maxf(FightController.rod_from_button(_ui.pull_pressed), float(_motion_state.get("pull", 0.0))),
+		"drag_kg": FightController.drag_from_slider(_ui.drag_ratio, _controller.drag_max_kg),
+		"steer": _ui.steer if _ui.pull_pressed else 0.0,
 	}
 
 
 ## For tests and the debug menu: hold or release the two thumbs.
 func set_fight_input(reel_pressed: bool, reel_y: float, pull_pressed: bool, drag_ratio: float) -> void:
-	_reel_pressed = reel_pressed
-	_reel_y = reel_y
-	_pull_pressed = pull_pressed
-	_drag_ratio = drag_ratio
+	_ui.reel_pressed = reel_pressed
+	_ui.reel_y = reel_y
+	_ui.pull_pressed = pull_pressed
+	_ui.drag_ratio = drag_ratio
 
 
 func _step_fight(delta: float) -> void:
@@ -569,49 +537,6 @@ func _lift_length_px() -> float:
 	return clampf(float(_fight_ctx["play"]["fish_length_cm"]) / 100.0 * FISH_DRAW_SCALE * px_per_m, 40.0, 230.0)
 
 
-func _draw_lifted_fish(tip: Vector2) -> void:
-	var pts := _lift_points()
-	var mouth: Vector2 = pts[0]
-	var length_px := _lift_length_px()
-	var dir := (pts[1] - mouth).normalized()
-	var side := Vector2(-dir.y, dir.x)
-	var flap := 0.18 if _lift_t > LIFT_RISE_S else 0.05
-	if _landing_now():
-		flap = 0.3 if _hud["kicking"] else 0.04
-	var left := PackedVector2Array()
-	var right := PackedVector2Array()
-	var spine := PackedVector2Array()
-	for i in FishBody.SEGMENTS:
-		var s := float(i) / float(FishBody.SEGMENTS - 1)
-		var sway := sin(_time * 11.0 - s * 4.0) * flap * length_px * s * s
-		spine.append(mouth + dir * s * length_px + side * sway)
-	for i in spine.size():
-		var s := float(i) / float(spine.size() - 1)
-		var a: Vector2 = spine[maxi(i - 1, 0)]
-		var b: Vector2 = spine[mini(i + 1, spine.size() - 1)]
-		var d := (b - a).normalized()
-		var n := Vector2(-d.y, d.x)
-		var w := FishBody.half_width(s) * length_px * 1.3
-		left.append(spine[i] + n * w)
-		right.append(spine[i] - n * w)
-	var tail: Vector2 = spine[spine.size() - 1]
-	var back := (tail - spine[spine.size() - 2]).normalized()
-	var across := Vector2(-back.y, back.x)
-	var fin := length_px * 0.16
-	var outline := PackedVector2Array()
-	outline.append_array(left)
-	outline.append(tail + back * fin + across * fin * 0.8)
-	outline.append(tail + back * fin * 0.35)
-	outline.append(tail + back * fin - across * fin * 0.8)
-	right.reverse()
-	outline.append_array(right)
-	if Geometry2D.triangulate_polygon(outline).size() > 0:
-		_overlay.draw_colored_polygon(outline, Color(0.62, 0.68, 0.72))
-	outline.append(outline[0])
-	_overlay.draw_polyline(outline, Color(0.12, 0.15, 0.18), 2.0, true)
-	# Dark back along the spine and an eye near the mouth.
-	_overlay.draw_polyline(spine.slice(0, spine.size() - 1), Color(0.2, 0.25, 0.3, 0.8), maxf(length_px * 0.05, 2.0), true)
-	_overlay.draw_circle(mouth + dir * length_px * 0.06 + side * length_px * 0.03, maxf(length_px * 0.018, 2.0), Color(0.05, 0.05, 0.05))
 
 
 func _fight_effects(delta: float) -> void:
@@ -778,7 +703,7 @@ func _step_rod_and_line(delta: float) -> void:
 	# Breathing: the whole rig rises and falls slowly (pillar 3: oscillation).
 	var breath := Vector2(sin(_time * 0.9) * 1.5, sin(_time * TAU * 0.25) * 3.0)
 	var butt := Vector2(size.x * 0.66, size.y * 0.95) + breath
-	var rest_tip := Vector2(size.x * (0.76 + 0.07 * (_steer if phase == Phase.FIGHT and _pull_pressed else 0.0)), size.y * 0.30)
+	var rest_tip := Vector2(size.x * (0.76 + 0.07 * (_ui.steer if phase == Phase.FIGHT and _ui.pull_pressed else 0.0)), size.y * 0.30)
 	var base := (rest_tip - butt).angle()
 	var length := butt.distance_to(rest_tip)
 	# The cast swing: back over the shoulder while charging, a forward snap on release.
@@ -912,7 +837,7 @@ func _process(delta: float) -> void:
 		for e: Dictionary in _neighbours.take_events():
 			_snd("splash", -24.0)   # a neighbour lifts a fish: a distant splash
 	_toast_s = maxf(_toast_s - delta, 0.0)
-	_toast_label.visible = _toast_s > 0.0
+	_ui.toast_label.visible = _toast_s > 0.0
 	_fx.step(delta)
 	_update_texts()
 	_overlay.queue_redraw()
@@ -920,77 +845,8 @@ func _process(delta: float) -> void:
 
 # ------------------------------------------------------------------ drawing
 
-func _draw_overlay() -> void:
-	var size := _overlay.size
-	for ring: Dictionary in _fx.rings:
-		var world: Vector2 = ring["world"]
-		if WaterView.view_depth(world) < 1.0:
-			continue
-		var r := SplashFx.ring_radius(ring)
-		var centre := WaterView.project(world, 0.0, size)
-		var aspect := size.x / maxf(size.y, 1.0)
-		var depth := WaterView.view_depth(world)
-		var rx := r / (depth * aspect * WaterView.FOV) * size.x
-		var ry := WaterView.CAM_HEIGHT * r / (depth * depth * WaterView.FOV) * size.y
-		_ellipse(centre, rx, ry, Color(1, 1, 1, 0.55 * SplashFx.ring_alpha(ring)))
-	var tip := _rod.tip()
-	match phase:
-		Phase.READY, Phase.CHARGE:
-			_draw_line(false)
-			_overlay.draw_circle(_end_pos, 4.0, Color(0.95, 0.75, 0.3))
-			if phase == Phase.CHARGE:
-				_draw_aim_marker(size)
-		Phase.FLIGHT:
-			_draw_line(false)
-			_overlay.draw_circle(_end_pos, 4.0, Color(0.95, 0.75, 0.3))
-		Phase.WAIT:
-			_draw_line(false)
-			_overlay.draw_circle(_end_pos, 3.0, Color(0.95, 0.75, 0.3))
-		Phase.FIGHT, Phase.RESULT:
-			if _lifted() or _landing_now():
-				_draw_line(false)
-				_draw_lifted_fish(tip)
-			elif not _hud.is_empty():
-				_draw_fight(size)
-		Phase.LIFT:
-			_draw_line(false)
-			_draw_lifted_fish(tip)
-	_gulls.draw(_overlay, size, float(_env.get("light", 0.6)))
-	for p: Dictionary in _fx.particles:
-		_overlay.draw_circle(p["pos"], p["size"], Color(0.92, 0.96, 1.0, 0.85 * float(p["life"]) / float(p["max_life"])))
-	_water.bridge.visible = _on_bridge()
-	if _on_bridge():
-		_draw_bridge(size)
-	_water.rig3d.pose(_rig, _rod.points(), size)
-	if phase == Phase.FIGHT or (phase == Phase.RESULT and not _hud.is_empty()):
-		_draw_tension_bar(size)
-	if phase == Phase.CHARGE:
-		_draw_power(size)
 
 
-func _draw_fight(size: Vector2) -> void:
-	var outcome: String = _hud["outcome"]
-	var line_gone := outcome == FightSim.OUTCOME_LINE_BREAK or outcome == FightSim.OUTCOME_LEADER_CUT
-	var pos := _fish_world()
-	if not line_gone and phase == Phase.FIGHT:
-		_draw_line(float(_hud["strain_ratio"]) > 0.0)
-	var jump_h := _jump_height()
-	# Which way it runs: a small arrow at the line's end, so side strain can be read.
-	if phase == Phase.FIGHT and _hud["fish_state"] == "run" and not line_gone:
-		var at := WaterView.project(pos, 0.0, size) + Vector2(0.0, -26.0)
-		var hd := float(_hud["heading"])
-		_overlay.draw_colored_polygon(PackedVector2Array([at + Vector2(hd * 16.0, 0.0), at + Vector2(-hd * 6.0, -9.0), at + Vector2(-hd * 6.0, 9.0)]), Color(1, 1, 1, 0.85))
-	if (_hud["fish_visible"] or jump_h > 0.0) and not line_gone and _fish:
-		var pts := PackedVector2Array()
-		for w: Vector2 in _fish.outline():
-			pts.append(WaterView.project(_fish.head + (w - _fish.head) * FISH_DRAW_SCALE, jump_h, size))
-		var shade := Color(0.05, 0.08, 0.1, 0.55 + 0.3 * float(_env.get("visibility", 0.5)))
-		if jump_h > 0.0:
-			shade = Color(0.62, 0.68, 0.72).darkened(0.5 * (1.0 - float(_env.get("light", 0.6))))
-		if Geometry2D.triangulate_polygon(pts).size() > 0:
-			_overlay.draw_colored_polygon(pts, shade)
-		else:
-			_overlay.draw_polyline(pts, shade, 3.0, true)
 
 
 ## True when the standing position is on a bridge deck (Galata): the
@@ -999,130 +855,24 @@ func _on_bridge() -> bool:
 	return not _ctx.is_empty() and "bridge piers" in (_ctx["position"].get("structure_tags", []) as Array)
 
 
-## The bridge itself is 3D (Bridge3D); the overlay adds the neighbours' lines
-## and the fish they lift.
-func _draw_bridge(size: Vector2) -> void:
-	var bridge := _water.bridge
-	bridge.pose(_neighbours.people, _time)
-	var tips := PackedVector2Array()
-	var lures := PackedVector2Array()
-	for i in _neighbours.people.size():
-		var p: Dictionary = _neighbours.people[i]
-		var t := bridge.tip_water(i)
-		tips.append(WaterView.project(Vector2(t.x, t.z), t.y, size))
-		lures.append(WaterView.project(bridge.lure_water(i, float(p["cast_m"]), float(p["side"])), 0.0, size))
-	_neighbours.draw_lines(_overlay, size, float(_env.get("light", 0.6)), tips, lures)
 
 
-## The line along the Verlet rope; warm-coloured and thicker while straining.
-## The line as a thin thread: thicker and clearer near the rod, finer and
-## fainter far out (distance), with the odd glint where the sun catches it.
-## Warm and thicker while it strains.
-func _draw_line(strained: bool) -> void:
-	if _rope == null:
-		return
-	var pts := _rope.points
-	var n := pts.size() - 1
-	var light := float(_env.get("light", 0.6))
-	var base := Color(1.0, 0.86, 0.58) if strained else Color(0.84, 0.91, 1.0).lerp(Color(1.0, 0.82, 0.62), 0.5 * (1.0 - light))
-	for i in n:
-		var t := float(i) / n
-		var w := lerpf(1.7, 0.6, pow(t, 0.7)) * (1.4 if strained else 1.0)
-		var col := base
-		col.a = lerpf(0.85, 0.35, pow(t, 0.9))
-		var ph := sin(_time * 2.7 + i * 1.9)
-		if ph > 0.92:
-			col = col.lerp(Color(1, 1, 1, 1), (ph - 0.92) / 0.08 * (0.35 + 0.65 * light))
-		_overlay.draw_line(pts[i], pts[i + 1], col, w, true)
-	# Where the line meets the water: a small ripple, so it reads as cutting the surface.
-	if _has_line and (phase == Phase.WAIT or phase == Phase.FIGHT):
-		_ring_at(_end_pos, 5.0 + 2.0 * sin(_time * 3.1), Color(1, 1, 1, 0.3))
 
 
-## While charging: where the lure would land at the current power and aim
-## (the skill error is not shown; it is added at release).
-func _draw_aim_marker(size: Vector2) -> void:
-	var c := CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], _ctx["position"], conditions, maxf(power_at(_charge_s), 0.15))
-	var d := maxf(float(c["cast_m"]), float(_k["WAIT_END_M"]) + 2.0)
-	var world := Vector2(-0.3 + tan(_aim) * d, NEAR_DRAW_M + d)
-	var centre := WaterView.project(world, 0.0, size)
-	var aspect := size.x / maxf(size.y, 1.0)
-	var rx := 0.8 / (world.y * aspect * WaterView.FOV) * size.x
-	var ry := WaterView.CAM_HEIGHT * 0.8 / (world.y * world.y * WaterView.FOV) * size.y
-	_ellipse(centre, maxf(rx, 6.0), maxf(ry, 2.0), Color(1, 1, 1, 0.6))
-	_ellipse(centre, maxf(rx, 6.0) * 0.4, maxf(ry, 2.0) * 0.4, Color(1, 1, 1, 0.45))
 
 
-func _ring_at(centre: Vector2, r: float, color: Color) -> void:
-	_overlay.draw_set_transform(centre, 0.0, Vector2(1.0, 0.3))
-	_overlay.draw_arc(Vector2.ZERO, r, 0.0, TAU, 14, color, 1.0, true)
-	_overlay.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
-func _ellipse(centre: Vector2, rx: float, ry: float, color: Color) -> void:
-	if rx < 0.5 or color.a <= 0.01:
-		return
-	var points := PackedVector2Array()
-	for i in 33:
-		var a := TAU * i / 32.0
-		points.append(centre + Vector2(cos(a) * rx, sin(a) * ry))
-	_overlay.draw_polyline(points, color, 1.2, true)
 
 
-## Cast power: a vertical gauge beside the Cast button; the marker swings up
-## and down and the top band is the best release.
-func _draw_power(size: Vector2) -> void:
-	var x := size.x - 290.0
-	var y0 := size.y - 300.0
-	var h := 260.0
-	var p := power_at(_charge_s)
-	_overlay.draw_rect(Rect2(x - 3, y0 - 3, 34, h + 6), Color(0, 0, 0, 0.55))
-	_overlay.draw_rect(Rect2(x, y0, 28, h), Color(0.12, 0.14, 0.18, 0.9))
-	_overlay.draw_rect(Rect2(x, y0, 28, h * 0.1), Color(0.55, 0.85, 0.6))
-	_overlay.draw_rect(Rect2(x, y0 + h * (1.0 - p), 28, h * p), Color(0.95, 0.8, 0.35, 0.8))
-	_overlay.draw_rect(Rect2(x - 8, y0 + h * (1.0 - p) - 3, 44, 6), Color(1, 1, 1))
 
 
-## Tension against the line's strength. Shape, not colour, tells the danger:
-## a tick at the strain threshold, a thick block at the break point, and the
-## numbers in kilograms (PRD F8, F18).
-func _draw_tension_bar(size: Vector2) -> void:
-	var w := minf(size.x * 0.46, 600.0)
-	var h := 40.0
-	var x := (size.x - w) * 0.5
-	var y := 26.0
-	var ratio: float = clampf(float(_hud["tension_ratio"]), 0.0, 1.0)
-	_overlay.draw_rect(Rect2(x - 3, y - 3, w + 6, h + 6), Color(0, 0, 0, 0.55))
-	_overlay.draw_rect(Rect2(x, y, w, h), Color(0.12, 0.14, 0.18, 0.9))
-	var fill := Color(0.55, 0.85, 0.6) if ratio < 0.6 else (Color(0.95, 0.8, 0.35) if ratio < 0.8 else Color(0.95, 0.4, 0.3))
-	_overlay.draw_rect(Rect2(x, y, w * ratio, h), fill)
-	var thr := float(_hud["strain_threshold_ratio"])
-	_overlay.draw_line(Vector2(x + w * thr, y - 8), Vector2(x + w * thr, y + h + 8), Color(1, 1, 1), 3.0)
-	_overlay.draw_rect(Rect2(x + w - 8, y - 8, 8, h + 16), Color(1, 1, 1))
-	var drag_ratio: float = clampf(float(_hud["drag_set_kg"]) / float(_hud["line_strength_kg"]), 0.0, 1.0)
-	var nx := x + w * drag_ratio
-	_overlay.draw_colored_polygon(PackedVector2Array([Vector2(nx, y + h + 3), Vector2(nx - 9, y + h + 18), Vector2(nx + 9, y + h + 18)]), Color(1, 1, 1))
-	var strain: float = clampf(float(_hud["strain_ratio"]), 0.0, 1.0)
-	if strain > 0.0:
-		_overlay.draw_rect(Rect2(x, y - 14, w * strain, 6), Color(1.0, 0.35, 0.25))
 
 
 # ------------------------------------------------------------------ input
 
-func _on_reel_input(event: InputEvent) -> void:
-	if event is InputEventScreenTouch or event is InputEventMouseButton:
-		_reel_pressed = event.pressed
-		_reel_y = event.position.y
-	elif event is InputEventScreenDrag or event is InputEventMouseMotion:
-		if _reel_pressed:
-			_reel_y = event.position.y
 
 
-func _on_drag_input(event: InputEvent) -> void:
-	var down: bool = (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed)
-	var moving: bool = (event is InputEventScreenDrag) or (event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))
-	if down or moving:
-		_drag_ratio = clampf(1.0 - event.position.y / maxf(_drag_slider.size.y, 1.0), 0.0, 1.0)
 
 
 func _on_main_down() -> void:
@@ -1150,178 +900,14 @@ func _on_main_up() -> void:
 
 # ------------------------------------------------------------------ UI
 
-func _build_hud() -> void:
-	var back := _button(tr("PROTO_BACK"), 22, func() -> void: get_tree().change_scene_to_file.call_deferred(MAIN_SCENE))
-	back.custom_minimum_size = Vector2(160, TOUCH_MIN)
-	back.position = Vector2(16, 16)
-	add_child(back)
-
-	_status_label = _label(20)
-	add_child(_status_label)
-	_status_label.position = Vector2(192, 20)
-	_status_label.size = Vector2(700, 30)
-
-	# Motion status: shown only where the browser can send motion. A tap on it
-	# (like any tap) lets iPhone Safari ask for permission.
-	_motion_chip = _button("", 16, func() -> void:
-		if _motion:
-			_motion.request_permission())
-	_motion_chip.anchor_left = 1.0
-	_motion_chip.anchor_right = 1.0
-	_motion_chip.offset_left = -360.0
-	_motion_chip.offset_right = -16.0
-	_motion_chip.offset_top = 100.0
-	_motion_chip.offset_bottom = 150.0
-	_motion_chip.custom_minimum_size = Vector2(0, 54)
-	_motion_chip.clip_text = true
-	_motion_chip.visible = false
-	add_child(_motion_chip)
-
-	_tension_label = _label(24)
-	add_child(_tension_label)
-	_top_center(_tension_label, 98.0, 32.0)
-	_tension_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_distance_label = _label(30)
-	add_child(_distance_label)
-	_top_center(_distance_label, 132.0, 40.0)
-	_distance_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_depth_label = _label(22)
-	add_child(_depth_label)
-	_top_center(_depth_label, 172.0, 30.0)
-	_depth_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_toast_label = _label(30)
-	add_child(_toast_label)
-	_top_center(_toast_label, 200.0, 44.0)
-	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_toast_label.visible = false
-	_hint_label = _label(22)
-	add_child(_hint_label)
-	_top_center(_hint_label, 176.0, 32.0)
-	_hint_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hint_label.text = tr("FISH_OVERMATCHED")
-	_hint_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.5))
-	_hint_label.visible = false
-
-	# Fight controls.
-	_reel_pad = _pad(tr("FIGHT_REEL"))
-	_place_bottom(_reel_pad, false, Vector2(260, 300), 16.0)
-	_reel_pad.gui_input.connect(_on_reel_input)
-	_drag_slider = _pad(tr("FIGHT_DRAG"))
-	_place_bottom(_drag_slider, true, Vector2(120, 300), 230.0)
-	_drag_slider.gui_input.connect(_on_drag_input)
-	_drag_label = _label(22)
-	_drag_slider.add_child(_drag_label)
-	_drag_label.set_anchors_preset(Control.PRESET_CENTER)
-	_drag_label.offset_left = -60.0
-	_drag_label.offset_right = 60.0
-	_drag_label.offset_top = -14.0
-	_drag_label.offset_bottom = 14.0
-	_drag_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_pull_button = _button(tr("FIGHT_PULL"), 28, Callable())
-	_place_bottom(_pull_button, true, Vector2(210, 210), 16.0)
-	_pull_button.button_down.connect(func() -> void: _pull_pressed = true)
-	_pull_button.button_up.connect(func() -> void: _pull_pressed = false)
-	# A second finger does not emulate a mouse, so listen to raw touch as well.
-	_pull_button.gui_input.connect(func(event: InputEvent) -> void:
-		if event is InputEventScreenTouch:
-			_pull_pressed = event.pressed
-		# Where the thumb sits sideways on the button is the side strain.
-		if event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouse:
-			_steer = FightController.steer_from_pad(event.position.x, _pull_button.size.x))
-	add_child(_pull_button)
-
-	# Cast / strike: the same right-corner button.
-	_main_button = _button(tr("FISH_CAST"), 32, Callable())
-	_place_bottom(_main_button, true, Vector2(220, 200), 16.0)
-	_main_button.button_down.connect(_on_main_down)
-	_main_button.button_up.connect(_on_main_up)
-	_main_button.gui_input.connect(_on_main_input)
-	add_child(_main_button)
-
-	# Wait controls on the left.
-	_reel_in_button = _button(tr("FISH_REEL_IN"), 24, reel_in)
-	_top_left(_reel_in_button, 128.0)
-	add_child(_reel_in_button)
-	_speed_button = _button(tr("FISH_SPEED"), 24, func() -> void: _speed_on = not _speed_on)
-	_speed_button.toggle_mode = true
-	_top_left(_speed_button, 232.0)
-	add_child(_speed_button)
-
-	# Ready controls on the left.
-	_rig_button = _button(tr("FISH_RIG"), 24, func() -> void:
-		_log_panel.visible = false
-		_rig_panel.visible = not _rig_panel.visible)
-	_top_left(_rig_button, 128.0)
-	add_child(_rig_button)
-	_log_button = _button(tr("FISH_LOG"), 24, func() -> void:
-		_rig_panel.visible = false
-		_log_panel.visible = not _log_panel.visible
-		_update_log())
-	_top_left(_log_button, 232.0)
-	add_child(_log_button)
 
 
-func _build_rig_panel() -> void:
-	var box := _panel(Vector2(560, 0))
-	_rig_panel = box.get_parent()
-	_rig_panel.visible = false
-	var title := _plain_label(tr("FISH_RIG"), 30)
-	box.add_child(title)
-	_rig_cycle = _button("", 24, func() -> void:
-		set_rig(FightSetup.TACKLES[(FightSetup.TACKLES.find(rig) + 1) % FightSetup.TACKLES.size()], position_id))
-	box.add_child(_rig_cycle)
-	_position_cycle = _button("", 24, func() -> void:
-		var positions: Array = _db["spot"][0]["positions"]
-		set_rig(rig, positions[(_position_index(position_id) + 1) % positions.size()]["id"]))
-	box.add_child(_position_cycle)
-	_rig_label = _plain_label("", 18)
-	_rig_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_rig_label)
-	box.add_child(_button(tr("FISH_CLOSE"), 24, func() -> void: _rig_panel.visible = false))
 
 
-func _build_result() -> void:
-	var box := _panel(Vector2(600, 0))
-	_result_panel = box.get_parent()
-	_result_panel.visible = false
-	_result_label = _plain_label("", 40)
-	box.add_child(_result_label)
-	_result_detail = _plain_label("", 22)
-	_result_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_result_detail)
-	_why_button = _button(tr("WHY_BUTTON"), 24, _show_why)
-	box.add_child(_why_button)
-	var again := _button(tr("FISH_CAST_AGAIN"), 28, func() -> void:
-		_hud = {}
-		_set_phase(Phase.READY))
-	again.custom_minimum_size = Vector2(0, 110)
-	box.add_child(again)
 
 
-func _build_log() -> void:
-	var box := _panel(Vector2(700, 0))
-	_log_panel = box.get_parent()
-	_log_panel.visible = false
-	box.add_child(_plain_label(tr("LOG_TITLE"), 30))
-	_log_text = _plain_label("", 20)
-	_log_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_log_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_log_text)
-	box.add_child(_button(tr("FISH_CLOSE"), 24, func() -> void: _log_panel.visible = false))
 
 
-func _build_why() -> void:
-	var box := _panel(Vector2(780, 0))
-	_why_panel = box.get_parent()
-	_why_panel.visible = false
-	box.add_child(_plain_label(tr("WHY_TITLE"), 30))
-	_why_text = _plain_label("", 18)
-	_why_text.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
-	_why_text.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_why_text)
-	box.add_child(_button(tr("FISH_CLOSE"), 24, func() -> void:
-		_why_panel.visible = false
-		_result_panel.visible = true))
 
 
 ## The catch attempt explained (PRD F10): the stage numbers behind the result
@@ -1343,72 +929,13 @@ func _show_why() -> void:
 			args.append(tr(a) if (typeof(a) == TYPE_STRING and (a as String).begins_with("WHY_")) else a)
 		texts.append(tr(l["key"]) % args if not args.is_empty() else tr(l["key"]))
 	texts.append(tr("DATA_NOTE"))
-	_why_text.text = "\n\n".join(texts)
-	_result_panel.visible = false
-	_why_panel.visible = true
+	_ui.why_text.text = "\n\n".join(texts)
+	_ui.result_panel.visible = false
+	_ui.why_panel.visible = true
 
 
-func _build_settings() -> void:
-	_settings_button = _button(tr("SET_BUTTON"), 20, func() -> void:
-		_rig_panel.visible = false
-		_log_panel.visible = false
-		_settings_panel.visible = not _settings_panel.visible)
-	_settings_button.anchor_left = 1.0
-	_settings_button.anchor_right = 1.0
-	_settings_button.offset_left = -296.0
-	_settings_button.offset_right = -156.0
-	_settings_button.offset_top = 16.0
-	_settings_button.offset_bottom = 88.0
-	_settings_button.custom_minimum_size = Vector2(0, 72)
-	add_child(_settings_button)
-	var box := _panel(Vector2(640, 0))
-	_settings_panel = box.get_parent()
-	_settings_panel.visible = false
-	box.add_child(_plain_label(tr("SET_TITLE"), 30))
-	box.add_child(_plain_label(tr("SET_VOLUME"), 20))
-	_vol_slider = _slider(0.0, 1.0, 0.05, func(v: float) -> void: _change_setting("volume", v))
-	box.add_child(_vol_slider)
-	box.add_child(_plain_label(tr("SET_MOTION"), 20))
-	_sens_slider = _slider(0.5, 2.0, 0.1, func(v: float) -> void: _change_setting("motion_sens", v))
-	box.add_child(_sens_slider)
-	# Live view of what the phone reports, so a wrong reading can be seen.
-	_mon_label = _plain_label("", 16)
-	_mon_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(_mon_label)
-	_mon_pull = ProgressBar.new()
-	_mon_pull.max_value = 1.0
-	_mon_pull.show_percentage = false
-	_mon_pull.custom_minimum_size = Vector2(0, 16)
-	box.add_child(_mon_pull)
-	_mon_jig = ProgressBar.new()
-	_mon_jig.max_value = 1.0
-	_mon_jig.show_percentage = false
-	_mon_jig.custom_minimum_size = Vector2(0, 16)
-	box.add_child(_mon_jig)
-	box.add_child(_button(tr("SET_RECENTER"), 20, func() -> void: _gesture.calibrated = false))
-	var help := _plain_label(tr("SET_MOTION_HELP"), 15)
-	help.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	box.add_child(help)
-	_flip_check = CheckButton.new()
-	_flip_check.text = tr("SET_INVERT")
-	_flip_check.add_theme_font_size_override("font_size", 22)
-	_flip_check.custom_minimum_size = Vector2(0, TOUCH_MIN * 0.8)
-	_flip_check.toggled.connect(func(on: bool) -> void:
-		_change_setting("motion_flip", on)
-		_store())
-	box.add_child(_flip_check)
-	box.add_child(_button(tr("FISH_CLOSE"), 24, func() -> void: _settings_panel.visible = false))
 
 
-func _slider(lo: float, hi: float, step: float, on_change: Callable) -> HSlider:
-	var s := HSlider.new()
-	s.min_value = lo
-	s.max_value = hi
-	s.step = step
-	s.custom_minimum_size = Vector2(0, 56)
-	s.value_changed.connect(on_change)
-	s.drag_ended.connect(func(_changed: bool) -> void: _store())
-	return s
 
 
 func _change_setting(key: String, value: Variant) -> void:
@@ -1424,12 +951,12 @@ func _apply_settings() -> void:
 	_gesture.sensitivity = float(st["motion_sens"])
 	if _motion:
 		_motion.set_flip(bool(st["motion_flip"]))
-	if _vol_slider and not is_equal_approx(_vol_slider.value, float(st["volume"])):
-		_vol_slider.set_value_no_signal(float(st["volume"]))
-	if _sens_slider and not is_equal_approx(_sens_slider.value, float(st["motion_sens"])):
-		_sens_slider.set_value_no_signal(float(st["motion_sens"]))
-	if _flip_check and _flip_check.button_pressed != bool(st["motion_flip"]):
-		_flip_check.set_pressed_no_signal(bool(st["motion_flip"]))
+	if _ui.vol_slider and not is_equal_approx(_ui.vol_slider.value, float(st["volume"])):
+		_ui.vol_slider.set_value_no_signal(float(st["volume"]))
+	if _ui.sens_slider and not is_equal_approx(_ui.sens_slider.value, float(st["motion_sens"])):
+		_ui.sens_slider.set_value_no_signal(float(st["motion_sens"]))
+	if _ui.flip_check and _ui.flip_check.button_pressed != bool(st["motion_flip"]):
+		_ui.flip_check.set_pressed_no_signal(bool(st["motion_flip"]))
 
 
 func _build_audio() -> void:
@@ -1467,14 +994,14 @@ func _store() -> void:
 
 
 func _toast(text: String, seconds: float) -> void:
-	_toast_label.text = text
+	_ui.toast_label.text = text
 	_toast_s = seconds
-	_toast_label.visible = true
+	_ui.toast_label.visible = true
 
 
 func _show_result() -> void:
 	var outcome: String = _result["outcome"]
-	_result_label.text = tr("FIGHT_%s" % outcome.to_upper())
+	_ui.result_label.text = tr("FIGHT_%s" % outcome.to_upper())
 	var lines: Array[String] = []
 	if outcome == FightSim.OUTCOME_LANDED:
 		lines.append(tr("FISH_CATCH") % [tr(_fight_ctx["species"]["name_key"]), _result["length_cm"], _result["weight_kg"]])
@@ -1489,9 +1016,9 @@ func _show_result() -> void:
 	if _hud["cap_applied"]:
 		lines.append(tr("FIGHT_CAP"))
 	lines.append(tr("DATA_NOTE"))
-	_result_detail.text = "\n".join(lines)
-	_reel_pressed = false
-	_pull_pressed = false
+	_ui.result_detail.text = "\n".join(lines)
+	_ui.reel_pressed = false
+	_ui.pull_pressed = false
 
 
 func _update_log() -> void:
@@ -1506,54 +1033,54 @@ func _update_log() -> void:
 			lines.append(tr("LOG_EMPTY_ROW") % species_name)
 	lines.append("")
 	lines.append(tr("DATA_NOTE"))
-	_log_text.text = "\n".join(lines)
+	_ui.log_text.text = "\n".join(lines)
 
 
 func _update_texts() -> void:
-	if _status_label == null or _ctx.is_empty():
+	if _ui.status_label == null or _ctx.is_empty():
 		return
 	_strike_flash = maxf(_strike_flash - get_process_delta_time(), 0.0)
-	_status_label.modulate.a = 0.0 if _settings_panel.visible else 1.0
-	if _mon_label and _settings_panel.visible:
+	_ui.status_label.modulate.a = 0.0 if _ui.settings_panel.visible else 1.0
+	if _ui.mon_label and _ui.settings_panel.visible:
 		if _motion and _motion.available:
-			_mon_label.text = tr("SET_MON_TEXT") % [rad_to_deg(float(_motion_state.get("tilt", 0.0))), _motion.pitch_rate, 100.0 * float(_motion_state.get("pull", 0.0)), 100.0 * float(_motion_state.get("jig", 0.0))]
+			_ui.mon_label.text = tr("SET_MON_TEXT") % [rad_to_deg(float(_motion_state.get("tilt", 0.0))), _motion.pitch_rate, 100.0 * float(_motion_state.get("pull", 0.0)), 100.0 * float(_motion_state.get("jig", 0.0))]
 			if _strike_flash > 0.0:
-				_mon_label.text += "  " + tr("SET_MON_STRIKE")
-			_mon_pull.value = float(_motion_state.get("pull", 0.0))
-			_mon_jig.value = float(_motion_state.get("jig", 0.0))
+				_ui.mon_label.text += "  " + tr("SET_MON_STRIKE")
+			_ui.mon_pull.value = float(_motion_state.get("pull", 0.0))
+			_ui.mon_jig.value = float(_motion_state.get("jig", 0.0))
 		else:
-			_mon_label.text = tr("SET_MON_NONE")
-	if _motion_chip and _motion:
+			_ui.mon_label.text = tr("SET_MON_NONE")
+	if _ui.motion_chip and _motion:
 		var st := _motion.status()
-		_motion_chip.visible = st != DeviceMotion.STATUS_NONE and phase != Phase.RESULT
-		_motion_chip.text = tr({DeviceMotion.STATUS_ON: "MOTION_ON", DeviceMotion.STATUS_TAP: "MOTION_TAP", DeviceMotion.STATUS_DENIED: "MOTION_DENIED"}.get(st, "MOTION_ON"))
+		_ui.motion_chip.visible = st != DeviceMotion.STATUS_NONE and phase != Phase.RESULT
+		_ui.motion_chip.text = tr({DeviceMotion.STATUS_ON: "MOTION_ON", DeviceMotion.STATUS_TAP: "MOTION_TAP", DeviceMotion.STATUS_DENIED: "MOTION_DENIED"}.get(st, "MOTION_ON"))
 	var pos: Dictionary = _ctx["position"]
-	_status_label.text = tr(_db["spot"][0]["name_key"]) + " · " + tr("FISH_STATUS") % [tr("SLOT_%s" % String(conditions["slot"]).to_upper()), conditions["wind_dir"], int(conditions["wind_ms"]), tr(pos["name_key"])]
-	_rig_cycle.text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_ctx["rod"]["name_key"])]
-	_position_cycle.text = "%s: %s" % [tr("FISH_POSITION"), tr(pos["name_key"])]
+	_ui.status_label.text = tr(_db["spot"][0]["name_key"]) + " · " + tr("FISH_STATUS") % [tr("SLOT_%s" % String(conditions["slot"]).to_upper()), conditions["wind_dir"], int(conditions["wind_ms"]), tr(pos["name_key"])]
+	_ui.rig_cycle.text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_ctx["rod"]["name_key"])]
+	_ui.position_cycle.text = "%s: %s" % [tr("FISH_POSITION"), tr(pos["name_key"])]
 	var cast_check := CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], pos, conditions, 1.0)
-	_rig_label.text = tr("FISH_RIG_INFO") % [tr(_ctx["lure"]["name_key"]), float(cast_check["cast_max_m"])]
+	_ui.rig_label.text = tr("FISH_RIG_INFO") % [tr(_ctx["lure"]["name_key"]), float(cast_check["cast_max_m"])]
 	if cast_check["lure_out_of_range"]:
-		_rig_label.text += "\n" + tr("RIG_WARN_RANGE")
-	_speed_button.button_pressed = _speed_on
+		_ui.rig_label.text += "\n" + tr("RIG_WARN_RANGE")
+	_ui.speed_button.button_pressed = _speed_on
 	match phase:
 		Phase.WAIT:
-			_distance_label.text = "%.1f m" % float(_wait_state.get("lure_distance_m", 0.0))
-			_depth_label.text = tr("WAIT_HUD") % [float(_wait_state.get("depth_m", 0.0)), float(_wait_state.get("water_depth_m", 0.0)), float(_wait_state.get("retrieve_ms", 0.0))]
+			_ui.distance_label.text = "%.1f m" % float(_wait_state.get("lure_distance_m", 0.0))
+			_ui.depth_label.text = tr("WAIT_HUD") % [float(_wait_state.get("depth_m", 0.0)), float(_wait_state.get("water_depth_m", 0.0)), float(_wait_state.get("retrieve_ms", 0.0))]
 		Phase.FIGHT:
-			_tension_label.text = "%.2f / %.2f kg" % [_hud["tension_kg"], _hud["line_strength_kg"]]
+			_ui.tension_label.text = "%.2f / %.2f kg" % [_hud["tension_kg"], _hud["line_strength_kg"]]
 			var landing: bool = _hud["in_landing"]
-			_drag_slider.visible = not landing
-			_pull_button.visible = not landing
-			_hint_label.visible = landing or _hud["jumping"] or _controller.overmatched
+			_ui.drag_slider.visible = not landing
+			_ui.pull_button.visible = not landing
+			_ui.hint_label.visible = landing or _hud["jumping"] or _controller.overmatched
 			if landing:
-				_hint_label.text = tr("LAND_WAIT") if _hud["kicking"] else tr("LAND_REEL")
+				_ui.hint_label.text = tr("LAND_WAIT") if _hud["kicking"] else tr("LAND_REEL")
 			elif _hud["jumping"]:
-				_hint_label.text = tr("FIGHT_JUMP_HINT")
+				_ui.hint_label.text = tr("FIGHT_JUMP_HINT")
 			else:
-				_hint_label.text = tr("FISH_OVERMATCHED")
-			_distance_label.text = "%.1f m" % _hud["distance_m"]
-			_drag_label.text = "%.1f kg" % _hud["drag_set_kg"]
+				_ui.hint_label.text = tr("FISH_OVERMATCHED")
+			_ui.distance_label.text = "%.1f m" % _hud["distance_m"]
+			_ui.drag_label.text = "%.1f kg" % _hud["drag_set_kg"]
 
 
 ## Text for the debug menu's "why" view (PRD F10): the last stage numbers.
@@ -1599,98 +1126,3 @@ func _position_index(id: String) -> int:
 		if positions[i]["id"] == id:
 			return i
 	return -1
-
-
-# ------------------------------------------------------------------ widgets
-
-func _place_bottom(control: Control, right_side: bool, control_size: Vector2, dx: float) -> void:
-	var edge := 1.0 if right_side else 0.0
-	control.anchor_left = edge
-	control.anchor_right = edge
-	control.anchor_top = 1.0
-	control.anchor_bottom = 1.0
-	if right_side:
-		control.offset_right = -dx
-		control.offset_left = -dx - control_size.x
-	else:
-		control.offset_left = dx
-		control.offset_right = dx + control_size.x
-	control.offset_bottom = -16.0
-	control.offset_top = -16.0 - control_size.y
-
-
-## A 200 px wide, 96 px high button at the top left, y px down.
-func _top_left(control: Control, y: float) -> void:
-	control.anchor_left = 0.0
-	control.anchor_right = 0.0
-	control.anchor_top = 0.0
-	control.anchor_bottom = 0.0
-	control.offset_left = 16.0
-	control.offset_right = 216.0
-	control.offset_top = y
-	control.offset_bottom = y + TOUCH_MIN
-
-
-func _top_center(control: Control, y: float, height: float) -> void:
-	control.anchor_left = 0.5
-	control.anchor_right = 0.5
-	control.offset_left = -300.0
-	control.offset_right = 300.0
-	control.offset_top = y
-	control.offset_bottom = y + height
-
-
-func _pad(caption: String) -> Control:
-	var panel := Panel.new()
-	panel.mouse_filter = Control.MOUSE_FILTER_STOP
-	var label := _label(24)
-	label.text = caption
-	label.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	label.offset_top = 8.0
-	label.offset_bottom = 38.0
-	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	panel.add_child(label)
-	panel.self_modulate = Color(1, 1, 1, 0.45)
-	add_child(panel)
-	return panel
-
-
-## A centred panel; returns its VBox (the panel is the VBox's parent).
-func _panel(min_size: Vector2) -> VBoxContainer:
-	var panel := PanelContainer.new()
-	panel.set_anchors_preset(Control.PRESET_CENTER)
-	panel.grow_horizontal = Control.GROW_DIRECTION_BOTH
-	panel.grow_vertical = Control.GROW_DIRECTION_BOTH
-	add_child(panel)
-	var box := VBoxContainer.new()
-	box.custom_minimum_size = min_size
-	box.add_theme_constant_override("separation", 12)
-	panel.add_child(box)
-	return box
-
-
-func _button(text: String, font_size: int, on_press: Callable) -> Button:
-	var b := Button.new()
-	b.text = text
-	b.add_theme_font_size_override("font_size", font_size)
-	b.custom_minimum_size = Vector2(0, TOUCH_MIN * 0.8)
-	if on_press.is_valid():
-		b.pressed.connect(on_press)
-	return b
-
-
-func _plain_label(text: String, font_size: int) -> Label:
-	var l := Label.new()
-	l.text = text
-	l.add_theme_font_size_override("font_size", font_size)
-	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	return l
-
-
-func _label(font_size: int) -> Label:
-	var label := Label.new()
-	label.add_theme_font_size_override("font_size", font_size)
-	label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
-	label.add_theme_constant_override("outline_size", 6)
-	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	return label
