@@ -168,3 +168,6 @@ DBG_STAGE,Place,Mekân,Lugar
 DBG_STAGE_DATA,from data,veriden,de los datos
 DBG_STAGE_BRIDGE,bridge,köprü,puente
 DBG_STAGE_QUAY,quay,rıhtım,muelle
+DBG_SHADOWS,Shadows,Gölgeler,Sombras
+DBG_GLOW,Glow,Parlama,Resplandor
+DBG_LAMPS,Lamp lights,Lamba ışıkları,Luces de farolas

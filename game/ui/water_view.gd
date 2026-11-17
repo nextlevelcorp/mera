@@ -12,6 +12,9 @@ const SKY_SHADER := preload("res://ui/sea/sky.gdshader")
 const GULL_SHADER := preload("res://ui/sea/gull.gdshader")
 const MAX_RINGS := 12
 const MAX_SHADOWS := 8
+## The sun's shadow map is 1024 square: the shadows cover 40 m, and the
+## engine's default of 4096 is a large depth texture to fill on a phone.
+const SHADOW_ATLAS := 1024
 const CAM_NEAR := 0.05
 const HORIZON := 0.38
 const CAM_HEIGHT := 2.2
@@ -47,6 +50,11 @@ const SUN_YAW := 0.49
 static var view_yaw := 0.0
 
 var detail := true
+## Quality switches the debug menu flips to find what costs frame time on a
+## phone (owner measurement 2026-11-17: worst 1% fell from 47 to 34 fps).
+var shadows := true
+var glow := true
+var lamp_lights := true
 var camera: Camera3D
 var stage: Stage3D
 var rig3d: Rig3D
@@ -121,6 +129,7 @@ func _init() -> void:
 	camera.add_child(rig3d)
 	fish_hand = Fish3D.new()
 	camera.add_child(fish_hand)
+	RenderingServer.directional_shadow_atlas_set_size(SHADOW_ATLAS, false)
 	_sun.shadow_enabled = true
 	_sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	_sun.directional_shadow_max_distance = 40.0
@@ -161,8 +170,7 @@ func set_conditions(slot: String, chop: float, visibility: float, light: float) 
 	_sun.light_color = sun[1]
 	_sun.light_energy = (0.25 + 1.6 * light) * (0.25 if slot == "night" else 1.0)
 	_light = light
-	if stage:
-		stage.set_light(light)
+	_apply_quality()
 	if sun_dir.y > 0.0:
 		_sun.look_at_from_position(Vector3.ZERO, -sun_dir, Vector3.UP if absf(sun_dir.x) + absf(sun_dir.z) > 0.01 else Vector3.FORWARD)
 
@@ -178,6 +186,7 @@ func set_stage(kind: String) -> void:
 	stage = Stage3D.make(kind)
 	if stage != null:
 		_root.add_child(stage)
+		stage.lights_enabled = lamp_lights
 		stage.set_light(_light)
 
 
@@ -228,11 +237,35 @@ func set_view_yaw(yaw: float) -> void:
 	camera.rotation.y = yaw
 
 
+func set_shadows(on: bool) -> void:
+	shadows = on
+	_apply_quality()
+
+
+func set_glow(on: bool) -> void:
+	glow = on
+	_apply_quality()
+
+
+func set_lamp_lights(on: bool) -> void:
+	lamp_lights = on
+	_apply_quality()
+
+
+## Shadows only when the sun is up enough to show them: at night the moon's
+## shadows are invisible and not worth a pass.
+func _apply_quality() -> void:
+	_env.glow_enabled = glow
+	_sun.shadow_enabled = shadows and _light > 0.3
+	if stage:
+		stage.lights_enabled = lamp_lights
+		stage.set_light(_light)
+
+
 ## Debug menu: switch the extra water detail off and on to measure its cost.
 func set_detail(on: bool) -> void:
 	detail = on
 	_sea.set_shader_parameter("detail", 1.0 if on else 0.0)
-	_env.glow_enabled = on
 
 
 func shader_parameter(name_id: String) -> Variant:

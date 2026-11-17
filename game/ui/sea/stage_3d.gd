@@ -39,6 +39,8 @@ var _tips: Array[Vector3] = [] # local tip of each rod
 var _lamp_mat: StandardMaterial3D
 var _lights: Array[OmniLight3D] = []
 var _steel: StandardMaterial3D
+## The debug menu can switch the lamps' real lights off to measure their cost.
+var lights_enabled := true
 
 
 ## The stage of a kind (KINDS), or null for "" or an unknown kind.
@@ -73,7 +75,7 @@ func set_light(light: float) -> void:
 	_lamp_mat.emission_energy_multiplier = 0.05 + 6.0 * dark
 	for l: OmniLight3D in _lights:
 		l.light_energy = 5.0 * dark
-		l.visible = dark > 0.02
+		l.visible = lights_enabled and dark > 0.02
 
 
 ## Poses the neighbours' rods from NeighborAnglers.people.
