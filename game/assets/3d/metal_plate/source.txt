@@ -1,0 +1,6 @@
+metal_plate: bridge rail and lamp standards
+Source: https://polyhaven.com/a/metal_plate
+Files: https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/metal_plate/
+Licence: CC0 1.0 per Poly Haven's licence policy (https://polyhaven.com/license). The asset page itself
+was not readable from the build environment (HTTP 403) when this was fetched: verify it there.
+Processing: 1k JPG diffuse, OpenGL normal and roughness maps, resized to 512 px, lossy WebP quality 82.

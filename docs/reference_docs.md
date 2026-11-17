@@ -13,6 +13,20 @@
 
 Add every data, art, audio and tool source here with its licence before it is used (spec 5.4, 7.8).
 
+## CC0 PBR textures in `game/assets/3d/` (2026-11-17, roadmap R7)
+Owner approved CC0 assets (2026-11-15) and added the hosts `polyhaven.com`, `dl.polyhaven.org` and `ambientcg.com` to the network list (2026-11-17). Fetched with `scripts/fetch_polyhaven_textures.py` from `dl.polyhaven.org` (the only host of those that served files to the build environment). Each set is the 1k JPG diffuse, OpenGL normal and roughness map, shrunk to 512 px and stored as lossy WebP; each folder has a `source.txt`. **Licence evidence:** Poly Haven's licence policy (https://polyhaven.com/license) puts every asset under CC0 1.0; the build environment could not open `polyhaven.com` (HTTP 403) so the individual asset pages were not read. Before a release, open each page below and confirm CC0.
+
+| Asset (folder) | Source page | Author | Licence | Used for |
+| --- | --- | --- | --- | --- |
+| `concrete_pavement` | https://polyhaven.com/a/concrete_pavement | per asset page (not read) | CC0 1.0 per Poly Haven policy | Bridge deck paving and coping strip |
+| `metal_plate` | https://polyhaven.com/a/metal_plate | per asset page (not read) | CC0 1.0 per Poly Haven policy | Bridge rail and lamp standards (tinted dark green) |
+| `cobblestone_floor_04` | https://polyhaven.com/a/cobblestone_floor_04 | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay apron |
+| `rough_concrete` | https://polyhaven.com/a/rough_concrete | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay coping |
+| `rusty_metal_02` | https://polyhaven.com/a/rusty_metal_02 | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay bollards |
+| `stone_wall_04` | https://polyhaven.com/a/stone_wall_04 | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay wall below the waterline |
+
+ambientCG: its API answers (200) from the build environment but its files redirect to `acg-download.struffelproductions.com`, which the network list does not include (HTTP 403), so no ambientCG file is used. A first-person hand model: no CC0 source is reachable (Poly Haven has none; model sites are not on the list); see `project_status.md`.
+
 ## 3D sea textures (2026-11-15)
 No image, model or HDRI asset is used yet: the ripple normal map, the cloud and noise map and the sea mesh are generated in code (`game/ui/sea/sea_maps.gd`, Godot's `FastNoiseLite`, MIT as part of the engine). The owner approved CC0 assets for the later 3D steps (2026-11-15); each one gets a row here when it is committed.
 

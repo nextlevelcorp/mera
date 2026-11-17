@@ -153,3 +153,35 @@ func test_the_quality_switches_reach_the_scene() -> void:
 	w.set_lamp_lights(true)
 	assert_true(w.stage._lights[0].visible, "and back")
 	w.free()
+
+
+func test_the_cc0_texture_sets_are_complete_and_credited() -> void:
+	var dir := DirAccess.open("res://assets/3d")
+	assert_true(dir != null, "the assets folder exists")
+	var sets := 0
+	for name_id: String in dir.get_directories():
+		sets += 1
+		for map in ["diff", "nor", "rough"]:
+			var tex := load("res://assets/3d/%s/%s.webp" % [name_id, map]) as Texture2D
+			assert_true(tex != null, "%s/%s imports as a texture" % [name_id, map])
+			if tex != null:
+				assert_eq(tex.get_width(), 512, "%s/%s is 512 px (phone memory)" % [name_id, map])
+		var source := FileAccess.get_file_as_string("res://assets/3d/%s/source.txt" % name_id)
+		assert_true(source.contains("CC0") and source.contains("polyhaven.com/a/%s" % name_id), "%s names its source and licence" % name_id)
+	assert_eq(sets, 6, "the six sets of roadmap R7")
+
+
+func test_the_stages_use_the_textures_and_fall_back_without_them() -> void:
+	var steel := Stage3D.pbr_material("metal_plate", Color.WHITE, 1.0, 0.5)
+	assert_true(steel.albedo_texture != null and steel.normal_texture != null and steel.roughness_texture != null, "a full PBR set")
+	assert_true(steel.uv1_triplanar and steel.uv1_world_triplanar, "projected from three sides in world space")
+	assert_near(steel.uv1_scale.x, 1.0, "one repeat per metre", 1e-6)
+	assert_near(Stage3D.pbr_material("concrete_pavement", Color.WHITE, 3.0).uv1_scale.x, 1.0 / 3.0, "a larger tile, a smaller scale", 1e-6)
+	var missing := Stage3D.pbr_material("no_such_asset", Color(0.5, 0.5, 0.5), 1.0)
+	assert_true(missing.albedo_texture == null, "a missing set falls back to a plain material, not an error")
+	var bridge := Bridge3D.new()
+	assert_true(bridge._steel.albedo_texture != null, "the bridge's steel is textured")
+	var quay := Quay3D.new()
+	assert_true(quay._steel.albedo_texture != null, "and so are the quay's lamps")
+	bridge.free()
+	quay.free()

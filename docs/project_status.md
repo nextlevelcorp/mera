@@ -20,12 +20,14 @@
 | World NPCs, neighbours in the world, world clock, more areas | Not started | `architecture.md` 4 |
 | Float and bait fishing | Designed outline; scope open (D2) | `architecture.md` 5 |
 | Native iOS and Android | Not started | `architecture.md` 9 |
-| CC0 models and PBR textures | Blocked on network hosts (D3) | `architecture.md` 6 |
+| CC0 PBR textures on the stages (six sets) | Implemented (R7, 2026-11-17) | `reference_docs.md` |
+| CC0 first-person hand model | Blocked: no reachable CC0 source | `reference_docs.md` |
 
 ## Owner decisions (2026-11-17)
 - **D1 top-down art**: start with grey boxes (R4) and choose the style on a real phone screen.
 - **D2 scope order**: economy and progression first, then quests; float and bait fishing is the first presentation after the MVP; crafting last.
-- **D3 CC0 assets**: `polyhaven.com`, `dl.polyhaven.org` and `ambientcg.com` are on the environment's network allowlist; CC0 PBR textures and a CC0 hand model may be fetched (R7). Each asset still gets its row in `reference_docs.md` before it is committed.
+- **D3 CC0 assets**: `polyhaven.com`, `dl.polyhaven.org` and `ambientcg.com` are on the environment's network allowlist. In practice only `dl.polyhaven.org` serves files (polyhaven.com answers 403; ambientCG files redirect to `acg-download.struffelproductions.com`). Each asset still gets its row in `reference_docs.md` before it is committed.
+- **D5 hand model (new, owner)**: a first-person hand model needs a CC0 source the build environment can reach. Options: (a) add the host of a CC0 model site to the allowlist (for example `quaternius.com` or `kenney.nl`, whose licences are CC0, files not checked) and I look for a rigged hand or glove; (b) you upload a `.glb` hand model and its licence; (c) keep the procedural hands. Recommendation: (b) or (a), because procedural hands are what looks least real.
 - **D4 tester round**: run the 0.1 round now on the fishing slice (5 anglers, 5 non-anglers, `prd.md` 9). The owner recruits; a stop date comes first.
 - **Phone frame rate** (owner, bridge view with shadows, lamps and the 3D rig): 58 fps average, worst 1% 47 over 60 s. The average holds; the worst 1% fell from 58 to 47, so the next visual steps (R6, R7) start by measuring what the shadow pass costs.
 
@@ -43,7 +45,7 @@
 | R4 | World prototype: one grey-box area (the Galata Bridge from above), player, camera, markers, hand-over both ways **(done 2026-11-17 in the browser; the phone check and the frame rate are the owner's)** | R2, D1 for final art | Walk, fish, come back | Played on the phone; frame rate measured | `scenes/world/`, `architecture.md` 4 |
 | R5 | Stage interface; `Bridge3D` as the first stage, a quay as the second **(done 2026-11-17)** | R1 | Positions choose their stage | Two stages render; tests for tips and lures per stage | `ui/sea/` |
 | R6 | 3D fish, rings in the sea shader, 3D gulls **(done 2026-11-17 except the line, which stays 2D on purpose)** | R1 | No fish, ring or gull drawing on the overlay | Rings hidden by the rail; fps measured before and after (the owner's) | `ui/sea/`, `ui/fx/` |
-| R7 | Asset pipeline; CC0 hand model and PBR textures for deck, rail, cork | D3 | Realistic hands and close surfaces | Licence rows written; download size and fps reported | `game/assets/`, `reference_docs.md` |
+| R7 | Asset pipeline; PBR textures for deck, rail, quay **(done 2026-11-17)**; CC0 hand model **(Blocked)** | D3 | Realistic close surfaces; hands pending | Licence rows written; download size and fps reported | `game/assets/`, `reference_docs.md` |
 | R8 | Economy: fishmonger and tackle shop | R3, R4 | Sell fish, buy tackle | Price tests; played | `sim/economy.gd`, `data/shop.json` |
 | R9 | Progression: experience, skills, spot unlocks | R3 | Skills change cast and strike numbers | Tests show the attribute path; why view names the skill | `sim/progress.gd` |
 | R10 | NPCs with schedules; world anglers become the 3D neighbours | R4 | People in the world | Seeded schedule tests; played | `scenes/world/actors/`, `data/npcs.json` |
@@ -76,6 +78,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R7 textures (2026-11-17): 173 tests pass with no script errors in the output; both web exports build (pack 1.7 MB, up from 0.5); played in the debug web build (software GL, 1280x720): the bridge deck shows paving slabs and the rail steel texture by day and dusk, and the quay shows cobbles and coping; no console errors. Not measured: the phone frame rate and memory with six texture sets (about 12 MB decoded, an estimate), the quay at night.
 - R6 follow-up (2026-11-17): 171 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): the new debug switches are in the menu and the wedge of sky beside the bridge view is gone at day; no console errors. **Owner measurement needed, in a fight, 60 s each:** debug fps with everything on, then with Shadows off, then Glow off, then Lamp lights off, then all three off. Last figures: 57 average, 34 worst 1% (R6 merged); 58 and 47 before R6; the shadow map size and the night shadow skip are untested changes aimed at this.
 - R6 scene effects (2026-11-17): 170 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720) with forced horse mackerel and bluefish fights: thin rings and the lure's ripple on the water, a dark fish shadow under the ring near the shore, gulls as small flapping shapes over the sea, a silvery bluefish hanging from the line while the landing kicks and in the lift; no console errors. Not seen: a jump in the air (the unit tests cover the mesh; a jump is short and the captures missed it), the effects at night and at 844x390. **Owner check:** the debug fps line in a fight, before (47 worst 1% at the last measure) and after; the sea shader now loops over up to 12 rings and 8 shadow blobs per pixel only while they exist.
 - R5 stages (2026-11-17): 164 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): the debug "Place" button switched the Galata position from the bridge to the quay, the quay showed a stone edge without a rail and a neighbour at the edge, the view turned to the water on the cast and the wait ran as before; no console errors. Not checked: the quay at night and at 844x390, and its frame rate on the phone. The quay is a generic shape; no real position uses it yet.

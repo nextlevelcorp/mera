@@ -13,6 +13,10 @@ extends Node3D
 ## water; the origin is on the deck at the edge.
 
 const KINDS: Array[String] = ["bridge", "quay"]
+## CC0 PBR texture sets (diff, nor, rough as 512 px WebP) from Poly Haven,
+## one folder each, with their source in source.txt and a row in
+## docs/reference_docs.md. Fetched by scripts/fetch_polyhaven_textures.py.
+const ASSET_DIR := "res://assets/3d"
 
 const ALONG := Vector2(-1.0, 0.0)           ## along the edge, to the angler's left (water metres: x right, z out)
 const NORMAL := Vector2(0.0, 1.0)           ## towards the water
@@ -57,7 +61,7 @@ func build() -> void:
 	var f3 := Vector3(ALONG.x, 0.0, -ALONG.y)
 	var n3 := Vector3(NORMAL.x, 0.0, -NORMAL.y)
 	transform = Transform3D(Basis(f3, Vector3.UP, n3), Vector3(0.0, DECK_Y, -edge_z))
-	_steel = _material(Color(0.13, 0.19, 0.19), 0.55, 0.42, 2.5)
+	_steel = pbr_material("metal_plate", Color(0.3, 0.42, 0.4), 1.0, 0.55)
 	_build_surface()
 	_build_lamps(_steel)
 	for i in people_at.size():
@@ -267,6 +271,33 @@ func _mesh(m: Mesh, mat: Material) -> MeshInstance3D:
 	mi.material_override = mat
 	add_child(mi)
 	return mi
+
+
+## A lit material from a texture set in ASSET_DIR (albedo times tint, normal,
+## roughness), projected on the shape from three sides in world space so it
+## needs no UVs; tile_m is how many metres one repeat covers. Without the
+## files the grain material stands in, so a missing asset shows as plain
+## shapes and not as an error.
+static func pbr_material(asset: String, tint: Color, tile_m: float, metallic: float = 0.0) -> StandardMaterial3D:
+	var dir := "%s/%s" % [ASSET_DIR, asset]
+	if not ResourceLoader.exists("%s/diff.webp" % dir):
+		var fallback := StandardMaterial3D.new()
+		fallback.albedo_color = tint * 0.6
+		fallback.roughness = 0.8
+		return fallback
+	var mat := StandardMaterial3D.new()
+	mat.albedo_texture = load("%s/diff.webp" % dir)
+	mat.albedo_color = tint
+	mat.normal_enabled = true
+	mat.normal_texture = load("%s/nor.webp" % dir)
+	mat.roughness = 1.0
+	mat.roughness_texture = load("%s/rough.webp" % dir)
+	mat.metallic = metallic
+	mat.uv1_triplanar = true
+	mat.uv1_world_triplanar = true
+	mat.uv1_scale = Vector3.ONE / tile_m
+	mat.texture_filter = BaseMaterial3D.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS_ANISOTROPIC
+	return mat
 
 
 ## A lit material with the shared grain as wear; tile sets how fine it is (0: none).
