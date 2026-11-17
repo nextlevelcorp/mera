@@ -160,3 +160,7 @@ WHY_OUT_JUMP,The fish jumped and threw the hook while the rod was pulled hard (h
 FISH_SHOAL_HINT,Gulls mark a feeding shoal: cast near them,Martılar beslenen sürüyü gösterir: yakınına at,Las gaviotas marcan un banco: lanza cerca
 TRIP_SUMMARY,"Last trip: %d casts, %d fish landed","Son sefer: %d atış, %d balık karaya alındı","Última salida: %d lances, %d peces en tierra"
 BAG_SUMMARY,In the bag: %d fish,Çantada: %d balık,En la bolsa: %d peces
+MAIN_WALK,Walk the bridge (prototype),Köprüde yürü (prototip),Caminar por el puente (prototipo)
+WORLD_FISH_HERE,Fish here,Burada balık tut,Pescar aquí
+WORLD_WALK_HINT,Walk to a fishing spot on the rail,Korkuluktaki bir olta yerine yürü,Camina a un puesto de pesca en la barandilla
+DBG_NEXT_MARKER,Next fishing spot,Sonraki olta yeri,Siguiente puesto de pesca

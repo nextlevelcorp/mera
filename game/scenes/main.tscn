@@ -61,6 +61,11 @@ custom_minimum_size = Vector2(0, 80)
 layout_mode = 2
 theme_override_font_sizes/font_size = 26
 
+[node name="Walk" type="Button" parent="Column"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+
 [node name="DeviceGuard" type="CanvasLayer" parent="."]
 layer = 100
 script = ExtResource("2_guard")

@@ -471,6 +471,9 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 | Fixtures (illustrative design fills, not real data) | `game/tests/fixtures/` | Excluded from the export |
 | Real species and spot data | `game/data/species.json`, `spots.json`, `tackle/` | Galata Bridge and three species written 2026-11-13; sources per field in each record's provenance and in `reference_docs.md`; tackle and angler are design fills |
 
+## 13. World area data (Implemented 2026-11-17, design fill)
+`game/data/areas/<id>.json`, read by `WorldArea` (not by the schema validator; the checks are in `WorldArea.load_area` and `test_world.gd`): `id` (equals the file name), `spot_id` (an existing spot), `design_fill: true` or a `source`, `size_m`, `px_per_m`, `start_m`, `rects` (`kind` plaza, walkway, road or water; `rect` as x, y, width, height in metres; `blocked`), `rails`, `lamps_m` (drawing only) and `markers` (`position_id` of the spot, `pos_m`, `facing`). Every marker must stand on open ground and its facing must match the spot's position (test). Walking constants, all design fills in `constants.json`: `WALK_M_PER_S` (3.0), `WALK_RADIUS_M` (0.35), `INTERACT_M` (2.2, how near a marker the action button shows). A real survey of the bridge decks would replace the compressed layout; until then the file says it is not to scale.
+
 ## 12. Player data and save (v2 Implemented 2026-11-17)
 The only home of the save format. Code: `game/sim/save_game.gd` (pure: defaults, validation, migration, records), `game/save/save_file.gd` (writes `user://save.json` through a temporary file; IndexedDB on the web). Nothing leaves the device; anything else needs the owner's approval (`security.md`).
 
