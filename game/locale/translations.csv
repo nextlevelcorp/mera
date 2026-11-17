@@ -164,3 +164,7 @@ MAIN_WALK,Walk the bridge (prototype),Köprüde yürü (prototip),Caminar por el
 WORLD_FISH_HERE,Fish here,Burada balık tut,Pescar aquí
 WORLD_WALK_HINT,Walk to a fishing spot on the rail,Korkuluktaki bir olta yerine yürü,Camina a un puesto de pesca en la barandilla
 DBG_NEXT_MARKER,Next fishing spot,Sonraki olta yeri,Siguiente puesto de pesca
+DBG_STAGE,Place,Mekân,Lugar
+DBG_STAGE_DATA,from data,veriden,de los datos
+DBG_STAGE_BRIDGE,bridge,köprü,puente
+DBG_STAGE_QUAY,quay,rıhtım,muelle

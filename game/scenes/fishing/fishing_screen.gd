@@ -106,6 +106,8 @@ var _gulls: GullFlock
 var _boil_clock := 0.0
 var _shoal_hint_shown := false
 var _view_yaw := WaterView.BRIDGE_YAW
+## Debug menu: a stage kind that replaces the position's own ("" = the position's).
+var stage_override := ""
 var _last_contact_s := -99.0   ## when a fish last touched the lure (_time)
 var _strike_flash := 0.0
 var _motion: DeviceMotion
@@ -217,6 +219,7 @@ func _step_shoals(delta: float) -> void:
 ## Recomputes the environment from the conditions and updates the water.
 func apply_conditions() -> void:
 	_ctx = _base_context(_db["spot"][0]["species"][0]["species_id"])
+	apply_stage()
 	_env = CatchModel.environment(_k, _ctx["spot"], _ctx["position"], conditions)
 	# Neighbours get bites about as often as a bite comes here and now.
 	_neighbours.set_pace(WaitSim.new(_ctx, _k, _db["species"], 15.0, 1).median_wait_s() * 1.3)
@@ -826,10 +829,10 @@ func _process(delta: float) -> void:
 	_step_rod_and_line(delta)
 	# Getting ready the angler looks along the bridge; to cast and fish they
 	# turn to the water (owner, 2026-11-16).
-	_view_yaw = lerpf(_view_yaw, WaterView.BRIDGE_YAW if phase == Phase.READY else 0.0, minf(delta * 5.0, 1.0))
+	_view_yaw = lerpf(_view_yaw, _ready_yaw() if phase == Phase.READY else 0.0, minf(delta * 5.0, 1.0))
 	_water.set_view_yaw(_view_yaw)
 	_step_shoals(delta)
-	if _on_bridge():
+	if _has_stage():
 		_neighbours.update(delta)
 		for e: Dictionary in _neighbours.take_events():
 			_snd("splash", -24.0)   # a neighbour lifts a fish: a distant splash
@@ -846,10 +849,28 @@ func _process(delta: float) -> void:
 
 
 
-## True when the standing position is on a bridge deck (Galata): the
-## foreground then shows the rail and the other anglers along it.
-func _on_bridge() -> bool:
-	return not _ctx.is_empty() and "bridge piers" in (_ctx["position"].get("structure_tags", []) as Array)
+## The kind of standing place scene for this position: the debug override,
+## else the position's own `stage` in the data, else none (the sea only).
+func stage_kind() -> String:
+	if stage_override != "":
+		return stage_override
+	return String(_ctx["position"].get("stage", "")) if not _ctx.is_empty() else ""
+
+
+func _has_stage() -> bool:
+	return _water != null and _water.stage != null
+
+
+## How far the view turns along the place's edge while getting ready.
+func _ready_yaw() -> float:
+	return _water.stage.ready_yaw if _has_stage() else 0.0
+
+
+## Puts the scene of the current position's stage in the 3D view.
+func apply_stage() -> void:
+	if _water:
+		_water.set_stage(stage_kind())
+
 
 
 

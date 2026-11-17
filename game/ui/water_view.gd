@@ -45,12 +45,14 @@ static var view_yaw := 0.0
 
 var detail := true
 var camera: Camera3D
-var bridge: Bridge3D
+var stage: Stage3D
 var rig3d: Rig3D
 var _sea: ShaderMaterial
 var _sky: ShaderMaterial
 var _env: Environment
 var _sun: DirectionalLight3D
+var _root: Node3D
+var _light := 1.0
 
 
 func _init() -> void:
@@ -94,8 +96,7 @@ func _init() -> void:
 	root.add_child(mesh)
 	camera = make_camera()
 	root.add_child(camera)
-	bridge = Bridge3D.new()
-	root.add_child(bridge)
+	_root = root
 	rig3d = Rig3D.new()
 	camera.add_child(rig3d)
 	_sun.shadow_enabled = true
@@ -137,9 +138,25 @@ func set_conditions(slot: String, chop: float, visibility: float, light: float) 
 	_env.tonemap_exposure = EXPOSURE[slot]
 	_sun.light_color = sun[1]
 	_sun.light_energy = (0.25 + 1.6 * light) * (0.25 if slot == "night" else 1.0)
-	bridge.set_light(light)
+	_light = light
+	if stage:
+		stage.set_light(light)
 	if sun_dir.y > 0.0:
 		_sun.look_at_from_position(Vector3.ZERO, -sun_dir, Vector3.UP if absf(sun_dir.x) + absf(sun_dir.z) > 0.01 else Vector3.FORWARD)
+
+
+## Puts the standing place of a kind (Stage3D.KINDS) in the scene; "" or an
+## unknown kind leaves only the sea.
+func set_stage(kind: String) -> void:
+	if stage != null and stage.kind == kind:
+		return
+	if stage != null:
+		stage.queue_free()
+		stage = null
+	stage = Stage3D.make(kind)
+	if stage != null:
+		_root.add_child(stage)
+		stage.set_light(_light)
 
 
 func set_view_yaw(yaw: float) -> void:

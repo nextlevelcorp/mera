@@ -54,9 +54,8 @@ func _draw() -> void:
 	scr._gulls.draw(self, size, float(scr._env.get("light", 0.6)))
 	for p: Dictionary in scr._fx.particles:
 		draw_circle(p["pos"], p["size"], Color(0.92, 0.96, 1.0, 0.85 * float(p["life"]) / float(p["max_life"])))
-	scr._water.bridge.visible = scr._on_bridge()
-	if scr._on_bridge():
-		_draw_bridge(size)
+	if scr._water.stage != null:
+		_draw_stage(size)
 	scr._water.rig3d.pose(scr._rig, scr._rod.points(), size)
 	if scr.phase == FishingScreen.Phase.FIGHT or (scr.phase == FishingScreen.Phase.RESULT and not scr._hud.is_empty()):
 		_draw_tension_bar(size)
@@ -89,10 +88,10 @@ func _draw_fight(size: Vector2) -> void:
 			draw_polyline(pts, shade, 3.0, true)
 
 
-## The bridge itself is 3D (Bridge3D); the overlay adds the neighbours' lines
+## The standing place is 3D (Stage3D); the overlay adds the neighbours' lines
 ## and the fish they lift.
-func _draw_bridge(size: Vector2) -> void:
-	var bridge := scr._water.bridge
+func _draw_stage(size: Vector2) -> void:
+	var bridge := scr._water.stage
 	bridge.pose(scr._neighbours.people, scr._time)
 	var tips := PackedVector2Array()
 	var lures := PackedVector2Array()

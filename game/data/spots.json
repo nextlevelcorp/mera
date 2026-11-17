@@ -116,6 +116,7 @@
     },
     "current": 10,
     "landing_difficulty": 0.6,
+    "stage": "bridge",
     "provenance": {
      "default": {
       "design_fill": true
@@ -160,6 +161,7 @@
     },
     "current": 9,
     "landing_difficulty": 0.6,
+    "stage": "bridge",
     "provenance": {
      "default": {
       "design_fill": true
@@ -203,6 +205,7 @@
     },
     "current": 4,
     "landing_difficulty": 0.6,
+    "stage": "bridge",
     "provenance": {
      "default": {
       "design_fill": true
@@ -246,6 +249,7 @@
     },
     "current": 3,
     "landing_difficulty": 0.6,
+    "stage": "bridge",
     "provenance": {
      "default": {
       "design_fill": true

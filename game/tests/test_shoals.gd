@@ -120,3 +120,47 @@ func test_the_view_turns_between_the_bridge_and_the_water() -> void:
 	assert_true(WaterView.project(Vector2(0, 20), 0.0, size).x > 1280.0, "and the casting water is off to the right")
 	assert_true(WaterView.view_depth(Vector2(-10, 0)) > 0.0 and WaterView.view_depth(Vector2(10, 0)) < 0.0, "left is ahead, right is behind")
 	WaterView.view_yaw = 0.0
+
+
+func test_every_stage_kind_builds_with_neighbours_over_its_edge() -> void:
+	for kind in Stage3D.KINDS:
+		var stage := Stage3D.make(kind)
+		assert_true(stage != null and stage.kind == kind, "%s: made by kind" % kind)
+		var n := NeighborAnglers.new(5)
+		stage.pose(n.people, 1.0)
+		assert_true(stage.ready_yaw > 0.3 and stage.ready_yaw < 1.3, "%s: a sensible look along the edge" % kind)
+		for i in n.people.size():
+			var tip := stage.tip_water(i)
+			assert_true(tip.y > 1.8 and tip.y < 6.0, "%s: rod tip %d is above the deck (%.2f m)" % [kind, i, tip.y])
+			assert_true(tip.z > stage.edge_z, "%s: and out over the water" % kind)
+			assert_true(tip.x < -2.0, "%s: to the angler's left" % kind)
+			var lure := stage.lure_water(i, 12.0, 0.0)
+			assert_true(lure.y > stage.edge_z + 6.0, "%s: its lure is in the water" % kind)
+		stage.set_light(0.0)
+		stage.set_light(1.0)
+		stage.free()
+	assert_true(Stage3D.make("") == null and Stage3D.make("marina") == null, "no stage for nothing or an unknown kind")
+
+
+func test_positions_name_a_known_stage_and_galata_is_a_bridge() -> void:
+	for spot: Dictionary in Db.database()["spot"]:
+		for p: Dictionary in spot["positions"]:
+			assert_true(not p.has("stage") or String(p["stage"]) in Stage3D.KINDS, "%s: a known stage" % p["id"])
+			if spot["id"] == "galata_bridge":
+				assert_eq(p.get("stage", ""), "bridge", "%s is on the bridge" % p["id"])
+
+
+func test_the_fishing_screen_takes_its_stage_from_the_position_and_the_debug_override() -> void:
+	var screen: FishingScreen = load("res://scenes/fishing/fishing_screen.tscn").instantiate()
+	screen.setup("")
+	assert_eq(screen.stage_kind(), "bridge", "the position's stage")
+	assert_true(screen._has_stage() and screen._water.stage.kind == "bridge", "the bridge is in the scene")
+	assert_near(screen._ready_yaw(), Bridge3D.new().ready_yaw, "and the view looks along it")
+	screen.stage_override = "quay"
+	screen.apply_stage()
+	assert_true(screen._water.stage.kind == "quay", "the debug override swaps in the quay")
+	assert_true(screen._ready_yaw() != Bridge3D.new().ready_yaw, "with its own look along the edge")
+	screen.stage_override = ""
+	screen.apply_stage()
+	assert_eq(screen._water.stage.kind, "bridge", "and back to the position's")
+	screen.free()
