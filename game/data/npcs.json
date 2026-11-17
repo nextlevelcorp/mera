@@ -1,0 +1,148 @@
+{
+ "design_fill": true,
+ "note": "Fictional people: names, looks and daily habits are game-design fills, not real anglers. Schedules are by time-of-day slot.",
+ "npcs": [
+  {
+   "id": "hasan",
+   "name_key": "NPC_HASAN",
+   "role": "angler",
+   "jacket": [
+    0.1,
+    0.14,
+    0.24
+   ],
+   "schedule": {
+    "dawn": {
+     "activity": "fish",
+     "position_id": "karakoy_east",
+     "offset_m": -3.0
+    },
+    "day": {
+     "activity": "fish",
+     "position_id": "karakoy_east",
+     "offset_m": -3.0
+    },
+    "evening": {
+     "activity": "fish",
+     "position_id": "karakoy_east",
+     "offset_m": -3.0
+    },
+    "night": {
+     "activity": "away"
+    }
+   }
+  },
+  {
+   "id": "nuri",
+   "name_key": "NPC_NURI",
+   "role": "angler",
+   "jacket": [
+    0.3,
+    0.19,
+    0.13
+   ],
+   "schedule": {
+    "dawn": {
+     "activity": "away"
+    },
+    "day": {
+     "activity": "fish",
+     "position_id": "karakoy_east",
+     "offset_m": 3.5
+    },
+    "evening": {
+     "activity": "fish",
+     "position_id": "karakoy_east",
+     "offset_m": 3.5
+    },
+    "night": {
+     "activity": "fish",
+     "position_id": "eminonu_east",
+     "offset_m": -2.5
+    }
+   }
+  },
+  {
+   "id": "cemil",
+   "name_key": "NPC_CEMIL",
+   "role": "angler",
+   "jacket": [
+    0.2,
+    0.24,
+    0.16
+   ],
+   "schedule": {
+    "dawn": {
+     "activity": "fish",
+     "position_id": "karakoy_west",
+     "offset_m": 2.5
+    },
+    "day": {
+     "activity": "away"
+    },
+    "evening": {
+     "activity": "fish",
+     "position_id": "karakoy_east",
+     "offset_m": 6.5
+    },
+    "night": {
+     "activity": "fish",
+     "position_id": "eminonu_east",
+     "offset_m": 3.0
+    }
+   }
+  },
+  {
+   "id": "ayten",
+   "name_key": "NPC_AYTEN",
+   "role": "angler",
+   "jacket": [
+    0.45,
+    0.12,
+    0.18
+   ],
+   "schedule": {
+    "dawn": {
+     "activity": "fish",
+     "position_id": "eminonu_west",
+     "offset_m": -3.0
+    },
+    "day": {
+     "activity": "fish",
+     "position_id": "eminonu_west",
+     "offset_m": -3.0
+    },
+    "evening": {
+     "activity": "fish",
+     "position_id": "karakoy_east",
+     "offset_m": -6.0
+    },
+    "night": {
+     "activity": "away"
+    }
+   }
+  },
+  {
+   "id": "recep",
+   "name_key": "NPC_RECEP",
+   "role": "vendor",
+   "jacket": [
+    0.85,
+    0.85,
+    0.82
+   ],
+   "shop": "fishmonger"
+  },
+  {
+   "id": "selma",
+   "name_key": "NPC_SELMA",
+   "role": "vendor",
+   "jacket": [
+    0.16,
+    0.3,
+    0.45
+   ],
+   "shop": "tackle"
+  }
+ ]
+}

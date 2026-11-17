@@ -13,6 +13,9 @@
 
 Add every data, art, audio and tool source here with its licence before it is used (spec 5.4, 7.8).
 
+## People in the world (2026-11-17)
+`game/data/npcs.json`: the anglers and vendors are fictional; names, looks and routines are design fills, not real people.
+
 ## Shop prices (2026-11-17)
 `game/data/shop.json`: every price is a game-design fill (labelled in the file); no source for real fish or tackle prices was used.
 

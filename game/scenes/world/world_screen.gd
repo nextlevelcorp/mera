@@ -65,7 +65,16 @@ func setup() -> void:
 	if conditions.is_empty():
 		conditions = SessionConditions.from_clock(Time.get_datetime_dict_from_system())
 	_build_art()
+	var roster := NpcRoster.load_roster(area)
+	if not roster["ok"]:
+		push_error("NPC roster failed to load: %s" % str(roster["errors"]))
+	for n: Dictionary in roster["npcs"]:
+		var rec := n.duplicate()
+		var c: Array = n["jacket"]
+		rec["jacket_color"] = Color(c[0], c[1], c[2])
+		_npcs.append(rec)
 	apply_conditions()
+	settle_npcs()
 	_cam = Camera2D.new()
 	_cam.limit_left = 0
 	_cam.limit_top = 0
@@ -86,6 +95,43 @@ func setup() -> void:
 ## sun's relief on the textures and the lamps after dark.
 func apply_conditions() -> void:
 	_apply_art_light()
+	_replan_npcs()
+
+
+## Everyone gets their plan for the slot; someone who was away arrives from
+## the plaza nearest their spot and walks there.
+func _replan_npcs() -> void:
+	var slot := String(conditions.get("slot", "day"))
+	for n: Dictionary in _npcs:
+		var p := NpcRoster.plan(n, slot, area)
+		var st: Dictionary = _npc_state.get(n["id"], {"present": false, "phase": 0.0})
+		if p["present"]:
+			if not st["present"]:
+				st["pos"] = NpcRoster.entry_point(p["pos"], area) if n["role"] == "angler" else p["pos"]
+			st["target"] = p["pos"]
+			st["fishing"] = p["fishing"]
+			st["facing"] = p["facing"]
+			st["position_id"] = p["position_id"]
+		st["present"] = p["present"]
+		_npc_state[n["id"]] = st
+
+
+## Puts everyone where their plan says, at once (opening the world).
+func settle_npcs() -> void:
+	for id: String in _npc_state:
+		var st: Dictionary = _npc_state[id]
+		if st["present"]:
+			st["pos"] = st["target"]
+
+
+## The anglers fishing on the same side of the bridge as that marker, arrived.
+func neighbours_of(marker: Dictionary) -> Array:
+	var out: Array = []
+	for n: Dictionary in _npcs:
+		var st: Dictionary = _npc_state[n["id"]]
+		if st["present"] and st["fishing"] and st["facing"] == marker["facing"] and (st["pos"] as Vector2).distance_to(st["target"]) < 0.3:
+			out.append({"id": n["id"], "jacket": n["jacket_color"]})
+	return out
 
 
 ## While the fishing view is open the world sleeps: hidden, not processed,
@@ -123,7 +169,7 @@ func fishing_request() -> Dictionary:
 	var m := walk.nearest_marker()
 	if m.is_empty():
 		return {}
-	return Game.fishing_request(area.spot_id, m["position_id"], "", conditions.duplicate())
+	return Game.fishing_request(area.spot_id, m["position_id"], "", conditions.duplicate(), neighbours_of(m))
 
 
 func fish() -> void:
@@ -147,6 +193,13 @@ func _process(delta: float) -> void:
 	_time += delta
 	var keys := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
 	walk.step(delta, keys if keys.length() > 0.0 else _stick)
+	var speed := float(Db.constants()["NPC_WALK_M_PER_S"])
+	for n: Dictionary in _npcs:
+		var st: Dictionary = _npc_state[n["id"]]
+		if st["present"]:
+			var before: Vector2 = st["pos"]
+			st["pos"] = NpcRoster.walk_step(before, st["target"], delta, area, speed)
+			st["phase"] = float(st["phase"]) + before.distance_to(st["pos"]) * 4.5
 	var moved := walk.pos.distance_to(_last_pos)
 	_walk_phase += moved * 4.5
 	_last_pos = walk.pos
@@ -200,6 +253,8 @@ var _sun2d: DirectionalLight2D
 var _lamps: Array[PointLight2D] = []
 var _water_mats: Array[ShaderMaterial] = []
 var _walk_phase := 0.0
+var _npcs: Array = []           ## NpcRoster records, with jacket_color
+var _npc_state := {}             ## id -> {pos, target, present, fishing, facing, position_id, phase}
 var _last_pos := Vector2.ZERO
 
 
@@ -333,6 +388,19 @@ func _draw() -> void:
 			draw_circle(m["pos"] * s, 0.45 * s, Color(c, 0.3))
 		var out := Vector2(1.0 if m["facing"] == "E" else -1.0, 0.0)
 		draw_line(m["pos"] * s + out * 0.7 * s, m["pos"] * s + out * 1.5 * s, c, 3.0, true)
+	for n: Dictionary in _npcs:
+		var st: Dictionary = _npc_state[n["id"]]
+		if not st["present"]:
+			continue
+		var arrived: bool = (st["pos"] as Vector2).distance_to(st["target"]) < 0.3
+		var face := Vector2.DOWN
+		var rod := Vector2.ZERO
+		if arrived and st["fishing"]:
+			face = Vector2(1.0 if st["facing"] == "E" else -1.0, 0.0)
+			rod = (face + Vector2(0.0, 0.15)).normalized()
+		elif not arrived:
+			face = ((st["target"] as Vector2) - (st["pos"] as Vector2)).normalized()
+		_draw_person(st["pos"], face, n["jacket_color"], float(st["phase"]), rod, s, shadow, sun_off)
 	_draw_player(s, shadow, sun_off)
 
 
@@ -371,31 +439,34 @@ func _draw_kiosk(sh: Dictionary, s: float, shadow: Color, sun_off: Vector2) -> v
 	draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 8.0, 16, Color(1, 1, 1))
 
 
-## The angler from above: a shadow, legs that step, a jacket, a cap and the
-## rod carried forward over the shoulder.
+## The player from above (see _draw_person).
 func _draw_player(px_per_m: float, shadow: Color, sun_off: Vector2) -> void:
-	# Drawn twice life size, like the fish in the fishing view: a person seen
-	# from above at true scale is a speck on a phone.
-	var s := px_per_m * PLAYER_DRAW_SCALE
-	var p := walk.pos * px_per_m
 	var f := walk.facing.normalized() if walk.facing.length() > 0.01 else Vector2.DOWN
+	_draw_person(walk.pos, f, Color(0.18, 0.27, 0.42), _walk_phase, (f * 0.85 + Vector2(-f.y, f.x) * 0.25).normalized(), px_per_m, shadow, sun_off)
+
+
+## Someone from above, drawn twice life size like the fish in the fishing
+## view (a person at true scale is a speck on a phone): a shadow, feet that
+## step with phase, a jacket, a cap whose brim points forward and a rod along
+## rod_dir (none when it is zero).
+func _draw_person(pos_m: Vector2, f: Vector2, jacket: Color, phase: float, rod_dir: Vector2, px_per_m: float, shadow: Color, sun_off: Vector2) -> void:
+	var s := px_per_m * PLAYER_DRAW_SCALE
+	var p := pos_m * px_per_m
 	var side := Vector2(-f.y, f.x)
-	var stride := sin(_walk_phase) * 0.18 * s
+	var stride := sin(phase) * 0.18 * s
 	draw_set_transform(p + sun_off * 0.6, f.angle(), Vector2(1.0, 0.7))
 	draw_circle(Vector2.ZERO, 0.42 * s, shadow)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	for sgn in [-1.0, 1.0]:
 		draw_circle(p + side * sgn * 0.12 * s + f * stride * sgn, 0.1 * s, Color(0.1, 0.11, 0.14))
-	# Rod: from the right hand, forward and out.
 	var hand := p + side * 0.28 * s + f * 0.1 * s
-	draw_line(hand, hand + (f * 0.85 + side * 0.25).normalized() * 2.6 * s, Color(0.08, 0.08, 0.09), 0.05 * s, true)
-	# Shoulders and jacket.
+	if rod_dir != Vector2.ZERO:
+		draw_line(hand, hand + rod_dir * 2.6 * s, Color(0.08, 0.08, 0.09), 0.05 * s, true)
 	draw_set_transform(p, side.angle(), Vector2(1.0, 0.62))
-	draw_circle(Vector2.ZERO, 0.32 * s, Color(0.13, 0.2, 0.32))
-	draw_circle(Vector2(-0.04, -0.04) * s, 0.24 * s, Color(0.18, 0.27, 0.42))
+	draw_circle(Vector2.ZERO, 0.32 * s, jacket.darkened(0.3))
+	draw_circle(Vector2(-0.04, -0.04) * s, 0.24 * s, jacket)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	draw_circle(hand, 0.08 * s, Color(0.8, 0.6, 0.48))
-	# Head with a cap whose brim points forward.
 	draw_circle(p + f * 0.04 * s, 0.15 * s, Color(0.75, 0.55, 0.43))
 	draw_circle(p - f * 0.02 * s, 0.14 * s, Color(0.12, 0.12, 0.13))
 	draw_set_transform(p + f * 0.14 * s, f.angle(), Vector2(1.0, 1.6))
