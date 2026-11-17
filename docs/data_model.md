@@ -471,22 +471,21 @@ Wind in 0.1 comes from the date seed and a design-fill distribution per spot, so
 | Fixtures (illustrative design fills, not real data) | `game/tests/fixtures/` | Excluded from the export |
 | Real species and spot data | `game/data/species.json`, `spots.json`, `tackle/` | Galata Bridge and three species written 2026-11-13; sources per field in each record's provenance and in `reference_docs.md`; tackle and angler are design fills |
 
-## 12. Player data and save (v1 Implemented, v2 Designed 2026-11-16)
+## 12. Player data and save (v2 Implemented 2026-11-17)
 The only home of the save format. Code: `game/sim/save_game.gd` (pure: defaults, validation, migration, records), `game/save/save_file.gd` (writes `user://save.json` through a temporary file; IndexedDB on the web). Nothing leaves the device; anything else needs the owner's approval (`security.md`).
 
-**v1 (today)**: `{version: 1, log: {species_id: {count, best_length_cm, best_weight_kg, first_seen}}, last_rig, last_position, settings: {volume, motion_sens, motion_flip}}`. Version 0 (a bare log) migrates; an unreadable or newer file resets with a notice.
+**v1 (until 2026-11-17)**: `{version: 1, log: {species_id: {count, best_length_cm, best_weight_kg, first_seen}}, last_rig, last_position, settings: {volume, motion_sens, motion_flip}}`. Version 0 (a bare log) migrates; an unreadable or newer file resets with a notice.
 
-**v2 (designed for the world and the systems of `architecture.md` 7)**:
+**v2 (Implemented 2026-11-17)**:
 ```
-{ version: 2, revision: int, updated_at: "YYYY-MM-DDTHH:MM:SSZ",
-  settings: {...v1...},
-  log: {...v1...},
-  inventory: { capacity: int, items: [{ id: String, count: int, meta: {} }] },   # fish carry {length_cm, weight_kg, caught_at}
-  equipped: { rod, reel, line, leader, lure },                                   # replaces last_rig
-  money: int,
-  angler: { xp: int, skills: { cast: int, strike: int, fight: int, knots: int } },
-  quests: { active: [{ id, progress: {} }], done: [id] },
-  world: { area_id, x, y, day: int, minute: int, last_position },
-  stats: { casts: int, fish_landed: int, fish_lost: int, play_s: int } }
+{ version: 2, revision: int,                       # revision rises on every write
+  settings: {...v1...}, log: {...v1...}, last_rig, last_position,
+  inventory: { items: [{ id: String, count: int, meta: {} }] },   # a fish is "fish:<species_id>" with meta {length_cm, weight_kg, caught_at}
+  money: int,                                      # 0 until the economy (R8)
+  stats: { casts, fish_landed, fish_lost, lures_lost, play_s } }
 ```
-Rules: every id must exist in the static data (validated at load, unknown ids dropped with a notice, never a crash); migration is a chain of small functions `_migrate_1_to_2` and so on, each with a test that feeds an old file; `revision` rises on every write; the previous file is kept as `save.bak` before a migrated file is first written. Writers: only `Profile` (architecture 3). A cloud backend, if the owner ever approves one, is a second implementation of the same two calls (`load_save`, `store`) and resolves conflicts by the higher `revision`, merging `log` by best values; no account data is designed here.
+`SaveGame.apply_result(save, result, date)` moves a `FishingResult` into it; `Inventory` holds the bag's rules. Version 1 files migrate (the bag empty, money 0, counters 0) and the old file is copied to `save.json.bak` first.
+
+**Later slices (Designed; each arrives with its system as its own version and migration)**: `updated_at`; `inventory.capacity`; `equipped {rod, reel, line, leader, lure}` replacing `last_rig`; `angler {xp, skills {cast, strike, fight, knots}}` (R9); `quests {active [{id, progress}], done [id]}` (R11); `world {area_id, x, y, day, minute}` (R4).
+
+Rules: every id must exist in the static data (validated at load, unknown ids dropped with a notice, never a crash); migration is one function with a step per version, each with a test that feeds an old file. Not yet enforced: the check of ids against the static data (R8, when items come from `items.json`). Writers: only `Profile` (architecture 3). A cloud backend, if the owner ever approves one, is a second implementation of the same two calls (`load_save`, `store`) and resolves conflicts by the higher `revision`, merging `log` by best values; no account data is designed here.

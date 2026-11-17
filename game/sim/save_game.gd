@@ -2,11 +2,12 @@ class_name SaveGame
 extends RefCounted
 ## The player's save as plain data (PRD F9, F14; owner decision 15): the catch
 ## log (first-seen date, count, biggest length and weight per species), the
-## last rig and the last standing position. No XP, money or unlocks in 0.1.
+## last rig and the last standing position, and from version 2 the bag, money
+## and session counters (data_model.md 12).
 ## Pure functions: reading and writing the file is SaveFile's job, so the
 ## migration and record rules are unit-tested headless.
 
-const VERSION := 1
+const VERSION := 2
 
 const STATUS_NEW := "new"
 const STATUS_OK := "ok"
@@ -15,7 +16,15 @@ const STATUS_RESET := "reset"
 
 
 static func fresh() -> Dictionary:
-	return {"version": VERSION, "log": {}, "last_rig": "lrf", "last_position": "", "settings": default_settings()}
+	return {
+		"version": VERSION, "revision": 0, "log": {}, "last_rig": "lrf", "last_position": "", "settings": default_settings(),
+		"inventory": {"items": []}, "money": 0, "stats": default_stats(),
+	}
+
+
+## Counters over every session (version 2).
+static func default_stats() -> Dictionary:
+	return {"casts": 0, "fish_landed": 0, "fish_lost": 0, "lures_lost": 0, "play_s": 0}
 
 
 ## Player settings kept on the phone only. volume 0..1 (sound), motion_sens
@@ -77,6 +86,14 @@ static func is_valid(d: Dictionary) -> bool:
 		return false
 	if typeof(d.get("last_rig")) != TYPE_STRING or typeof(d.get("last_position")) != TYPE_STRING:
 		return false
+	var inv: Variant = d.get("inventory")
+	if typeof(inv) != TYPE_DICTIONARY or typeof((inv as Dictionary).get("items")) != TYPE_ARRAY:
+		return false
+	for it: Variant in inv["items"]:
+		if typeof(it) != TYPE_DICTIONARY or typeof((it as Dictionary).get("id")) != TYPE_STRING or not (it as Dictionary).has("count") or typeof((it as Dictionary).get("meta")) != TYPE_DICTIONARY:
+			return false
+	if typeof(d.get("money")) not in [TYPE_INT, TYPE_FLOAT] or typeof(d.get("stats")) != TYPE_DICTIONARY:
+		return false
 	for id: Variant in d["log"]:
 		var e: Variant = d["log"][id]
 		if typeof(e) != TYPE_DICTIONARY:
@@ -122,5 +139,28 @@ static func _migrate(d: Dictionary, from_version: int) -> Dictionary:
 			out["last_rig"] = d["last_rig"]
 		if typeof(d.get("last_position")) == TYPE_STRING:
 			out["last_position"] = d["last_position"]
+	# Version 1 to 2 (2026-11-17): the bag, money and session counters.
+	if not out.has("inventory"):
+		out["inventory"] = {"items": []}
+	if not out.has("money"):
+		out["money"] = 0
+	if not out.has("stats"):
+		out["stats"] = default_stats()
+	if not out.has("revision"):
+		out["revision"] = 0
 	out["version"] = VERSION
 	return out
+
+
+## Moves a finished session (Game's FishingResult) into the save: kept fish
+## go to the bag, the counters rise. date: "YYYY-MM-DD" from the caller.
+static func apply_result(save: Dictionary, result: Dictionary, date: String) -> void:
+	var stats: Dictionary = save["stats"]
+	for c: Dictionary in result["catches"]:
+		if c.get("kept", false):
+			Inventory.add_fish(save, c["species_id"], float(c["length_cm"]), float(c["weight_kg"]), date)
+	stats["casts"] = int(stats["casts"]) + int(result["casts"])
+	stats["fish_landed"] = int(stats["fish_landed"]) + (result["catches"] as Array).size()
+	stats["lures_lost"] = int(stats["lures_lost"]) + (result["lost"] as Array).size()
+	stats["fish_lost"] = int(stats["fish_lost"]) + (result["events"] as Array).size() - (result["catches"] as Array).size()
+	stats["play_s"] = int(stats["play_s"]) + int(float(result["time_s"]))

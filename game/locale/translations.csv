@@ -159,3 +159,4 @@ LAND_WAIT,Kicking: wait!,Çırpınıyor: bekle!,Colea: ¡espera!
 WHY_OUT_JUMP,The fish jumped and threw the hook while the rod was pulled hard (hook hold %.0f%%). Ease the rod when it jumps and keep reeling.,"Balık sıçradı ve kamış sert çekilirken kancayı attı (kanca tutma %.0f%%). Sıçrayınca kamışı gevşet, sarmaya devam et.",El pez saltó y soltó el anzuelo con la caña tirando fuerte (sujeción %.0f%%). Afloja la caña cuando salte y sigue recogiendo.
 FISH_SHOAL_HINT,Gulls mark a feeding shoal: cast near them,Martılar beslenen sürüyü gösterir: yakınına at,Las gaviotas marcan un banco: lanza cerca
 TRIP_SUMMARY,"Last trip: %d casts, %d fish landed","Son sefer: %d atış, %d balık karaya alındı","Última salida: %d lances, %d peces en tierra"
+BAG_SUMMARY,In the bag: %d fish,Çantada: %d balık,En la bolsa: %d peces

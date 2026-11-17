@@ -99,7 +99,7 @@ func test_depth_line_reads_the_models_numbers() -> void:
 
 func test_old_saves_get_default_settings_and_values_are_clamped() -> void:
 	var old := {"version": 1, "log": {}, "last_rig": "lrf", "last_position": "karakoy_east"}
-	assert_eq(SaveGame.from_data(old)["status"], SaveGame.STATUS_OK, "a save without settings still loads")
+	assert_eq(SaveGame.from_data(old)["status"], SaveGame.STATUS_MIGRATED, "a version 1 save without settings still loads (migrated to version 2)")
 	assert_near(float(SaveGame.settings_of(old)["volume"]), 0.8, "default volume", 1e-6)
 	var s := SaveGame.fresh()
 	SaveGame.set_setting(s, "volume", 5.0)
