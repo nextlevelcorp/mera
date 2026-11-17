@@ -13,6 +13,9 @@
 
 Add every data, art, audio and tool source here with its licence before it is used (spec 5.4, 7.8).
 
+## Shop prices (2026-11-17)
+`game/data/shop.json`: every price is a game-design fill (labelled in the file); no source for real fish or tackle prices was used.
+
 ## CC0 PBR textures in `game/assets/3d/` (2026-11-17, roadmap R7)
 Owner approved CC0 assets (2026-11-15) and added the hosts `polyhaven.com`, `dl.polyhaven.org` and `ambientcg.com` to the network list (2026-11-17). Fetched with `scripts/fetch_polyhaven_textures.py` from `dl.polyhaven.org` (the only host of those that served files to the build environment). Each set is the 1k JPG diffuse, OpenGL normal and roughness map, shrunk to 512 px and stored as lossy WebP; each folder has a `source.txt`. **Licence evidence:** Poly Haven's licence policy (https://polyhaven.com/license) puts every asset under CC0 1.0; the build environment could not open `polyhaven.com` (HTTP 403) so the individual asset pages were not read. Before a release, open each page below and confirm CC0.
 
@@ -24,6 +27,8 @@ Owner approved CC0 assets (2026-11-15) and added the hosts `polyhaven.com`, `dl.
 | `rough_concrete` | https://polyhaven.com/a/rough_concrete | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay coping |
 | `rusty_metal_02` | https://polyhaven.com/a/rusty_metal_02 | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay bollards |
 | `stone_wall_04` | https://polyhaven.com/a/stone_wall_04 | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay wall below the waterline |
+
+Quaternius (https://quaternius.com, CC0 per its pack pages): the site is reachable from the build environment but every pack download is on `drive.google.com` or `quaternius.itch.io`, which are not on the network list, so nothing was downloaded (checked 2026-11-17 over all 84 pack pages).
 
 ambientCG: its API answers (200) from the build environment but its files redirect to `acg-download.struffelproductions.com`, which the network list does not include (HTTP 403), so no ambientCG file is used. A first-person hand model: no CC0 source is reachable (Poly Haven has none; model sites are not on the list); see `project_status.md`.
 

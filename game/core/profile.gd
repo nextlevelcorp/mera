@@ -16,9 +16,13 @@ static func open(save_path: String) -> void:
 	var loaded := SaveFile.load_save(save_path) if save_path != "" else SaveGame.from_data(null)
 	save = loaded["save"]
 	status = loaded["status"]
+	# The welcome lures, once (also for a save from before the shop).
+	var gave := Db.ok() and Economy.give_starting_stock(save, Db.shop())
 	# Keep the file as it was before a migrated save is first written.
 	if status == SaveGame.STATUS_MIGRATED and save_path != "":
 		DirAccess.copy_absolute(save_path, save_path + ".bak")
+	if gave and save_path != "":
+		SaveFile.store(save, save_path)
 
 
 static func persistent() -> bool:

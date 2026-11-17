@@ -9,6 +9,7 @@ const DATA_DIR := "res://data"
 static var _database := {}
 static var _constants := {}
 static var errors: Array[String] = []
+static var _shop := {}
 
 
 ## The validated records by kind (species, spot, rod, ...); empty if loading failed.
@@ -23,8 +24,22 @@ static func constants() -> Dictionary:
 	return _constants
 
 
+## The shop catalogue (Economy.load_catalog); empty if it failed to load.
+static func shop() -> Dictionary:
+	_load()
+	if _shop.is_empty() and errors.is_empty():
+		var loaded := Economy.load_catalog(_database)
+		if loaded["ok"]:
+			_shop = loaded["catalog"]
+		else:
+			for e: Variant in loaded["errors"]:
+				errors.append(str(e))
+	return _shop
+
+
 static func ok() -> bool:
 	_load()
+	shop()
 	return errors.is_empty()
 
 

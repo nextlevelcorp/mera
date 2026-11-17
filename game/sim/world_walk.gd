@@ -50,5 +50,17 @@ func nearest_marker() -> Dictionary:
 	return best
 
 
+## The shop within reach, or an empty dictionary.
+func nearest_shop() -> Dictionary:
+	var best := {}
+	var best_d := _reach
+	for sh: Dictionary in area.shops:
+		var d := pos.distance_to(sh["pos"])
+		if d <= best_d:
+			best_d = d
+			best = sh
+	return best
+
+
 func teleport(p: Vector2) -> void:
 	pos = p

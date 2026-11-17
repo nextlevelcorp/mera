@@ -1,0 +1,29 @@
+{
+ "design_fill": true,
+ "note": "Prices are game-design fills, not market prices: no source for real fish or tackle prices was used. The currency is shown as TL (the default font has no lira sign).",
+ "price_per_kg": {
+  "istavrit": 90,
+  "lufer": 160,
+  "palamut": 180
+ },
+ "default_price_per_kg": 80,
+ "lures": [
+  {
+   "id": "lrf_soft",
+   "price": 30
+  },
+  {
+   "id": "spin_minnow",
+   "price": 60
+  },
+  {
+   "id": "capari_rig",
+   "price": 45
+  }
+ ],
+ "starting_stock": {
+  "lrf_soft": 6,
+  "spin_minnow": 3,
+  "capari_rig": 3
+ }
+}

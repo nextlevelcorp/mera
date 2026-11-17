@@ -27,6 +27,8 @@ const GROUND := {
 var area: WorldArea
 var walk: WorldWalk
 var conditions := {}
+## Where the save is read from; tests set "" to keep it in memory.
+var profile_path := SaveFile.DEFAULT_PATH
 
 var _cam: Camera2D
 var _hud: CanvasLayer
@@ -36,6 +38,8 @@ var _action: Button
 var _prompt: Label
 var _toast: Label
 var _toast_s := 0.0
+var _shop: ShopPanel
+var _wallet: Label
 var _stick := Vector2.ZERO
 var _touching := false
 var _time := 0.0
@@ -53,6 +57,7 @@ func setup() -> void:
 		push_error("World area failed to load: %s" % str(loaded["errors"]))
 		return
 	area = loaded["area"]
+	Profile.open(profile_path)
 	walk = WorldWalk.new(area, Db.constants())
 	if conditions.is_empty():
 		conditions = SessionConditions.from_clock(Time.get_datetime_dict_from_system())
@@ -119,6 +124,15 @@ func fish() -> void:
 		fish_requested.emit(request)
 
 
+## The action button: a shop in reach opens it, else a fishing marker fishes.
+func act() -> void:
+	var shop := walk.nearest_shop()
+	if not shop.is_empty():
+		_shop.open(shop["id"])
+	else:
+		fish()
+
+
 func _process(delta: float) -> void:
 	if walk == null:
 		return
@@ -127,19 +141,25 @@ func _process(delta: float) -> void:
 	walk.step(delta, keys if keys.length() > 0.0 else _stick)
 	_cam.position = walk.pos * area.px_per_m
 	var m := walk.nearest_marker()
-	_action.visible = not m.is_empty()
-	if m.is_empty():
+	var shop := walk.nearest_shop()
+	_action.visible = (not m.is_empty() or not shop.is_empty()) and not _shop.visible
+	if not shop.is_empty():
+		_prompt.text = tr("SHOP_%s" % String(shop["id"]).to_upper())
+		_action.text = tr("WORLD_OPEN_SHOP")
+	elif m.is_empty():
 		_prompt.text = tr("WORLD_WALK_HINT")
 	else:
 		_prompt.text = tr(_position_name_key(m["position_id"]))
+		_action.text = tr("WORLD_FISH_HERE")
+	_wallet.text = "%s · %s" % [tr("MONEY_FMT") % Economy.money(Profile.save), tr("WORLD_BAG") % Inventory.fish_count(Profile.save)]
 	_toast_s = maxf(_toast_s - delta, 0.0)
 	_toast.visible = _toast_s > 0.0
 	queue_redraw()
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept") and not walk.nearest_marker().is_empty():
-		fish()
+	if event.is_action_pressed("ui_accept") and not _shop.visible and (not walk.nearest_marker().is_empty() or not walk.nearest_shop().is_empty()):
+		act()
 
 
 func _position_name_key(position_id: String) -> String:
@@ -162,6 +182,12 @@ func _draw() -> void:
 	for lamp: Vector2 in area.lamps:
 		draw_circle(lamp * s, 0.25 * s, Color(0.18, 0.18, 0.2))
 		draw_circle(lamp * s, 0.6 * s, Color(1.0, 0.9, 0.55, 0.25))
+	for sh: Dictionary in area.shops:
+		var box := Rect2((sh["pos"] as Vector2 - Vector2(2.4, 1.0)) * s, Vector2(4.8, 2.0) * s)
+		draw_rect(box, Color(0.45, 0.4, 0.35))
+		draw_rect(Rect2(box.position, Vector2(box.size.x, 0.5 * s)), Color(0.6, 0.25, 0.2) if sh["id"] == "fishmonger" else Color(0.2, 0.4, 0.55))
+		var label := tr("SHOP_%s" % String(sh["id"]).to_upper())
+		draw_string(ThemeDB.fallback_font, box.position + Vector2(6.0, box.size.y - 8.0), label, HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 8.0, 14, Color(1, 1, 1))
 	var near := walk.nearest_marker()
 	for m: Dictionary in area.markers:
 		var active: bool = not near.is_empty() and near["position_id"] == m["position_id"]
@@ -245,8 +271,21 @@ func _build_hud() -> void:
 	_action.offset_bottom = -16.0
 	_action.offset_top = -216.0
 	_action.visible = false
-	_action.pressed.connect(fish)
+	_action.pressed.connect(act)
 	_hud.add_child(_action)
+	_wallet = Label.new()
+	_wallet.add_theme_font_size_override("font_size", 22)
+	_wallet.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_wallet.add_theme_constant_override("outline_size", 6)
+	_wallet.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_wallet.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_wallet.offset_left = -300.0
+	_wallet.offset_right = 300.0
+	_wallet.offset_top = 60.0
+	_wallet.offset_bottom = 90.0
+	_hud.add_child(_wallet)
+	_shop = ShopPanel.new()
+	_hud.add_child(_shop)
 
 
 func _center_knob() -> void:

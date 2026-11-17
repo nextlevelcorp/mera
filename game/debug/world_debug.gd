@@ -59,7 +59,33 @@ func _ready() -> void:
 		_world.walk.teleport(m["pos"] + Vector2(0.0, 1.2))
 		_panel.visible = false)
 	box.add_child(jump)
+	for entry: Array in [["DBG_GIVE_MONEY", 0], ["DBG_GIVE_FISH", 1], ["DBG_GIVE_LURES", 2]]:
+		var give := Button.new()
+		give.text = tr(entry[0])
+		give.add_theme_font_size_override("font_size", 20)
+		give.custom_minimum_size = Vector2(360, 64)
+		var which: int = entry[1]
+		give.pressed.connect(func() -> void: _give(which))
+		box.add_child(give)
 	_refresh()
+
+
+## Hands the player something to test the shops with.
+func _give(which: int) -> void:
+	var save := Profile.save
+	match which:
+		0:
+			save["money"] = Economy.money(save) + 100
+		1:
+			for i in 3:
+				var legal: String = ["istavrit", "lufer", "palamut"][i]
+				var species := Db.record("species", legal)
+				var length := float(species["regulation"]["min_length_cm"]) + 4.0 + 3.0 * i
+				Inventory.add_fish(save, legal, length, 0.002 * pow(length, 2.2) / 4.0, Time.get_date_string_from_system())
+		2:
+			for id: String in Db.shop()["starting_stock"]:
+				Inventory.add(save, id, 5)
+	Profile.flush()
 
 
 func _refresh() -> void:
