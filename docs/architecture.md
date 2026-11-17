@@ -22,7 +22,7 @@ Dependencies point one way: views -> core -> sim and data. `sim/` never imports 
 | `game/sim/` | `world_area`, `world_walk`, `fishing_session`, `inventory`, `catch_model`, `wait_sim`, `fight_sim`, `fight_controller`, `fight_setup`, `why_report`, `shoal_field`, `session_conditions`, `motion_gesture`, `save_game`, `data_store`, `data_validator` | Implemented |
 | `game/data/` | `schema.json`, `constants.json`, `species.json`, `spots.json`, `tackle/`, `angler.json`, `demo/` | Implemented |
 | `game/scenes/fishing/` | `fishing_screen.gd` (`FishingScreen`: phases, simulations, view physics), `fishing_hud.gd` (`FishingHud`: controls, panels, raw thumb state), `fishing_overlay.gd` (`FishingOverlay`: the 2D layer) | Implemented; split 2026-11-17 (R1) |
-| `game/ui/water_view.gd`, `game/ui/sea/` | The 3D fishing scene: sea and sky shaders, `Bridge3D`, `Rig3D`, `SeaMaps` | Implemented |
+| `game/ui/water_view.gd`, `game/ui/sea/` | The 3D fishing scene: sea and sky shaders, `Stage3D` with `Bridge3D` and `Quay3D`, `Rig3D`, `SeaMaps` | Implemented |
 | `game/ui/fx/` | Screen-space motion and effects: `rod_spring`, `verlet_rope`, `angler_rig`, `cast_motion`, `fish_body`, `splash_fx`, `gull_flock`, `neighbor_anglers` | Implemented |
 | `game/ui/audio/` | `sound_director` (recorded CC0 beds and one-shots), `cue_synth` | Implemented |
 | `game/ui/device_motion.gd`, `device_guard.gd`, `frame_stats.gd` | Phone motion bridge, portrait guard, fps statistics | Implemented |
@@ -71,21 +71,21 @@ FishingResult  = { catches: [{species_id, length_cm, weight_kg, kept}], lost: [{
 | Thing | How | State |
 | --- | --- | --- |
 | Sea, sky, far shore, sun, clouds | `sea.gdshader` (Gerstner mesh), `sky.gdshader`, shared `sea_sky.gdshaderinc`, ACES and glow | Implemented |
-| Standing place | `Bridge3D`: deck, rail, lamps and lights, shadows, neighbours with rods | Implemented for one stage type (bridge) |
+| Standing place | `Stage3D` subclasses chosen by the position's `stage`: `Bridge3D` (deck, rail, lamps and lights, shadows) and `Quay3D` (stone coping, bollards, low lamps); both with neighbours and rods | Implemented for two stage types (R5); `rocks` and `beach` Designed |
 | Player's rod, reel, hands, forearms | `Rig3D`, lifted each frame from the screen-space `RodSpring` and `AnglerRig` | Implemented; hands are simple shapes (R7) |
 | Line, lure, rings, splashes, fish, gulls, neighbours' lines | 2D overlay through `project()` | Implemented in 2D; 3D versions Designed (R6) |
 | HUD | Godot controls built in code in `fishing_screen.gd` | Implemented |
 
 **Designed next steps for this mode**
 - *Split the screen*: `FishingHud` and `FishingOverlay` are out (R1, Implemented). Both hold a reference to the screen and read its state; the HUD calls it for what a press means. `FishingSession` (`game/sim/fishing_session.gd`, Implemented in R2, pure) owns the rule-bearing steps: context, cast, the wait and fight it starts, and the trip record. The phases stay on the screen on purpose: they follow the view's timing (lure flight, the lift, the result panel). Behaviour must not change; the existing loop tests are the guard.
-- *Stages* (R5): `Bridge3D` becomes one implementation of a stage interface (`build()`, `set_light(light)`, `pose(neighbours, time)`, `tip_water(i)`, `lure_water(i, cast_m, side)`, `ready_yaw`). A position in `spots.json` names its stage (`bridge`, `quay`, `rocks`, `beach`); `WaterView` instantiates it.
+- *Stages* (R5, Implemented): `Stage3D` is the interface (`build()`, `set_light(light)`, `pose(neighbours, time)`, `tip_water(i)`, `lure_water(i, cast_m, side)`, `ready_yaw`, `kind`). A position in `spots.json` names its stage (`bridge`, `quay`); `WaterView.set_stage` instantiates it. New kinds (`rocks`, `beach`) are a subclass with its numbers in `_init`, a `_build_surface()` and an entry in `Stage3D.make` and `KINDS`, plus the value in the schema's enum.
 - *3D fish, line, rings, gulls* (R6): fish as a mesh built from `FishBody`'s spine with per-species colour; line as a ribbon mesh through the `VerletRope` points lifted like `Rig3D` does; rings and boils as up to 8 ring uniforms in `sea.gdshader` (so the rail hides them correctly); gulls as quads in the 3D scene.
 - *Presentations* (R12): the lure retrieve exists (`WaitSim` controlled mode). Float and bottom fishing are new presentations with their own small simulations feeding the same stages 1 to 4; needs `float` and `sinker` in the schema and bait data. PRD 4 lists bait and float fishing as a non-goal for the MVP: the owner decides when (decision D2).
 - *Fish that can be seen coming*: only when clarity allows (`visible_at_m`); a view-only steering agent driven by `WaitSim` events, never a second source of truth.
 
 ## 6. 3D systems: assessment and rules
 **What exists and is worth keeping**: the frustum camera matched to `project()`; the shared sky include that makes reflections agree with the sky; the lift technique of `Rig3D` (motion stays in tested screen space, shapes get real light); everything generated in code, so the download stays small.
-**Weak points**: no asset pipeline yet (no models or textures in the repository); hands are capsules; `Bridge3D` is specific to Galata; the overlay is not depth-tested against 3D (rings can draw over the rail); night scenes are very dark; phone frame rate is measured only for the sea (58 fps, owner's phone, 2026-11-15), not for shadows, lamp lights and the 3D rig.
+**Weak points**: no asset pipeline yet (no models or textures in the repository); hands are capsules; the stages are generic shapes, not surveyed places; the overlay is not depth-tested against 3D (rings can draw over the rail); night scenes are very dark; phone frame rate is measured only for the sea (58 fps, owner's phone, 2026-11-15), not for shadows, lamp lights and the 3D rig.
 **Asset pipeline (Designed, R7)**: CC0 only (owner approved 2026-11-15; the tech lead's choice on 2026-11-16 is to adopt CC0 PBR textures and a CC0 rigged hand model rather than keep everything procedural, because hands and close surfaces are where procedural shapes read as fake). One folder per asset under `game/assets/3d/<name>/` with the `.glb` and textures; a row in `reference_docs.md` before the commit (`data-and-sources.md`); textures at most 1024 px, WebP, three maps per material at most; models optimised with gltf-transform (`.claude/skills/gltf-transform.md`). Needs the asset hosts on the network allowlist (decision D3).
 **Budgets for the fishing view** (proposal until measured on the phone): at most 60,000 triangles, 80 draw calls, 1 shadowed directional light, 3 unshadowed omni lights, 15 MB total download at 0.5 (today: a 0.5 MB pack plus the 42 MB engine file before the host's compression).
 

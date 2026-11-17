@@ -117,6 +117,7 @@ Standing position (inside a spot):
 | `exposure_by_wind` | {N, NE, E, SE, S, SW, W, NW: float01} | 0.1 environment | How much each wind direction roughens the water here |
 | `current` | int20 | MVP | Current strength |
 | `landing_difficulty` | float01 | 0.1 landing | Height and awkwardness of the landing |
+| `stage` | `bridge`, `quay`, optional | view | Which 3D standing-place scene is shown (`architecture.md` 5); none means the sea only. A view choice, labelled design fill by the record's default provenance |
 
 ### 3.3 Tackle
 

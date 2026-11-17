@@ -89,6 +89,11 @@ func _ready() -> void:
 	_add(grid, "rig", func() -> void:
 		var t := FightSetup.TACKLES
 		_screen.set_rig(t[(t.find(_screen.rig) + 1) % t.size()], _screen.position_id))
+	_add(grid, "stage", func() -> void:
+		var kinds: Array[String] = [""]
+		kinds.append_array(Stage3D.KINDS)
+		_screen.stage_override = kinds[(kinds.find(_screen.stage_override) + 1) % kinds.size()]
+		_screen.apply_stage())
 	_add(grid, "species", func() -> void: _species_i = (_species_i + 1) % _species_ids.size())
 	_add(grid, "size", func() -> void: _size_i = (_size_i + 1) % SIZES.size())
 	_add(grid, "water", func() -> void: _screen._water.set_detail(not _screen._water.detail))
@@ -144,6 +149,7 @@ func _refresh() -> void:
 	_buttons["position"].text = "%s: %s" % [tr("FISH_POSITION"), tr(_screen._ctx["position"]["name_key"])]
 	_buttons["rig"].text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_screen._ctx["rod"]["name_key"])]
 	_buttons["species"].text = "%s: %s" % [tr("FIGHT_SPECIES"), tr(_screen._species_by_id(_species_ids[_species_i])["name_key"])]
+	_buttons["stage"].text = "%s: %s" % [tr("DBG_STAGE"), tr("DBG_STAGE_%s" % ("DATA" if _screen.stage_override == "" else _screen.stage_override.to_upper()))]
 	_buttons["size"].text = "%s: %s" % [tr("DBG_SIZE"), tr(SIZE_KEYS[_size_i])]
 	_buttons["water"].text = "%s: %s" % [tr("DBG_WATER_DETAIL"), tr("DBG_ON") if _screen._water.detail else tr("DBG_OFF")]
 	var inverted: bool = _screen._motion != null and _screen._motion.invert
