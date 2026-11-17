@@ -20,18 +20,23 @@
 | Native iOS and Android | Not started | `architecture.md` 9 |
 | CC0 models and PBR textures | Blocked on network hosts (D3) | `architecture.md` 6 |
 
-## Decisions the owner still owes
-- **D1. Top-down art**: style of tiles and characters (pixel art or painted), and the source: a CC0 tileset (for example Kenney), generated art, or commissioned art (costs money). Recommendation: start R4 with grey boxes, pick the style on a real phone screen.
-- **D2. Scope order**: bait and float fishing, quests and crafting are not in the MVP of spec 4.6 (bait and float are a PRD non-goal). Recommendation: economy and progression first (they are M4), quests after, float fishing as the first post-MVP presentation, crafting last.
-- **D3. Network hosts for CC0 assets**: `polyhaven.com`, `dl.polyhaven.org`, `ambientcg.com` on the environment's allowlist, or the owner uploads the files.
-- **D4. The 0.1 tester round** (5 anglers, 5 non-anglers, `prd.md` 9): run it on the fishing slice as planned, or wait for the world prototype? Recommendation: run it now; it tests the core loop, which is what must hold.
-- Still open from before: phone frame rate with shadows, lamps and the 3D rig (read the debug fps line); what feels wrong in the phone motion; an Android phone for testing.
+## Owner decisions (2026-11-17)
+- **D1 top-down art**: start with grey boxes (R4) and choose the style on a real phone screen.
+- **D2 scope order**: economy and progression first, then quests; float and bait fishing is the first presentation after the MVP; crafting last.
+- **D3 CC0 assets**: `polyhaven.com`, `dl.polyhaven.org` and `ambientcg.com` are on the environment's network allowlist; CC0 PBR textures and a CC0 hand model may be fetched (R7). Each asset still gets its row in `reference_docs.md` before it is committed.
+- **D4 tester round**: run the 0.1 round now on the fishing slice (5 anglers, 5 non-anglers, `prd.md` 9). The owner recruits; a stop date comes first.
+- **Phone frame rate** (owner, bridge view with shadows, lamps and the 3D rig): 58 fps average, worst 1% 47 over 60 s. The average holds; the worst 1% fell from 58 to 47, so the next visual steps (R6, R7) start by measuring what the shadow pass costs.
+
+## Still open for the owner
+- What feels wrong in the phone motion (the Settings monitor shows the readings).
+- An Android phone for testing.
+- Recommended, needs approval because it changes CI: fail the test job when Godot prints `SCRIPT ERROR`. Today the runner counts assertions only, so a script error inside a test does not fail it (seen during R1).
 
 ## Roadmap (ordered by dependency; one pull request each)
 | # | Task | Needs | Output | Done when | Files |
 | --- | --- | --- | --- | --- | --- |
-| R1 | Split `fishing_screen.gd` into session, HUD and overlay | - | Same behaviour in four files | All tests pass unchanged; played once | `scenes/fishing/` |
-| R2 | Core autoloads `Db`, `Profile`, `Game`; `main.tscn` routes modes; `FishingRequest` and `FishingResult` | R1 | Fishing starts from a request and returns a result | Test builds a request, plays a forced fight headless, checks the result | `game/core/`, `architecture.md` 3 |
+| R1 | Split `fishing_screen.gd`: HUD and overlay out **(done 2026-11-17)**; the session logic moves in R2 | - | Same behaviour in three files | All tests pass unchanged; played once | `scenes/fishing/` |
+| R2 | Core autoloads `Db`, `Profile`, `Game`; `main.tscn` routes modes; `FishingRequest` and `FishingResult`; the session (phases and simulations) leaves the screen as `FishingSession` | R1 | Fishing starts from a request and returns a result | Test builds a request, plays a forced fight headless, checks the result | `game/core/`, `architecture.md` 3 |
 | R3 | Save v2 with migration; `Inventory` and money (pure) | R2 | Fish go to the bag; lost lures leave it | Migration test from a v1 file; inventory tests | `sim/save_game.gd`, `data_model.md` 12 |
 | R4 | World prototype: one grey-box area (Galata Bridge and the Karaköy quay), player, camera, markers, hand-over both ways | R2, D1 for final art | Walk, fish, come back | Played on the phone; frame rate measured | `scenes/world/`, `architecture.md` 4 |
 | R5 | Stage interface; `Bridge3D` as the first stage, a quay as the second | R1 | Positions choose their stage | Two stages render; tests for tips and lures per stage | `ui/sea/` |
@@ -69,6 +74,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R1 screen split (2026-11-17): 144 tests pass unchanged; both web exports build; played in the debug web build (software GL, 1280x720): bridge view, cast with the turn to the water, wait with the reel pad, a forced horse mackerel fought, reeled up and landed, result panel; no console errors. The why, log, rig and settings panels were not opened by hand in this pass (their tests pass).
 - View turn and architecture pass (2026-11-16): the fishing world is square to the rail; the view looks along the bridge when ready and turns to the water for the cast, wait and fight, so casts land clear of the neighbours; the ready buttons moved to the top left. 144 tests pass; played in the debug web build (software GL, 1280x720, night): bridge view, turn on the cast, wait and a forced fight facing the water; no console errors. Not fixed in this pass, moved to the roadmap: realistic hands (R7), 3D fish, line, rings and gulls (R6). The reel pad still covers part of the neighbours in the bridge view.
 - 3D rod, reel and hands (2026-11-16): 143 tests pass; both web exports build; played in the debug web build (software GL, 1280x720) in four time slots and through a forced bluefish fight to the landing: the 3D rod bends with the fish, the reel and hands sit where the 2D ones were, the line meets the tip; no console errors. Known limits: the hands are simple shapes (palm and capsule fingers), the fish and the line are still 2D, the phone frame rate with the three 3D steps is unmeasured.
 - Shoals, gulls and the 3D bridge (2026-11-16): 142 tests pass; both web exports build; played in the debug web build (software GL, 1280x720): dawn, day, evening and night show the deck, rail, lamps, neighbours with shadows and gulls over the water; a forced bite was fought and reeled up with the overlay aligned; no console errors. Not checked: phone frame rate with shadows and two lamp lights (owner: read the debug fps again), and whether casting at the gulls is felt in play (unit test shows 1.5 times or more interest inside a shoal).
