@@ -67,7 +67,7 @@ func _init(screen: FishingScreen) -> void:
 
 
 func _build_hud() -> void:
-	var back := _button(tr("PROTO_BACK"), 22, func() -> void: get_tree().change_scene_to_file.call_deferred(FishingScreen.MAIN_SCENE))
+	var back := _button(tr("PROTO_BACK"), 22, func() -> void: scr.leave())
 	back.custom_minimum_size = Vector2(160, TOUCH_MIN)
 	back.position = Vector2(16, 16)
 	add_child(back)

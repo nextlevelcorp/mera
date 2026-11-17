@@ -14,7 +14,6 @@ extends Control
 ##           (up = more drag) and Pull (rod against the fish's run)
 
 const MAIN_SCENE := "res://scenes/main.tscn"
-const DATA_DIR := "res://data"
 const DEBUG_MENU := "res://debug/debug_menu.gd"
 const NEAR_DRAW_M := 4.6  ## drawing depth of the angler's feet; the camera cannot see nearer
 ## The fish body is drawn this many times its size: at true scale a 20 cm fish
@@ -27,6 +26,13 @@ enum Phase { READY, CHARGE, FLIGHT, WAIT, FIGHT, LIFT, RESULT }
 
 const LIFT_RISE_S := 0.8   ## landed fish: time to swing it up out of the water
 const LIFT_HOLD_S := 1.8   ## then it hangs and kicks before the result shows
+
+## Emitted by leave() with the FishingResult.
+signal finished(result: Dictionary)
+
+## The FishingRequest (Game.fishing_request) this session was started with; set before setup().
+var request := {}
+var _trip := Game.empty_result()
 
 var phase: int = Phase.READY
 var conditions := {"slot": "evening", "month": 10, "wind_dir": "SW", "wind_ms": 3}
@@ -137,23 +143,27 @@ func _ready() -> void:
 ## Everything except the portrait guard, so tests can run it without a viewport.
 ## save_path empty: do not read or write a save (tests).
 func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
-	var loaded := DataStore.load_all(DATA_DIR)
-	if not loaded["ok"]:
-		push_error("Game data failed to load: %s" % str(loaded["errors"]))
+	if not Db.ok():
+		push_error("Game data failed to load: %s" % str(Db.errors))
 		return
-	_db = loaded["database"]
-	var errors: Array[String] = []
-	_k = DataStore.load_constants(errors)
-	save_enabled = save_path != ""
-	var loaded_save := SaveFile.load_save(save_path) if save_enabled else SaveGame.from_data(null)
-	save = loaded_save["save"]
-	save_status = loaded_save["status"]
-	if save_enabled:
+	_db = Db.database()
+	_k = Db.constants()
+	Profile.open(save_path)
+	save = Profile.save
+	save_status = Profile.status
+	save_enabled = Profile.persistent()
+	if not (request.get("conditions", {}) as Dictionary).is_empty():
+		conditions = request["conditions"]
+	elif save_enabled:
 		# Real place, real time: the slot, month and wind come from the phone's clock.
 		conditions = SessionConditions.from_clock(Time.get_datetime_dict_from_system())
-	if save["last_rig"] in FightSetup.TACKLES:
+	if String(request.get("rig", "")) in FightSetup.TACKLES:
+		rig = request["rig"]
+	elif save["last_rig"] in FightSetup.TACKLES:
 		rig = save["last_rig"]
-	if _position_index(save["last_position"]) >= 0:
+	if _position_index(String(request.get("position_id", ""))) >= 0:
+		position_id = request["position_id"]
+	elif _position_index(save["last_position"]) >= 0:
 		position_id = save["last_position"]
 	else:
 		position_id = _db["spot"][0]["positions"][0]["id"]
@@ -296,6 +306,7 @@ func release_cast() -> void:
 ## error of CatchModel.cast is added on top.
 func cast_with_power(power: float, aim: float = 0.0) -> void:
 	_snd("cast_swish", -3.0)
+	_trip["casts"] = int(_trip["casts"]) + 1
 	_cast_motion.release(power)
 	_rod.kick(-6.0)
 	_cast = CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], _ctx["position"], conditions, power)
@@ -466,6 +477,11 @@ func _finish_fight() -> void:
 	var outcome: String = _hud["outcome"]
 	var sp: Dictionary = _fight_ctx["species"]
 	_result = {"outcome": outcome, "species_id": sp["id"], "length_cm": float(_fight_ctx["play"]["fish_length_cm"]), "weight_kg": _controller.sim.weight_kg}
+	(_trip["events"] as Array).append({"type": outcome, "species_id": sp["id"]})
+	if outcome == FightSim.OUTCOME_LANDED:
+		(_trip["catches"] as Array).append({"species_id": sp["id"], "length_cm": _result["length_cm"], "weight_kg": _result["weight_kg"], "kept": true})
+	elif outcome in [FightSim.OUTCOME_LINE_BREAK, FightSim.OUTCOME_LEADER_CUT]:
+		(_trip["lost"] as Array).append({"item_id": _fight_ctx["lure"]["id"], "reason": outcome})
 	if outcome == FightSim.OUTCOME_LANDED:
 		_result.merge(SaveGame.record_catch(save, sp["id"], _result["length_cm"], _result["weight_kg"], Time.get_date_string_from_system()))
 		_store()
@@ -801,6 +817,7 @@ func _step_rod_and_line(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	_time += delta
+	_trip["time_s"] = float(_trip["time_s"]) + delta
 	_stats.add(delta)
 	_update_motion(delta)
 	match phase:
@@ -989,8 +1006,21 @@ func _snd(name_id: String, volume_db: float) -> void:
 
 
 func _store() -> void:
-	if save_enabled:
-		SaveFile.store(save)
+	Profile.flush()
+
+
+## Leaves the fishing view: whoever opened it gets the result; opened on its
+## own (tests, the old entry), it goes back to the title scene.
+func leave() -> void:
+	if finished.get_connections().is_empty():
+		get_tree().change_scene_to_file.call_deferred(MAIN_SCENE)
+	else:
+		finished.emit(result())
+
+
+## The session so far as a FishingResult (Game.empty_result).
+func result() -> Dictionary:
+	return _trip.duplicate(true)
 
 
 func _toast(text: String, seconds: float) -> void:

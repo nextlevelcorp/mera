@@ -14,7 +14,7 @@
 | Sound (CC0 beds and one-shots) | Implemented for fishing | `reference_docs.md` |
 | Save v1 (log, settings) | Implemented | `data_model.md` 12 |
 | Save v2, inventory, economy, progression, quests, crafting | Designed | `architecture.md` 7, `data_model.md` 12 |
-| Core autoloads and the world-fishing hand-over | Designed | `architecture.md` 3 |
+| Core (`Db`, `Profile`, `Game` request and result) | Implemented; mode switch with a world Designed | `architecture.md` 3 |
 | Top-down world, NPCs | Not started | `architecture.md` 4 |
 | Float and bait fishing | Designed outline; scope open (D2) | `architecture.md` 5 |
 | Native iOS and Android | Not started | `architecture.md` 9 |
@@ -36,7 +36,7 @@
 | # | Task | Needs | Output | Done when | Files |
 | --- | --- | --- | --- | --- | --- |
 | R1 | Split `fishing_screen.gd`: HUD and overlay out **(done 2026-11-17)**; the session logic moves in R2 | - | Same behaviour in three files | All tests pass unchanged; played once | `scenes/fishing/` |
-| R2 | Core autoloads `Db`, `Profile`, `Game`; `main.tscn` routes modes; `FishingRequest` and `FishingResult`; the session (phases and simulations) leaves the screen as `FishingSession` | R1 | Fishing starts from a request and returns a result | Test builds a request, plays a forced fight headless, checks the result | `game/core/`, `architecture.md` 3 |
+| R2 | Core `Db`, `Profile`, `Game`; the title opens fishing with a `FishingRequest` and gets a `FishingResult` back **(done 2026-11-17)**. Still to do (R2b): the session (phases and simulations) leaves the screen as `FishingSession` | R1 | Fishing starts from a request and returns a result | Test builds a request, plays a forced fight headless, checks the result | `game/core/`, `architecture.md` 3 |
 | R3 | Save v2 with migration; `Inventory` and money (pure) | R2 | Fish go to the bag; lost lures leave it | Migration test from a v1 file; inventory tests | `sim/save_game.gd`, `data_model.md` 12 |
 | R4 | World prototype: one grey-box area (Galata Bridge and the Karaköy quay), player, camera, markers, hand-over both ways | R2, D1 for final art | Walk, fish, come back | Played on the phone; frame rate measured | `scenes/world/`, `architecture.md` 4 |
 | R5 | Stage interface; `Bridge3D` as the first stage, a quay as the second | R1 | Positions choose their stage | Two stages render; tests for tips and lures per stage | `ui/sea/` |
@@ -74,6 +74,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R2 first part (2026-11-17): 148 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): title, fishing, a forced fight, Back shows "Last trip: 1 casts, 0 fish landed" on the title, fishing opens again with the 3D scene. Found and fixed while playing: the title's background covered the 3D scene.
 - R1 screen split (2026-11-17): 144 tests pass unchanged; both web exports build; played in the debug web build (software GL, 1280x720): bridge view, cast with the turn to the water, wait with the reel pad, a forced horse mackerel fought, reeled up and landed, result panel; no console errors. The why, log, rig and settings panels were not opened by hand in this pass (their tests pass).
 - View turn and architecture pass (2026-11-16): the fishing world is square to the rail; the view looks along the bridge when ready and turns to the water for the cast, wait and fight, so casts land clear of the neighbours; the ready buttons moved to the top left. 144 tests pass; played in the debug web build (software GL, 1280x720, night): bridge view, turn on the cast, wait and a forced fight facing the water; no console errors. Not fixed in this pass, moved to the roadmap: realistic hands (R7), 3D fish, line, rings and gulls (R6). The reel pad still covers part of the neighbours in the bridge view.
 - 3D rod, reel and hands (2026-11-16): 143 tests pass; both web exports build; played in the debug web build (software GL, 1280x720) in four time slots and through a forced bluefish fight to the landing: the 3D rod bends with the fish, the reel and hands sit where the 2D ones were, the line meets the tip; no console errors. Known limits: the hands are simple shapes (palm and capsule fingers), the fish and the line are still 2D, the phone frame rate with the three 3D steps is unmeasured.
