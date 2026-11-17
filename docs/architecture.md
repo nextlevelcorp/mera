@@ -73,13 +73,17 @@ FishingResult  = { catches: [{species_id, length_cm, weight_kg, kept}], lost: [{
 | Sea, sky, far shore, sun, clouds | `sea.gdshader` (Gerstner mesh), `sky.gdshader`, shared `sea_sky.gdshaderinc`, ACES and glow | Implemented |
 | Standing place | `Stage3D` subclasses chosen by the position's `stage`: `Bridge3D` (deck, rail, lamps and lights, shadows) and `Quay3D` (stone coping, bollards, low lamps); both with neighbours and rods | Implemented for two stage types (R5); `rocks` and `beach` Designed |
 | Player's rod, reel, hands, forearms | `Rig3D`, lifted each frame from the screen-space `RodSpring` and `AnglerRig` | Implemented; hands are simple shapes (R7) |
-| Line, lure, rings, splashes, fish, gulls, neighbours' lines | 2D overlay through `project()` | Implemented in 2D; 3D versions Designed (R6) |
+| Rings, boils, the lure's ripple | `sea.gdshader` (12 rings from `SplashFx` through `WaterView.set_rings`) | Implemented (R6) |
+| Fish under the water | A shadow in `sea.gdshader` (8 blobs along the spine, `WaterView.set_fish_shadow`) | Implemented (R6) |
+| Fish in the air, on the line | `Fish3D` (`fish_world` for a jump, `fish_hand` as a child of the camera for the landing and lift) | Implemented (R6) |
+| Gulls | `GullFlock.pose` into one `MultiMesh`, flap in `gull.gdshader` | Implemented (R6) |
+| Line, splash droplets, heading arrow, neighbours' lines | 2D overlay through `project()` | Implemented in 2D; the line stays 2D on purpose (it is in front of everything) |
 | HUD | Godot controls built in code in `fishing_screen.gd` | Implemented |
 
 **Designed next steps for this mode**
 - *Split the screen*: `FishingHud` and `FishingOverlay` are out (R1, Implemented). Both hold a reference to the screen and read its state; the HUD calls it for what a press means. `FishingSession` (`game/sim/fishing_session.gd`, Implemented in R2, pure) owns the rule-bearing steps: context, cast, the wait and fight it starts, and the trip record. The phases stay on the screen on purpose: they follow the view's timing (lure flight, the lift, the result panel). Behaviour must not change; the existing loop tests are the guard.
 - *Stages* (R5, Implemented): `Stage3D` is the interface (`build()`, `set_light(light)`, `pose(neighbours, time)`, `tip_water(i)`, `lure_water(i, cast_m, side)`, `ready_yaw`, `kind`). A position in `spots.json` names its stage (`bridge`, `quay`); `WaterView.set_stage` instantiates it. New kinds (`rocks`, `beach`) are a subclass with its numbers in `_init`, a `_build_surface()` and an entry in `Stage3D.make` and `KINDS`, plus the value in the schema's enum.
-- *3D fish, line, rings, gulls* (R6): fish as a mesh built from `FishBody`'s spine with per-species colour; line as a ribbon mesh through the `VerletRope` points lifted like `Rig3D` does; rings and boils as up to 8 ring uniforms in `sea.gdshader` (so the rail hides them correctly); gulls as quads in the 3D scene.
+- *3D fish, rings, gulls* (R6, Implemented): see the table above. Not done: per-species fish colour and fins (one generic silver body for all three species), a 3D line (a ribbon through the `VerletRope` points lifted like `Rig3D` does; judged to add flicker without a depth benefit), 3D splash droplets.
 - *Presentations* (R12): the lure retrieve exists (`WaitSim` controlled mode). Float and bottom fishing are new presentations with their own small simulations feeding the same stages 1 to 4; needs `float` and `sinker` in the schema and bait data. PRD 4 lists bait and float fishing as a non-goal for the MVP: the owner decides when (decision D2).
 - *Fish that can be seen coming*: only when clarity allows (`visible_at_m`); a view-only steering agent driven by `WaitSim` events, never a second source of truth.
 

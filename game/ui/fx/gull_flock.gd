@@ -4,11 +4,12 @@ extends RefCounted
 ## towards a point circling its shoal, with a limited turn rate, glides and
 ## flaps, and now and then drops to the water and climbs again. Visual only,
 ## seeded; the shoals come from ShoalField. Positions in water metres plus a
-## height: Vector3(x right, height, z out).
+## height: Vector3(x right, height, z out). Drawn as 3D instances (pose).
 
 const PER_SHOAL := 4
 const SPEED := 7.0
 const TURN := 1.6
+const SPAN := 0.55   ## the mesh is 2 m across, so a 1.1 m wingspan
 
 var gulls: Array[Dictionary] = []
 var dives: Array[Vector2] = []   ## water points hit since the last take_dives()
@@ -66,24 +67,46 @@ func take_dives() -> Array[Vector2]:
 	return out
 
 
-## Draws each gull as two wings from its body, flapping; smaller with distance.
-func draw(ci: CanvasItem, size: Vector2, light: float) -> void:
-	var col := Color(0.93, 0.94, 0.96).lerp(Color(0.16, 0.17, 0.2), 1.0 - light)
-	var tip_col := col.darkened(0.45)
-	for g: Dictionary in gulls:
-		var pos: Vector3 = g["pos"]
-		if WaterView.view_depth(Vector2(pos.x, pos.z)) < 3.0:
-			continue
-		var at := WaterView.project(Vector2(pos.x, pos.z), pos.y, size)
-		var span := clampf(size.y * 1.3 / (WaterView.view_depth(Vector2(pos.x, pos.z)) * WaterView.FOV), 3.0, 60.0) * 0.5
-		var dir: Vector2 = g["dir"]
-		var side := clampf(dir.x, -1.0, 1.0)   # banking: wings foreshorten when flying across
-		var flap := sin(float(g["phase"])) * 0.55
-		var w := span * (0.55 + 0.45 * absf(dir.y))
-		var body := Vector2(side * span * 0.25, 0.0)
-		for sgn: float in [-1.0, 1.0]:
-			var elbow := at + Vector2(sgn * w * 0.5, -span * (0.12 + 0.3 * flap))
-			var tip := at + Vector2(sgn * w, -span * (0.6 * flap) + span * 0.08)
-			ci.draw_line(at, elbow, col, maxf(span * 0.14, 1.2), true)
-			ci.draw_line(elbow, tip, tip_col, maxf(span * 0.09, 1.0), true)
-		ci.draw_line(at - body, at + body, col, maxf(span * 0.2, 1.5), true)
+## One gull's mesh, wingspan 2 m (x from -1 to 1), nose along -z, built once.
+static func gull_mesh() -> ArrayMesh:
+	var v := PackedVector3Array()
+	var idx := PackedInt32Array()
+	# Body: a thin diamond along z.
+	v.append_array(PackedVector3Array([Vector3(0, 0.02, -0.28), Vector3(-0.07, 0, 0.0), Vector3(0.07, 0, 0.0), Vector3(0, 0.0, 0.3), Vector3(0, 0.07, 0.02)]))
+	idx.append_array(PackedInt32Array([0, 1, 4, 0, 4, 2, 3, 4, 1, 3, 2, 4, 0, 2, 1, 3, 1, 2]))
+	# Wings, left then right: root, mid and tip, each front and back.
+	for sgn: float in [-1.0, 1.0]:
+		var base := v.size()
+		v.append_array(PackedVector3Array([
+			Vector3(0.05 * sgn, 0.0, -0.1), Vector3(0.05 * sgn, 0.0, 0.14),
+			Vector3(0.5 * sgn, 0.0, -0.12), Vector3(0.5 * sgn, 0.0, 0.1),
+			Vector3(1.0 * sgn, 0.0, 0.08)]))
+		idx.append_array(PackedInt32Array([base, base + 2, base + 1, base + 1, base + 2, base + 3, base + 2, base + 4, base + 3]))
+	var arrays := []
+	arrays.resize(Mesh.ARRAY_MAX)
+	arrays[Mesh.ARRAY_VERTEX] = v
+	arrays[Mesh.ARRAY_INDEX] = idx
+	var mesh := ArrayMesh.new()
+	mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+	return mesh
+
+
+## Writes the flock into a MultiMesh (transform format 3D, custom data on):
+## one instance per gull, in the 3D scene's coordinates (x right, y up, -z
+## away), heading along its flight, the flap phase in the custom data.
+func pose(mm: MultiMesh) -> void:
+	if mm.instance_count != gulls.size():
+		mm.instance_count = gulls.size()
+	for i in gulls.size():
+		mm.set_instance_transform(i, gull_transform(gulls[i]))
+		mm.set_instance_custom_data(i, Color(float((gulls[i] as Dictionary)["phase"]), 0.0, 0.0, 0.0))
+
+
+## Where and how a gull sits in the 3D scene: nose (-z of the mesh) along its flight.
+static func gull_transform(g: Dictionary) -> Transform3D:
+	var pos: Vector3 = g["pos"]
+	var dir: Vector2 = g["dir"]
+	# dir is (x, z_out); the scene's z is -z_out.
+	var forward := Vector3(dir.x, 0.0, -dir.y)
+	var right := forward.cross(Vector3.UP)
+	return Transform3D(Basis(right, Vector3.UP, -forward) * SPAN, Vector3(pos.x, pos.y, -pos.z))

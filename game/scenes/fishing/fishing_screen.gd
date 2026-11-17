@@ -538,6 +538,87 @@ func _lift_length_px() -> float:
 
 
 
+## Fish and water effects in the 3D scene this frame (roadmap R6): a fish
+## under the water is a shadow in the sea shader, one in the air (a jump) or
+## on the line (the landing and the lift) is a lit mesh, and the rings and
+## boils are drawn by the sea itself.
+func _update_scene_effects() -> void:
+	var size := _overlay.size
+	if size.x < 2.0 or _water == null:
+		return
+	_water.fish_world.hide_fish()
+	_water.fish_hand.hide_fish()
+	var shadow := PackedVector2Array()
+	var shadow_strength := 0.0
+	var shadow_radius := 0.1
+	var extra: Array[Vector4] = []
+	var lifted := _lifted() or _landing_now()
+	if lifted and not _fight_ctx.is_empty():
+		_show_fish_on_the_line(size)
+	elif phase == Phase.FIGHT and not _hud.is_empty() and _fish != null:
+		var outcome: String = _hud["outcome"]
+		var line_gone := outcome == FightSim.OUTCOME_LINE_BREAK or outcome == FightSim.OUTCOME_LEADER_CUT
+		if not line_gone:
+			var spine := _fish_spine()
+			if bool(_hud["jumping"]):
+				_show_jumping_fish(spine)
+			elif _hud["fish_visible"]:
+				shadow = spine
+				shadow_strength = 0.5 + 0.4 * float(_env.get("visibility", 0.5))
+				shadow_radius = 0.16 * _fish.length_m * FISH_DRAW_SCALE
+			var at := _fish_world()
+			extra.append(Vector4(at.x, -at.y, 0.2 + 0.04 * sin(_time * 3.1), 0.25))
+	elif phase == Phase.WAIT and _has_line:
+		var dw := float(_wait_state.get("lure_distance_m", 0.0))
+		extra.append(Vector4(_lure_x(dw), -(NEAR_DRAW_M + dw), 0.2 + 0.04 * sin(_time * 3.1), 0.35))
+	_water.set_fish_shadow(shadow, shadow_radius, shadow_strength)
+	_water.set_rings(_fx.rings, extra)
+	_gulls.pose(_water.gulls_mm.multimesh)
+
+
+## The fish's spine on the water, head first, scaled up for readability.
+func _fish_spine() -> PackedVector2Array:
+	var out := PackedVector2Array()
+	for w: Vector2 in _fish.spine():
+		out.append(_fish.head + (w - _fish.head) * FISH_DRAW_SCALE)
+	return out
+
+
+## A jump: the fish arcs above the water, nose up on the way up, down on the way down.
+func _show_jumping_fish(spine: PackedVector2Array) -> void:
+	var h := _jump_height()
+	var length := _fish.length_m * FISH_DRAW_SCALE
+	var phase_t := clampf(1.0 - float(_hud["jump_left_s"]) / float(_k["JUMP_S"]), 0.0, 1.0)
+	var pitch := cos(PI * phase_t)
+	var pts := PackedVector3Array()
+	for i in spine.size():
+		var s := float(i) / float(spine.size() - 1)
+		pts.append(Vector3(spine[i].x, h + (0.5 - s) * length * 0.5 * pitch, -spine[i].y))
+	_water.fish_world.show_along(pts, Vector3.UP, length)
+
+
+## The landing and the lift: the fish hangs from the rod tip, swinging, in
+## the camera's space at the depth of the tip (Rig3D.DEPTH_TIP).
+func _show_fish_on_the_line(size: Vector2) -> void:
+	var ends := _lift_points()
+	var mouth: Vector2 = ends[0]
+	var dir := (ends[1] - mouth).normalized()
+	var side := Vector2(-dir.y, dir.x)
+	var length_px := _lift_length_px()
+	var landed_calm := _lift_t > LIFT_RISE_S and not _landing_now()
+	var flap := 0.18 if landed_calm else 0.05
+	if _landing_now():
+		flap = 0.3 if _hud["kicking"] else 0.04
+	var z := Rig3D.DEPTH_TIP
+	var pts := PackedVector3Array()
+	for i in FishBody.SEGMENTS:
+		var s := float(i) / float(FishBody.SEGMENTS - 1)
+		var sway := sin(_time * 11.0 - s * 4.0) * flap * length_px * s * s
+		pts.append(Rig3D.lift_point(mouth + dir * s * length_px + side * sway, z, size))
+	var metres_per_px := z * WaterView.FOV / size.y
+	_water.fish_hand.show_along(pts, Vector3(side.x, -side.y, 0.0), length_px * metres_per_px)
+
+
 func _fight_effects(delta: float) -> void:
 	var pos := _fish_world()
 	var state: String = _hud["fish_state"]
@@ -839,6 +920,7 @@ func _process(delta: float) -> void:
 	_toast_s = maxf(_toast_s - delta, 0.0)
 	_ui.toast_label.visible = _toast_s > 0.0
 	_fx.step(delta)
+	_update_scene_effects()
 	_update_texts()
 	_overlay.queue_redraw()
 
