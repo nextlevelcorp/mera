@@ -191,3 +191,9 @@ WORLD_BAG,%d fish in the bag,Çantada %d balık,%d peces en la bolsa
 DBG_GIVE_MONEY,+100 money,+100 para,+100 dinero
 DBG_GIVE_FISH,+3 fish,+3 balık,+3 peces
 DBG_GIVE_LURES,+5 lures,+5 yem,+5 señuelos
+SKILL_CAST,Casting,Atış,Lance
+SKILL_STRIKE,Strike,Kanca vurma,Clavada
+SKILL_KNOTS,Knots,Düğüm,Nudos
+SKILL_LINE,%s level %d (%d XP),%s seviye %d (%d TP),%s nivel %d (%d PX)
+LEVEL_UP,%s is now level %d,%s artık seviye %d,%s sube a nivel %d
+XP_GAINED,Experience: %s,Tecrübe: %s,Experiencia: %s

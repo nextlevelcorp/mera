@@ -16,6 +16,8 @@ var clarity_override := -1.0        ## debug menu: replaces the spot's clarity w
 var shoals: ShoalField
 var seed_counter := 1
 var trip := Game.empty_result()
+## The player's save, for the skills (Progress); empty keeps the base angler.
+var save := {}
 
 
 func _init(database: Dictionary, constants: Dictionary, rig_id: String, position: String, session_conditions: Dictionary, shoal_field: ShoalField = null) -> void:
@@ -30,6 +32,8 @@ func _init(database: Dictionary, constants: Dictionary, rig_id: String, position
 ## The CatchModel context for a species on the current rig and position.
 func context(species_id: String, overrides: Dictionary = {}) -> Dictionary:
 	var ctx := FightSetup.build(db, species_id, rig, position_id, 0.5, conditions, overrides)
+	if not save.is_empty():
+		ctx["angler"] = Progress.angler(ctx["angler"], save, k)
 	if clarity_override > 0.0:
 		var spot: Dictionary = (ctx["spot"] as Dictionary).duplicate()
 		spot["typical_clarity"] = clarity_override
