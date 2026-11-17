@@ -18,18 +18,6 @@ func _init(screen: FishingScreen) -> void:
 
 
 func _draw() -> void:
-	for ring: Dictionary in scr._fx.rings:
-		var world: Vector2 = ring["world"]
-		if WaterView.view_depth(world) < 1.0:
-			continue
-		var r := SplashFx.ring_radius(ring)
-		var centre := WaterView.project(world, 0.0, size)
-		var aspect := size.x / maxf(size.y, 1.0)
-		var depth := WaterView.view_depth(world)
-		var rx := r / (depth * aspect * WaterView.FOV) * size.x
-		var ry := WaterView.CAM_HEIGHT * r / (depth * depth * WaterView.FOV) * size.y
-		_ellipse(centre, rx, ry, Color(1, 1, 1, 0.55 * SplashFx.ring_alpha(ring)))
-	var tip := scr._rod.tip()
 	match scr.phase:
 		FishingScreen.Phase.READY, FishingScreen.Phase.CHARGE:
 			_draw_line(false)
@@ -45,13 +33,10 @@ func _draw() -> void:
 		FishingScreen.Phase.FIGHT, FishingScreen.Phase.RESULT:
 			if scr._lifted() or scr._landing_now():
 				_draw_line(false)
-				_draw_lifted_fish(tip)
 			elif not scr._hud.is_empty():
 				_draw_fight(size)
 		FishingScreen.Phase.LIFT:
 			_draw_line(false)
-			_draw_lifted_fish(tip)
-	scr._gulls.draw(self, size, float(scr._env.get("light", 0.6)))
 	for p: Dictionary in scr._fx.particles:
 		draw_circle(p["pos"], p["size"], Color(0.92, 0.96, 1.0, 0.85 * float(p["life"]) / float(p["max_life"])))
 	if scr._water.stage != null:
@@ -69,23 +54,11 @@ func _draw_fight(size: Vector2) -> void:
 	var pos := scr._fish_world()
 	if not line_gone and scr.phase == FishingScreen.Phase.FIGHT:
 		_draw_line(float(scr._hud["strain_ratio"]) > 0.0)
-	var jump_h := scr._jump_height()
 	# Which way it runs: a small arrow at the line's end, so side strain can be read.
 	if scr.phase == FishingScreen.Phase.FIGHT and scr._hud["fish_state"] == "run" and not line_gone:
 		var at := WaterView.project(pos, 0.0, size) + Vector2(0.0, -26.0)
 		var hd := float(scr._hud["heading"])
 		draw_colored_polygon(PackedVector2Array([at + Vector2(hd * 16.0, 0.0), at + Vector2(-hd * 6.0, -9.0), at + Vector2(-hd * 6.0, 9.0)]), Color(1, 1, 1, 0.85))
-	if (scr._hud["fish_visible"] or jump_h > 0.0) and not line_gone and scr._fish:
-		var pts := PackedVector2Array()
-		for w: Vector2 in scr._fish.outline():
-			pts.append(WaterView.project(scr._fish.head + (w - scr._fish.head) * FishingScreen.FISH_DRAW_SCALE, jump_h, size))
-		var shade := Color(0.05, 0.08, 0.1, 0.55 + 0.3 * float(scr._env.get("visibility", 0.5)))
-		if jump_h > 0.0:
-			shade = Color(0.62, 0.68, 0.72).darkened(0.5 * (1.0 - float(scr._env.get("light", 0.6))))
-		if Geometry2D.triangulate_polygon(pts).size() > 0:
-			draw_colored_polygon(pts, shade)
-		else:
-			draw_polyline(pts, shade, 3.0, true)
 
 
 ## The standing place is 3D (Stage3D); the overlay adds the neighbours' lines
@@ -123,9 +96,6 @@ func _draw_line(strained: bool) -> void:
 		if ph > 0.92:
 			col = col.lerp(Color(1, 1, 1, 1), (ph - 0.92) / 0.08 * (0.35 + 0.65 * light))
 		draw_line(pts[i], pts[i + 1], col, w, true)
-	# Where the line meets the water: a small ripple, so it reads as cutting the surface.
-	if scr._has_line and (scr.phase == FishingScreen.Phase.WAIT or scr.phase == FishingScreen.Phase.FIGHT):
-		_ring_at(scr._end_pos, 5.0 + 2.0 * sin(scr._time * 3.1), Color(1, 1, 1, 0.3))
 
 
 ## While charging: where the lure would land at the current power and aim
@@ -140,12 +110,6 @@ func _draw_aim_marker(size: Vector2) -> void:
 	var ry := WaterView.CAM_HEIGHT * 0.8 / (world.y * world.y * WaterView.FOV) * size.y
 	_ellipse(centre, maxf(rx, 6.0), maxf(ry, 2.0), Color(1, 1, 1, 0.6))
 	_ellipse(centre, maxf(rx, 6.0) * 0.4, maxf(ry, 2.0) * 0.4, Color(1, 1, 1, 0.45))
-
-
-func _ring_at(centre: Vector2, r: float, color: Color) -> void:
-	draw_set_transform(centre, 0.0, Vector2(1.0, 0.3))
-	draw_arc(Vector2.ZERO, r, 0.0, TAU, 14, color, 1.0, true)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _ellipse(centre: Vector2, rx: float, ry: float, color: Color) -> void:
@@ -194,48 +158,3 @@ func _draw_tension_bar(size: Vector2) -> void:
 	var strain: float = clampf(float(scr._hud["strain_ratio"]), 0.0, 1.0)
 	if strain > 0.0:
 		draw_rect(Rect2(x, y - 14, w * strain, 6), Color(1.0, 0.35, 0.25))
-
-
-func _draw_lifted_fish(tip: Vector2) -> void:
-	var pts := scr._lift_points()
-	var mouth: Vector2 = pts[0]
-	var length_px := scr._lift_length_px()
-	var dir := (pts[1] - mouth).normalized()
-	var side := Vector2(-dir.y, dir.x)
-	var flap := 0.18 if scr._lift_t > FishingScreen.LIFT_RISE_S else 0.05
-	if scr._landing_now():
-		flap = 0.3 if scr._hud["kicking"] else 0.04
-	var left := PackedVector2Array()
-	var right := PackedVector2Array()
-	var spine := PackedVector2Array()
-	for i in FishBody.SEGMENTS:
-		var s := float(i) / float(FishBody.SEGMENTS - 1)
-		var sway := sin(scr._time * 11.0 - s * 4.0) * flap * length_px * s * s
-		spine.append(mouth + dir * s * length_px + side * sway)
-	for i in spine.size():
-		var s := float(i) / float(spine.size() - 1)
-		var a: Vector2 = spine[maxi(i - 1, 0)]
-		var b: Vector2 = spine[mini(i + 1, spine.size() - 1)]
-		var d := (b - a).normalized()
-		var n := Vector2(-d.y, d.x)
-		var w := FishBody.half_width(s) * length_px * 1.3
-		left.append(spine[i] + n * w)
-		right.append(spine[i] - n * w)
-	var tail: Vector2 = spine[spine.size() - 1]
-	var back := (tail - spine[spine.size() - 2]).normalized()
-	var across := Vector2(-back.y, back.x)
-	var fin := length_px * 0.16
-	var outline := PackedVector2Array()
-	outline.append_array(left)
-	outline.append(tail + back * fin + across * fin * 0.8)
-	outline.append(tail + back * fin * 0.35)
-	outline.append(tail + back * fin - across * fin * 0.8)
-	right.reverse()
-	outline.append_array(right)
-	if Geometry2D.triangulate_polygon(outline).size() > 0:
-		draw_colored_polygon(outline, Color(0.62, 0.68, 0.72))
-	outline.append(outline[0])
-	draw_polyline(outline, Color(0.12, 0.15, 0.18), 2.0, true)
-	# Dark back along the spine and an eye near the mouth.
-	draw_polyline(spine.slice(0, spine.size() - 1), Color(0.2, 0.25, 0.3, 0.8), maxf(length_px * 0.05, 2.0), true)
-	draw_circle(mouth + dir * length_px * 0.06 + side * length_px * 0.03, maxf(length_px * 0.018, 2.0), Color(0.05, 0.05, 0.05))

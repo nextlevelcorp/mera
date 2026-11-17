@@ -9,7 +9,8 @@
 | Catch model, cast, wait and strike, fight, landing, why view | Implemented | `data_model.md` 5 |
 | Controlled retrieve and lure depth, shoals and gulls, clock-based conditions | Implemented | `changelog.md` |
 | First-person 3D: sea, sky, bridge, neighbours, rod, reel, hands | Implemented; hands simple | `architecture.md` 5, 6 |
-| 3D fish, line, rings, gulls | Designed (still a 2D overlay) | `architecture.md` 5, R6 |
+| 3D fish, rings, gulls | Implemented (R6) | `architecture.md` 5 |
+| 3D line, 3D splash droplets, per-species fish look | Designed | `architecture.md` 5 |
 | Phone motion (strike, pull, jig), settings | Implemented; owner: "a bit better", not tuned | `changelog.md` |
 | Sound (CC0 beds and one-shots) | Implemented for fishing | `reference_docs.md` |
 | Save v2 (log, settings, bag, money field, counters), migration from v1 | Implemented | `data_model.md` 12 |
@@ -41,7 +42,7 @@
 | R3 | Save v2 with migration; `Inventory`, money field and counters **(done 2026-11-17)**; lure stock moves to R8 | R2 | Fish go to the bag; lost lures are counted | Migration test from a v1 file; inventory tests | `sim/save_game.gd`, `data_model.md` 12 |
 | R4 | World prototype: one grey-box area (the Galata Bridge from above), player, camera, markers, hand-over both ways **(done 2026-11-17 in the browser; the phone check and the frame rate are the owner's)** | R2, D1 for final art | Walk, fish, come back | Played on the phone; frame rate measured | `scenes/world/`, `architecture.md` 4 |
 | R5 | Stage interface; `Bridge3D` as the first stage, a quay as the second **(done 2026-11-17)** | R1 | Positions choose their stage | Two stages render; tests for tips and lures per stage | `ui/sea/` |
-| R6 | 3D fish, 3D line, rings in the sea shader, 3D gulls | R1 | No overlay drawing in the water | Rings hidden by the rail; fps measured before and after | `ui/sea/`, `ui/fx/` |
+| R6 | 3D fish, rings in the sea shader, 3D gulls **(done 2026-11-17 except the line, which stays 2D on purpose)** | R1 | No fish, ring or gull drawing on the overlay | Rings hidden by the rail; fps measured before and after (the owner's) | `ui/sea/`, `ui/fx/` |
 | R7 | Asset pipeline; CC0 hand model and PBR textures for deck, rail, cork | D3 | Realistic hands and close surfaces | Licence rows written; download size and fps reported | `game/assets/`, `reference_docs.md` |
 | R8 | Economy: fishmonger and tackle shop | R3, R4 | Sell fish, buy tackle | Price tests; played | `sim/economy.gd`, `data/shop.json` |
 | R9 | Progression: experience, skills, spot unlocks | R3 | Skills change cast and strike numbers | Tests show the attribute path; why view names the skill | `sim/progress.gd` |
@@ -75,6 +76,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R6 scene effects (2026-11-17): 170 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720) with forced horse mackerel and bluefish fights: thin rings and the lure's ripple on the water, a dark fish shadow under the ring near the shore, gulls as small flapping shapes over the sea, a silvery bluefish hanging from the line while the landing kicks and in the lift; no console errors. Not seen: a jump in the air (the unit tests cover the mesh; a jump is short and the captures missed it), the effects at night and at 844x390. **Owner check:** the debug fps line in a fight, before (47 worst 1% at the last measure) and after; the sea shader now loops over up to 12 rings and 8 shadow blobs per pixel only while they exist.
 - R5 stages (2026-11-17): 164 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): the debug "Place" button switched the Galata position from the bridge to the quay, the quay showed a stone edge without a rail and a neighbour at the edge, the view turned to the water on the cast and the wait ran as before; no console errors. Not checked: the quay at night and at 844x390, and its frame rate on the phone. The quay is a generic shape; no real position uses it yet.
 - R4 world prototype (2026-11-17): 161 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL) at 1280x720 and 844x390: title, "Walk the bridge", walking down the walkway with the stick, the debug jump to a marker, "Fish here" (a button and Enter), the first-person fishing view at that position, Back to the world with "Last trip: 0 casts, 0 fish landed" in a toast; no console errors. Found and fixed while playing: the action button's text did not fit. Not checked: the stick with real thumbs, the frame rate of the world on the phone, a catch landed from the world and shown in the bag (the same code path as from the title, which was played).
 - R2 second part and R3 (2026-11-17): 153 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720): a forced horse mackerel was fought and reeled up, Back showed "Last trip: 1 casts, 1 fish landed" and "In the bag: 1 fish"; fishing opened again. Not played: a version 1 save from a real phone migrating (unit test only; the owner's phone has one, so the first load there is the real check).

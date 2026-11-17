@@ -9,6 +9,9 @@ extends Control
 
 const SEA_SHADER := preload("res://ui/sea/sea.gdshader")
 const SKY_SHADER := preload("res://ui/sea/sky.gdshader")
+const GULL_SHADER := preload("res://ui/sea/gull.gdshader")
+const MAX_RINGS := 12
+const MAX_SHADOWS := 8
 const CAM_NEAR := 0.05
 const HORIZON := 0.38
 const CAM_HEIGHT := 2.2
@@ -52,6 +55,9 @@ var _sky: ShaderMaterial
 var _env: Environment
 var _sun: DirectionalLight3D
 var _root: Node3D
+var gulls_mm: MultiMeshInstance3D
+var fish_world: Fish3D
+var fish_hand: Fish3D
 var _light := 1.0
 
 
@@ -97,8 +103,24 @@ func _init() -> void:
 	camera = make_camera()
 	root.add_child(camera)
 	_root = root
+	var gull_mm := MultiMesh.new()
+	gull_mm.transform_format = MultiMesh.TRANSFORM_3D
+	gull_mm.use_custom_data = true
+	gull_mm.mesh = GullFlock.gull_mesh()
+	gulls_mm = MultiMeshInstance3D.new()
+	gulls_mm.multimesh = gull_mm
+	var gull_mat := ShaderMaterial.new()
+	gull_mat.shader = GULL_SHADER
+	gulls_mm.material_override = gull_mat
+	gulls_mm.custom_aabb = AABB(Vector3(-200, -5, -300), Vector3(400, 60, 300))
+	gulls_mm.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	root.add_child(gulls_mm)
+	fish_world = Fish3D.new()
+	root.add_child(fish_world)
 	rig3d = Rig3D.new()
 	camera.add_child(rig3d)
+	fish_hand = Fish3D.new()
+	camera.add_child(fish_hand)
 	_sun.shadow_enabled = true
 	_sun.directional_shadow_mode = DirectionalLight3D.SHADOW_ORTHOGONAL
 	_sun.directional_shadow_max_distance = 40.0
@@ -157,6 +179,48 @@ func set_stage(kind: String) -> void:
 	if stage != null:
 		_root.add_child(stage)
 		stage.set_light(_light)
+
+
+## Rings and boils on the surface, from SplashFx.rings (world: x right, z out).
+## At most MAX_RINGS, the strongest first when there are more.
+func set_rings(rings: Array[Dictionary], extra: Array[Vector4] = []) -> void:
+	_sea.set_shader_parameter("ring_count", 0)
+	var packed := pack_rings(rings, extra)
+	_sea.set_shader_parameter("rings", packed)
+	_sea.set_shader_parameter("ring_count", packed.size())
+
+
+## The shader's ring array (x, z in the sea's own coordinates where z runs
+## away as a negative number; radius; strength). Extra rings come first.
+static func pack_rings(rings: Array[Dictionary], extra: Array[Vector4] = []) -> PackedVector4Array:
+	var live: Array[Vector4] = []
+	live.append_array(extra)
+	for r: Dictionary in rings:
+		var world: Vector2 = r["world"]
+		var strength := SplashFx.ring_alpha(r)
+		if strength > 0.02:
+			live.append(Vector4(world.x, -world.y, SplashFx.ring_radius(r), strength))
+	live.sort_custom(func(a: Vector4, b: Vector4) -> bool: return a.w > b.w)
+	var out := PackedVector4Array()
+	for v: Vector4 in live.slice(0, MAX_RINGS):
+		out.append(v)
+	return out
+
+
+## A fish under the surface as soft dark blobs along its spine (water
+## metres, head first); strength 0..1 hides it with distance and clarity.
+## An empty spine clears the shadow.
+func set_fish_shadow(spine: PackedVector2Array, radius_m: float, strength: float) -> void:
+	var out := PackedVector4Array()
+	if spine.size() >= 2 and strength > 0.01:
+		var step := float(spine.size() - 1) / float(MAX_SHADOWS - 1)
+		for i in MAX_SHADOWS:
+			var p: Vector2 = spine[mini(int(roundf(step * i)), spine.size() - 1)]
+			var s := float(i) / float(MAX_SHADOWS - 1)
+			out.append(Vector4(p.x, -p.y, maxf(radius_m * (0.6 + 0.8 * sin(PI * clampf(s * 0.9 + 0.05, 0.0, 1.0))), 0.06), strength))
+	_sea.set_shader_parameter("shadow_count", 0)
+	_sea.set_shader_parameter("fish_shadow", out if not out.is_empty() else PackedVector4Array([Vector4()]))
+	_sea.set_shader_parameter("shadow_count", out.size())
 
 
 func set_view_yaw(yaw: float) -> void:

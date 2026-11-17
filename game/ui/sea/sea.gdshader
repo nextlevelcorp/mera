@@ -18,6 +18,15 @@ uniform vec2 wind = vec2(0.3, -1.0);
 // 1 adds wind slicks, finer ripples and whitecap texture; the debug menu
 // switches it off to measure its cost on the phone.
 uniform float detail = 1.0;
+// Rings and boils on the surface (x, z in the sea's world, radius, strength)
+// and fish seen as shadows under the water (x, z, radius, strength); both
+// are filled by WaterView from the splash effects and the fight.
+const int MAX_RINGS = 12;
+const int MAX_SHADOWS = 8;
+uniform int ring_count = 0;
+uniform vec4 rings[MAX_RINGS];
+uniform int shadow_count = 0;
+uniform vec4 fish_shadow[MAX_SHADOWS];
 uniform sampler2D ripple_tex : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
 
 varying vec3 v_world;
@@ -79,7 +88,23 @@ void fragment() {
 		slick = smoothstep(0.55, 0.75, texture(cloud_tex, p * vec2(0.0045, 0.0016) + TIME * 0.0012).r) * (1.0 - 0.7 * chop);
 	}
 	float ripple = (0.16 + 0.34 * chop) * (1.0 - 0.8 * slick) / (1.0 + dist * 0.012);
-	vec3 n = normalize(normalize(v_normal) + ripples(p, ripple));
+	// Rings: a narrow raised band pushing the normal outwards, so it catches
+	// the sky and the sun like a real ripple, and hides behind whatever is nearer.
+	vec3 ring_n = vec3(0.0);
+	float ring_glow = 0.0;
+	for (int i = 0; i < MAX_RINGS; i++) {
+		if (i >= ring_count) {
+			break;
+		}
+		vec2 dv = p - rings[i].xy;
+		float d = length(dv);
+		float w = 0.04 + 0.05 * rings[i].z;
+		float x = (d - rings[i].z) / w;
+		float k = exp(-x * x) * rings[i].w / (1.0 + 0.6 * rings[i].z);
+		ring_n += vec3(dv.x, 0.0, dv.y) / max(d, 0.001) * k;
+		ring_glow += k;
+	}
+	vec3 n = normalize(normalize(v_normal) + ripples(p, ripple) + ring_n * 0.6);
 
 	float ndv = max(dot(n, v), 0.0);
 	float fresnel = 0.02 + 0.98 * pow(1.0 - ndv, 5.0);
@@ -92,6 +117,17 @@ void fragment() {
 
 	// The water body: darker looking down into it, clearer water a little brighter.
 	vec3 body = mix(water_shallow, water_deep, smoothstep(0.15, 0.6, ndv)) * (0.35 + 0.65 * light) * (0.75 + 0.5 * visibility);
+	// A fish under the surface: a soft dark body along its spine.
+	float shade = 0.0;
+	for (int i = 0; i < MAX_SHADOWS; i++) {
+		if (i >= shadow_count) {
+			break;
+		}
+		vec2 q = (p - fish_shadow[i].xy) / fish_shadow[i].z;
+		shade += exp(-dot(q, q)) * fish_shadow[i].w;
+	}
+	shade = clamp(shade, 0.0, 1.0);
+	body *= 1.0 - 0.8 * shade;
 	// Light through the crests: thin water lit from behind when facing the sun.
 	vec3 sun = normalize(sun_dir);
 	vec2 sun_h = normalize(sun.xz + vec2(1e-4));
@@ -99,6 +135,8 @@ void fragment() {
 	body += water_shallow * sun_color * clamp(v_crest, 0.0, 1.0) * back * 0.9 * light;
 
 	vec3 col = mix(body, refl, fresnel);
+	col *= 1.0 - 0.3 * shade;
+	col += vec3(0.85, 0.9, 1.0) * (0.1 + 0.25 * light) * clamp(ring_glow, 0.0, 1.0) * 0.3;
 
 	// Sun glitter: a sharp highlight and a broad sheen on the facets.
 	float rs = max(dot(r, sun), 0.0);

@@ -127,9 +127,15 @@ func pose(rig: AnglerRig, pts: PackedVector2Array, size: Vector2) -> void:
 
 ## A screen point at depth z (metres in front of the camera) as a 3D point.
 func _lift(p: Vector2, z: float) -> Vector3:
-	var aspect := _size.x / maxf(_size.y, 1.0)
-	return Vector3((p.x / _size.x - 0.5) * aspect * WaterView.FOV * z,
-			-(p.y / _size.y - WaterView.HORIZON) * WaterView.FOV * z, -z)
+	return Rig3D.lift_point(p, z, _size)
+
+
+## A screen point at depth z in front of the camera, as a point in the
+## camera's own space (so a child of the camera lands where it is drawn).
+static func lift_point(p: Vector2, z: float, size: Vector2) -> Vector3:
+	var aspect := size.x / maxf(size.y, 1.0)
+	return Vector3((p.x / size.x - 0.5) * aspect * WaterView.FOV * z,
+			-(p.y / size.y - WaterView.HORIZON) * WaterView.FOV * z, -z)
 
 
 ## Metres per screen pixel at depth z.
