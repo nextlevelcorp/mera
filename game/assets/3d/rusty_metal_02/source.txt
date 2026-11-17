@@ -1,0 +1,6 @@
+rusty_metal_02: quay bollards
+Source: https://polyhaven.com/a/rusty_metal_02
+Files: https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/rusty_metal_02/
+Licence: CC0 1.0 per Poly Haven's licence policy (https://polyhaven.com/license). The asset page itself
+was not readable from the build environment (HTTP 403) when this was fetched: verify it there.
+Processing: 1k JPG diffuse, OpenGL normal and roughness maps, resized to 512 px, lossy WebP quality 82.

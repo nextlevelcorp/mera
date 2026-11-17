@@ -25,10 +25,10 @@ func _init() -> void:
 
 
 func _build_surface() -> void:
-	var paving := _material(Color(0.36, 0.35, 0.34), 0.0, 0.82, 0.45)
+	var paving := pbr_material("concrete_pavement", Color(0.82, 0.8, 0.78), 3.0)
 	var back := -6.0
 	_box(Vector3(LENGTH, 0.6, 14.3), Vector3(LENGTH * 0.5 + back, -0.3, -6.9), paving)
-	_box(Vector3(LENGTH, 0.16, 0.32), Vector3(LENGTH * 0.5 + back, 0.08, 0.02), _material(Color(0.42, 0.41, 0.4), 0.0, 0.7, 0.8))
+	_box(Vector3(LENGTH, 0.16, 0.32), Vector3(LENGTH * 0.5 + back, 0.08, 0.02), pbr_material("concrete_pavement", Color(1.0, 0.98, 0.95), 2.0))
 	# Rails: a round handrail and two thinner bars.
 	for bar: Array in [[RAIL_H, 0.036], [0.72, 0.016], [0.4, 0.016]]:
 		var m := CylinderMesh.new()

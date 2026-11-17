@@ -2,7 +2,9 @@ class_name Quay3D
 extends Stage3D
 ## A stone quay (roadmap R5, the second stage): a cobbled apron, a stone
 ## coping at the edge with no rail, iron bollards every few metres, a wet
-## stone wall going down into the water and low lamp standards. The
+## stone wall going down into the water and low lamp standards, with CC0
+## textures from Poly Haven (cobblestone_floor_04, rough_concrete,
+## stone_wall_04, rusty_metal_02). The
 ## neighbours stand right at the edge. The look along the quay is gentler
 ## than along a bridge. Generic: no real quay is modelled yet (the first
 ## position that uses it needs sourced data, roadmap R14).
@@ -25,10 +27,10 @@ func _init() -> void:
 
 
 func _build_surface() -> void:
-	var cobbles := _material(Color(0.42, 0.4, 0.37), 0.0, 0.9, 0.35)
-	var stone := _material(Color(0.5, 0.48, 0.44), 0.0, 0.8, 0.6)
-	var wet := _material(Color(0.16, 0.18, 0.2), 0.0, 0.4, 0.5)
-	var iron := _material(Color(0.07, 0.07, 0.08), 0.8, 0.45, 0.0)
+	var cobbles := pbr_material("cobblestone_floor_04", Color(0.85, 0.83, 0.8), 1.5)
+	var stone := pbr_material("rough_concrete", Color(0.95, 0.93, 0.9), 2.0)
+	var wet := pbr_material("stone_wall_04", Color(0.4, 0.45, 0.5), 1.5)
+	var iron := pbr_material("rusty_metal_02", Color(0.7, 0.7, 0.72), 0.8, 0.25)
 	var back := -6.0
 	# The apron, the coping and the wall below the waterline.
 	_box(Vector3(LENGTH, 0.6, 16.0), Vector3(LENGTH * 0.5 + back, -0.3, -8.0), cobbles)
