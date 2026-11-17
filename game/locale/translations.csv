@@ -171,3 +171,23 @@ DBG_STAGE_QUAY,quay,rıhtım,muelle
 DBG_SHADOWS,Shadows,Gölgeler,Sombras
 DBG_GLOW,Glow,Parlama,Resplandor
 DBG_LAMPS,Lamp lights,Lamba ışıkları,Luces de farolas
+NO_LURES,No lures for this rig: buy more at the tackle shop,Bu takım için yem kalmadı: olta dükkânından al,No te quedan señuelos para este equipo: compra más en la tienda
+LURE_LOST,The lure is gone. %d left.,Yem gitti. %d kaldı.,Se perdió el señuelo. Quedan %d.
+RIG_STOCK,In your bag: %d,Çantanda: %d,En tu bolsa: %d
+MONEY_FMT,%d TL,%d TL,%d TL
+SHOP_FISHMONGER,Fishmonger,Balıkçı,Pescadería
+SHOP_TACKLE,Tackle shop,Olta dükkânı,Tienda de pesca
+SHOP_SELL_ALL,Sell all,Hepsini sat,Vender todo
+SHOP_SELL,Sell,Sat,Vender
+SHOP_RELEASE,Release,Bırak,Soltar
+SHOP_BUY,Buy,Al,Comprar
+SHOP_OWNED,owned: %d,sende: %d,tienes: %d
+SHOP_UNDERSIZE,under the legal size: release it,yasal boyun altında: suya bırak,bajo la talla legal: devuélvelo
+SHOP_NO_FISH,No fish in the bag,Çantada balık yok,No hay peces en la bolsa
+SHOP_SOLD,Sold %d fish for %d TL,%d balık %d TL'ye satıldı,Vendidos %d peces por %d TL
+SHOP_POOR,Not enough money,Yeterli para yok,No hay dinero suficiente
+WORLD_OPEN_SHOP,Go in,İçeri gir,Entrar
+WORLD_BAG,%d fish in the bag,Çantada %d balık,%d peces en la bolsa
+DBG_GIVE_MONEY,+100 money,+100 para,+100 dinero
+DBG_GIVE_FISH,+3 fish,+3 balık,+3 peces
+DBG_GIVE_LURES,+5 lures,+5 yem,+5 señuelos

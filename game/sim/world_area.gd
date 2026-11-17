@@ -8,6 +8,7 @@ extends RefCounted
 
 const DIR := "res://data/areas"
 const KINDS := ["plaza", "walkway", "road", "water"]
+const SHOPS := ["fishmonger", "tackle"]
 
 var id := ""
 var spot_id := ""
@@ -19,6 +20,7 @@ var rects: Array[Dictionary] = []   ## {kind, rect: Rect2, blocked}
 var rails: Array[Dictionary] = []   ## {from: Vector2, to: Vector2}
 var lamps: Array[Vector2] = []
 var markers: Array[Dictionary] = [] ## {position_id, pos: Vector2, facing}
+var shops: Array[Dictionary] = []   ## {id, pos}: id is fishmonger or tackle
 
 
 ## Loads and validates an area. Returns {"ok", "errors", "area"}.
@@ -66,10 +68,17 @@ static func load_area(area_id: String, database: Dictionary) -> Dictionary:
 		if not position_ids.has(m["position_id"]):
 			errors.append("area:%s: marker for unknown position %s" % [area_id, m["position_id"]])
 		area.markers.append({"position_id": m["position_id"], "pos": _v(m["pos_m"]), "facing": String(m["facing"])})
+	for sh: Dictionary in d.get("shops", []):
+		if not String(sh.get("id", "")) in SHOPS:
+			errors.append("area:%s: unknown shop %s" % [area_id, str(sh.get("id"))])
+		area.shops.append({"id": String(sh.get("id", "")), "pos": _v(sh["pos_m"])})
 	if area.size_m.x <= 0.0 or area.size_m.y <= 0.0 or area.px_per_m <= 0.0:
 		errors.append("area:%s: size and scale must be positive" % area_id)
 	if area.blocked_at(area.start_m, 0.35):
 		errors.append("area:%s: the start point is blocked" % area_id)
+	for sh: Dictionary in area.shops:
+		if area.blocked_at(sh["pos"], 0.35):
+			errors.append("area:%s: shop %s stands on blocked ground" % [area_id, sh["id"]])
 	for m: Dictionary in area.markers:
 		if area.blocked_at(m["pos"], 0.35):
 			errors.append("area:%s: marker %s stands on blocked ground" % [area_id, m["position_id"]])

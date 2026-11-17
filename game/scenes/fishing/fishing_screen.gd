@@ -283,8 +283,20 @@ func _set_phase(p: int) -> void:
 
 # ------------------------------------------------------------------ cast
 
+## The lure the current rig fishes with, and how many are left in the bag.
+func lure_id() -> String:
+	return FightSetup.lure_id(rig)
+
+
+func lure_stock() -> int:
+	return Inventory.count(save, lure_id())
+
+
 func begin_charge() -> void:
 	if phase != Phase.READY:
+		return
+	if lure_stock() <= 0:
+		_toast(tr("NO_LURES"), 3.5)
 		return
 	_charge_s = 0.0
 	_aim = 0.0
@@ -465,6 +477,11 @@ func _finish_fight() -> void:
 	var sp: Dictionary = _fight_ctx["species"]
 	_result = {"outcome": outcome, "species_id": sp["id"], "length_cm": float(_fight_ctx["play"]["fish_length_cm"]), "weight_kg": _controller.sim.weight_kg}
 	_session.record_outcome(outcome, _fight_ctx, _controller.sim.weight_kg)
+	# A broken line or a bitten-through leader takes the lure with it, now, so
+	# closing the tab does not bring it back.
+	_result["lure_lost"] = outcome in [FightSim.OUTCOME_LINE_BREAK, FightSim.OUTCOME_LEADER_CUT] and Economy.lose_lure(save, _fight_ctx["lure"]["id"])
+	if _result["lure_lost"]:
+		_store()
 	if outcome == FightSim.OUTCOME_LANDED:
 		_result.merge(SaveGame.record_catch(save, sp["id"], _result["length_cm"], _result["weight_kg"], Time.get_date_string_from_system()))
 		_store()
@@ -1125,6 +1142,8 @@ func _show_result() -> void:
 		var rule: Dictionary = _fight_ctx["species"].get("regulation", {})
 		if rule.has("min_length_cm") and float(_result["length_cm"]) < float(rule["min_length_cm"]):
 			lines.append(tr("FISH_UNDERSIZE") % float(rule["min_length_cm"]))
+	if _result.get("lure_lost", false):
+		lines.append(tr("LURE_LOST") % lure_stock())
 	lines.append(tr("FIGHT_DETAIL") % [_hud["time_s"], _hud["max_tension_kg"], _hud["line_strength_kg"]])
 	if _hud["cap_applied"]:
 		lines.append(tr("FIGHT_CAP"))
@@ -1172,7 +1191,7 @@ func _update_texts() -> void:
 	_ui.rig_cycle.text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_ctx["rod"]["name_key"])]
 	_ui.position_cycle.text = "%s: %s" % [tr("FISH_POSITION"), tr(pos["name_key"])]
 	var cast_check := CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], pos, conditions, 1.0)
-	_ui.rig_label.text = tr("FISH_RIG_INFO") % [tr(_ctx["lure"]["name_key"]), float(cast_check["cast_max_m"])]
+	_ui.rig_label.text = tr("FISH_RIG_INFO") % [tr(_ctx["lure"]["name_key"]), float(cast_check["cast_max_m"])] + "\n" + tr("RIG_STOCK") % lure_stock()
 	if cast_check["lure_out_of_range"]:
 		_ui.rig_label.text += "\n" + tr("RIG_WARN_RANGE")
 	_ui.speed_button.button_pressed = _speed_on

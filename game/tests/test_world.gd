@@ -89,6 +89,7 @@ func test_the_nearest_marker_is_found_within_reach() -> void:
 
 func test_the_world_screen_hands_a_request_to_fishing_and_takes_the_result_back() -> void:
 	var world := WorldScreen.new()
+	world.profile_path = ""
 	world.conditions = {"slot": "dawn", "month": 5, "wind_dir": "NE", "wind_ms": 4}
 	world.setup()
 	assert_eq(world.modulate, WorldScreen.TINT["dawn"], "the world is tinted for the slot")
@@ -118,6 +119,7 @@ func test_the_world_screen_hands_a_request_to_fishing_and_takes_the_result_back(
 
 func test_a_world_request_sets_the_fishing_screen_up() -> void:
 	var world := WorldScreen.new()
+	world.profile_path = ""
 	world.conditions = {"slot": "night", "month": 11, "wind_dir": "S", "wind_ms": 5}
 	world.setup()
 	world.walk.teleport(world.area.markers[1]["pos"] + Vector2(0.0, 0.5))
@@ -137,3 +139,68 @@ func test_the_world_strings_are_translated() -> void:
 		for key: String in ["MAIN_WALK", "WORLD_FISH_HERE", "WORLD_WALK_HINT", "DBG_NEXT_MARKER"]:
 			assert_true(TranslationServer.translate(key) != key, "%s has a %s translation" % [key, locale])
 	TranslationServer.set_locale("en")
+
+
+func test_the_shops_stand_on_open_ground_and_are_found_within_reach() -> void:
+	var a := _area()
+	assert_eq(a.shops.size(), 2, "a fishmonger and a tackle shop")
+	var ids := []
+	for sh: Dictionary in a.shops:
+		ids.append(sh["id"])
+		assert_true(not a.blocked_at(sh["pos"], 0.35), "%s stands on open ground" % sh["id"])
+	assert_true("fishmonger" in ids and "tackle" in ids, "both kinds")
+	var w := WorldWalk.new(a, Db.constants())
+	assert_true(w.nearest_shop().is_empty(), "no shop near the start")
+	w.teleport(a.shops[0]["pos"] + Vector2(0.0, 1.0))
+	assert_eq(w.nearest_shop()["id"], a.shops[0]["id"], "a shop within reach")
+	var broken := Db.database().duplicate()
+	assert_true(WorldArea.load_area("galata_bridge", broken)["ok"], "the area still loads")
+
+
+func test_the_action_button_opens_a_shop_before_it_fishes() -> void:
+	var world := WorldScreen.new()
+	world.profile_path = ""
+	world.conditions = {"slot": "day", "month": 5, "wind_dir": "NE", "wind_ms": 2}
+	world.setup()
+	var fish_requests := []
+	world.fish_requested.connect(func(request: Dictionary) -> void: fish_requests.append(request))
+	world.walk.teleport(world.area.shops[0]["pos"] + Vector2(0.0, 1.0))
+	world._process(0.016)
+	assert_true(world._action.visible, "the action button shows at a shop")
+	world.act()
+	assert_true(world._shop.visible and world._shop.kind == world.area.shops[0]["id"], "the shop panel opens")
+	assert_eq(fish_requests.size(), 0, "and nothing is fished")
+	world._process(0.016)
+	assert_true(not world._action.visible, "the button hides while the panel is open")
+	world._shop.closed.emit()
+	world._shop.visible = false
+	world.walk.teleport(world.area.markers[0]["pos"] + Vector2(0.0, 0.5))
+	world._process(0.016)
+	world.act()
+	assert_eq(fish_requests.size(), 1, "at a fishing marker the same button fishes")
+	assert_true(world._wallet.text.contains("TL"), "the wallet shows money")
+	world.free()
+
+
+func test_the_shop_panel_sells_and_buys_through_the_save() -> void:
+	Profile.open("")
+	var save := Profile.save
+	Inventory.add_fish(save, "lufer", 30.0, 0.4, "2026-11-17")
+	Inventory.add_fish(save, "istavrit", 10.0, 0.02, "2026-11-17")
+	var panel := ShopPanel.new()
+	var changes := []
+	panel.changed.connect(func() -> void: changes.append(1))
+	panel.open("fishmonger")
+	assert_true(panel.visible and panel._rows.get_child_count() >= 2, "a row per fish")
+	var before := Economy.money(save)
+	var rows := Economy.bag_fish(save, Db.shop(), Db.database()["species"])
+	Economy.sell(save, Db.shop(), Db.database()["species"], int(rows[0]["index"]))
+	assert_true(Economy.money(save) > before, "selling paid")
+	panel.open("tackle")
+	assert_true(panel._title.text != "", "the tackle shop has a title")
+	save["money"] = 500
+	var stock := Inventory.count(save, "lrf_soft")
+	Economy.buy(save, Db.shop(), "lrf_soft")
+	assert_eq(Inventory.count(save, "lrf_soft"), stock + 1, "buying adds a lure")
+	panel.free()
+	Profile.open("")
