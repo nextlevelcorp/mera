@@ -37,6 +37,8 @@ var distance_label: Label
 var drag_label: Label
 var rig_panel: Control
 var rig_label: Label
+var float_row: HBoxContainer
+var float_label: Label
 var rig_cycle: Button
 var position_cycle: Button
 var result_panel: Control
@@ -190,6 +192,16 @@ func _build_rig_panel() -> void:
 		var positions: Array = scr._db["spot"][0]["positions"]
 		scr.set_rig(scr.rig, positions[(scr._position_index(scr.position_id) + 1) % positions.size()]["id"]))
 	box.add_child(position_cycle)
+	# Float rig: where the float stop sits, so the bait hangs at that depth (R12).
+	float_row = HBoxContainer.new()
+	float_row.add_theme_constant_override("separation", 8)
+	float_row.add_child(_button(tr("RIG_SHALLOWER"), 22, func() -> void: scr.change_float_depth(-0.5)))
+	float_label = _plain_label("", 20)
+	float_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	float_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	float_row.add_child(float_label)
+	float_row.add_child(_button(tr("RIG_DEEPER"), 22, func() -> void: scr.change_float_depth(0.5)))
+	box.add_child(float_row)
 	rig_label = _plain_label("", 18)
 	rig_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(rig_label)

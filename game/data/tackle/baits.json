@@ -1,0 +1,20 @@
+[
+ {
+  "id": "shrimp",
+  "name_key": "TACKLE_BAIT_SHRIMP",
+  "type": "shrimp",
+  "size_cm": 2.5,
+  "scent": 16,
+  "durability": 4,
+  "target_diet_tags": [
+   "crustacean"
+  ],
+  "effective_depth_min_m": 0,
+  "effective_depth_max_m": 30,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ }
+]

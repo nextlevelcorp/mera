@@ -40,5 +40,19 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "float_reel",
+  "name_key": "TACKLE_REEL_FLOAT",
+  "size": 2500,
+  "drag_max_kg": 3,
+  "retrieve_m_per_s": 0.7,
+  "smoothness": 12,
+  "line_capacity_m": 150,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]

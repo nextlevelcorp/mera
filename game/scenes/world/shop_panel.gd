@@ -108,6 +108,8 @@ func _fill_tackle(save: Dictionary) -> void:
 	for lure: Dictionary in Db.shop()["lures"]:
 		var id: String = lure["id"]
 		var record := Db.record("lure", id)
+		if record.is_empty():
+			record = Db.record("bait", id)
 		var line := HBoxContainer.new()
 		var info := _label(20, "%s · %s" % [tr(record["name_key"]), tr("SHOP_OWNED") % Inventory.count(save, id)])
 		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL

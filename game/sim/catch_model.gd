@@ -166,8 +166,13 @@ static func attraction(k: Dictionary, sp: Dictionary, lure: Dictionary, play: Di
 	var gape_cm: float = float(sp["mouth_gape_mm"]) / 10.0
 	var size_fit := band(float(lure["length_cm"]), float(k["SIZE_LO"]) * gape_cm, float(k["SIZE_HI"]) * gape_cm, float(k["SIZE_M"]) * gape_cm)
 	var speed_fit: float = 1.0 - float(k["SPEED_PEN"]) * absf(n(float(play["retrieve_speed"])) - n(float(sp["speed"])))
+	if Presentation.is_float(lure):
+		# A still bait: fast hunters pass it by more often than slow grazers (R12).
+		speed_fit = 1.0 - float(k["SPEED_PEN"]) * float(k["BAIT_STILL_PEN"]) * n(float(sp["speed"]))
 	var vis: float = float(env["visibility"])
-	var detect: float = float(k["DETECT_BASE"]) + (1.0 - float(k["DETECT_BASE"])) * (vis + (1.0 - vis) * (0.5 * n(float(lure["flash"])) + 0.5 * n(float(lure["action"]))))
+	# Fish find a lure by sight (flash, action) and a bait by smell, whichever is stronger.
+	var cue := maxf(0.5 * n(float(lure["flash"])) + 0.5 * n(float(lure["action"])), n(float(lure.get("scent", 1))))
+	var detect: float = float(k["DETECT_BASE"]) + (1.0 - float(k["DETECT_BASE"])) * (vis + (1.0 - vis) * cue)
 	return {
 		"inputs": {"lure_depth_m": lure_depth, "lure_length_cm": float(lure["length_cm"]), "retrieve_speed": float(play["retrieve_speed"]), "visibility": vis},
 		"G": reach, "M": diet_match, "Z": size_fit, "V": speed_fit, "F": detect,

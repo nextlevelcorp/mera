@@ -54,5 +54,19 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "float_leader",
+  "name_key": "TACKLE_LEADER_FLOAT",
+  "type": "fluorocarbon",
+  "length_m": 1.0,
+  "breaking_strain_kg": 2.5,
+  "visibility": 3,
+  "abrasion_resistance": 10,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]

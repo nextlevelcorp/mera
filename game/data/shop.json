@@ -1,6 +1,6 @@
 {
  "design_fill": true,
- "note": "Prices are game-design fills, not market prices: no source for real fish or tackle prices was used. The currency is shown as TL (the default font has no lira sign).",
+ "note": "Prices are game-design fills, not market prices: no source for real fish or tackle prices was used. The currency is shown as TL (the default font has no lira sign). Bait (shrimp) is sold by the piece; one piece is used on every cast.",
  "price_per_kg": {
   "istavrit": 90,
   "lufer": 160,
@@ -19,11 +19,16 @@
   {
    "id": "capari_rig",
    "price": 45
+  },
+  {
+   "id": "shrimp",
+   "price": 4
   }
  ],
  "starting_stock": {
   "lrf_soft": 6,
   "spin_minnow": 3,
-  "capari_rig": 3
+  "capari_rig": 3,
+  "shrimp": 10
  }
 }

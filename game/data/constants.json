@@ -23,6 +23,7 @@
   "SIZE_HI": 4.0,
   "SIZE_M": 2.0,
   "SPEED_PEN": 0.8,
+  "BAIT_STILL_PEN": 0.6,
   "DETECT_BASE": 0.4,
   "COMMIT_BASE": 0.25,
   "COMMIT_AGG": 0.75,

@@ -18,6 +18,8 @@ var seed_counter := 1
 var trip := Game.empty_result()
 ## The player's save, for the skills (Progress); empty keeps the base angler.
 var save := {}
+## The float rig's depth (R12); the float's default until the angler changes it.
+var float_depth_m := -1.0
 
 
 func _init(database: Dictionary, constants: Dictionary, rig_id: String, position: String, session_conditions: Dictionary, shoal_field: ShoalField = null) -> void:
@@ -31,7 +33,11 @@ func _init(database: Dictionary, constants: Dictionary, rig_id: String, position
 
 ## The CatchModel context for a species on the current rig and position.
 func context(species_id: String, overrides: Dictionary = {}) -> Dictionary:
-	var ctx := FightSetup.build(db, species_id, rig, position_id, 0.5, conditions, overrides)
+	var o := overrides
+	if rig == "float" and float_depth_m > 0.0 and not o.has("float_depth_m"):
+		o = overrides.duplicate()
+		o["float_depth_m"] = float_depth_m
+	var ctx := FightSetup.build(db, species_id, rig, position_id, 0.5, conditions, o)
 	if not save.is_empty():
 		ctx["angler"] = Progress.angler(ctx["angler"], save, k)
 	if clarity_override > 0.0:
@@ -45,6 +51,9 @@ func context(species_id: String, overrides: Dictionary = {}) -> Dictionary:
 func cast(ctx: Dictionary, power: float) -> Dictionary:
 	trip["casts"] = int(trip["casts"]) + 1
 	seed_counter += 1
+	# A bait is used up on every cast (a lure is only lost to a break).
+	if Presentation.is_float(ctx["lure"]) and not save.is_empty():
+		Inventory.remove(save, ctx["lure"]["id"])
 	var c := CatchModel.cast(k, ctx["rod"], ctx["lure"], ctx["angler"], ctx["position"], conditions, power)
 	c["cast_m"] = maxf(float(c["cast_m"]), float(k["WAIT_END_M"]) + 2.0)
 	return c
