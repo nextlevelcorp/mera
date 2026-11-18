@@ -208,3 +208,29 @@ WORLD_SIGN_KARAKOY,Karaköy,Karaköy,Karaköy
 WORLD_SIGN_EMINONU,Eminönü,Eminönü,Eminönü
 WORLD_SIGN_FISH_MARKET,Fish market,Balık Pazarı,Mercado de pescado
 WORLD_SIGN_SPICE_BAZAAR,Spice Bazaar,Mısır Çarşısı,Bazar de las Especias
+QUEST_HASAN_SUPPER_TITLE,Supper for Hasan,Hasan'ın akşam yemeği,La cena de Hasán
+QUEST_HASAN_SUPPER_ASK,"Nothing bites for me today. Bring me three horse mackerel, legal size, and supper is saved.","Bugün bana hiç vurmuyor. Bana üç yasal boy istavrit getir, akşam yemeği kurtulsun.",Hoy no pica nada. Tráeme tres jureles de talla legal y la cena está salvada.
+QUEST_HASAN_SUPPER_THANKS,"Fine fish! Take these feathers, the çapari works at dawn.","Güzel balık! Al şu çaparileri, sabah erken iyi çalışır.","¡Buen pescado! Toma estos çapari, funcionan al amanecer."
+QUEST_HASAN_BLUEFISH_TITLE,A proper bluefish,Adam gibi bir lüfer,Una anjova como es debido
+QUEST_HASAN_BLUEFISH_ASK,"When the bluefish run, a real one is 24 cm or more. Show me one.","Lüfer akınca, gerçeği 24 santim ve üstüdür. Bana bir tane göster.","Cuando entra la anjova, una de verdad mide 24 cm o más. Enséñame una."
+QUEST_HASAN_BLUEFISH_THANKS,"Now that is a bluefish. Your knots held, I see.","İşte lüfer bu. Düğümlerin dayanmış, görüyorum.","Eso sí es una anjova. Tus nudos aguantaron, ya veo."
+QUEST_NURI_BONITO_TITLE,Nuri's bonito,Nuri'nin palamudu,El bonito de Nuri
+QUEST_NURI_BONITO_ASK,My grandson wants to see a bonito. Catch one for him?,Torunum palamut görmek istiyor. Ona bir tane tutar mısın?,Mi nieto quiere ver un bonito. ¿Le pescas uno?
+QUEST_NURI_BONITO_THANKS,He will not believe it. Strike quick like that and they stay on.,"İnanmayacak. Böyle hızlı vur, balık kaçmaz.",No se lo va a creer. Clava así de rápido y no se escapan.
+QUEST_AYTEN_NEIGHBOURS_TITLE,Fish for the neighbours,Komşulara balık,Pescado para los vecinos
+QUEST_AYTEN_NEIGHBOURS_ASK,"The whole building is coming to dinner. Five horse mackerel, legal size, and I will pay you in lures.","Bütün apartman yemeğe geliyor. Beş yasal boy istavrit getir, sana yemle öderim.",Viene a cenar todo el edificio. Cinco jureles de talla legal y te pago en señuelos.
+QUEST_AYTEN_NEIGHBOURS_THANKS,"Bless your hands. Soft lures, they fool the small ones.",Eline sağlık. Silikonlar küçükleri iyi kandırır.,"Bendita tus manos. Señuelos blandos, engañan a los pequeños."
+QUEST_RECEP_COUNTER_TITLE,Bluefish for the counter,Tezgâha lüfer,Anjova para el mostrador
+QUEST_RECEP_COUNTER_ASK,"Customers ask for bluefish and my ice is empty. Two legal ones, I pay above the market.","Müşteri lüfer soruyor, buzum boş. İki yasal boy getir, piyasanın üstünde öderim.","Los clientes piden anjova y mi hielo está vacío. Dos de talla legal, pago por encima del mercado."
+QUEST_RECEP_COUNTER_THANKS,"Fresh from the bridge, the best kind. Here, as promised.","Köprüden taze, en iyisi. Al, söz verdiğim gibi.","Fresca del puente, la mejor. Toma, lo prometido."
+WORLD_TALK,Talk to %s,%s ile konuş,Hablar con %s
+QUEST_ACCEPT,I will bring them,Getiririm,Te los traigo
+QUEST_HAND_OVER,Hand over,Teslim et,Entregar
+QUEST_CLOSE,Goodbye,Hoşça kal,Adiós
+QUEST_PROGRESS,In your bag: %d of %d,Çantanda: %d / %d,En tu bolsa: %d de %d
+QUEST_MIN_LENGTH,at least %d cm,en az %d cm,al menos %d cm
+QUEST_REWARD,Reward: %s,Ödül: %s,Recompensa: %s
+QUEST_XP,%d %s experience,%d %s deneyimi,%d de experiencia en %s
+QUEST_NOTHING,Good fishing to you. Nothing else I need today.,Rastgele. Bugün başka bir şeye ihtiyacım yok.,Buena pesca. Hoy no necesito nada más.
+QUEST_JOURNAL,Quests: %s,Görevler: %s,Misiones: %s
+QUEST_DONE_TOAST,Quest done: %s,Görev tamam: %s,Misión cumplida: %s

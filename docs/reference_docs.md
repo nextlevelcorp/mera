@@ -16,6 +16,9 @@ Add every data, art, audio and tool source here with its licence before it is us
 ## Galata Bridge look in the top-down world (2026-11-18)
 All pixel art is drawn in code for this project (`game/ui/pixel_art.gd`, `game/scenes/world/world_painter.gd`); no image is downloaded. The landmarks (Galata Tower, New Mosque, Spice Bazaar, the T1 tram line across the bridge, city ferries, simit carts, the pigeons of Eminönü) are drawn from general knowledge of the place, simplified and placed for recognition; layout and distances are design fills. Reference for the place: https://en.wikipedia.org/wiki/Galata_Bridge (not opened from the build environment). Place names on signs are proper names (Karaköy, Eminönü, Mısır Çarşısı).
 
+## Quests (2026-11-18)
+`game/data/quests.json`: asks, texts and rewards are game-design fills. The only real-world value they use is the legal minimum length of each species, read from `species.json` (sourced there).
+
 ## People in the world (2026-11-17)
 `game/data/npcs.json`: the anglers and vendors are fictional; names, looks and routines are design fills, not real people.
 
