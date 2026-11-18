@@ -1,35 +1,44 @@
 shader_type canvas_item;
-// Water of the top-down world: the same ripple normal map as the 3D sea,
-// scrolled twice, lit by the sun from the top left, with sun glints, a darker
-// colour away from the edges and foam where the water meets stone. Sized in
-// metres (size_m), so the ripples keep their scale on every rect.
+// Water of the top-down world in pixel art (owner, 2026-11-18: Stardew Valley
+// style): flat colour bands, short light dashes that drift with the current,
+// a darker band in the bridge's shade and a one-pixel foam line where the
+// water meets stone. Worked out per art pixel (px_per_m pixels a metre), so
+// it stays crisp when the camera scales it up. Sized in metres (size_m).
 
-uniform sampler2D ripple_tex : repeat_enable, filter_linear_mipmap;
 uniform vec2 size_m = vec2(10.0, 10.0);
+uniform float px_per_m = 16.0;
 uniform vec4 foam_edges = vec4(0.0);   // left, top, right, bottom: 1 where stone meets water
-uniform vec3 deep : source_color = vec3(0.05, 0.16, 0.24);
-uniform vec3 shallow : source_color = vec3(0.13, 0.3, 0.37);
+uniform vec3 deep : source_color = vec3(0.16, 0.38, 0.55);
+uniform vec3 shallow : source_color = vec3(0.24, 0.5, 0.64);
+uniform vec3 shade : source_color = vec3(0.12, 0.27, 0.42);
+uniform vec3 glint : source_color = vec3(0.72, 0.88, 0.95);
 uniform float light = 1.0;
 
+float hash(vec2 p) {
+	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
 void fragment() {
-	vec2 p = UV * size_m;
-	vec3 a = texture(ripple_tex, p * 0.09 + vec2(TIME * 0.012, TIME * 0.02)).rgb * 2.0 - 1.0;
-	vec3 b = texture(ripple_tex, p * 0.23 + vec2(-TIME * 0.025, TIME * 0.01)).rgb * 2.0 - 1.0;
-	vec3 n = normalize(vec3(a.xy + b.xy, 2.4));
-	vec3 l = normalize(vec3(-0.5, -0.6, 0.62));
-	float diffuse = clamp(dot(n, l), 0.0, 1.0);
-	vec3 h = normalize(l + vec3(0.0, 0.0, 1.0));
-	float glint = pow(max(dot(n, h), 0.0), 120.0);
-	// Distance to the stone edges, in metres.
+	vec2 cell = floor(UV * size_m * px_per_m);   // the art pixel
+	vec2 p = cell / px_per_m;                     // metres
 	float d = 1000.0;
 	d = mix(d, min(d, p.x), foam_edges.x);
 	d = mix(d, min(d, p.y), foam_edges.y);
-	d = mix(d, min(d, size_m.x - p.x), foam_edges.z);
-	d = mix(d, min(d, size_m.y - p.y), foam_edges.w);
-	vec3 col = mix(shallow, deep, smoothstep(0.0, 4.0, d));
-	col *= 0.75 + 0.45 * diffuse;
-	col += vec3(1.0, 0.97, 0.9) * glint * 0.9 * light;
-	float foam = (1.0 - smoothstep(0.0, 0.55, d)) * smoothstep(0.35, 0.6, texture(ripple_tex, p * 0.4 + TIME * 0.03).b);
-	col = mix(col, vec3(0.92, 0.95, 0.97), foam * 0.7);
+	d = mix(d, min(d, size_m.x - p.x - 1.0 / px_per_m), foam_edges.z);
+	d = mix(d, min(d, size_m.y - p.y - 1.0 / px_per_m), foam_edges.w);
+	vec3 col = d < 2.5 ? shallow : deep;
+	// Slow broad swell: alternate two tones in wavy bands.
+	float band = sin(p.y * 0.9 + sin(p.x * 0.35 + TIME * 0.4) * 1.6 + TIME * 0.3);
+	col = band > 0.75 ? mix(col, shallow, 0.5) : col;
+	// Light dashes: one pixel thin, a few pixels long, drifting along rows.
+	float drift = TIME * 4.0;
+	vec2 row = vec2(floor((cell.x + drift) / 24.0), floor(cell.y / 12.0));
+	float r = hash(row);
+	float x_in = mod(cell.x + drift, 24.0);
+	float on = step(0.6, r) * step(x_in, 2.0 + floor(r * 4.0)) * (mod(cell.y, 12.0) < 1.0 ? 1.0 : 0.0);
+	col = mix(col, glint, on * (0.4 + 0.6 * light));
+	// The bridge's shade and the foam line along stone.
+	col = d < 0.75 ? shade : col;
+	col = d < 1.0 / px_per_m ? vec3(0.9, 0.95, 0.97) : col;
 	COLOR = vec4(col, 1.0);
 }

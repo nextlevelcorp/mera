@@ -12,6 +12,7 @@ const ROLES := ["angler", "vendor"]
 const ACTIVITIES := ["fish", "away"]
 const SLOTS := ["dawn", "day", "evening", "night"]
 const ARRIVE_M := 0.15
+const ENTRY_M := 6.0
 
 
 ## Loads and validates the roster against the area. Returns {"ok", "errors", "npcs"}.
@@ -67,9 +68,10 @@ static func plan(npc: Dictionary, slot: String, area: WorldArea) -> Dictionary:
 	return {"present": false}
 
 
-## Where an angler enters the area: the plaza nearest their spot, at the edge.
+## Where an angler enters the area: the plaza nearest their spot, in front of
+## the buildings that close it.
 static func entry_point(target: Vector2, area: WorldArea) -> Vector2:
-	return Vector2(target.x, 2.0 if target.y < area.size_m.y * 0.5 else area.size_m.y - 2.0)
+	return Vector2(target.x, ENTRY_M if target.y < area.size_m.y * 0.5 else area.size_m.y - ENTRY_M)
 
 
 ## One walking step towards target, around the blocked road: someone on the
@@ -87,8 +89,16 @@ static func walk_step(pos: Vector2, target: Vector2, dt: float, area: WorldArea,
 	var d := step.length()
 	if d <= ARRIVE_M:
 		return goal
-	var next := pos + step / d * minf(speed * clampf(dt, 0.0, 0.1), d)
-	return next if not area.blocked_at(next, 0.2) else pos + Vector2(0.0, signf(step.y)) * minf(speed * dt, absf(step.y))
+	var reach := minf(speed * clampf(dt, 0.0, 0.1), d)
+	# Straight on if open, else slide along one axis (the larger first), else wait.
+	var tries: Array[Vector2] = [pos + step / d * reach]
+	var along_x := Vector2(signf(step.x) * minf(reach, absf(step.x)), 0.0)
+	var along_y := Vector2(0.0, signf(step.y) * minf(reach, absf(step.y)))
+	tries.append_array([pos + along_x, pos + along_y] if absf(step.x) > absf(step.y) else [pos + along_y, pos + along_x])
+	for next: Vector2 in tries:
+		if next != pos and not area.blocked_at(next, 0.2):
+			return next
+	return pos
 
 
 static func _blocked_between(a: Vector2, b: Vector2, area: WorldArea) -> bool:

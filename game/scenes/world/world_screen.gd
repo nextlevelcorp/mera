@@ -1,12 +1,13 @@
 class_name WorldScreen
 extends Node2D
-## The top-down world (architecture.md 4), first grey-box prototype: one
-## area (the Galata Bridge), a player walking with the stick under the left
-## thumb, and the fishing markers on the rails. At a marker the action button
-## fishes: the screen emits fish_requested with a FishingRequest and the
-## owner (main.gd) opens the fishing view; resume() takes the result back.
-## A view over WorldWalk and WorldArea: it holds no rules. Art is grey boxes
-## on purpose (owner decision D1: pick the style on a real phone later).
+## The top-down world (architecture.md 4): one area (the Galata Bridge), a
+## player walking with the stick under the left thumb, and the fishing
+## markers on the rails. At a marker the action button fishes: the screen
+## emits fish_requested with a FishingRequest and the owner (main.gd) opens
+## the fishing view; resume() takes the result back. A view over WorldWalk,
+## WorldArea, NpcRoster and Crowd: it holds no rules. Pixel art in a
+## three-quarter view (owner, 2026-11-18: Stardew Valley style), drawn by
+## WorldPainter and PixelArt.
 
 signal fish_requested(request: Dictionary)
 signal closed
@@ -14,17 +15,13 @@ signal closed
 const AREA_ID := "galata_bridge"
 const DEBUG_MENU := "res://debug/world_debug.gd"
 const STICK_RADIUS := 110.0
-## The camera is close, as in Stardew Valley: about 27 m across at 1280 px.
-const CAMERA_ZOOM := 2.0
-const PLAYER_DRAW_SCALE := 2.0
+## The camera is close, as in Stardew Valley: three screen pixels per art
+## pixel, about 27 m across at 1280 px.
+const CAMERA_ZOOM := 3.0
 ## Slot tint over the whole world: the same conditions that light the sea.
 const TINT := {
 	"dawn": Color(1.0, 0.86, 0.82), "day": Color(1.0, 1.0, 1.0),
 	"evening": Color(1.0, 0.76, 0.62), "night": Color(0.36, 0.42, 0.62),
-}
-const GROUND := {
-	"plaza": Color(0.56, 0.56, 0.55), "walkway": Color(0.72, 0.72, 0.7),
-	"road": Color(0.28, 0.28, 0.3), "water": Color(0.27, 0.38, 0.5),
 }
 
 var area: WorldArea
@@ -46,6 +43,7 @@ var _wallet: Label
 var _stick := Vector2.ZERO
 var _touching := false
 var _time := 0.0
+var _moving := false
 
 
 func _ready() -> void:
@@ -72,18 +70,21 @@ func setup() -> void:
 		var rec := n.duplicate()
 		var c: Array = n["jacket"]
 		rec["jacket_color"] = Color(c[0], c[1], c[2])
+		var pal := PixelArt.palette(hash(n["id"]))
+		pal["shirt"] = rec["jacket_color"].lightened(0.15)
+		rec["frames"] = PixelArt.person(pal)
 		_npcs.append(rec)
 	apply_conditions()
 	settle_npcs()
 	_cam = Camera2D.new()
 	_cam.limit_left = 0
-	_cam.limit_top = 0
+	_cam.limit_top = int(-BACKDROP_M * area.px_per_m)
 	_cam.limit_right = int(area.size_m.x * area.px_per_m)
 	_cam.limit_bottom = int(area.size_m.y * area.px_per_m)
 	_cam.zoom = Vector2(CAMERA_ZOOM, CAMERA_ZOOM)
 	_cam.position_smoothing_enabled = true
 	_cam.position_smoothing_speed = 8.0
-	_cam.position = walk.pos * area.px_per_m
+	_cam.position = camera_target() * area.px_per_m
 	add_child(_cam)
 	if _cam.is_inside_tree():
 		_cam.make_current()
@@ -92,7 +93,7 @@ func setup() -> void:
 
 
 ## Relights the world for the conditions' time of day: a canvas tint, the
-## sun's relief on the textures and the lamps after dark.
+## lamps after dark, and the passers-by of the slot.
 func apply_conditions() -> void:
 	_apply_art_light()
 	_replan_npcs()
@@ -140,6 +141,7 @@ func pause() -> void:
 	visible = false
 	process_mode = Node.PROCESS_MODE_DISABLED
 	_canvas_tint.visible = false   # it would tint the fishing view's controls too
+	_lights.visible = false
 	_hud.visible = false
 	_cam.enabled = false
 	_stick = Vector2.ZERO
@@ -151,6 +153,7 @@ func resume(result: Dictionary) -> void:
 	visible = true
 	process_mode = Node.PROCESS_MODE_INHERIT
 	_canvas_tint.visible = true
+	_lights.visible = true
 	_hud.visible = true
 	_cam.enabled = true
 	if _cam.is_inside_tree():
@@ -201,9 +204,10 @@ func _process(delta: float) -> void:
 			st["pos"] = NpcRoster.walk_step(before, st["target"], delta, area, speed)
 			st["phase"] = float(st["phase"]) + before.distance_to(st["pos"]) * 4.5
 	var moved := walk.pos.distance_to(_last_pos)
+	_moving = moved > 0.0001
 	_walk_phase += moved * 4.5
 	_last_pos = walk.pos
-	_cam.position = walk.pos * area.px_per_m
+	_cam.position = (camera_target() * area.px_per_m).round()
 	var m := walk.nearest_marker()
 	var shop := walk.nearest_shop()
 	_action.visible = (not m.is_empty() or not shop.is_empty()) and not _shop.visible
@@ -219,6 +223,14 @@ func _process(delta: float) -> void:
 	_toast_s = maxf(_toast_s - delta, 0.0)
 	_toast.visible = _toast_s > 0.0
 	queue_redraw()
+	_boats.queue_redraw()
+
+
+## Where the camera looks: at the player, and towards the landmarks at the
+## ends of the area (the tower above Karaköy) as the player nears them.
+func camera_target() -> Vector2:
+	var near_top := clampf((12.0 - walk.pos.y) / 7.0, 0.0, 1.0)
+	return walk.pos - Vector2(0.0, near_top * LOOK_AHEAD_M)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -235,70 +247,53 @@ func _position_name_key(position_id: String) -> String:
 
 # ------------------------------------------------------------------ drawing
 
-## Ground of each kind: a CC0 texture set (game/assets/3d), how many metres one
-## repeat covers, and a tint. Water is a shader instead (world_water.gdshader).
-const SURFACES := {
-	"plaza": ["cobblestone_floor_04", 2.6, Color(0.95, 0.93, 0.9)],
-	"walkway": ["concrete_pavement", 3.0, Color(1.0, 1.0, 1.0)],
-	"road": ["rough_concrete", 2.0, Color(0.42, 0.42, 0.44)],
-}
+## Pixel-art tiles of each walkable ground kind (PixelArt.tile).
+const TILES := {"plaza": "cobble", "walkway": "paving", "road": "asphalt", "building": "asphalt"}
 const WATER_SHADER := preload("res://scenes/world/world_water.gdshader")
-const GROUND_SHADER := preload("res://scenes/world/world_ground.gdshader")
-const LAMP_LIGHT := {"dawn": 0.4, "day": 0.0, "evening": 0.9, "night": 1.4}
-const SUN_LIGHT := {"dawn": 0.35, "day": 0.55, "evening": 0.35, "night": 0.05}
+## Lamps and windows light up from dusk.
+const LIT_SLOTS := ["dawn", "evening", "night"]
+const GLOW := {"dawn": 0.35, "day": 0.0, "evening": 0.7, "night": 1.0}
+const PLAYER_PALETTE := 7
+const GULLS := 5
+## Above the Karaköy roofs the camera may look this far, so the tower shows,
+## and near either end it looks ahead by up to LOOK_AHEAD_M.
+const BACKDROP_M := 8.0
+const LOOK_AHEAD_M := 4.0
 
-var _surfaces := {}
 var _canvas_tint: CanvasModulate
-var _sun2d: DirectionalLight2D
-var _lamps: Array[PointLight2D] = []
+var _tiles := {}                     ## kind -> TextureRect
 var _water_mats: Array[ShaderMaterial] = []
+var _boats: Node2D                   ## ferries, drawn under the bridge deck
+var _lights: CanvasLayer             ## lamp glow, outside the slot tint
+var _glows: Array[Sprite2D] = []
 var _walk_phase := 0.0
-var _npcs: Array = []           ## NpcRoster records, with jacket_color
-var _npc_state := {}             ## id -> {pos, target, present, fishing, facing, position_id, phase}
+var _npcs: Array = []                ## NpcRoster records, with jacket_color and frames
+var _npc_state := {}                 ## id -> {pos, target, present, fishing, facing, position_id, phase}
+var _crowd: Array[Dictionary] = []   ## Crowd.passers_by for the slot, with frames
+var _player_frames: Array[ImageTexture] = []
 var _last_pos := Vector2.ZERO
+var _crossings: Array[Rect2] = []
 
 
-## Textures, water, sun and lamps: built once after the area is loaded.
+## Tiles, water, ferries' layer, lamp glow: built once after the area is loaded.
 func _build_art() -> void:
-	texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
+	texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	var s := area.px_per_m
 	for r: Dictionary in area.rects:
-		if r["kind"] == "water":
-			continue
 		var rect: Rect2 = r["rect"]
-		var ground := ColorRect.new()
-		ground.position = rect.position * s
-		ground.size = rect.size * s
-		ground.show_behind_parent = true
-		ground.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		ground.color = GROUND[r["kind"]]
-		var spec: Array = SURFACES.get(r["kind"], [])
-		var dir := "%s/%s" % [Stage3D.ASSET_DIR, spec[0]] if not spec.is_empty() else ""
-		if dir != "" and ResourceLoader.exists("%s/diff.webp" % dir):
-			var mat := ShaderMaterial.new()
-			mat.shader = GROUND_SHADER
-			mat.set_shader_parameter("albedo_tex", load("%s/diff.webp" % dir))
-			mat.set_shader_parameter("normal_tex", load("%s/nor.webp" % dir))
-			mat.set_shader_parameter("noise_tex", SeaMaps.cloud())
-			mat.set_shader_parameter("size_m", rect.size)
-			mat.set_shader_parameter("tile_m", float(spec[1]))
-			mat.set_shader_parameter("tint", spec[2])
-			ground.material = mat
-			_surfaces[r["kind"]] = mat
-		add_child(ground)
-	for r: Dictionary in area.rects:
+		if r["kind"] == "crossing":
+			_crossings.append(rect)
 		if r["kind"] != "water":
 			continue
-		var rect: Rect2 = r["rect"]
 		var water := ColorRect.new()
 		water.position = rect.position * s
 		water.size = rect.size * s
-		water.show_behind_parent = true
+		water.z_index = -3
 		water.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		var mat := ShaderMaterial.new()
 		mat.shader = WATER_SHADER
-		mat.set_shader_parameter("ripple_tex", SeaMaps.ripple())
 		mat.set_shader_parameter("size_m", rect.size)
+		mat.set_shader_parameter("px_per_m", s)
 		# Foam only where the water meets stone, not at the edge of the map.
 		mat.set_shader_parameter("foam_edges", Vector4(
 			1.0 if rect.position.x > 0.01 else 0.0, 1.0 if rect.position.y > 0.01 else 0.0,
@@ -306,172 +301,192 @@ func _build_art() -> void:
 		water.material = mat
 		add_child(water)
 		_water_mats.append(mat)
+	_boats = Node2D.new()
+	_boats.z_index = -2
+	_boats.draw.connect(_draw_boats)
+	add_child(_boats)
+	for r: Dictionary in area.rects:
+		var kind := String(r["kind"])
+		if not TILES.has(kind):
+			continue
+		var rect: Rect2 = r["rect"]
+		if kind == "road":
+			# The road runs on into the city beyond both ends.
+			rect = rect.grow_individual(0.0, BACKDROP_M, 0.0, BACKDROP_M)
+		var ground := TextureRect.new()
+		ground.texture = PixelArt.tile(TILES[kind])
+		ground.stretch_mode = TextureRect.STRETCH_TILE
+		ground.position = (rect.position * s).round()
+		ground.size = (rect.size * s).round()
+		ground.z_index = -1
+		ground.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(ground)
+		_tiles[kind] = ground
 	_canvas_tint = CanvasModulate.new()
 	add_child(_canvas_tint)
-	_sun2d = DirectionalLight2D.new()
-	_sun2d.height = 0.6
-	_sun2d.rotation = deg_to_rad(35.0)
-	add_child(_sun2d)
+	_lights = CanvasLayer.new()
+	_lights.layer = 1
+	_lights.follow_viewport_enabled = true
+	add_child(_lights)
 	var glow := GradientTexture2D.new()
 	glow.fill = GradientTexture2D.FILL_RADIAL
 	glow.fill_from = Vector2(0.5, 0.5)
 	glow.fill_to = Vector2(1.0, 0.5)
-	glow.width = 256
-	glow.height = 256
+	glow.width = 64
+	glow.height = 64
 	var g := Gradient.new()
-	g.set_color(0, Color(1, 1, 1, 1))
-	g.set_color(1, Color(1, 1, 1, 0))
+	g.set_color(0, Color(1.0, 0.8, 0.45, 0.55))
+	g.set_color(1, Color(1.0, 0.8, 0.45, 0.0))
 	glow.gradient = g
+	var add := CanvasItemMaterial.new()
+	add.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
 	for lamp: Vector2 in area.lamps:
-		var light := PointLight2D.new()
-		light.texture = glow
-		light.texture_scale = 7.0 * s / 128.0
-		light.color = Color(1.0, 0.8, 0.5)
-		light.height = 40.0
-		light.position = lamp * s
-		add_child(light)
-		_lamps.append(light)
+		for side in [-0.6, 0.6]:
+			var sp := Sprite2D.new()
+			sp.texture = glow
+			sp.material = add
+			sp.position = ((lamp + Vector2(side, -3.3)) * s).round()
+			sp.scale = Vector2(1.6, 1.6)
+			_lights.add_child(sp)
+			_glows.append(sp)
+	_player_frames = PixelArt.person(_player_palette())
+
+
+func _player_palette() -> Dictionary:
+	var pal := PixelArt.palette(PLAYER_PALETTE)
+	pal["shirt"] = Color(0.18, 0.32, 0.55)
+	pal["trousers"] = Color(0.3, 0.26, 0.22)
+	pal["cap"] = true
+	return pal
 
 
 func _apply_art_light() -> void:
 	var slot := String(conditions.get("slot", "day"))
 	if _canvas_tint:
 		_canvas_tint.color = TINT.get(slot, Color.WHITE)
-	if _sun2d:
-		_sun2d.energy = SUN_LIGHT.get(slot, 0.5)
-	for l: PointLight2D in _lamps:
-		l.energy = LAMP_LIGHT.get(slot, 0.0)
-		l.visible = l.energy > 0.01
+	for gl: Sprite2D in _glows:
+		gl.modulate = Color(1, 1, 1, GLOW.get(slot, 0.0))
+		gl.visible = float(GLOW.get(slot, 0.0)) > 0.01
 	for m: ShaderMaterial in _water_mats:
 		m.set_shader_parameter("light", 1.0 if slot == "day" else (0.6 if slot != "night" else 0.15))
+	if area:
+		_crowd = Crowd.passers_by(area, slot, hash(area.id + slot), Db.constants())
+		for w: Dictionary in _crowd:
+			w["frames"] = PixelArt.person(PixelArt.palette(int(w["palette"])))
+
+
+func _draw_boats() -> void:
+	for f: Dictionary in Crowd.ferries(area, _time, Db.constants()):
+		WorldPainter.ferry(_boats, f["x"], f["y"], f["dir"], _time)
 
 
 func _draw() -> void:
 	if area == null:
 		return
-	var s := area.px_per_m
-	var shadow := Color(0.0, 0.0, 0.05, 0.28)
-	var sun_off := Vector2(0.35, 0.45) * s   # shadows fall to the bottom right
-	# Kerbs: a lighter stone line where a walkway meets the road.
+	var slot := String(conditions.get("slot", "day"))
+	var k := Db.constants()
+	var lit := slot in LIT_SLOTS
+	var road := Rect2()
 	for r: Dictionary in area.rects:
 		if r["kind"] == "road":
-			var rect := Rect2((r["rect"] as Rect2).position * s, (r["rect"] as Rect2).size * s)
-			draw_rect(Rect2(rect.position - Vector2(0.15 * s, 0.0), Vector2(0.3 * s, rect.size.y)), Color(0.58, 0.57, 0.55))
-			draw_rect(Rect2(Vector2(rect.end.x - 0.15 * s, rect.position.y), Vector2(0.3 * s, rect.size.y)), Color(0.58, 0.57, 0.55))
-	# Rails: a shadow on the water, posts every 1.5 m, then the handrail.
+			road = (r["rect"] as Rect2).grow_individual(0.0, BACKDROP_M, 0.0, BACKDROP_M)
+	WorldPainter.road(self, road, _crossings)
+	WorldPainter.far_city(self, -1.0, area.size_m.x + 1.0, -BACKDROP_M - 1.0, 0.5, hash(area.id))
+	for t: Dictionary in Crowd.trams(area, _time, k):
+		WorldPainter.tram(self, t["x"], t["y"], t["dir"])
+	for c: Dictionary in Crowd.cars(area, _time, slot, k):
+		WorldPainter.car(self, c["x"], c["y"], c["dir"], c["colour"])
 	for rail: Dictionary in area.rails:
-		var a: Vector2 = rail["from"] * s
-		var b: Vector2 = rail["to"] * s
-		draw_line(a + sun_off * 0.5, b + sun_off * 0.5, shadow, 0.25 * s)
-		var steps := int(a.distance_to(b) / (1.5 * s))
-		for i in steps + 1:
-			var at := a.lerp(b, float(i) / float(maxi(steps, 1)))
-			draw_rect(Rect2(at - Vector2(0.09, 0.09) * s, Vector2(0.18, 0.18) * s), Color(0.1, 0.13, 0.13))
-		draw_line(a, b, Color(0.12, 0.16, 0.16), 0.12 * s)
-		draw_line(a - Vector2(0.03 * s, 0.0), b - Vector2(0.03 * s, 0.0), Color(0.35, 0.42, 0.42), 0.04 * s)
-	for sh: Dictionary in area.shops:
-		_draw_kiosk(sh, s, shadow, sun_off)
-	for lamp: Vector2 in area.lamps:
-		var at := lamp * s
-		draw_line(at, at + sun_off * 2.2, shadow, 0.16 * s)   # the pole's long shadow
-		draw_circle(at, 0.22 * s, Color(0.1, 0.12, 0.12))
-		draw_circle(at - Vector2(0.05, 0.05) * s, 0.09 * s, Color(0.35, 0.4, 0.4))
-		for side in [-1.0, 1.0]:
-			draw_circle(at + Vector2(side * 0.75 * s, 0.0), 0.16 * s, Color(0.95, 0.9, 0.75))
+		WorldPainter.rail(self, rail["from"], rail["to"])
 	var near := walk.nearest_marker()
 	for m: Dictionary in area.markers:
-		var active: bool = not near.is_empty() and near["position_id"] == m["position_id"]
-		var c := Color(1.0, 0.85, 0.3, 1.0 if active else 0.6)
-		var pulse := 1.0 + 0.12 * sin(_time * 3.0)
-		draw_arc(m["pos"] * s, 0.7 * s * pulse, 0.0, TAU, 32, c, 3.0, true)
-		if active:
-			draw_circle(m["pos"] * s, 0.45 * s, Color(c, 0.3))
-		var out := Vector2(1.0 if m["facing"] == "E" else -1.0, 0.0)
-		draw_line(m["pos"] * s + out * 0.7 * s, m["pos"] * s + out * 1.5 * s, c, 3.0, true)
+		WorldPainter.marker(self, m["pos"], m["facing"], not near.is_empty() and near["position_id"] == m["position_id"], _time)
+	# Everything that stands is drawn from the back of the screen to the front.
+	var items: Array = []
+	for b: Dictionary in area.rects:
+		if b["kind"] == "building":
+			items.append([(b["rect"] as Rect2).end.y, "building", b["rect"]])
+	for sh: Dictionary in area.shops:
+		items.append([(sh["pos"] as Vector2).y - 1.3, "kiosk_back", sh])
+		items.append([(sh["pos"] as Vector2).y + 1.2, "kiosk_front", sh])
+	for lamp: Vector2 in area.lamps:
+		items.append([lamp.y, "lamp", lamp])
+	for cart: Vector2 in _carts():
+		items.append([cart.y, "cart", cart])
+	for sign: Array in _signs():
+		items.append([(sign[0] as Vector2).y, "sign", sign])
 	for n: Dictionary in _npcs:
 		var st: Dictionary = _npc_state[n["id"]]
-		if not st["present"]:
-			continue
-		var arrived: bool = (st["pos"] as Vector2).distance_to(st["target"]) < 0.3
-		var face := Vector2.DOWN
-		var rod := Vector2.ZERO
-		if arrived and st["fishing"]:
-			face = Vector2(1.0 if st["facing"] == "E" else -1.0, 0.0)
-			rod = (face + Vector2(0.0, 0.15)).normalized()
-		elif not arrived:
-			face = ((st["target"] as Vector2) - (st["pos"] as Vector2)).normalized()
-		_draw_person(st["pos"], face, n["jacket_color"], float(st["phase"]), rod, s, shadow, sun_off)
-	_draw_player(s, shadow, sun_off)
+		if st["present"]:
+			items.append([(st["pos"] as Vector2).y, "npc", n])
+	for w: Dictionary in _crowd:
+		var at := Crowd.walker_at(w, _time)
+		items.append([(at["pos"] as Vector2).y, "walker", [w, at]])
+	items.append([walk.pos.y, "player", null])
+	items.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
+	for it: Array in items:
+		_draw_item(it[1], it[2], lit)
+	WorldPainter.pigeons(self, Rect2(3.0, 93.0, 11.0, 6.0), _time, 9)
+	for i in GULLS:
+		var a := _time * (0.18 + i * 0.03) + i * 1.7
+		var centre := Vector2(7.0 if i % 2 == 0 else 53.0, 30.0 + i * 12.0)
+		WorldPainter.gull(self, centre + Vector2(cos(a) * 5.0, sin(a) * 3.0), _time + i * 0.4, 3.0)
 
 
-## A market kiosk: a shadow, a striped awning, a counter with goods, a sign.
-func _draw_kiosk(sh: Dictionary, s: float, shadow: Color, sun_off: Vector2) -> void:
-	var fish: bool = sh["id"] == "fishmonger"
-	var centre: Vector2 = sh["pos"] * s
-	var box := Rect2(centre - Vector2(2.4, 1.6) * s, Vector2(4.8, 2.4) * s)
-	draw_rect(Rect2(box.position + sun_off, box.size), shadow)
-	draw_rect(box, Color(0.36, 0.3, 0.25))
-	# Awning stripes.
-	var stripe := box.size.x / 8.0
-	for i in 8:
-		var col := (Color(0.75, 0.2, 0.18) if fish else Color(0.15, 0.38, 0.58)) if i % 2 == 0 else Color(0.93, 0.92, 0.88)
-		draw_rect(Rect2(box.position + Vector2(stripe * i, 0.0), Vector2(stripe, box.size.y * 0.55)), col)
-	draw_rect(Rect2(box.position + Vector2(0.0, box.size.y * 0.55), Vector2(box.size.x, box.size.y * 0.06)), Color(0.0, 0.0, 0.0, 0.25))
-	# Counter with goods.
-	var counter := Rect2(box.position + Vector2(0.2 * s, box.size.y * 0.62), Vector2(box.size.x - 0.4 * s, box.size.y * 0.33))
-	draw_rect(counter, Color(0.55, 0.45, 0.33))
-	if fish:
-		draw_rect(counter.grow(-0.08 * s), Color(0.82, 0.9, 0.95))   # crushed ice
-		for i in 7:
-			var at := counter.position + Vector2(0.4 * s + i * 0.6 * s, counter.size.y * 0.5)
-			draw_set_transform(at, 0.35 * sin(i * 1.7), Vector2(1.0, 0.35))
-			draw_circle(Vector2.ZERO, 0.24 * s, Color(0.62, 0.68, 0.74))
-			draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	else:
-		for i in 6:
-			var x := counter.position.x + 0.4 * s + i * 0.7 * s
-			draw_line(Vector2(x, counter.position.y + counter.size.y), Vector2(x + 0.6 * s, counter.position.y - 0.9 * s), Color(0.12, 0.12, 0.14), 2.0, true)
-			draw_rect(Rect2(Vector2(x + 0.1 * s, counter.end.y - 0.3 * s), Vector2(0.25, 0.2) * s), [Color(0.9, 0.5, 0.1), Color(0.2, 0.6, 0.3), Color(0.8, 0.2, 0.3)][i % 3])
-	var label := tr("SHOP_%s" % String(sh["id"]).to_upper())
-	var font := ThemeDB.fallback_font
-	var at := Vector2(box.position.x + 6.0, box.position.y + box.size.y * 0.38)
-	draw_string_outline(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 8.0, 16, 4, Color(0, 0, 0, 0.8))
-	draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, box.size.x - 8.0, 16, Color(1, 1, 1))
+func _draw_item(kind: String, data: Variant, lit: bool) -> void:
+	match kind:
+		"building":
+			var fp: Rect2 = data
+			if fp.position.y < area.size_m.y * 0.5:
+				if fp.position.x > area.size_m.x * 0.5:
+					WorldPainter.galata_tower(self, Vector2(fp.position.x + 11.0, fp.position.y + 4.0))
+					WorldPainter.house_row(self, fp, 1, "")
+				else:
+					WorldPainter.house_row(self, fp, 3, tr("WORLD_SIGN_FISH_MARKET"))
+			elif fp.position.x < area.size_m.x * 0.5:
+				WorldPainter.mosque(self, fp)
+			else:
+				WorldPainter.bazaar(self, fp, tr("WORLD_SIGN_SPICE_BAZAAR"))
+		"kiosk_back":
+			WorldPainter.kiosk_back(self, data["pos"], data["id"] == "fishmonger")
+		"kiosk_front":
+			WorldPainter.kiosk_front(self, data["pos"], data["id"] == "fishmonger", tr("SHOP_%s" % String(data["id"]).to_upper()))
+		"lamp":
+			WorldPainter.lamp(self, data, lit)
+		"cart":
+			WorldPainter.simit_cart(self, data)
+		"sign":
+			WorldPainter.place_sign(self, data[0], tr(data[1]))
+		"npc":
+			var st: Dictionary = _npc_state[data["id"]]
+			var arrived: bool = (st["pos"] as Vector2).distance_to(st["target"]) < 0.3
+			var face := Vector2.DOWN
+			if arrived and st["fishing"]:
+				face = Vector2(1.0 if st["facing"] == "E" else -1.0, 0.0)
+			elif not arrived:
+				face = ((st["target"] as Vector2) - (st["pos"] as Vector2)).normalized()
+			if arrived and st["fishing"] and st["facing"] == "W":
+				WorldPainter.rod_out(self, st["pos"], st["facing"], _time)
+			WorldPainter.person(self, data["frames"], st["pos"], face, float(st["phase"]), not arrived)
+			if arrived and st["fishing"] and st["facing"] == "E":
+				WorldPainter.rod_out(self, st["pos"], st["facing"], _time)
+		"walker":
+			var at: Dictionary = data[1]
+			WorldPainter.person(self, data[0]["frames"], at["pos"], at["facing"], at["phase"], true)
+		"player":
+			# No rod while walking: the angler carries it packed (owner, 2026-11-18).
+			var f := walk.facing if walk.facing.length() > 0.01 else Vector2.DOWN
+			WorldPainter.person(self, _player_frames, walk.pos, f, _walk_phase, _moving)
 
 
-## The player from above (see _draw_person).
-func _draw_player(px_per_m: float, shadow: Color, sun_off: Vector2) -> void:
-	var f := walk.facing.normalized() if walk.facing.length() > 0.01 else Vector2.DOWN
-	_draw_person(walk.pos, f, Color(0.18, 0.27, 0.42), _walk_phase, (f * 0.85 + Vector2(-f.y, f.x) * 0.25).normalized(), px_per_m, shadow, sun_off)
+## Simit carts with their sellers' spots, on both squares.
+func _carts() -> Array[Vector2]:
+	return [Vector2(6.0, 16.0), Vector2(52.0, 95.0)]
 
 
-## Someone from above, drawn twice life size like the fish in the fishing
-## view (a person at true scale is a speck on a phone): a shadow, feet that
-## step with phase, a jacket, a cap whose brim points forward and a rod along
-## rod_dir (none when it is zero).
-func _draw_person(pos_m: Vector2, f: Vector2, jacket: Color, phase: float, rod_dir: Vector2, px_per_m: float, shadow: Color, sun_off: Vector2) -> void:
-	var s := px_per_m * PLAYER_DRAW_SCALE
-	var p := pos_m * px_per_m
-	var side := Vector2(-f.y, f.x)
-	var stride := sin(phase) * 0.18 * s
-	draw_set_transform(p + sun_off * 0.6, f.angle(), Vector2(1.0, 0.7))
-	draw_circle(Vector2.ZERO, 0.42 * s, shadow)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	for sgn in [-1.0, 1.0]:
-		draw_circle(p + side * sgn * 0.12 * s + f * stride * sgn, 0.1 * s, Color(0.1, 0.11, 0.14))
-	var hand := p + side * 0.28 * s + f * 0.1 * s
-	if rod_dir != Vector2.ZERO:
-		draw_line(hand, hand + rod_dir * 2.6 * s, Color(0.08, 0.08, 0.09), 0.05 * s, true)
-	draw_set_transform(p, side.angle(), Vector2(1.0, 0.62))
-	draw_circle(Vector2.ZERO, 0.32 * s, jacket.darkened(0.3))
-	draw_circle(Vector2(-0.04, -0.04) * s, 0.24 * s, jacket)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	draw_circle(hand, 0.08 * s, Color(0.8, 0.6, 0.48))
-	draw_circle(p + f * 0.04 * s, 0.15 * s, Color(0.75, 0.55, 0.43))
-	draw_circle(p - f * 0.02 * s, 0.14 * s, Color(0.12, 0.12, 0.13))
-	draw_set_transform(p + f * 0.14 * s, f.angle(), Vector2(1.0, 1.6))
-	draw_circle(Vector2.ZERO, 0.07 * s, Color(0.1, 0.1, 0.11))
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+## The place-name signs: [foot, key].
+func _signs() -> Array:
+	return [[Vector2(57.0, 18.5), "WORLD_SIGN_KARAKOY"], [Vector2(57.0, 92.5), "WORLD_SIGN_EMINONU"]]
 
 
 # ------------------------------------------------------------------ controls
