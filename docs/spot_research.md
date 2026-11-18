@@ -35,6 +35,22 @@
 
 English Wikipedia (Golden Horn) gives a maximum depth of about 35 m where the Golden Horn flows into the Bosphorus. That bounds the Galata profiles but does not give depths at the rail; the four profiles (5-8 m at the rail, 12-22 m at 40 m out, deeper on the Bosphorus side) remain design fills.
 
+## R14 species research, picarel (izmarit), 2026-11-18
+
+Zengin (2009) names picarel (izmarit, *Spicara smaris*) at the Galata Bridge all year. A record is ready but **not added to `game/data/`**: every species must carry a legal minimum size (`test_galata_data.gd`, from the Tebliğ 6/2 table) and that value could not be checked, because `www.resmigazete.gov.tr` does not resolve from the session any more.
+
+| Field | Value | Source |
+| --- | --- | --- |
+| `scientific_name` | *Spicara smaris* (Linnaeus, 1758), accepted, AphiaID 126830 | WoRMS REST API, 2026-11-18 |
+| `lw_a`, `lw_b` | 0.004, 3.365 (both sexes, R2 0.963) | Özpiçak & İbitürk (2024) KMUJENS 6(2): 1-8, Black Sea n=50, TL, https://doi.org/10.55213/kmujens.1478476 (read in full from https://dergipark.org.tr/en/download/article-file/3905889). Aegean sample for comparison: a 0.013, b 2.870 |
+| `length_min_cm`, `length_max_cm` | 9.5, 17.5 (TL, Black Sea sample; weight 7.4-64.2 g) | same |
+| `regulation.min_length_cm` | **not found** | needs Tebliğ 6/2 (2024/21), Çizelge 7, Resmî Gazete 32629 |
+| Everything else (strength, speed, diet `plankton` and `crustacean`, gape about 8 mm, activity, monthly abundance) | design fill | picarel is a plankton and small-crustacean feeder (same paper's introduction); the numbers are ours |
+
+Marmara or Istanbul values for *S. smaris* were not found in a text that could be read (North Marmara study at Marmara University's repository: `openaccess.marmara.edu.tr` does not resolve). The Black Sea sample is the nearest read.
+
+Other species named for Istanbul in sources already read: mullet (kefal, late spring, Zengin 2009), chub mackerel (kolyoz) and Atlantic mackerel at Sarayburnu (search summaries only), scorpionfish (iskorpit) and çinekop at Kuzguncuk (summary only). None has a read length-weight source yet. A Marmara study of *Scomber scombrus* exists (b above 3) but its values were not read.
+
 ## What the web cannot give
 
 - **Depth profiles at standing positions.** Charts are protected (SHODB); EMODnet is about 115 m per cell. Without a visit these stay design fills, labelled as such.
