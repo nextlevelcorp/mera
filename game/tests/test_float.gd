@@ -124,3 +124,58 @@ func test_a_take_pulls_the_float_under() -> void:
 	assert_eq(scr._wait_state.get("phase", ""), WaitSim.PHASE_TAKE, "a take is on")
 	assert_true(scr.float_dip > 10.0, "the float is pulled under (%.1f px)" % scr.float_dip)
 	scr.free()
+
+
+func test_live_bait_is_a_legal_horse_mackerel_from_the_bag() -> void:
+	var db := Db.database()
+	var bait := Db.record("bait", "live_istavrit")
+	var save := SaveGame.fresh()
+	Inventory.add_fish(save, "istavrit", 10.0, 0.01, "2026-11-18")   # undersize: goes back, not on the hook
+	assert_eq(Presentation.bait_stock(save, bait, db["species"]), 0, "an undersize fish is no bait")
+	Inventory.add_fish(save, "istavrit", 18.0, 0.06, "2026-11-18")
+	Inventory.add_fish(save, "istavrit", 14.0, 0.03, "2026-11-18")
+	Inventory.add_fish(save, "lufer", 25.0, 0.2, "2026-11-18")
+	assert_eq(Presentation.bait_stock(save, bait, db["species"]), 2, "two legal horse mackerel")
+	var s := FishingSession.new(db, Db.constants(), "float", _pos(), _cond())
+	s.save = save
+	s.float_bait = "live_istavrit"
+	var ctx := s.context("lufer")
+	assert_eq(ctx["lure"]["id"], "live_istavrit", "the rig fishes the live bait")
+	assert_eq(s.stock(ctx), 2, "the session counts it")
+	s.cast(ctx, 0.8)
+	assert_eq(s.stock(ctx), 1, "a cast uses one")
+	var left: Array = []
+	for it: Dictionary in Inventory.items(save):
+		if it["id"] == "fish:istavrit":
+			left.append(float(it["meta"]["length_cm"]))
+	left.sort()
+	assert_eq(left, [10.0, 18.0], "the smallest legal one went on the hook")
+	assert_eq(Inventory.count(save, "fish:lufer"), 1, "other fish stay")
+
+
+func test_live_bait_suits_the_hunters() -> void:
+	var k := Db.constants()
+	var live := {}
+	var shrimp := {}
+	for sp: String in ["istavrit", "lufer", "palamut"]:
+		for pair: Array in [[live, "live_istavrit"], [shrimp, "shrimp"]]:
+			var c := _ctx(sp, "float", {"float_bait": pair[1]})
+			var env := CatchModel.environment(k, c["spot"], c["position"], _cond())
+			var a := CatchModel.attraction(k, c["species"], c["lure"], c["play"], env, 10.0)
+			var h := CatchModel.hook(k, c["species"], c["rod"], c["line"], c["lure"], 0.8)
+			(pair[0] as Dictionary)[sp] = float(a["attraction"]) * float(h["hook"])
+	assert_true(live["lufer"] > shrimp["lufer"] and live["palamut"] > shrimp["palamut"], "live bait catches more hunters than shrimp: %s %s" % [str(live), str(shrimp)])
+	assert_true(shrimp["istavrit"] > live["istavrit"], "shrimp stays the horse mackerel bait")
+
+
+func test_the_rig_panel_cycles_the_bait() -> void:
+	var scr := FishingScreen.new()
+	scr.request = Game.fishing_request("", "", "float", _cond())
+	scr.setup("")
+	assert_eq(scr._ctx["lure"]["id"], "shrimp", "shrimp first")
+	scr.cycle_bait()
+	assert_eq(scr._ctx["lure"]["id"], "live_istavrit", "then live bait")
+	assert_eq(scr.lure_stock(), 0, "with no legal horse mackerel in a fresh bag")
+	scr.cycle_bait()
+	assert_eq(scr._ctx["lure"]["id"], "shrimp", "and back")
+	scr.free()

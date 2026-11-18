@@ -244,3 +244,6 @@ RIG_FLOAT_DEPTH,Float depth: %.1f m,Şamandıra derinliği: %.1f m,Profundidad d
 RIG_DEEPER,Deeper,Derine,Más hondo
 RIG_SHALLOWER,Shallower,Sığa,Menos hondo
 NO_BAIT,No bait left: buy shrimp at the tackle shop,Yem kalmadı: olta dükkânından karides al,No queda cebo: compra gambas en la tienda
+TACKLE_BAIT_LIVE_ISTAVRIT,Live horse mackerel (from your bag),Canlı istavrit (çantandan),Jurel vivo (de tu bolsa)
+RIG_BAIT,Bait,Yem,Cebo
+NO_LIVE_BAIT,No legal-size horse mackerel in your bag for live bait,Canlı yem için çantanda yasal boy istavrit yok,No tienes jureles de talla legal en la bolsa para cebo vivo

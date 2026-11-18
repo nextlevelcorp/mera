@@ -743,6 +743,23 @@
      "type": "number",
      "min": 0,
      "max": 100
+    },
+    "action": {
+     "type": "int",
+     "min": 1,
+     "max": 20,
+     "required": false
+    },
+    "from_species": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$",
+     "required": false
+    },
+    "hook_gape_mm": {
+     "type": "number",
+     "min": 1,
+     "max": 100,
+     "required": false
     }
    },
    "optional_file": true

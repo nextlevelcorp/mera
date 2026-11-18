@@ -128,7 +128,7 @@ Standing position (inside a spot):
 | Line | `type` (`mono`, `braid`, `fluorocarbon`), `diameter_mm`, `breaking_strain_kg` (float), `stretch`, `visibility`, `abrasion_resistance` (int20) | breaking strain, stretch |
 | Leader | `type`, `length_m`, `breaking_strain_kg` (float), `visibility`, `abrasion_resistance` (int20) | breaking strain, visibility (commit), abrasion |
 | Lure | `type` (`soft_plastic`, `metal_jig`, `spoon`, `minnow`, `popper`, `sabiki` for a multi-hook çapari rig, added 2026-11-14), `length_cm`, `weight_g` (float), `flash`, `action`, `scent`, `durability` (int20), `imitates` (diet tags), `run_depth_min_m`, `run_depth_max_m`, `sink_rate_m_per_s` (float), `hook_gape_mm` (float), `hook_pattern` | length, weight, flash, action, imitates, depths, hook gape |
-| Bait (Implemented R12) | `type`, `size_cm`, `scent`, `durability`, `target_diet_tags`, `effective_depth_min_m`, `effective_depth_max_m` | size, scent, diet tags (attraction, through `Presentation.float_lure`); the effective depths are stored only |
+| Bait (Implemented R12) | `type`, `size_cm`, `scent`, `durability`, `target_diet_tags`, `effective_depth_min_m`, `effective_depth_max_m`; optional `action`, `hook_gape_mm`, `from_species` (live bait) | size, scent, diet tags (attraction, through `Presentation.float_lure`); the effective depths are stored only |
 | Float rig (Implemented R12, file `tackle/floats.json`) | `weight_g` (float and shot, the casting weight), `hook_gape_mm`, `depth_min_m`, `depth_max_m`, `depth_default_m` | casting weight (cast), hook gape (hook), depth range |
 
 All tackle records carry `id`, `name_key` and `provenance`. Tackle is fictional and labelled design fill (PRD non-goal: real brands).
@@ -195,7 +195,7 @@ M = 1 if lure.imitates shares a tag with sp.diet_tags else K.DIET_MISS
 g = sp.mouth_gape_mm / 10                         # gape in cm
 Z = band(lure.length_cm, K.SIZE_LO * g, K.SIZE_HI * g, K.SIZE_M * g)
 V = 1 - K.SPEED_PEN * abs(n(retrieve_speed) - n(sp.speed))
-V_float = 1 - K.SPEED_PEN * K.BAIT_STILL_PEN * n(sp.speed)   # a still bait under a float (R12)
+V_float = 1 - K.SPEED_PEN * K.BAIT_STILL_PEN * (1 - n(lure.action)) * n(sp.speed)   # a bait under a float (R12); a live bait swims
 cue = max(0.5 * n(lure.flash) + 0.5 * n(lure.action), n(lure.scent))
 F = K.DETECT_BASE + (1 - K.DETECT_BASE) * (visibility + (1 - visibility) * cue)
 attraction = G * M * Z * V * F                    # 0..1
@@ -203,7 +203,9 @@ attraction = G * M * Z * V * F                    # 0..1
 
 In murky water or low light, flash and action do the work that visibility cannot; in clear daylight they add little. Since R12 (2026-11-18) a scented bait does the same work by smell: the cue is whichever is stronger, sight or scent. Every lure in `lures.json` has a sight cue above its scent, so lure results are unchanged (test). `BAIT_STILL_PEN` (0.6, design fill) replaces the retrieve match for a bait under a float: it barely moves, so fast hunters pass it more often than slow grazers.
 
-**Float rig (R12, Implemented 2026-11-18).** `Presentation.float_lure(bait, float, depth_m)` turns a bait (`baits.json`) under a float (`floats.json`) into the lure-shaped record every stage reads: `imitates` = the bait's `target_diet_tags`, `length_cm` = `size_cm`, flash 1, action 2, `scent` from the bait, `weight_g` and `hook_gape_mm` from the float rig, and `run_depth_min_m` = `run_depth_max_m` = the depth the angler sets, clamped to the float's `depth_min_m`..`depth_max_m` (default `depth_default_m`). In `WaitSim` the bait hangs at that depth or at 0.9 of the water depth, whichever is shallower; it stays where it landed until the angler reels (then it comes in at the same depth). One bait is used on every cast (`FishingSession.cast`); a line break loses no extra bait. The rig is `float` in `FightSetup.TACKLES` (`float_rod`, `float_reel`, `float_line`, `float_leader`, bait `shrimp`, float `float_rig`); all values are design fills.
+**Float rig (R12, Implemented 2026-11-18).** `Presentation.float_lure(bait, float, depth_m)` turns a bait (`baits.json`) under a float (`floats.json`) into the lure-shaped record every stage reads: `imitates` = the bait's `target_diet_tags`, `length_cm` = `size_cm`, flash 1, action 2, `scent` from the bait, `weight_g` and `hook_gape_mm` from the float rig, and `run_depth_min_m` = `run_depth_max_m` = the depth the angler sets, clamped to the float's `depth_min_m`..`depth_max_m` (default `depth_default_m`). In `WaitSim` the bait hangs at that depth or at 0.9 of the water depth, whichever is shallower; it stays where it landed until the angler reels (then it comes in at the same depth). One bait is used on every cast (`FishingSession.cast`); a line break loses no extra bait.
+
+**Live bait (R12 extension, Implemented 2026-11-18).** A bait with `from_species` is a fish from the bag: `live_istavrit` is a horse mackerel of at least its legal length (`regulation.min_length_cm`; an undersize fish must go back, so it is never bait). Each cast uses the smallest legal one (`Presentation.use_bait`); `Presentation.bait_stock` counts them. Optional bait fields: `action` (1-20, default 1; a live fish swims, so action 16), `hook_gape_mm` (overrides the float's hook: 14 mm for a fish bait), `from_species`. Through `V_float` the swimming bait suits the fast hunters (bluefish, bonito) and through `M` its `small_fish` tag matches their diet, while shrimp stays the horse mackerel bait (test). The rig is `float` in `FightSetup.TACKLES` (`float_rod`, `float_reel`, `float_line`, `float_leader`, bait `shrimp`, float `float_rig`); all values are design fills.
 
 ### 5.3 Stage 3: commit (nibble or take?)
 
