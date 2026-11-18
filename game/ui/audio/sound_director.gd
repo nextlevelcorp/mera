@@ -37,6 +37,7 @@ var _reel_target_pitch := 1.0
 
 
 func _ready() -> void:
+	AudioBuses.ensure()
 	_rng.seed = 11
 	_wind = _player(_load("wind_loop"), true)
 	_reel = _player(_load("reel_loop"), true)
@@ -47,6 +48,10 @@ func _ready() -> void:
 		_waves.append(_player(_load(w), false))
 	for s: String in ONE_SHOTS:
 		_shots[s] = _player(_load(s), false)
+	for p: AudioStreamPlayer in [_wind] + _waves:
+		p.bus = AudioBuses.AMBIENCE
+	for p: AudioStreamPlayer in [_reel, _drag] + _shots.values():
+		p.bus = AudioBuses.EFFECTS
 	_wind.play()
 	set_conditions(_wind_ms, _chop)
 

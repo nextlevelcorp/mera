@@ -47,6 +47,7 @@ var _stick := Vector2.ZERO
 var _touching := false
 var _time := 0.0
 var _moving := false
+var _audio: WorldAudio
 
 
 func _ready() -> void:
@@ -95,6 +96,8 @@ func setup() -> void:
 	add_child(_cam)
 	if _cam.is_inside_tree():
 		_cam.make_current()
+	_audio = WorldAudio.new()
+	add_child(_audio)
 	_build_hud()
 	_build_debug()
 
@@ -149,6 +152,7 @@ func pause() -> void:
 	process_mode = Node.PROCESS_MODE_DISABLED
 	_canvas_tint.visible = false   # it would tint the fishing view's controls too
 	_lights.visible = false
+	_audio.fade_out()
 	_hud.visible = false
 	_cam.enabled = false
 	_stick = Vector2.ZERO
@@ -161,6 +165,7 @@ func resume(result: Dictionary) -> void:
 	process_mode = Node.PROCESS_MODE_INHERIT
 	_canvas_tint.visible = true
 	_lights.visible = true
+	_audio.fade_in()
 	_hud.visible = true
 	_cam.enabled = true
 	if _cam.is_inside_tree():
@@ -237,7 +242,11 @@ func _process(delta: float) -> void:
 			st["phase"] = float(st["phase"]) + before.distance_to(st["pos"]) * 4.5
 	var moved := walk.pos.distance_to(_last_pos)
 	_moving = moved > 0.0001
+	var stride := int(_walk_phase / 2.0)
 	_walk_phase += moved * 4.5
+	if int(_walk_phase / 2.0) != stride:
+		_audio.step(walk.pos, area)   # one foot down every second walk frame
+	_audio.update(delta, walk.pos, area, conditions, _time, Db.constants())
 	_last_pos = walk.pos
 	_cam.position = (camera_target() * area.px_per_m).round()
 	var m := walk.nearest_marker()

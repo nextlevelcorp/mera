@@ -52,6 +52,7 @@ No image, model or HDRI asset is used yet: the ripple normal map, the cloud and 
 
 ## Generated sound cues (2026-11-13)
 `game/ui/audio/cue_synth.gd` computes the nibble, take and landed cues from formulas at start-up (filtered noise and sine partials, fixed seeds). No external source, no file, no licence. They are generated sound, not recordings of a place.
+Added 2026-11-18 (R13), the same way: `tram_bell`, `ferry_horn`, `gull`, `step`, `step_stone` and the looping `traffic` rumble for the top-down world. Generated, not recorded at the Galata Bridge; the sea and wind beds there reuse the CC0 recordings listed below.
 
 ## Recorded sounds in `game/audio/` (2026-11-13, owner listened and approved on 2026-11-13)
 Converted to mono 22.05 kHz Ogg Vorbis; cuts and loops made with ffmpeg and numpy. All CC0 as shown on the source page on 2026-11-12/13. None is a recording of an Istanbul shore; in the game they are generic recordings.

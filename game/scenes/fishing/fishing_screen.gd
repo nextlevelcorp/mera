@@ -1150,9 +1150,11 @@ func _apply_settings() -> void:
 
 
 func _build_audio() -> void:
+	AudioBuses.ensure()
 	for cue: String in ["nibble", "take", "landed"]:
 		var player := AudioStreamPlayer.new()
 		player.stream = CueSynth.make(cue)
+		player.bus = AudioBuses.INTERFACE
 		add_child(player)
 		_audio[cue] = player
 

@@ -12,7 +12,7 @@
 | 3D fish, rings, gulls | Implemented (R6) | `architecture.md` 5 |
 | 3D line, 3D splash droplets, per-species fish look | Designed | `architecture.md` 5 |
 | Phone motion (strike, pull, jig), settings | Implemented; owner: "a bit better", not tuned | `changelog.md` |
-| Sound (CC0 beds and one-shots) | Implemented for fishing | `reference_docs.md` |
+| Sound: CC0 beds and one-shots in fishing; world layers (sea, wind, traffic, tram bell, ferry horn, gulls, footsteps); mix buses | Implemented (R13); not yet heard on the phone | `architecture.md` 9 |
 | Save v2 (log, settings, bag, money field, counters), migration from v1 | Implemented | `data_model.md` 12 |
 | Economy: fish prices, selling, releasing undersize fish, the tackle shop, lure stock | Implemented (R8) | `data_model.md` 14 |
 | Progression: three skills with levels that raise the model's angler attributes | Implemented (R9) | `data_model.md` 15 |
@@ -55,7 +55,7 @@
 | R10 | NPCs with schedules; world anglers become the 3D neighbours **(done 2026-11-17; talking comes with R11)** | R4 | People in the world | Seeded schedule tests; played | `sim/npc_roster.gd`, `data/npcs.json` |
 | R11 | Quests **(done 2026-11-18: deliveries from the bag; event-based conditions later)** | R8, R10 | Journal and rewards | Condition tests over recorded results | `sim/quests.gd`, `data/quests.json` |
 | R12 | Float and bait presentation **(done 2026-11-18: float rig with shrimp and live horse mackerel; bottom fishing later)** | R1, D2 | A second way to fish | Simulation tests; data sourced or labelled | `sim/`, `data/tackle/` |
-| R13 | World audio layers and buses | R4 | Ambience per area, beds continue across modes | Listened on the phone | `ui/audio/` |
+| R13 | World audio layers and buses **(done 2026-11-18 in code; the owner listens on the phone)** | R4 | Ambience per area, beds continue across modes | Listened on the phone | `ui/audio/` |
 | R14 | Content: spots 2 and 3, species towards 15 | R5 | Sourced records | Data tests pass; sources recorded | `data/`, `spot_research.md` |
 | R15 | Native export spike (Android first), then release gates | R4 | An installable test build | Owner approval for each release step | `release_checklist.md` |
 
@@ -82,6 +82,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R13 world audio (2026-11-18): 225 tests pass with no script errors; both web exports build; played in the browser (1280x720 debug, 844x390 release): walking down the bridge, the jump to a marker, Fish here, Back to the world; no console errors or warnings. Sound itself was not heard (the browser test has no speakers); the levels by place and time are unit-tested.
 - R12 live bait (2026-11-18): 219 tests pass with no script errors; debug web build exports; played at 1280x720 (en) and 844x390 (tr): world debug "+3 fish", the Karaköy east marker, Fish here, the rig panel on the float rod, "Bait: Live horse mackerel (from your bag)" with 1 in the bag, cast, the float out at 34.9 m with the bait at 3.0 m; no console errors. Not seen: a bluefish taking the live bait (the model test covers the odds). The project board (Kanban artifact) is updated by Claude with each merge.
 - R12 float (2026-11-18): 216 tests pass with no script errors; both web exports build; played in the debug web build at 1280x720 (en) and 844x390 (tr): the rig cycles to "Float rod (4 m)" with "Shrimp (bait)", 10 in the bag, the depth row (3.0 m, Deeper to 3.5 m), cast, the red and white float on the water and the HUD saying the bait is at 3.5 m of 19 m with no retrieve, a forced take with its splash; no console errors. Not seen on screen: the float going under (the take window passed before the screenshot; a unit test checks the dip), a nibble bob. Also fixed: a console error on opening the fishing view (`Rig3D` turned the left hand about a zero axis before the rod had points).
 - R11 quests (2026-11-18): 207 tests pass with no script errors; both web exports build; played in the debug web build at 1280x720 (English) and 844x390 (Turkish): walked to Hasan at the Karaköy east rail, "Talk to Hasan", his quest with the reward, accepted, the journal line under the wallet, "Hand over" disabled with one fish, enabled with three, then paid 40 TL, three horse mackerel left the bag, the thanks text and the toast; no console errors. Not seen in the browser: the experience shown on the skills panel (unit test covers it).

@@ -8,6 +8,12 @@ extends RefCounted
 ##   nibble  soft short tick: something touched the lure
 ##   take    sharp dry click over a low thump: a committed take, strike now
 ##   landed  short warm two-note confirmation
+## World layer (R13), made the same way, so no recording or licence is needed:
+##   tram_bell   two bright strikes of a bell, as a tram warns walkers
+##   ferry_horn  a long low two-tone horn
+##   gull        a falling cry
+##   step        a short low scuff of a shoe (step_stone is brighter)
+##   traffic     a three-second rumble of distant traffic, looped
 
 const MIX_RATE := 22050
 
@@ -24,7 +30,73 @@ static func make(cue: String) -> AudioStreamWAV:
 			var a := _tone([523.25, 1046.5], 0.22, 0.45, 0.01, 0.20)
 			var b := _tone([659.25, 1318.5], 0.30, 0.45, 0.01, 0.28)
 			return _to_wav(_mix(a, _delay(b, 0.12)))
+		"tram_bell":
+			var ding := _tone([1318.5, 2637.0, 3520.0], 0.5, 0.35, 0.002, 0.45)
+			return _to_wav(_mix(ding, _delay(ding, 0.28)))
+		"ferry_horn":
+			return _to_wav(_horn(1.8, [110.0, 138.6], 0.35))
+		"gull":
+			return _to_wav(_chirp(0.45, 2300.0, 1200.0, 0.25))
+		"step":
+			return _to_wav(_tick(0.06, 700.0, 0.5, 31))
+		"step_stone":
+			return _to_wav(_tick(0.05, 1500.0, 0.45, 37))
+		"traffic":
+			var wav := _to_wav(_rumble(3.0, 0.5, 41))
+			wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+			wav.loop_end = int(3.0 * MIX_RATE)
+			return wav
 	return _to_wav(PackedFloat32Array())
+
+
+## A horn: rich partials (odd harmonics) with a slow swell and fade.
+static func _horn(seconds: float, freqs: Array, gain: float) -> PackedFloat32Array:
+	var n := int(seconds * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	for i in n:
+		var t := float(i) / MIX_RATE
+		var env := minf(t / 0.25, 1.0) * minf((seconds - t) / 0.4, 1.0)
+		var v := 0.0
+		for f: float in freqs:
+			for h in [1.0, 3.0, 5.0]:
+				v += sin(TAU * f * h * t) / h
+		out[i] = v * env * gain * 0.4
+	return out
+
+
+## A falling cry: the pitch slides down, with a quick tremolo.
+static func _chirp(seconds: float, f_start: float, f_end: float, gain: float) -> PackedFloat32Array:
+	var n := int(seconds * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var phase := 0.0
+	for i in n:
+		var t := float(i) / MIX_RATE
+		var s := t / seconds
+		phase += TAU * lerpf(f_start, f_end, s * s) / MIX_RATE
+		var env := minf(t / 0.02, 1.0) * (1.0 - s) * (0.6 + 0.4 * sin(TAU * 18.0 * t))
+		out[i] = (sin(phase) + 0.3 * sin(2.0 * phase)) * env * gain
+	return out
+
+
+## Low rumble: brown noise, faded into its own start over the last 0.3 s so
+## the loop has no seam.
+static func _rumble(seconds: float, gain: float, seed_value: int) -> PackedFloat32Array:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var n := int(seconds * MIX_RATE)
+	var out := PackedFloat32Array()
+	out.resize(n)
+	var y := 0.0
+	for i in n:
+		y = clampf(y * 0.995 + rng.randf_range(-1.0, 1.0) * 0.06, -1.0, 1.0)
+		out[i] = y * gain
+	var fade := int(0.3 * MIX_RATE)
+	for i in fade:
+		var k := float(i) / fade
+		out[n - fade + i] = lerpf(out[n - fade + i], out[i], k)
+	return out
 
 
 ## Filtered noise burst with an exponential decay.
