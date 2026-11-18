@@ -106,3 +106,15 @@ static func _blocked_between(a: Vector2, b: Vector2, area: WorldArea) -> bool:
 		if area.blocked_at(a.lerp(b, float(i) / 12.0), 0.2):
 			return true
 	return false
+
+
+## The person within reach of pos who is nearest, from {id: pos}; "" for none.
+static func nearest(pos: Vector2, people: Dictionary, reach: float) -> String:
+	var best := ""
+	var best_d := reach
+	for id: String in people:
+		var d := pos.distance_to(people[id])
+		if d <= best_d:
+			best = id
+			best_d = d
+	return best

@@ -16,11 +16,12 @@
 | Save v2 (log, settings, bag, money field, counters), migration from v1 | Implemented | `data_model.md` 12 |
 | Economy: fish prices, selling, releasing undersize fish, the tackle shop, lure stock | Implemented (R8) | `data_model.md` 14 |
 | Progression: three skills with levels that raise the model's angler attributes | Implemented (R9) | `data_model.md` 15 |
-| Bag screen, quests, crafting, spot unlocks | Designed | `architecture.md` 7, `data_model.md` 12 |
+| Quests: five delivery quests from four people, talk panel, journal line, rewards | Implemented (R11) | `data_model.md` 17 |
+| Bag screen, event-based quests, crafting, spot unlocks | Designed | `architecture.md` 7, `data_model.md` 12 |
 | Core (`Db`, `Profile`, `Game` request and result) | Implemented; mode switch with a world Designed | `architecture.md` 3 |
 | Top-down world (one area in Stardew-style pixel art, landmarks of both ends, crowd, trams, cars, ferries, walking, markers, shops, hand-over both ways) | Partial | `architecture.md` 4 |
 | World people: four anglers with routines by slot, two vendors, neighbours carried into the fishing view | Implemented (R10) | `data_model.md` 16 |
-| Talking to people, world clock, more areas | Not started | `architecture.md` 4 |
+| World clock, more areas | Not started | `architecture.md` 4 |
 | Float and bait fishing | Designed outline; scope open (D2) | `architecture.md` 5 |
 | Native iOS and Android | Not started | `architecture.md` 9 |
 | CC0 PBR textures on the stages (six sets) | Implemented (R7, 2026-11-17) | `reference_docs.md` |
@@ -52,7 +53,7 @@
 | R8 | Economy: fishmonger and tackle shop **(done 2026-11-17)** | R3, R4 | Sell fish, buy tackle | Price tests; played | `sim/economy.gd`, `data/shop.json` |
 | R9 | Progression: experience and skills **(done 2026-11-17; spot unlocks wait for a second spot)** | R3 | Skills change cast and strike numbers | Tests show the attribute path; the result names the experience | `sim/progress.gd` |
 | R10 | NPCs with schedules; world anglers become the 3D neighbours **(done 2026-11-17; talking comes with R11)** | R4 | People in the world | Seeded schedule tests; played | `sim/npc_roster.gd`, `data/npcs.json` |
-| R11 | Quests | R8, R10 | Journal and rewards | Condition tests over recorded results | `sim/quests.gd`, `data/quests.json` |
+| R11 | Quests **(done 2026-11-18: deliveries from the bag; event-based conditions later)** | R8, R10 | Journal and rewards | Condition tests over recorded results | `sim/quests.gd`, `data/quests.json` |
 | R12 | Float and bait presentation | R1, D2 | A second way to fish | Simulation tests; data sourced or labelled | `sim/`, `data/tackle/` |
 | R13 | World audio layers and buses | R4 | Ambience per area, beds continue across modes | Listened on the phone | `ui/audio/` |
 | R14 | Content: spots 2 and 3, species towards 15 | R5 | Sourced records | Data tests pass; sources recorded | `data/`, `spot_research.md` |
@@ -81,6 +82,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R11 quests (2026-11-18): 207 tests pass with no script errors; both web exports build; played in the debug web build at 1280x720 (English) and 844x390 (Turkish): walked to Hasan at the Karaköy east rail, "Talk to Hasan", his quest with the reward, accepted, the journal line under the wallet, "Hand over" disabled with one fish, enabled with three, then paid 40 TL, three horse mackerel left the bag, the thanks text and the toast; no console errors. Not seen in the browser: the experience shown on the skills panel (unit test covers it).
 - Stardew-style world (2026-11-18): 201 tests pass with no script errors; both web exports build; played in the browser (software GL) at 1280x720 by day, at dawn and in the evening, and at 844x390: the player with no rod, passers-by on the squares and walkways, the tackle and fish kiosks with their vendors, the Galata Tower above the Karaköy roofs when walking up, the zebra crossing (the road is blocked elsewhere), cars and the T1 tram, an angler with rod and bucket at the rail and the floating marker, the New Mosque and the pigeons at Eminönü, lamp glow at dawn, readable signs on the phone size; no console errors. Not seen: a ferry passing under the bridge on screen (the unit test checks its lane), the night slot.
 - R10 people (2026-11-17): 196 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL, 1280x720) in the evening: four anglers at the east rail with rods over the water, the debug jump to the Karaköy east marker, "Fish here", and the fishing view with four neighbours along the rail; no console errors. Not seen in the browser: someone walking in after a time change (unit test covers the walk), the vendors up close, 844x390.
 - Top-down world art (2026-11-17): 191 tests pass with no script errors in the output; both web exports build; played in the debug web build (software GL) at 1280x720 by dawn, day, evening and night and at 844x390 by day: cobbles without a visible repeat, water with glints and foam at the stone edges, lamps lighting the plaza at night, the two kiosks and the player at twice life size; no console errors. Not checked: the frame rate on a phone with two canvas shaders and the 2D lights.

@@ -39,6 +39,9 @@ var _prompt: Label
 var _toast: Label
 var _toast_s := 0.0
 var _shop: ShopPanel
+var _talk: TalkPanel
+var _journal: Label
+var _quests: Array = []
 var _wallet: Label
 var _stick := Vector2.ZERO
 var _touching := false
@@ -74,6 +77,10 @@ func setup() -> void:
 		pal["shirt"] = rec["jacket_color"].lightened(0.15)
 		rec["frames"] = PixelArt.person(pal)
 		_npcs.append(rec)
+	var q := Quests.load_quests(roster["npcs"], Db.database(), Db.shop())
+	if not q["ok"]:
+		push_error("Quests failed to load: %s" % str(q["errors"]))
+	_quests = q["quests"]
 	apply_conditions()
 	settle_npcs()
 	_cam = Camera2D.new()
@@ -181,11 +188,36 @@ func fish() -> void:
 		fish_requested.emit(request)
 
 
-## The action button: a shop in reach opens it, else a fishing marker fishes.
+## The person in reach to talk to (present, standing still), or {}.
+## A fishing marker nearer than them wins.
+func talk_target() -> Dictionary:
+	var people := {}
+	for n: Dictionary in _npcs:
+		var st: Dictionary = _npc_state[n["id"]]
+		if st["present"] and (st["pos"] as Vector2).distance_to(st["target"]) < 0.3:
+			people[n["id"]] = st["pos"]
+	var reach := float(Db.constants()["INTERACT_M"])
+	var id := NpcRoster.nearest(walk.pos, people, reach)
+	if id == "":
+		return {}
+	var m := walk.nearest_marker()
+	if not m.is_empty() and walk.pos.distance_to(m["pos"]) < walk.pos.distance_to(people[id]):
+		return {}
+	for n: Dictionary in _npcs:
+		if n["id"] == id:
+			return n
+	return {}
+
+
+## The action button: a shop in reach opens it, else someone in reach is
+## talked to, else a fishing marker fishes.
 func act() -> void:
 	var shop := walk.nearest_shop()
+	var person := talk_target()
 	if not shop.is_empty():
 		_shop.open(shop["id"])
+	elif not person.is_empty():
+		_talk.open(person)
 	else:
 		fish()
 
@@ -210,16 +242,21 @@ func _process(delta: float) -> void:
 	_cam.position = (camera_target() * area.px_per_m).round()
 	var m := walk.nearest_marker()
 	var shop := walk.nearest_shop()
-	_action.visible = (not m.is_empty() or not shop.is_empty()) and not _shop.visible
+	var person := talk_target()
+	_action.visible = (not m.is_empty() or not shop.is_empty() or not person.is_empty()) and not _shop.visible and not _talk.visible
 	if not shop.is_empty():
 		_prompt.text = tr("SHOP_%s" % String(shop["id"]).to_upper())
 		_action.text = tr("WORLD_OPEN_SHOP")
+	elif not person.is_empty():
+		_prompt.text = tr(person["name_key"])
+		_action.text = tr("WORLD_TALK") % tr(person["name_key"])
 	elif m.is_empty():
 		_prompt.text = tr("WORLD_WALK_HINT")
 	else:
 		_prompt.text = tr(_position_name_key(m["position_id"]))
 		_action.text = tr("WORLD_FISH_HERE")
 	_wallet.text = "%s · %s" % [tr("MONEY_FMT") % Economy.money(Profile.save), tr("WORLD_BAG") % Inventory.fish_count(Profile.save)]
+	_journal.text = journal_text()
 	_toast_s = maxf(_toast_s - delta, 0.0)
 	_toast.visible = _toast_s > 0.0
 	queue_redraw()
@@ -233,8 +270,17 @@ func camera_target() -> Vector2:
 	return walk.pos - Vector2(0.0, near_top * LOOK_AHEAD_M)
 
 
+## The active quests' titles for the HUD, or "" with none.
+func journal_text() -> String:
+	var titles: Array[String] = []
+	for q: Dictionary in _quests:
+		if Quests.is_active(Profile.save, q["id"]):
+			titles.append(tr(q["title_key"]))
+	return tr("QUEST_JOURNAL") % ", ".join(titles) if not titles.is_empty() else ""
+
+
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept") and not _shop.visible and (not walk.nearest_marker().is_empty() or not walk.nearest_shop().is_empty()):
+	if event.is_action_pressed("ui_accept") and not _shop.visible and not _talk.visible and _action.visible:
 		act()
 
 
@@ -519,8 +565,8 @@ func _build_hud() -> void:
 	_toast.set_anchors_preset(Control.PRESET_CENTER_TOP)
 	_toast.offset_left = -400.0
 	_toast.offset_right = 400.0
-	_toast.offset_top = 80.0
-	_toast.offset_bottom = 120.0
+	_toast.offset_top = 124.0
+	_toast.offset_bottom = 164.0
 	_toast.visible = false
 	_hud.add_child(_toast)
 	# The stick pad under the left thumb.
@@ -568,8 +614,24 @@ func _build_hud() -> void:
 	_wallet.offset_top = 60.0
 	_wallet.offset_bottom = 90.0
 	_hud.add_child(_wallet)
+	_journal = Label.new()
+	_journal.add_theme_font_size_override("font_size", 20)
+	_journal.add_theme_color_override("font_color", Color(1.0, 0.88, 0.5))
+	_journal.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_journal.add_theme_constant_override("outline_size", 6)
+	_journal.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_journal.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_journal.offset_left = -400.0
+	_journal.offset_right = 400.0
+	_journal.offset_top = 92.0
+	_journal.offset_bottom = 120.0
+	_hud.add_child(_journal)
 	_shop = ShopPanel.new()
 	_hud.add_child(_shop)
+	_talk = TalkPanel.new()
+	_talk.quests = _quests
+	_talk.completed.connect(func(q: Dictionary) -> void: show_toast(tr("QUEST_DONE_TOAST") % tr(q["title_key"]), 4.0))
+	_hud.add_child(_talk)
 
 
 func _center_knob() -> void:

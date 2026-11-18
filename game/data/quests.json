@@ -1,0 +1,99 @@
+{
+ "design_fill": true,
+ "note": "Quests, their asks and rewards are game-design fills. The minimum length is never below the species' legal size (species.json regulation).",
+ "quests": [
+  {
+   "id": "hasan_supper",
+   "giver": "hasan",
+   "title_key": "QUEST_HASAN_SUPPER_TITLE",
+   "ask_key": "QUEST_HASAN_SUPPER_ASK",
+   "thanks_key": "QUEST_HASAN_SUPPER_THANKS",
+   "need": {
+    "species": "istavrit",
+    "count": 3
+   },
+   "reward": {
+    "money": 40,
+    "items": {
+     "capari_rig": 2
+    },
+    "xp": {
+     "cast": 10
+    }
+   }
+  },
+  {
+   "id": "hasan_bluefish",
+   "giver": "hasan",
+   "title_key": "QUEST_HASAN_BLUEFISH_TITLE",
+   "ask_key": "QUEST_HASAN_BLUEFISH_ASK",
+   "thanks_key": "QUEST_HASAN_BLUEFISH_THANKS",
+   "need": {
+    "species": "lufer",
+    "count": 1,
+    "min_length_cm": 24
+   },
+   "reward": {
+    "money": 120,
+    "items": {
+     "spin_minnow": 2
+    },
+    "xp": {
+     "knots": 20
+    }
+   }
+  },
+  {
+   "id": "nuri_bonito",
+   "giver": "nuri",
+   "title_key": "QUEST_NURI_BONITO_TITLE",
+   "ask_key": "QUEST_NURI_BONITO_ASK",
+   "thanks_key": "QUEST_NURI_BONITO_THANKS",
+   "need": {
+    "species": "palamut",
+    "count": 1
+   },
+   "reward": {
+    "money": 100,
+    "items": {},
+    "xp": {
+     "strike": 15
+    }
+   }
+  },
+  {
+   "id": "ayten_neighbours",
+   "giver": "ayten",
+   "title_key": "QUEST_AYTEN_NEIGHBOURS_TITLE",
+   "ask_key": "QUEST_AYTEN_NEIGHBOURS_ASK",
+   "thanks_key": "QUEST_AYTEN_NEIGHBOURS_THANKS",
+   "need": {
+    "species": "istavrit",
+    "count": 5
+   },
+   "reward": {
+    "money": 30,
+    "items": {
+     "lrf_soft": 6
+    },
+    "xp": {}
+   }
+  },
+  {
+   "id": "recep_counter",
+   "giver": "recep",
+   "title_key": "QUEST_RECEP_COUNTER_TITLE",
+   "ask_key": "QUEST_RECEP_COUNTER_ASK",
+   "thanks_key": "QUEST_RECEP_COUNTER_THANKS",
+   "need": {
+    "species": "lufer",
+    "count": 2
+   },
+   "reward": {
+    "money": 200,
+    "items": {},
+    "xp": {}
+   }
+  }
+ ]
+}
