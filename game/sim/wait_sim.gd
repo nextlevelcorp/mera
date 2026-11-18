@@ -68,6 +68,8 @@ func _init(ctx: Dictionary, k: Dictionary, species_records: Array, cast_m: float
 	_k = k
 	_rng.seed = seed_value
 	lure_distance_m = cast_m
+	if Presentation.is_float(ctx["lure"]):
+		depth_m = minf(float(ctx["lure"]["run_depth_max_m"]), CatchModel.depth_at(ctx["position"]["depth_profile"], cast_m) * 0.9)
 	_species = []
 	for entry: Dictionary in ctx["spot"]["species"]:
 		for sp: Dictionary in species_records:
@@ -117,7 +119,7 @@ func step() -> void:
 		retrieve_ms = _reel * float(_ctx["reel"]["retrieve_m_per_s"])
 		lure_distance_m = maxf(lure_distance_m - retrieve_ms * DT, 0.0)
 		_update_depth()
-	else:
+	elif not Presentation.is_float(_ctx["lure"]):
 		lure_distance_m = maxf(lure_distance_m - float(_k["WAIT_RETRIEVE_M_PER_S"]) * DT, 0.0)
 	if lure_distance_m <= float(_k["WAIT_END_M"]):
 		phase = PHASE_RETRIEVED
@@ -222,7 +224,10 @@ func _update_depth() -> void:
 	var water := CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m)
 	var ceiling := minf(float(lure["run_depth_max_m"]), water * 0.9)
 	var sink := float(lure["sink_rate_m_per_s"])
-	if sink > 0.0:
+	if Presentation.is_float(lure):
+		# Under a float the bait hangs at the set depth (or just off the bottom).
+		depth_m = float(lure["run_depth_max_m"])
+	elif sink > 0.0:
 		# A sinker: falls while slack, rises as it is reeled in.
 		depth_m += (sink * (1.0 - _reel) - float(_k["RISE_PER_M"]) * retrieve_ms) * DT
 	else:
@@ -236,7 +241,9 @@ func _update_depth() -> void:
 func _refresh_rates() -> void:
 	_refresh_left = RATE_REFRESH_S
 	_ctx["play"]["cast_m"] = lure_distance_m
-	if controlled:
+	if Presentation.is_float(_ctx["lure"]):
+		_ctx["play"]["lure_depth_m"] = minf(float(_ctx["lure"]["run_depth_max_m"]), CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m) * 0.9)
+	elif controlled:
 		# What the player does is what the model sees (data_model 5.2, 5.3).
 		_ctx["play"]["lure_depth_m"] = depth_m
 		_ctx["play"]["retrieve_speed"] = 1.0 + 19.0 * _reel

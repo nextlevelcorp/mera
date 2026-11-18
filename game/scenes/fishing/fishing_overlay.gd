@@ -29,7 +29,10 @@ func _draw() -> void:
 			draw_circle(scr._end_pos, 4.0, Color(0.95, 0.75, 0.3))
 		FishingScreen.Phase.WAIT:
 			_draw_line(false)
-			draw_circle(scr._end_pos, 3.0, Color(0.95, 0.75, 0.3))
+			if scr.is_float():
+				_draw_float(scr._end_pos, scr.float_dip)
+			else:
+				draw_circle(scr._end_pos, 3.0, Color(0.95, 0.75, 0.3))
 		FishingScreen.Phase.FIGHT, FishingScreen.Phase.RESULT:
 			if scr._lifted() or scr._landing_now():
 				_draw_line(false)
@@ -74,6 +77,18 @@ func _draw_stage(size: Vector2) -> void:
 		tips.append(WaterView.project(Vector2(t.x, t.z), t.y, size))
 		lures.append(WaterView.project(bridge.lure_water(i, float(p["cast_m"]), float(p["side"])), 0.0, size))
 	scr._neighbours.draw_lines(self, size, float(scr._env.get("light", 0.6)), tips, lures)
+
+
+## The float on the water (R12): a red tip over a white body, cut off at the
+## waterline, so a dip shows less of it and a take pulls it under.
+func _draw_float(at: Vector2, dip: float) -> void:
+	var water_y := at.y
+	var top := at + Vector2(0.0, -15.0 + dip)
+	draw_line(at + Vector2(-9.0, 1.0), at + Vector2(9.0, 1.0), Color(1, 1, 1, 0.35), 1.5, true)   # the meniscus
+	if top.y + 5.0 < water_y:
+		draw_rect(Rect2(top + Vector2(-3.5, 5.0), Vector2(7.0, minf(water_y - top.y - 5.0, 10.0))), Color(0.96, 0.95, 0.9))
+	if top.y < water_y:
+		draw_rect(Rect2(top + Vector2(-2.5, 0.0), Vector2(5.0, minf(water_y - top.y, 5.0))), Color(0.95, 0.25, 0.15))
 
 
 ## The line along the Verlet rope; warm-coloured and thicker while straining.

@@ -134,6 +134,10 @@ var _was_landing := false
 var _was_kicking := false
 var _steer_hint_shown := false
 var _strike_queued := false
+## The float on the water (R12), in screen pixels below its resting line:
+## nibbles bob it, a take pulls it under. A damped spring, view only.
+var float_dip := 0.0
+var _float_vel := 0.0
 
 var _debug_menu: Control
 
@@ -314,6 +318,23 @@ func lure_id() -> String:
 	return FightSetup.lure_id(rig)
 
 
+func is_float() -> bool:
+	return not _ctx.is_empty() and Presentation.is_float(_ctx["lure"])
+
+
+## The float rig's depth, after the float's limits.
+func float_depth() -> float:
+	return float(_ctx["lure"]["run_depth_max_m"]) if is_float() else 0.0
+
+
+## Moves the float stop by step_m (rig panel); the next cast fishes there.
+func change_float_depth(step_m: float) -> void:
+	if not is_float():
+		return
+	_session.float_depth_m = Presentation.clamp_depth(Db.record("float", FightSetup.FLOAT_RIG), float_depth() + step_m)
+	apply_conditions()
+
+
 func lure_stock() -> int:
 	return Inventory.count(save, lure_id())
 
@@ -322,7 +343,7 @@ func begin_charge() -> void:
 	if phase != Phase.READY:
 		return
 	if lure_stock() <= 0:
-		_toast(tr("NO_LURES"), 3.5)
+		_toast(tr("NO_BAIT" if is_float() else "NO_LURES"), 3.5)
 		return
 	_charge_s = 0.0
 	_aim = 0.0
@@ -423,6 +444,7 @@ func _on_wait_event(e: Dictionary) -> void:
 	match e["event"]:
 		"nibble":
 			_last_contact_s = _time
+			_float_vel += 90.0
 			_tip_vel -= 6.0
 			_rod.kick(1.5)
 			_fx.add_ring(world, 0.35, 0.8, 0.35)
@@ -508,7 +530,8 @@ func _finish_fight() -> void:
 	_session.record_outcome(outcome, _fight_ctx, _controller.sim.weight_kg)
 	# A broken line or a bitten-through leader takes the lure with it, now, so
 	# closing the tab does not bring it back.
-	_result["lure_lost"] = outcome in [FightSim.OUTCOME_LINE_BREAK, FightSim.OUTCOME_LEADER_CUT] and Economy.lose_lure(save, _fight_ctx["lure"]["id"])
+	# A bait was used on the cast already; a lure goes with the line.
+	_result["lure_lost"] = outcome in [FightSim.OUTCOME_LINE_BREAK, FightSim.OUTCOME_LEADER_CUT] and not Presentation.is_float(_fight_ctx["lure"]) and Economy.lose_lure(save, _fight_ctx["lure"]["id"])
 	if _result["lure_lost"]:
 		_store()
 	if outcome == FightSim.OUTCOME_LANDED:
@@ -954,6 +977,9 @@ func _process(delta: float) -> void:
 	_tip_vel += ((target - _tip_kick) * 60.0 - _tip_vel * 9.0) * delta
 	_tip_kick += _tip_vel * delta
 	_tap_jig = maxf(_tap_jig - delta * 0.8, 0.0)
+	var under := 18.0 if phase == Phase.WAIT and _wait_state.get("phase", "") == WaitSim.PHASE_TAKE else 0.0
+	_float_vel += ((under - float_dip) * 80.0 - _float_vel * 10.0) * delta
+	float_dip += _float_vel * delta
 	_step_rod_and_line(delta)
 	# Getting ready the angler looks along the bridge; to cast and fish they
 	# turn to the water (owner, 2026-11-16).
@@ -1234,6 +1260,9 @@ func _update_texts() -> void:
 	_ui.position_cycle.text = "%s: %s" % [tr("FISH_POSITION"), tr(pos["name_key"])]
 	var cast_check := CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], pos, conditions, 1.0)
 	_ui.rig_label.text = tr("FISH_RIG_INFO") % [tr(_ctx["lure"]["name_key"]), float(cast_check["cast_max_m"])] + "\n" + tr("RIG_STOCK") % lure_stock()
+	_ui.float_row.visible = is_float()
+	if is_float():
+		_ui.float_label.text = tr("RIG_FLOAT_DEPTH") % float_depth()
 	if cast_check["lure_out_of_range"]:
 		_ui.rig_label.text += "\n" + tr("RIG_WARN_RANGE")
 	_ui.speed_button.button_pressed = _speed_on

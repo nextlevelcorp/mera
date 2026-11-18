@@ -116,7 +116,9 @@ func pose(rig: AnglerRig, pts: PackedVector2Array, size: Vector2) -> void:
 	_stretch(_handle_arm, Vector3(0, 0, 7), knob_local)
 	var handle2 := reel2 + normal2 * 22.0 + (normal2 * cos(rig.crank) * 22.0 + axis2 * sin(rig.crank) * 12.0)
 	var left2 := handle2.lerp(reel2 + axis2 * 24.0 + normal2 * 6.0, rig.cast_pose)
-	_hand_l.transform = Transform3D(frame.rotated(frame.z.normalized(), sin(rig.crank * 0.15) * 0.25), _lift(left2, z_seat - 0.02))
+	# Before the rod has points the frame is degenerate: no wrist turn then.
+	var wrist := frame.rotated(frame.z.normalized(), sin(rig.crank * 0.15) * 0.25) if frame.z.length_squared() > 1e-10 else frame
+	_hand_l.transform = Transform3D(wrist, _lift(left2, z_seat - 0.02))
 	var grip2 := rig.at(0.10) + tremor
 	var z_grip := _depth(0.10)
 	_hand_r.transform = Transform3D(_frame(grip2, axis2, normal2, z_grip), _lift(grip2, z_grip))

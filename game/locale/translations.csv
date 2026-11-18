@@ -234,3 +234,13 @@ QUEST_XP,%d %s experience,%d %s deneyimi,%d de experiencia en %s
 QUEST_NOTHING,Good fishing to you. Nothing else I need today.,Rastgele. Bugün başka bir şeye ihtiyacım yok.,Buena pesca. Hoy no necesito nada más.
 QUEST_JOURNAL,Quests: %s,Görevler: %s,Misiones: %s
 QUEST_DONE_TOAST,Quest done: %s,Görev tamam: %s,Misión cumplida: %s
+TACKLE_ROD_FLOAT,Float rod (4 m),Şamandıra kamışı (4 m),Caña de boya (4 m)
+TACKLE_REEL_FLOAT,Light spinning reel,Hafif makara,Carrete ligero
+TACKLE_LINE_FLOAT,Fine monofilament line,İnce monofilament misina,Sedal monofilamento fino
+TACKLE_LEADER_FLOAT,Fluorocarbon hook length,Florokarbon köstek,Bajo de fluorocarbono
+TACKLE_FLOAT_RIG,Float with shot and a single hook,Kurşunlu şamandıra ve tek iğne,Boya con plomos y un anzuelo
+TACKLE_BAIT_SHRIMP,Shrimp (bait),Karides (yem),Gamba (cebo)
+RIG_FLOAT_DEPTH,Float depth: %.1f m,Şamandıra derinliği: %.1f m,Profundidad de la boya: %.1f m
+RIG_DEEPER,Deeper,Derine,Más hondo
+RIG_SHALLOWER,Shallower,Sığa,Menos hondo
+NO_BAIT,No bait left: buy shrimp at the tackle shop,Yem kalmadı: olta dükkânından karides al,No queda cebo: compra gambas en la tienda

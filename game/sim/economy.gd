@@ -22,6 +22,8 @@ static func load_catalog(database: Dictionary) -> Dictionary:
 	var lure_ids := {}
 	for l: Dictionary in database.get("lure", []):
 		lure_ids[l["id"]] = true
+	for b: Dictionary in database.get("bait", []):
+		lure_ids[b["id"]] = true   # baits are sold and stocked like lures
 	var species_ids := {}
 	for s: Dictionary in database.get("species", []):
 		species_ids[s["id"]] = true

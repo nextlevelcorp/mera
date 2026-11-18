@@ -1,0 +1,16 @@
+[
+ {
+  "id": "float_rig",
+  "name_key": "TACKLE_FLOAT_RIG",
+  "weight_g": 8,
+  "hook_gape_mm": 7,
+  "depth_min_m": 0.5,
+  "depth_max_m": 8,
+  "depth_default_m": 3,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
+ }
+]

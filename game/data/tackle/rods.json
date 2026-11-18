@@ -46,5 +46,21 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "float_rod",
+  "name_key": "TACKLE_ROD_FLOAT",
+  "length_m": 4.0,
+  "power": 5,
+  "action": 6,
+  "cast_weight_min_g": 3,
+  "cast_weight_max_g": 20,
+  "sensitivity": 16,
+  "durability": 10,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]
