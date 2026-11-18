@@ -336,14 +336,26 @@ func change_float_depth(step_m: float) -> void:
 
 
 func lure_stock() -> int:
-	return Inventory.count(save, lure_id())
+	return _session.stock(_ctx) if not _ctx.is_empty() else Inventory.count(save, lure_id())
+
+
+## The float rig's next bait in baits.json order (rig panel).
+func cycle_bait() -> void:
+	if not is_float():
+		return
+	var ids: Array = _db.get("bait", []).map(func(b: Dictionary) -> String: return b["id"])
+	_session.float_bait = ids[(ids.find(_session.float_bait) + 1) % ids.size()]
+	apply_conditions()
 
 
 func begin_charge() -> void:
 	if phase != Phase.READY:
 		return
 	if lure_stock() <= 0:
-		_toast(tr("NO_BAIT" if is_float() else "NO_LURES"), 3.5)
+		var key := "NO_LURES"
+		if is_float():
+			key = "NO_LIVE_BAIT" if String(_ctx["lure"]["id"]) != FightSetup.FLOAT_BAIT else "NO_BAIT"
+		_toast(tr(key), 3.5)
 		return
 	_charge_s = 0.0
 	_aim = 0.0
@@ -1261,8 +1273,10 @@ func _update_texts() -> void:
 	var cast_check := CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], pos, conditions, 1.0)
 	_ui.rig_label.text = tr("FISH_RIG_INFO") % [tr(_ctx["lure"]["name_key"]), float(cast_check["cast_max_m"])] + "\n" + tr("RIG_STOCK") % lure_stock()
 	_ui.float_row.visible = is_float()
+	_ui.bait_cycle.visible = is_float()
 	if is_float():
 		_ui.float_label.text = tr("RIG_FLOAT_DEPTH") % float_depth()
+		_ui.bait_cycle.text = "%s: %s" % [tr("RIG_BAIT"), tr(_ctx["lure"]["name_key"])]
 	if cast_check["lure_out_of_range"]:
 		_ui.rig_label.text += "\n" + tr("RIG_WARN_RANGE")
 	_ui.speed_button.button_pressed = _speed_on

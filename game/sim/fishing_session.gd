@@ -20,6 +20,8 @@ var trip := Game.empty_result()
 var save := {}
 ## The float rig's depth (R12); the float's default until the angler changes it.
 var float_depth_m := -1.0
+## The float rig's bait (baits.json id).
+var float_bait := FightSetup.FLOAT_BAIT
 
 
 func _init(database: Dictionary, constants: Dictionary, rig_id: String, position: String, session_conditions: Dictionary, shoal_field: ShoalField = null) -> void:
@@ -34,9 +36,12 @@ func _init(database: Dictionary, constants: Dictionary, rig_id: String, position
 ## The CatchModel context for a species on the current rig and position.
 func context(species_id: String, overrides: Dictionary = {}) -> Dictionary:
 	var o := overrides
-	if rig == "float" and float_depth_m > 0.0 and not o.has("float_depth_m"):
+	if rig == "float":
 		o = overrides.duplicate()
-		o["float_depth_m"] = float_depth_m
+		if float_depth_m > 0.0 and not o.has("float_depth_m"):
+			o["float_depth_m"] = float_depth_m
+		if not o.has("float_bait"):
+			o["float_bait"] = float_bait
 	var ctx := FightSetup.build(db, species_id, rig, position_id, 0.5, conditions, o)
 	if not save.is_empty():
 		ctx["angler"] = Progress.angler(ctx["angler"], save, k)
@@ -53,7 +58,7 @@ func cast(ctx: Dictionary, power: float) -> Dictionary:
 	seed_counter += 1
 	# A bait is used up on every cast (a lure is only lost to a break).
 	if Presentation.is_float(ctx["lure"]) and not save.is_empty():
-		Inventory.remove(save, ctx["lure"]["id"])
+		Presentation.use_bait(save, _bait(ctx["lure"]["id"]), db["species"])
 	var c := CatchModel.cast(k, ctx["rod"], ctx["lure"], ctx["angler"], ctx["position"], conditions, power)
 	c["cast_m"] = maxf(float(c["cast_m"]), float(k["WAIT_END_M"]) + 2.0)
 	return c
@@ -103,3 +108,17 @@ func add_time(seconds: float) -> void:
 ## The FishingResult so far (a copy).
 func result() -> Dictionary:
 	return trip.duplicate(true)
+
+
+## How many casts are left with the rig's bait or lure.
+func stock(ctx: Dictionary) -> int:
+	if Presentation.is_float(ctx["lure"]):
+		return Presentation.bait_stock(save, _bait(ctx["lure"]["id"]), db["species"])
+	return Inventory.count(save, ctx["lure"]["id"])
+
+
+func _bait(id: String) -> Dictionary:
+	for b: Dictionary in db.get("bait", []):
+		if b["id"] == id:
+			return b
+	return {}

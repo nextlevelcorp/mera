@@ -16,5 +16,26 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "live_istavrit",
+  "name_key": "TACKLE_BAIT_LIVE_ISTAVRIT",
+  "type": "live_fish",
+  "size_cm": 15,
+  "scent": 8,
+  "action": 16,
+  "durability": 10,
+  "target_diet_tags": [
+   "small_fish"
+  ],
+  "effective_depth_min_m": 0,
+  "effective_depth_max_m": 30,
+  "hook_gape_mm": 14,
+  "from_species": "istavrit",
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]

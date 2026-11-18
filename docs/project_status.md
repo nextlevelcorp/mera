@@ -22,7 +22,7 @@
 | Top-down world (one area in Stardew-style pixel art, landmarks of both ends, crowd, trams, cars, ferries, walking, markers, shops, hand-over both ways) | Partial | `architecture.md` 4 |
 | World people: four anglers with routines by slot, two vendors, neighbours carried into the fishing view | Implemented (R10) | `data_model.md` 16 |
 | World clock, more areas | Not started | `architecture.md` 4 |
-| Float fishing with bait (shrimp, depth setting, bait used per cast, float on the water) | Implemented (R12) | `architecture.md` 5 |
+| Float fishing with bait (shrimp or live horse mackerel from the bag, depth setting, bait used per cast, float on the water) | Implemented (R12) | `architecture.md` 5 |
 | Native iOS and Android | Not started | `architecture.md` 9 |
 | CC0 PBR textures on the stages (six sets) | Implemented (R7, 2026-11-17) | `reference_docs.md` |
 | CC0 first-person hand model | Blocked: no reachable CC0 source | `reference_docs.md` |
@@ -54,7 +54,7 @@
 | R9 | Progression: experience and skills **(done 2026-11-17; spot unlocks wait for a second spot)** | R3 | Skills change cast and strike numbers | Tests show the attribute path; the result names the experience | `sim/progress.gd` |
 | R10 | NPCs with schedules; world anglers become the 3D neighbours **(done 2026-11-17; talking comes with R11)** | R4 | People in the world | Seeded schedule tests; played | `sim/npc_roster.gd`, `data/npcs.json` |
 | R11 | Quests **(done 2026-11-18: deliveries from the bag; event-based conditions later)** | R8, R10 | Journal and rewards | Condition tests over recorded results | `sim/quests.gd`, `data/quests.json` |
-| R12 | Float and bait presentation **(done 2026-11-18: float rig with shrimp; live bait and bottom fishing later)** | R1, D2 | A second way to fish | Simulation tests; data sourced or labelled | `sim/`, `data/tackle/` |
+| R12 | Float and bait presentation **(done 2026-11-18: float rig with shrimp and live horse mackerel; bottom fishing later)** | R1, D2 | A second way to fish | Simulation tests; data sourced or labelled | `sim/`, `data/tackle/` |
 | R13 | World audio layers and buses | R4 | Ambience per area, beds continue across modes | Listened on the phone | `ui/audio/` |
 | R14 | Content: spots 2 and 3, species towards 15 | R5 | Sourced records | Data tests pass; sources recorded | `data/`, `spot_research.md` |
 | R15 | Native export spike (Android first), then release gates | R4 | An installable test build | Owner approval for each release step | `release_checklist.md` |
@@ -82,6 +82,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R12 live bait (2026-11-18): 219 tests pass with no script errors; debug web build exports; played at 1280x720 (en) and 844x390 (tr): world debug "+3 fish", the Karaköy east marker, Fish here, the rig panel on the float rod, "Bait: Live horse mackerel (from your bag)" with 1 in the bag, cast, the float out at 34.9 m with the bait at 3.0 m; no console errors. Not seen: a bluefish taking the live bait (the model test covers the odds). The project board (Kanban artifact) is updated by Claude with each merge.
 - R12 float (2026-11-18): 216 tests pass with no script errors; both web exports build; played in the debug web build at 1280x720 (en) and 844x390 (tr): the rig cycles to "Float rod (4 m)" with "Shrimp (bait)", 10 in the bag, the depth row (3.0 m, Deeper to 3.5 m), cast, the red and white float on the water and the HUD saying the bait is at 3.5 m of 19 m with no retrieve, a forced take with its splash; no console errors. Not seen on screen: the float going under (the take window passed before the screenshot; a unit test checks the dip), a nibble bob. Also fixed: a console error on opening the fishing view (`Rig3D` turned the left hand about a zero axis before the rod had points).
 - R11 quests (2026-11-18): 207 tests pass with no script errors; both web exports build; played in the debug web build at 1280x720 (English) and 844x390 (Turkish): walked to Hasan at the Karaköy east rail, "Talk to Hasan", his quest with the reward, accepted, the journal line under the wallet, "Hand over" disabled with one fish, enabled with three, then paid 40 TL, three horse mackerel left the bag, the thanks text and the toast; no console errors. Not seen in the browser: the experience shown on the skills panel (unit test covers it).
 - Stardew-style world (2026-11-18): 201 tests pass with no script errors; both web exports build; played in the browser (software GL) at 1280x720 by day, at dawn and in the evening, and at 844x390: the player with no rod, passers-by on the squares and walkways, the tackle and fish kiosks with their vendors, the Galata Tower above the Karaköy roofs when walking up, the zebra crossing (the road is blocked elsewhere), cars and the T1 tram, an angler with rod and bucket at the rail and the floating marker, the New Mosque and the pigeons at Eminönü, lamp glow at dawn, readable signs on the phone size; no console errors. Not seen: a ferry passing under the bridge on screen (the unit test checks its lane), the night slot.

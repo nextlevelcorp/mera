@@ -39,6 +39,7 @@ var rig_panel: Control
 var rig_label: Label
 var float_row: HBoxContainer
 var float_label: Label
+var bait_cycle: Button
 var rig_cycle: Button
 var position_cycle: Button
 var result_panel: Control
@@ -202,6 +203,8 @@ func _build_rig_panel() -> void:
 	float_row.add_child(float_label)
 	float_row.add_child(_button(tr("RIG_DEEPER"), 22, func() -> void: scr.change_float_depth(0.5)))
 	box.add_child(float_row)
+	bait_cycle = _button("", 22, func() -> void: scr.cycle_bait())
+	box.add_child(bait_cycle)
 	rig_label = _plain_label("", 18)
 	rig_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(rig_label)
