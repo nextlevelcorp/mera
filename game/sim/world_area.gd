@@ -1,13 +1,16 @@
 class_name WorldArea
 extends RefCounted
 ## One place of the top-down world (architecture.md 4): its size, the ground
-## rectangles (some of them blocked: water, a road), rails and lamps for
+## rectangles (some of them blocked: water, a road, buildings; a crossing
+## opens the road under it), rails and lamps for
 ## drawing, and the fishing markers that link to the positions of its spot.
 ## Loaded from game/data/areas/<id>.json, validated against the spot
 ## database. Pure data: no nodes. The layout is a design fill; the file says so.
 
 const DIR := "res://data/areas"
-const KINDS := ["plaza", "walkway", "road", "water"]
+const KINDS := ["plaza", "walkway", "road", "water", "crossing", "building"]
+## Open ground that wins over blocked ground under it (a zebra crossing on the road).
+const OPENS := ["crossing"]
 const SHOPS := ["fishmonger", "tackle"]
 
 var id := ""
@@ -89,6 +92,9 @@ static func load_area(area_id: String, database: Dictionary) -> Dictionary:
 func blocked_at(p: Vector2, radius: float) -> bool:
 	if p.x < radius or p.y < radius or p.x > size_m.x - radius or p.y > size_m.y - radius:
 		return true
+	for r: Dictionary in rects:
+		if r["kind"] in OPENS and (r["rect"] as Rect2).grow_individual(radius, -radius, radius, -radius).has_point(p):
+			return false
 	for r: Dictionary in rects:
 		if r["blocked"] and (r["rect"] as Rect2).grow(radius).has_point(p):
 			return true

@@ -204,3 +204,7 @@ NPC_AYTEN,Ayten,Ayten,Ayten
 NPC_RECEP,Recep,Recep,Recep
 NPC_SELMA,Selma,Selma,Selma
 WORLD_NPC_FISHING,%s is fishing,%s balık tutuyor,%s está pescando
+WORLD_SIGN_KARAKOY,Karaköy,Karaköy,Karaköy
+WORLD_SIGN_EMINONU,Eminönü,Eminönü,Eminönü
+WORLD_SIGN_FISH_MARKET,Fish market,Balık Pazarı,Mercado de pescado
+WORLD_SIGN_SPICE_BAZAAR,Spice Bazaar,Mısır Çarşısı,Bazar de las Especias

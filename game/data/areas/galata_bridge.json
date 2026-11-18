@@ -2,34 +2,54 @@
  "id": "galata_bridge",
  "spot_id": "galata_bridge",
  "design_fill": true,
- "note": "Grey-box layout, not to scale: the real bridge is about 490 m long (compressed to 110 m). Karaköy is at the top, Eminönü at the bottom; the two walkways run along the rails.",
+ "note": "Layout is a design fill, not to scale: the real bridge is about 490 m long (compressed to 110 m). Karaköy is at the top, Eminönü at the bottom; the road and the tram line run down the middle and on into the city, crossed at two zebra crossings; the two walkways run along the rails. Waterfront buildings close both ends: the Galata Tower on the Karaköy side, the New Mosque (Yeni Cami) on the Eminönü side, placed for recognition, not at their real distance.",
  "size_m": [
   60.0,
   110.0
  ],
- "px_per_m": 24.0,
+ "px_per_m": 16.0,
  "start_m": [
   44.0,
-  12.0
+  7.0
  ],
  "rects": [
+  {
+   "kind": "building",
+   "rect": [
+    0.0,
+    0.0,
+    18.2,
+    5.0
+   ],
+   "blocked": true
+  },
+  {
+   "kind": "building",
+   "rect": [
+    41.8,
+    0.0,
+    18.2,
+    5.0
+   ],
+   "blocked": true
+  },
   {
    "kind": "plaza",
    "rect": [
     0.0,
-    0.0,
-    60.0,
-    20.0
+    5.0,
+    18.2,
+    15.0
    ],
    "blocked": false
   },
   {
    "kind": "plaza",
    "rect": [
-    0.0,
-    90.0,
-    60.0,
-    20.0
+    41.8,
+    5.0,
+    18.2,
+    15.0
    ],
    "blocked": false
   },
@@ -77,9 +97,69 @@
    "kind": "road",
    "rect": [
     18.2,
-    20.0,
+    0.0,
     23.6,
-    70.0
+    110.0
+   ],
+   "blocked": true
+  },
+  {
+   "kind": "crossing",
+   "rect": [
+    18.2,
+    9.0,
+    23.6,
+    2.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "crossing",
+   "rect": [
+    18.2,
+    99.0,
+    23.6,
+    2.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "plaza",
+   "rect": [
+    0.0,
+    90.0,
+    18.2,
+    15.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "plaza",
+   "rect": [
+    41.8,
+    90.0,
+    18.2,
+    15.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "building",
+   "rect": [
+    0.0,
+    105.0,
+    18.2,
+    5.0
+   ],
+   "blocked": true
+  },
+  {
+   "kind": "building",
+   "rect": [
+    41.8,
+    105.0,
+    18.2,
+    5.0
    ],
    "blocked": true
   }
@@ -170,14 +250,14 @@
   {
    "id": "fishmonger",
    "pos_m": [
-    30.0,
+    10.0,
     8.0
    ]
   },
   {
    "id": "tackle",
    "pos_m": [
-    24.0,
+    50.0,
     8.0
    ]
   }
