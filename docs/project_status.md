@@ -36,6 +36,7 @@
 - **Phone frame rate** (owner, bridge view with shadows, lamps and the 3D rig): 58 fps average, worst 1% 47 over 60 s. The average holds; the worst 1% fell from 58 to 47, so the next visual steps (R6, R7) start by measuring what the shadow pass costs.
 
 ## Still open for the owner
+- **R14 needs hosts the session cannot reach** (2026-11-18): `www.resmigazete.gov.tr` (legal minimum sizes, Tebliğ 6/2 Çizelge 7), `trjfas.org` and `doi.org` (papers with length-weight values), `openaccess.marmara.edu.tr` (a North Marmara picarel study). `dergipark.org.tr` works through `curl` but not through WebFetch. Firecrawl answers HTTP 403. Without the first, no species can be added (every species needs a legal minimum size); the picarel record is prepared in `spot_research.md`. Also a decision: may a species without a legal minimum size (no rule found) be added, labelled so, or should it wait?
 - What feels wrong in the phone motion (the Settings monitor shows the readings).
 - An Android phone for testing.
 - Recommended, needs approval because it changes CI: fail the test job when Godot prints `SCRIPT ERROR`. Today the runner counts assertions only, so a script error inside a test does not fail it (seen during R1).
@@ -56,7 +57,7 @@
 | R11 | Quests **(done 2026-11-18: deliveries from the bag; event-based conditions later)** | R8, R10 | Journal and rewards | Condition tests over recorded results | `sim/quests.gd`, `data/quests.json` |
 | R12 | Float and bait presentation **(done 2026-11-18: float rig with shrimp and live horse mackerel; bottom fishing later)** | R1, D2 | A second way to fish | Simulation tests; data sourced or labelled | `sim/`, `data/tackle/` |
 | R13 | World audio layers and buses **(done 2026-11-18 in code; the owner listens on the phone)** | R4 | Ambience per area, beds continue across modes | Listened on the phone | `ui/audio/` |
-| R14 | Content: spots 2 and 3, species towards 15 | R5 | Sourced records | Data tests pass; sources recorded | `data/`, `spot_research.md` |
+| R14 | Content: spots 2 and 3, species towards 15 **(started 2026-11-18, blocked on sources: see `spot_research.md` and Still open)** | R5 | Sourced records | Data tests pass; sources recorded | `data/`, `spot_research.md` |
 | R15 | Native export spike (Android first), then release gates | R4 | An installable test build | Owner approval for each release step | `release_checklist.md` |
 
 ## Owner decisions (2026-11-11)
