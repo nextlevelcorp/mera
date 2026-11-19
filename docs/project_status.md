@@ -17,7 +17,8 @@
 | Economy: fish prices, selling, releasing undersize fish, the tackle shop, lure stock | Implemented (R8) | `data_model.md` 14 |
 | Progression: three skills with levels that raise the model's angler attributes | Implemented (R9) | `data_model.md` 15 |
 | Quests: five delivery quests from four people, talk panel, journal line, rewards | Implemented (R11) | `data_model.md` 17 |
-| Bag screen, event-based quests, crafting, spot unlocks | Designed | `architecture.md` 7, `data_model.md` 12 |
+| Bag screen (fish, tackle, money, skills; release undersize fish) | Implemented (R16) | `architecture.md` 7 |
+| Event-based quests, crafting, spot unlocks | Designed | `architecture.md` 7, `data_model.md` 12 |
 | Core (`Db`, `Profile`, `Game` request and result) | Implemented; mode switch with a world Designed | `architecture.md` 3 |
 | Top-down world (one area in Stardew-style pixel art, landmarks of both ends, crowd, trams, cars, ferries, walking, markers, shops, hand-over both ways) | Partial | `architecture.md` 4 |
 | World people: four anglers with routines by slot, two vendors, neighbours carried into the fishing view | Implemented (R10) | `data_model.md` 16 |
@@ -26,6 +27,12 @@
 | Native iOS and Android | Not started | `architecture.md` 9 |
 | CC0 PBR textures on the stages (six sets) | Implemented (R7, 2026-11-17) | `reference_docs.md` |
 | CC0 first-person hand model | Blocked: no reachable CC0 source | `reference_docs.md` |
+
+## Owner decisions (2026-11-19)
+- **D6 places**: a map screen (country, then spot) and places in four countries: Turkey (Galata, Sarayburnu and one more), Spain, Greece and Italy. All Mediterranean, so the three species carry over; legal sizes move from the species to the country or region, each with an official source.
+- **D7 boats**: shore fishing stays the core; boat fishing opens at higher levels at some spots (R23), after the shore work.
+- **D8 progression**: a mastery loop (collection, records, goals and badges, unlocks, a next-goal line, fixed weekly tasks without penalty). No timers, energy, streak penalties or loot boxes.
+- **D9 baiting**: a short hand-skill baiting screen when the rig or bait changes or the bait is spent, different for each bait type; the result changes how well the bait holds and how natural it looks.
 
 ## Owner decisions (2026-11-17)
 - **D1 top-down art**: start with grey boxes (R4) and choose the style on a real phone screen. Update 2026-11-17: a realistic textured look was built. Update 2026-11-18: the owner asked for Stardew Valley style; pixel art in a three-quarter view replaces it (`design_direction.md` 6g).
@@ -59,6 +66,14 @@
 | R13 | World audio layers and buses **(done 2026-11-18 in code; the owner listens on the phone)** | R4 | Ambience per area, beds continue across modes | Listened on the phone | `ui/audio/` |
 | R14 | Content: spots 2 and 3, species towards 15 **(2026-11-19: spot 2, Sarayburnu, is in with the three existing species and a debug spot switch, no world area yet; new species wait for a checked legal size, owner decision)** | R5 | Sourced records | Data tests pass; sources recorded | `data/`, `spot_research.md` |
 | R15 | Native export spike (Android first), then release gates **(part 1 done 2026-11-19: `release_checklist.md` and `android_spike.md`; part 2: the "Android Debug" preset exports a signed 29 MB arm64 debug APK (`scripts/android_setup.sh`), checked statically; it has never run on a device, see `android_spike.md`)** | R4 | An installable test build | Owner approval for each release step | `release_checklist.md` |
+| R16 | Bag screen **(done 2026-11-19)** | R8, R9 | See fish, tackle, money, skills; release undersize fish | Panel tests; played | `scenes/world/bag_panel.gd` |
+| R17 | Map screen and places in four countries (D6) | R14 | Pick a country, then a spot; Turkey (Galata, Sarayburnu, one Aegean spot), Spain, Greece, Italy | Legal sizes per jurisdiction in the data, each with an official source; data tests | `data/`, `scenes/map/` |
+| R18 | Each rig looks like itself in 3D (rod length, colour, reel, float) | R12 | Changing the rig changes the rod in hand | Played; screenshots of every rig | `ui/sea/rig_3d.gd` |
+| R19 | Cast left and right (aim), readable before release | R12 | The thumb swipe aims; the marker shows where | Aim tests; played | `scenes/fishing/` |
+| R20 | Baiting minigame (D9): a short hand-skill screen when the bait or rig changes or the bait is spent, per bait type | R12 | Good baiting holds longer and looks more natural | Pure scoring tests; played | `sim/`, `scenes/fishing/` |
+| R21 | Buttons and interface redesign (one theme for every screen) | R16 | A designed, consistent HUD | Screenshots at 1280x720 and 844x390 | `ui/theme/` |
+| R22 | Mastery progression (D8): species collection and records, goals and badges per spot, unlocks by level (spots, tackle, boat), a "next goal" line, fixed weekly tasks with no penalty for missing them | R9, R17 | A reason to come back without timers | Rule tests; played | `sim/progress.gd`, `data/goals.json` |
+| R23 | Boat fishing at higher levels (D7) | R22 | Rent a boat at some spots, fish deeper water | Simulation tests; played | `sim/`, `ui/sea/` |
 
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
@@ -83,6 +98,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R16 bag (2026-11-19): 235 tests pass with no script errors; debug web build played at 1280x720 and 844x390 (tr): world debug "+3 fish", the Bag button under Back, the panel with money, the three skills, three fish with length, weight and value and their total, and the tackle counts; no console errors. The panel has the plain default style (R21 redesigns it).
 - R14 spot 2 (2026-11-19): 233 tests pass with no script errors; debug web build played at 1280x720: the debug menu's new "Spot" button switches to Sarayburnu (name and "The point, Bosphorus side" in the status line, a rocky quay scene), cast; no console errors. Not played: the Marmara and Golden Horn positions on screen, and nothing in the world mode leads to Sarayburnu yet.
 - Sound fix (2026-11-19): after the owner reported no sound on the phone, the browser build was measured with a Web Audio analyser tapped on the destination: R13 build peak 0.00 in fishing, the build before 0.23, the fix 0.37 in the world and 0.20 fishing. The cause was creating buses at run time; they are in the layout file now. Not heard on the phone yet (the owner's check). Owner's frame rate after the pixel-art world, floats and world audio: 59 fps average (worst 1% not given).
 - Float follow-ups (2026-11-19): 228 tests pass with no script errors; debug web build played at 1280x720: the rig panel on the float rod with the live horse mackerel says "longest cast about 40 m" (was 62), cast, reel in; no console errors. Not seen: the "live bait is spent" toast (the unit test covers the wear and the return to the bag).

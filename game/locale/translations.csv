@@ -253,3 +253,7 @@ SPOT_SARAYBURNU,Sarayburnu,Sarayburnu,Sarayburnu
 POS_SARAYBURNU_TIP,"The point, Bosphorus side","Burun ucu, Boğaz tarafı","La punta, lado del Bósforo"
 POS_SARAYBURNU_MARMARA,Marmara side,Marmara tarafı,Lado del Mármara
 POS_SARAYBURNU_HORN,Golden Horn side,Haliç tarafı,Lado del Cuerno de Oro
+BAG_TITLE,Bag,Çanta,Bolsa
+BAG_FISH,Fish: %d · worth %s,Balık: %d · değeri %s,Peces: %d · valen %s
+BAG_TACKLE,Tackle and bait,Takım ve yem,Aparejos y cebo
+BAG_TACKLE_LINE,%s × %d,%s × %d,%s × %d

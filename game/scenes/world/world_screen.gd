@@ -40,6 +40,7 @@ var _toast: Label
 var _toast_s := 0.0
 var _shop: ShopPanel
 var _talk: TalkPanel
+var _bag: BagPanel
 var _journal: Label
 var _quests: Array = []
 var _wallet: Label
@@ -252,7 +253,7 @@ func _process(delta: float) -> void:
 	var m := walk.nearest_marker()
 	var shop := walk.nearest_shop()
 	var person := talk_target()
-	_action.visible = (not m.is_empty() or not shop.is_empty() or not person.is_empty()) and not _shop.visible and not _talk.visible
+	_action.visible = (not m.is_empty() or not shop.is_empty() or not person.is_empty()) and not _shop.visible and not _talk.visible and not _bag.visible
 	if not shop.is_empty():
 		_prompt.text = tr("SHOP_%s" % String(shop["id"]).to_upper())
 		_action.text = tr("WORLD_OPEN_SHOP")
@@ -289,7 +290,7 @@ func journal_text() -> String:
 
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("ui_accept") and not _shop.visible and not _talk.visible and _action.visible:
+	if event.is_action_pressed("ui_accept") and not _shop.visible and not _talk.visible and not _bag.visible and _action.visible:
 		act()
 
 
@@ -555,6 +556,14 @@ func _build_hud() -> void:
 	back.position = Vector2(16, 16)
 	back.pressed.connect(func() -> void: closed.emit())
 	_hud.add_child(back)
+	var bag := _button(tr("BAG_TITLE"), 22)
+	bag.custom_minimum_size = Vector2(160, 80)
+	bag.position = Vector2(16, 124)
+	bag.pressed.connect(func() -> void:
+		_shop.visible = false
+		_talk.visible = false
+		_bag.open())
+	_hud.add_child(bag)
 	_prompt = Label.new()
 	_prompt.add_theme_font_size_override("font_size", 24)
 	_prompt.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
@@ -641,6 +650,8 @@ func _build_hud() -> void:
 	_talk.quests = _quests
 	_talk.completed.connect(func(q: Dictionary) -> void: show_toast(tr("QUEST_DONE_TOAST") % tr(q["title_key"]), 4.0))
 	_hud.add_child(_talk)
+	_bag = BagPanel.new()
+	_hud.add_child(_bag)
 
 
 func _center_knob() -> void:
