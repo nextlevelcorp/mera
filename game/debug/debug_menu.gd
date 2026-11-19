@@ -29,9 +29,16 @@ func _init(screen: Control) -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
-func _ready() -> void:
-	for entry: Dictionary in _screen._db["spot"][0]["species"]:
+## The species of the spot being fished, for the species button.
+func _load_species() -> void:
+	_species_ids.clear()
+	_species_i = 0
+	for entry: Dictionary in _screen.spot()["species"]:
 		_species_ids.append(entry["species_id"])
+
+
+func _ready() -> void:
+	_load_species()
 	var toggle := Button.new()
 	toggle.text = tr("DBG_OPEN")
 	toggle.add_theme_font_size_override("font_size", 20)
@@ -83,9 +90,18 @@ func _ready() -> void:
 		_screen.clarity_override = CLARITIES[_clarity_i]
 		_screen.apply_conditions())
 	_add(grid, "position", func() -> void:
-		var positions: Array = _screen._db["spot"][0]["positions"]
+		var positions: Array = _screen.spot()["positions"]
 		var i: int = _screen._position_index(_screen.position_id)
 		_screen.set_rig(_screen.rig, positions[(i + 1) % positions.size()]["id"]))
+	_add(grid, "spot", func() -> void:
+		var spots: Array = _screen._db["spot"]
+		var here := 0
+		for i in spots.size():
+			if spots[i]["id"] == _screen.spot()["id"]:
+				here = i
+		var next: Dictionary = spots[(here + 1) % spots.size()]
+		_screen.set_rig(_screen.rig, next["positions"][0]["id"])
+		_load_species())
 	_add(grid, "rig", func() -> void:
 		var t := FightSetup.TACKLES
 		_screen.set_rig(t[(t.find(_screen.rig) + 1) % t.size()], _screen.position_id))
@@ -149,6 +165,7 @@ func _refresh() -> void:
 	_buttons["dir"].text = "%s: %s" % [tr("DBG_WIND_DIR"), c["wind_dir"]]
 	var clarity: float = CLARITIES[_clarity_i]
 	_buttons["clarity"].text = "%s: %s" % [tr("DBG_CLARITY"), tr("DBG_AUTO") if clarity < 0.0 else str(int(clarity))]
+	_buttons["spot"].text = "%s: %s" % [tr("DBG_SPOT"), tr(_screen.spot()["name_key"])]
 	_buttons["position"].text = "%s: %s" % [tr("FISH_POSITION"), tr(_screen._ctx["position"]["name_key"])]
 	_buttons["rig"].text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_screen._ctx["rod"]["name_key"])]
 	_buttons["species"].text = "%s: %s" % [tr("FIGHT_SPECIES"), tr(_screen._species_by_id(_species_ids[_species_i])["name_key"])]

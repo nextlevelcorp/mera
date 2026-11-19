@@ -190,7 +190,7 @@ func _build_rig_panel() -> void:
 		scr.set_rig(FightSetup.TACKLES[(FightSetup.TACKLES.find(scr.rig) + 1) % FightSetup.TACKLES.size()], scr.position_id))
 	box.add_child(rig_cycle)
 	position_cycle = _button("", 24, func() -> void:
-		var positions: Array = scr._db["spot"][0]["positions"]
+		var positions: Array = scr.spot()["positions"]
 		scr.set_rig(scr.rig, positions[(scr._position_index(scr.position_id) + 1) % positions.size()]["id"]))
 	box.add_child(position_cycle)
 	# Float rig: where the float stop sits, so the bait hangs at that depth (R12).

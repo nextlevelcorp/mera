@@ -13,7 +13,7 @@ const FLOAT_RIG := "float_rig"
 ## replaces play values (cast_m, hook_distance_m, timing_quality) with what
 ## happened in the cast and the strike.
 static func build(database: Dictionary, species_id: String, tackle: String, position_id: String, u: float, conditions: Dictionary, play_overrides: Dictionary = {}) -> Dictionary:
-	var spot: Dictionary = database["spot"][0]
+	var spot: Dictionary = spot_of(database, position_id)
 	var position: Dictionary = {}
 	for p: Dictionary in spot["positions"]:
 		if p["id"] == position_id:
@@ -52,6 +52,16 @@ static func float_lure(database: Dictionary, play_overrides: Dictionary = {}) ->
 	var depth := float(play_overrides.get("float_depth_m", f["depth_default_m"]))
 	var bait := String(play_overrides.get("float_bait", FLOAT_BAIT))
 	return Presentation.float_lure(_by_id(database.get("bait", []), bait), f, depth, float(play_overrides.get("float_vigor", 1.0)))
+
+
+## The spot that has this position (position ids are unique across spots);
+## the first spot for an unknown id.
+static func spot_of(database: Dictionary, position_id: String) -> Dictionary:
+	for s: Dictionary in database["spot"]:
+		for p: Dictionary in s["positions"]:
+			if p["id"] == position_id:
+				return s
+	return database["spot"][0]
 
 
 ## Lure id of a rig (the demo has one lure per rig).

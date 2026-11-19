@@ -248,3 +248,8 @@ TACKLE_BAIT_LIVE_ISTAVRIT,Live horse mackerel (from your bag),Canlı istavrit (�
 RIG_BAIT,Bait,Yem,Cebo
 NO_LIVE_BAIT,No legal-size horse mackerel in your bag for live bait,Canlı yem için çantanda yasal boy istavrit yok,No tienes jureles de talla legal en la bolsa para cebo vivo
 LIVE_BAIT_SPENT,The live bait is spent,Canlı yem bitti,El cebo vivo se agotó
+DBG_SPOT,Spot,Yer,Lugar
+SPOT_SARAYBURNU,Sarayburnu,Sarayburnu,Sarayburnu
+POS_SARAYBURNU_TIP,"The point, Bosphorus side","Burun ucu, Boğaz tarafı","La punta, lado del Bósforo"
+POS_SARAYBURNU_MARMARA,Marmara side,Marmara tarafı,Lado del Mármara
+POS_SARAYBURNU_HORN,Golden Horn side,Haliç tarafı,Lado del Cuerno de Oro

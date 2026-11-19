@@ -15,8 +15,8 @@ func _init() -> void:
 func test_game_data_is_valid() -> void:
 	var loaded := DataStore.load_all("res://data")
 	assert_true(loaded["ok"], "res://data validates: %s" % str(loaded["errors"]))
-	assert_eq(_db["spot"].size(), 1, "one spot in the slice")
-	assert_eq(_db["spot"][0]["id"], "galata_bridge", "the Galata Bridge")
+	assert_eq(_db["spot"].size(), 2, "two spots: the Galata Bridge and Sarayburnu (R14)")
+	assert_eq(_db["spot"][0]["id"], "galata_bridge", "the Galata Bridge stays the first")
 
 
 func test_sourced_fields_carry_their_sources() -> void:

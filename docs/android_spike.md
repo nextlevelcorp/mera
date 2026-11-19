@@ -46,3 +46,21 @@ A debug APK installs on the owner's phone, the title opens, the world walks, a b
 - **The cloud session cannot finish the export yet:** `dl.google.com`, where the Android command-line tools come from, does not resolve. `maven.google.com`, `services.gradle.org`, `repo1.maven.org` and the Godot release downloads do. Add `dl.google.com` to the network list to continue; the 1.2 GB templates archive is downloaded after that.
 - **The cloud session cannot run an APK:** there is no `/dev/kvm`, so the Android emulator would run without acceleration, too slowly to play. A build can be checked statically (manifest, permissions, size, signature) but not played here.
 - **What a phone gives that the web build does not:** Android Chrome already runs the web build, with motion and no permission prompt. The native app is for store distribution and for things the browser limits (sensor rate, wake lock, full screen). The spike therefore has no urgent player value until a device exists to run it on; with no Android phone, the realistic options are: a borrowed phone for ten minutes, a paid device-farm service (costs money: the owner decides), or no native test and treating the web build on Android Chrome as the Android build for the first test round.
+
+## Second session (2026-11-19, later): the export works, the APK is checked but not run
+
+`dl.google.com` became reachable, so the SDK and templates were installed with `scripts/android_setup.sh` (the commands, repeatable: command-line tools, platform 34, build-tools 34.0.0, the Android templates, a debug keystore, Godot's editor settings). The preset then exported a **debug APK of 29 MB** (`build/android/mera-debug.apk`, not in git).
+
+Checked statically with `aapt2` and `apksigner` (build-tools 34.0.0):
+
+| Check | Result |
+| --- | --- |
+| Package, label, version | `com.nextlevelcorp.mera` (placeholder id), "Mera", 1, `0.1.0-spike` |
+| SDK levels | min 21, target 34 |
+| Architecture | `arm64-v8a` only |
+| Orientation | landscape (`screenOrientation=0`, feature `android.hardware.screen.landscape`) |
+| Permissions | `VIBRATE` only; no network, storage or sensor permission (the motion sensors need none) |
+| Signature | v1, v2 and v3 verify (the public debug key) |
+| Contents | engine library, the game's resources and imported textures; the debug feature tag is set, so the debug menu is in this APK |
+
+**Not checked, because nothing here can run an Android app:** that it starts, the frame rate, whether the native motion branch has the right signs, the safe area, the back button, the multi-touch fight. The owner has no Android phone; the APK can be sent as a file (about 29 MB) to anyone who can sideload it. Remaining work, all needing a device: the checks above, the back-button handling, a release preset and keystore for a store build.
