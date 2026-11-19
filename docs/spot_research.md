@@ -55,6 +55,17 @@ Other species named for Istanbul in sources already read: mullet (kefal, late sp
 
 **Sarayburnu** (Q1247633; 41.01714, 28.98605, CC0) is spot 2 in `game/data/spots.json`: the point where the Bosphorus, the Sea of Marmara and the Golden Horn meet; rocky shore (stage `quay`), three positions (Bosphorus side facing NE, Marmara side facing S, Golden Horn side facing NW). Real values: the coordinates (Wikidata), the monthly sea temperature (MGM Marmara mean) and the species named for the place (guide and news pages, search-result summaries only, level S). Everything else (depth profiles, exposure by wind, structure, current, landing difficulty, clarity, pressure, monthly abundance) is a labelled design fill. The three species are the ones already in the game, so no new legal minimum size was needed.
 
+## R17 legal sizes outside Turkey, first pass (2026-11-19)
+
+Read in full (R):
+
+| Text | What it says for our species | Scope | Source |
+| --- | --- | --- | --- |
+| Regulation (EU) 2019/1241, Annex IX Part A (Mediterranean minimum conservation reference sizes) | Horse mackerel (*Trachurus* spp.) **15 cm**; mackerel (*Scomber* spp.) 18 cm; bluefish and Atlantic bonito are **not listed** | Article 2(2): only Articles 7, 10, 11 and 12 apply to recreational fishing; Annex IX applies to it only if a delegated act extends it to a region. So for anglers the binding sizes come from national law unless such an act exists | Publications Office: https://publications.europa.eu/resource/celex/32019R1241 (EUR-Lex itself answers with a bot check) |
+| Spain, Real Decreto 560/1995 (consolidated, BOE-A-1995-8639), Annex II (Mediterranean) | Jurel (*Trachurus* spp.) **12 cm**; no entry for anjova or bonito | Article 1: species "capturadas por buques españoles"; whether it binds shore anglers is a legal reading | https://www.boe.es/buscar/pdf/1995/BOE-A-1995-8639-consolidado.pdf |
+
+Not read yet: Spain's recreational rules (Real Decreto 347/2011 and regional rules such as Andalusia's), Italy (DPR 1639/1968 Allegato 4, Gazzetta Ufficiale), Greece (the ΦΕΚ texts). Turkey: the 6/2 Tebliğ was amended in 2025 (2025/12, spearfishing licence) and again in 2026 (2026/26, Resmî Gazete of 16 September 2026, contents not read); `www.resmigazete.gov.tr` and `www.mevzuat.gov.tr` time out from the cloud, so the Galata sizes (as of 2024-09-01) may be out of date. **For the owner's legal consultation:** which national text binds a shore angler in each country, and whether "not listed" means no minimum size.
+
 ## What the web cannot give
 
 - **Depth profiles at standing positions.** Charts are protected (SHODB); EMODnet is about 115 m per cell. Without a visit these stay design fills, labelled as such.
