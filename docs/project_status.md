@@ -71,7 +71,7 @@
 | R18 | Each rig looks like itself in 3D (rod length, colour, reel, float) **(done 2026-11-19)** | R12 | Changing the rig changes the rod in hand | Played; screenshots of every rig | `ui/sea/rig_3d.gd` |
 | R19 | Cast left and right (aim), readable before release **(done 2026-11-19)** | R12 | The thumb swipe aims; the marker shows where | Aim tests; played | `scenes/fishing/` |
 | R20 | Baiting minigame (D9) **(done 2026-11-19)**: a short hand-skill screen when the bait or rig changes or the bait is spent, per bait type | R12 | Good baiting holds longer and looks more natural | Pure scoring tests; played | `sim/`, `scenes/fishing/` |
-| R21 | Buttons and interface redesign (one theme for every screen) | R16 | A designed, consistent HUD | Screenshots at 1280x720 and 844x390 | `ui/theme/` |
+| R21 | Buttons and interface redesign (one theme for every screen) **(done 2026-11-19)** | R16 | A designed, consistent HUD | Screenshots at 1280x720 and 844x390 | `ui/theme/` |
 | R22 | Mastery progression (D8): species collection and records, goals and badges per spot, unlocks by level (spots, tackle, boat), a "next goal" line, fixed weekly tasks with no penalty for missing them | R9, R17 | A reason to come back without timers | Rule tests; played | `sim/progress.gd`, `data/goals.json` |
 | R23 | Boat fishing at higher levels (D7) | R22 | Rent a boat at some spots, fish deeper water | Simulation tests; played | `sim/`, `ui/sea/` |
 
@@ -98,6 +98,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- R21 theme (2026-11-19): 250 tests pass with no script errors; debug web build played at 1280x720 and 844x390 (en and tr): the title (Walk the bridge in brass), the fishing HUD (Back, Rig, Catch log, Settings, Debug as dark keys, Cast as the brass key), the rig panel, the world HUD and the bag panel all in the new look; no console errors. Not checked: the shop and talk panels on screen, the debug menu's own controls (they inherit the theme).
 - R20 baiting (2026-11-19): 248 tests pass with no script errors; debug web build played at 1280x720 and 844x390: switched to the spinning rig, pressed Cast, the baiting screen opened ("Bait the hook: Minnow", step 1/2 "Open the snap", the needle and the green zone), two taps closed it with "Baited: it will do", then Cast charged as usual; no console errors. Not played in the browser: the shrimp and live-bait steps and a shrimp flying off (unit tests cover them).
 - R18 and R19 (2026-11-19): 239 tests pass with no script errors; debug web build played at 1280x720: the four rigs side by side (thin blue light rod, thick black spinning rod, red sabiki rod, long pale float rod with a bigger or smaller reel); holding Cast and steering left (keyboard, the desktop path) moved the target ring left and the cast landed left of the middle. Not tested in the browser: the two-thumb aim on a touch screen (a unit test sends the second finger's tap and drag).
 - R16 bag (2026-11-19): 235 tests pass with no script errors; debug web build played at 1280x720 and 844x390 (tr): world debug "+3 fish", the Bag button under Back, the panel with money, the three skills, three fish with length, weight and value and their total, and the tackle counts; no console errors. The panel has the plain default style (R21 redesigns it).

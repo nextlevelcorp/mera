@@ -23,13 +23,6 @@ func _init() -> void:
 	set_anchors_preset(Control.PRESET_CENTER)
 	grow_horizontal = Control.GROW_DIRECTION_BOTH
 	grow_vertical = Control.GROW_DIRECTION_BOTH
-	var bg := StyleBoxFlat.new()
-	bg.bg_color = Color(0.13, 0.1, 0.09, 0.94)
-	bg.border_color = Color(0.78, 0.6, 0.35)
-	bg.set_border_width_all(3)
-	bg.set_corner_radius_all(6)
-	bg.set_content_margin_all(20)
-	add_theme_stylebox_override("panel", bg)
 	var box := VBoxContainer.new()
 	box.custom_minimum_size = Vector2(680, 0)
 	box.add_theme_constant_override("separation", 10)

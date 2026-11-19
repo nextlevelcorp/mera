@@ -45,6 +45,7 @@ func _init() -> void:
 	box.add_child(_bar)
 	var tap := Button.new()
 	tap.text = tr("BAIT_TAP")
+	tap.theme_type_variation = UiTheme.PRIMARY
 	tap.add_theme_font_size_override("font_size", 30)
 	tap.custom_minimum_size = Vector2(0, 110)
 	tap.pressed.connect(press)
