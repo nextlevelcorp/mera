@@ -13,12 +13,13 @@ const FLOAT := "float"
 
 
 ## The record the catch model reads for bait under a float at depth_m.
-static func float_lure(bait: Dictionary, float_rec: Dictionary, depth_m: float) -> Dictionary:
+## vigor (0..1) is how lively a live bait still is: it swims less as it tires.
+static func float_lure(bait: Dictionary, float_rec: Dictionary, depth_m: float, vigor: float = 1.0) -> Dictionary:
 	var depth := clamp_depth(float_rec, depth_m)
 	return {
 		"id": bait["id"], "name_key": bait["name_key"], "type": "bait", "presentation": FLOAT,
 		"length_cm": float(bait["size_cm"]), "weight_g": float(float_rec["weight_g"]),
-		"flash": 1, "action": int(bait.get("action", 1)), "scent": int(bait["scent"]), "durability": int(bait["durability"]),
+		"flash": 1, "action": maxi(int(roundf(float(bait.get("action", 1)) * clampf(vigor, 0.0, 1.0))), 1), "scent": int(bait["scent"]), "durability": int(bait["durability"]),
 		"imitates": bait["target_diet_tags"],
 		"run_depth_min_m": depth, "run_depth_max_m": depth, "sink_rate_m_per_s": 0.0,
 		"hook_gape_mm": float(bait.get("hook_gape_mm", float_rec["hook_gape_mm"])), "hook_pattern": "single",

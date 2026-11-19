@@ -22,6 +22,9 @@ var save := {}
 var float_depth_m := -1.0
 ## The float rig's bait (baits.json id).
 var float_bait := FightSetup.FLOAT_BAIT
+## The live bait on the hook between casts (R12): the fish's length_cm,
+## weight_kg, caught_at and its vigor 1..0. Empty when none is out.
+var live := {}
 
 
 func _init(database: Dictionary, constants: Dictionary, rig_id: String, position: String, session_conditions: Dictionary, shoal_field: ShoalField = null) -> void:
@@ -42,6 +45,8 @@ func context(species_id: String, overrides: Dictionary = {}) -> Dictionary:
 			o["float_depth_m"] = float_depth_m
 		if not o.has("float_bait"):
 			o["float_bait"] = float_bait
+		if not live.is_empty():
+			o["float_vigor"] = float(live["vigor"])
 	var ctx := FightSetup.build(db, species_id, rig, position_id, 0.5, conditions, o)
 	if not save.is_empty():
 		ctx["angler"] = Progress.angler(ctx["angler"], save, k)
@@ -58,7 +63,11 @@ func cast(ctx: Dictionary, power: float) -> Dictionary:
 	seed_counter += 1
 	# A bait is used up on every cast (a lure is only lost to a break).
 	if Presentation.is_float(ctx["lure"]) and not save.is_empty():
-		Presentation.use_bait(save, _bait(ctx["lure"]["id"]), db["species"])
+		var bait := _bait(ctx["lure"]["id"])
+		if bait.has("from_species"):
+			_hook_live(bait)   # a live fish stays on the hook between casts
+		else:
+			Presentation.use_bait(save, bait, db["species"])
 	var c := CatchModel.cast(k, ctx["rod"], ctx["lure"], ctx["angler"], ctx["position"], conditions, power)
 	c["cast_m"] = maxf(float(c["cast_m"]), float(k["WAIT_END_M"]) + 2.0)
 	return c
@@ -113,7 +122,8 @@ func result() -> Dictionary:
 ## How many casts are left with the rig's bait or lure.
 func stock(ctx: Dictionary) -> int:
 	if Presentation.is_float(ctx["lure"]):
-		return Presentation.bait_stock(save, _bait(ctx["lure"]["id"]), db["species"])
+		var bait := _bait(ctx["lure"]["id"])
+		return Presentation.bait_stock(save, bait, db["species"]) + (1 if bait.has("from_species") and not live.is_empty() else 0)
 	return Inventory.count(save, ctx["lure"]["id"])
 
 
@@ -121,4 +131,51 @@ func _bait(id: String) -> Dictionary:
 	for b: Dictionary in db.get("bait", []):
 		if b["id"] == id:
 			return b
+	return {}
+
+
+## Puts the smallest legal fish of the bait's species on the hook, unless one
+## is already out.
+func _hook_live(bait: Dictionary) -> void:
+	if not live.is_empty():
+		return
+	var fish := Presentation.live_bait_fish(save, bait, _species(bait["from_species"]))
+	if fish.is_empty():
+		return
+	var it: Dictionary = Inventory.items(save)[fish[0]]
+	live = {"length_cm": float(it["meta"]["length_cm"]), "weight_kg": float(it["meta"]["weight_kg"]), "caught_at": String(it["meta"].get("caught_at", "")), "species_id": String(bait["from_species"]), "vigor": 1.0}
+	Inventory.items(save).remove_at(fish[0])
+
+
+## The end of a cast with the live bait still on: it tires with the cast, with
+## the seconds it waited and, if a fish only mouthed it, more. Returns false
+## when it is spent (and gone).
+func wear_live(wait_s: float, bitten: bool = false) -> bool:
+	if live.is_empty():
+		return true
+	var wear := float(k["LIVE_WEAR_PER_CAST"]) + float(k["LIVE_WEAR_PER_S"]) * maxf(wait_s, 0.0) + (float(k["LIVE_BITTEN_WEAR"]) if bitten else 0.0)
+	live["vigor"] = float(live["vigor"]) - wear
+	if float(live["vigor"]) <= 0.0:
+		live = {}
+		return false
+	return true
+
+
+## A hooked fish took the bait: it is gone.
+func lose_live() -> void:
+	live = {}
+
+
+## Leaving: a live bait still alive goes back into the bag.
+func release_live() -> void:
+	if live.is_empty() or save.is_empty():
+		return
+	Inventory.add_fish(save, String(live["species_id"]), float(live["length_cm"]), float(live["weight_kg"]), String(live["caught_at"]))
+	live = {}
+
+
+func _species(id: String) -> Dictionary:
+	for s: Dictionary in db["species"]:
+		if s["id"] == id:
+			return s
 	return {}

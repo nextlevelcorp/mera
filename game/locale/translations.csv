@@ -247,3 +247,4 @@ NO_BAIT,No bait left: buy shrimp at the tackle shop,Yem kalmadı: olta dükkân�
 TACKLE_BAIT_LIVE_ISTAVRIT,Live horse mackerel (from your bag),Canlı istavrit (çantandan),Jurel vivo (de tu bolsa)
 RIG_BAIT,Bait,Yem,Cebo
 NO_LIVE_BAIT,No legal-size horse mackerel in your bag for live bait,Canlı yem için çantanda yasal boy istavrit yok,No tienes jureles de talla legal en la bolsa para cebo vivo
+LIVE_BAIT_SPENT,The live bait is spent,Canlı yem bitti,El cebo vivo se agotó
