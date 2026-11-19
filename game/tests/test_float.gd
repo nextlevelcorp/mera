@@ -73,14 +73,18 @@ func test_bites_come_on_the_float_in_a_reasonable_time() -> void:
 	assert_true(wait_s > 5.0 and wait_s < 300.0, "median wait for a take at dawn: %.0f s" % wait_s)
 
 
-func test_a_bait_is_used_on_every_cast() -> void:
+func test_a_bait_is_used_when_the_hook_is_baited() -> void:
 	var save := SaveGame.fresh()
 	Inventory.add(save, "shrimp", 3)
 	Inventory.add(save, "lrf_soft", 3)
 	var s := FishingSession.new(Db.database(), Db.constants(), "float", _pos(), _cond())
 	s.save = save
+	assert_true(s.needs_baiting(s.context("istavrit")), "a bare hook needs baiting")
+	assert_true(s.bait_hook(s.context("istavrit"), 1.0), "a shrimp goes on")
+	assert_eq(Inventory.count(save, "shrimp"), 2, "one shrimp from the bag")
 	s.cast(s.context("istavrit"), 0.8)
-	assert_eq(Inventory.count(save, "shrimp"), 2, "one shrimp per cast")
+	assert_eq(Inventory.count(save, "shrimp"), 2, "a well-baited shrimp stays on through the cast")
+	assert_true(not s.needs_baiting(s.context("istavrit")), "and needs no new bait")
 	s.rig = "lrf"
 	s.cast(s.context("istavrit"), 0.8)
 	assert_eq(Inventory.count(save, "lrf_soft"), 3, "a lure is not used up by casting")
@@ -142,7 +146,7 @@ func test_live_bait_is_a_legal_horse_mackerel_from_the_bag() -> void:
 	var ctx := s.context("lufer")
 	assert_eq(ctx["lure"]["id"], "live_istavrit", "the rig fishes the live bait")
 	assert_eq(s.stock(ctx), 2, "the session counts it")
-	s.cast(ctx, 0.8)
+	s.bait_hook(ctx, 1.0)
 	assert_eq(s.stock(ctx), 2, "one is on the hook, one is in the bag")
 	var left: Array = []
 	for it: Dictionary in Inventory.items(save):
@@ -191,8 +195,9 @@ func test_a_live_bait_stays_out_between_casts_and_tires() -> void:
 	var s := FishingSession.new(db, k, "float", _pos(), _cond())
 	s.save = save
 	s.float_bait = "live_istavrit"
+	s.bait_hook(s.context("lufer"), 1.0)
 	s.cast(s.context("lufer"), 0.8)
-	assert_eq(Inventory.count(save, "fish:istavrit"), 1, "the first cast took one fish from the bag")
+	assert_eq(Inventory.count(save, "fish:istavrit"), 1, "the first baiting took one fish from the bag")
 	var action_fresh := int(s.context("lufer")["lure"]["action"])
 	assert_true(s.wear_live(40.0), "a cast later it is alive")
 	var vigor := float(s.live["vigor"])
@@ -202,8 +207,9 @@ func test_a_live_bait_stays_out_between_casts_and_tires() -> void:
 	assert_eq(Inventory.count(save, "fish:istavrit"), 1, "the second cast uses the same fish")
 	assert_true(not s.wear_live(0.0, true) or not s.wear_live(0.0, true), "mouthed and cast again, it is soon spent")
 	assert_true(s.live.is_empty(), "a spent bait is gone")
-	s.cast(s.context("lufer"), 0.8)
-	assert_eq(Inventory.count(save, "fish:istavrit"), 0, "and the next cast takes the next fish")
+	assert_true(s.needs_baiting(s.context("lufer")), "so the hook needs baiting again")
+	s.bait_hook(s.context("lufer"), 1.0)
+	assert_eq(Inventory.count(save, "fish:istavrit"), 0, "and that takes the next fish")
 
 
 func test_a_live_bait_goes_back_when_you_leave_and_is_lost_when_a_fish_takes_it() -> void:
@@ -212,12 +218,13 @@ func test_a_live_bait_goes_back_when_you_leave_and_is_lost_when_a_fish_takes_it(
 	var s := FishingSession.new(Db.database(), Db.constants(), "float", _pos(), _cond())
 	s.save = save
 	s.float_bait = "live_istavrit"
+	s.bait_hook(s.context("lufer"), 1.0)
 	s.cast(s.context("lufer"), 0.8)
 	s.wear_live(10.0)
 	assert_eq(Inventory.count(save, "fish:istavrit"), 0, "out on the hook")
 	s.release_live()
 	assert_eq(Inventory.count(save, "fish:istavrit"), 1, "back in the bag when you leave")
-	s.cast(s.context("lufer"), 0.8)
+	s.bait_hook(s.context("lufer"), 1.0)
 	s.lose_live()
 	s.release_live()
 	assert_eq(Inventory.count(save, "fish:istavrit"), 0, "a fish that took it keeps it")

@@ -258,3 +258,24 @@ BAG_FISH,Fish: %d · worth %s,Balık: %d · değeri %s,Peces: %d · valen %s
 BAG_TACKLE,Tackle and bait,Takım ve yem,Aparejos y cebo
 BAG_TACKLE_LINE,%s × %d,%s × %d,%s × %d
 FISH_AIM_HINT,"Hold Cast, aim with your other thumb","Atış'a bas, öbür başparmakla nişan al","Mantén Lanzar y apunta con el otro pulgar"
+BAIT_TITLE,Bait the hook: %s,İğneye tak: %s,Ceba el anzuelo: %s
+BAIT_TAP,Tap,Dokun,Toca
+BAIT_DONE,Baited: %s,Takıldı: %s,Cebado: %s
+BAIT_RESULT_GOOD,well done,iyi,bien
+BAIT_RESULT_FAIR,it will do,idare eder,pasable
+BAIT_RESULT_POOR,"badly, it may come off","kötü, düşebilir","mal, puede soltarse"
+BAIT_FLEW_OFF,The bait flew off the hook,Yem iğneden uçtu,El cebo salió volando del anzuelo
+BAIT_STOLEN,The fish stole the bait,Balık yemi çaldı,El pez robó el cebo
+BAIT_STEP_LIVE_HOLD,Hold the fish gently,Balığı nazikçe tut,Sujeta el pez con suavidad
+BAIT_STEP_LIVE_SPOT,Find the spot behind the back fin,Sırt yüzgecinin arkasını bul,Busca el punto tras la aleta dorsal
+BAIT_STEP_LIVE_HOOK,"Push the hook through, not too deep","İğneyi geçir, çok derin değil","Pasa el anzuelo, sin hundirlo"
+BAIT_STEP_SHRIMP_PEEL,Peel the shell,Kabuğunu soy,Pela la cáscara
+BAIT_STEP_SHRIMP_THREAD,Thread it from the tail,Kuyruktan geçir,Ensártala por la cola
+BAIT_STEP_SHRIMP_HIDE,Hide the point,İğne ucunu gizle,Esconde la punta
+BAIT_STEP_SOFT_LINE_UP,Line the lure up with the hook,Yemi iğneyle hizala,Alinea el señuelo con el anzuelo
+BAIT_STEP_SOFT_THREAD,Thread it on,Geçir,Ensártalo
+BAIT_STEP_SOFT_STRAIGHT,Keep it straight,Düz tut,Mantenlo recto
+BAIT_STEP_SNAP_OPEN,Open the snap,Klipsi aç,Abre el imperdible
+BAIT_STEP_SNAP_CLIP,Clip the lure's eye,Yemin halkasını tak,Engancha la anilla del señuelo
+BAIT_STEP_SABIKI_UNWIND,Unwind the feathers,Tüyleri çöz,Desenreda las plumas
+BAIT_STEP_SABIKI_WEIGHT,Clip the weight on,Kurşunu tak,Engancha el plomo

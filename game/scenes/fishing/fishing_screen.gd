@@ -138,6 +138,7 @@ var _steer_hint_shown := false
 var _strike_queued := false
 ## The float on the water (R12), in screen pixels below its resting line:
 ## nibbles bob it, a take pulls it under. A damped spring, view only.
+var _bait_panel: BaitPanel
 var _bitten := false          ## a fish mouthed the live bait this cast
 var float_dip := 0.0
 var _float_vel := 0.0
@@ -197,6 +198,9 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	add_child(_overlay)
 	_ui = FishingHud.new(self)
 	add_child(_ui)
+	_bait_panel = BaitPanel.new()
+	_bait_panel.done.connect(_on_baited)
+	_ui.add_child(_bait_panel)
 	_build_audio()
 	_sound = SoundDirector.new()
 	add_child(_sound)
@@ -269,6 +273,9 @@ func apply_rig_look() -> void:
 
 
 func set_rig(new_rig: String, new_position: String) -> void:
+	if new_rig != rig and _session:
+		_session.rig = new_rig
+		_session.rig_changed()   # a new rig is baited or rigged by hand first (R20)
 	rig = new_rig
 	position_id = new_position
 	SaveGame.set_rig(save, rig, position_id)
@@ -373,6 +380,7 @@ func cycle_bait() -> void:
 		return
 	var ids: Array = _db.get("bait", []).map(func(b: Dictionary) -> String: return b["id"])
 	_session.float_bait = ids[(ids.find(_session.float_bait) + 1) % ids.size()]
+	_session.rig_changed()
 	apply_conditions()
 
 
@@ -385,9 +393,26 @@ func begin_charge() -> void:
 			key = "NO_LIVE_BAIT" if String(_ctx["lure"]["id"]) != FightSetup.FLOAT_BAIT else "NO_BAIT"
 		_toast(tr(key), 3.5)
 		return
+	if _session.needs_baiting(_ctx):
+		open_baiting()
+		return
 	_charge_s = 0.0
 	_aim_base = _aim   # the aim taken on the water stays; the thumb swipe adds to it
 	_set_phase(Phase.CHARGE)
+
+
+## The baiting screen for the rig in hand (R20).
+func open_baiting() -> void:
+	var bait := Db.record("bait", String(_ctx["lure"]["id"])) if is_float() else {}
+	_ui.toast_label.visible = false
+	_toast_s = 0.0
+	_bait_panel.start(Baiting.kind_of(_ctx["lure"], bait), tr("BAIT_TITLE") % tr(_ctx["lure"]["name_key"]))
+
+
+func _on_baited(quality: float) -> void:
+	if _session.bait_hook(_ctx, quality):
+		_toast(tr("BAIT_DONE") % tr(Baiting.rating_key(quality)), 2.5)
+	apply_conditions()   # the bait's quality changes how it draws fish
 
 
 ## The power swing: rises to 1 and falls back, so letting go at the top is the skill.
@@ -409,6 +434,8 @@ func cast_with_power(power: float, aim: float = 0.0) -> void:
 	_cast_motion.release(power)
 	_rod.kick(-6.0)
 	_cast = _session.cast(_ctx, power)
+	if _cast.get("bait_lost", false):
+		_toast(tr("BAIT_FLEW_OFF"), 2.5)
 	_xp = {"gained": {}, "level_ups": []}
 	_award({"type": "cast", "power": power})
 	_aim_x = clampf(aim + _rng.randfn(0.0, float(_cast["aim_sigma_rad"])), -0.5, 0.5)
@@ -513,6 +540,8 @@ func _on_wait_event(e: Dictionary) -> void:
 			_speed_on = false
 		"take_missed":
 			_bitten = true
+			if _session.bait_mouthed():
+				_toast(tr("BAIT_STOLEN"), 2.2)
 			_toast(tr("FISH_TAKE_MISSED"), 1.8)
 		"hook_failed":
 			_bitten = true

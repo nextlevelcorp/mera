@@ -35,6 +35,9 @@ static func build(database: Dictionary, species_id: String, tackle: String, posi
 			"drag_kg": float(reel["drag_max_kg"]) / 3.0, "hook_distance_m": 26.0,
 		},
 	}
+	if play_overrides.has("rig_quality"):
+		ctx["lure"] = (ctx["lure"] as Dictionary).duplicate()
+		ctx["lure"]["rig_quality"] = float(play_overrides["rig_quality"])
 	if tackle == "float":
 		# The bait waits at the float's depth and barely moves.
 		ctx["play"]["lure_depth_m"] = ctx["lure"]["run_depth_max_m"]
@@ -43,6 +46,7 @@ static func build(database: Dictionary, species_id: String, tackle: String, posi
 	ctx["play"].erase("float_depth_m")
 	ctx["play"].erase("float_bait")
 	ctx["play"].erase("float_vigor")
+	ctx["play"].erase("rig_quality")
 	return ctx
 
 
