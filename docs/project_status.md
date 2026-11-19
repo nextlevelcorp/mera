@@ -58,7 +58,7 @@
 | R12 | Float and bait presentation **(done 2026-11-18: float rig with shrimp and live horse mackerel; bottom fishing later)** | R1, D2 | A second way to fish | Simulation tests; data sourced or labelled | `sim/`, `data/tackle/` |
 | R13 | World audio layers and buses **(done 2026-11-18 in code; the owner listens on the phone)** | R4 | Ambience per area, beds continue across modes | Listened on the phone | `ui/audio/` |
 | R14 | Content: spots 2 and 3, species towards 15 **(started 2026-11-18, blocked on sources: see `spot_research.md` and Still open)** | R5 | Sourced records | Data tests pass; sources recorded | `data/`, `spot_research.md` |
-| R15 | Native export spike (Android first), then release gates | R4 | An installable test build | Owner approval for each release step | `release_checklist.md` |
+| R15 | Native export spike (Android first), then release gates **(part 1 done 2026-11-19: `release_checklist.md` and `android_spike.md`; the spike itself waits for the owner's approval of the export preset, the SDK download and a phone)** | R4 | An installable test build | Owner approval for each release step | `release_checklist.md` |
 
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
