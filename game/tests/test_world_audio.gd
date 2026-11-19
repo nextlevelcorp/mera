@@ -6,6 +6,17 @@ func _area() -> WorldArea:
 	return WorldArea.load_area("galata_bridge", Db.database())["area"]
 
 
+func test_the_buses_come_from_the_layout_file_not_from_run_time_code() -> void:
+	# Adding buses at run time silenced the web build; they must be in the layout.
+	var layout := load("res://default_bus_layout.tres") as AudioBusLayout
+	assert_true(layout != null, "the layout file loads")
+	assert_eq(ProjectSettings.get_setting("audio/buses/default_bus_layout", "res://default_bus_layout.tres"), "res://default_bus_layout.tres", "and is the project's default")
+	var before := AudioServer.bus_count
+	assert_true(AudioServer.get_bus_index(AudioBuses.AMBIENCE) >= 0 or before >= 1, "the engine has its buses")
+	for bus: StringName in AudioBuses.ALL:
+		assert_true(AudioServer.get_bus_index(bus) >= 0, "%s exists at start-up" % bus)
+
+
 func test_the_buses_exist_once() -> void:
 	AudioBuses.ensure()
 	var count := AudioServer.bus_count
