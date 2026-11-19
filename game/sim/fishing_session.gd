@@ -25,12 +25,20 @@ var float_bait := FightSetup.FLOAT_BAIT
 ## The live bait on the hook between casts (R12): the fish's length_cm,
 ## weight_kg, caught_at and its vigor 1..0. Empty when none is out.
 var live := {}
+## Baiting (R20): a shrimp on the hook, the rig whose lure was last rigged by
+## hand, and the quality 0..1 of that baiting. A lure rig starts rigged.
+var shrimp_on := false
+var rigged := ""
+var rig_quality := 1.0
+var _rng := RandomNumberGenerator.new()
 
 
 func _init(database: Dictionary, constants: Dictionary, rig_id: String, position: String, session_conditions: Dictionary, shoal_field: ShoalField = null) -> void:
 	db = database
 	k = constants
 	rig = rig_id
+	rigged = rig_id
+	_rng.seed = 4241
 	position_id = position
 	conditions = session_conditions
 	shoals = shoal_field
@@ -47,6 +55,10 @@ func context(species_id: String, overrides: Dictionary = {}) -> Dictionary:
 			o["float_bait"] = float_bait
 		if not live.is_empty():
 			o["float_vigor"] = float(live["vigor"])
+	if not o.has("rig_quality") and rig_quality < 1.0:
+		if o == overrides:
+			o = overrides.duplicate()
+		o["rig_quality"] = rig_quality
 	var ctx := FightSetup.build(db, species_id, rig, position_id, 0.5, conditions, o)
 	if not save.is_empty():
 		ctx["angler"] = Progress.angler(ctx["angler"], save, k)
@@ -61,16 +73,66 @@ func context(species_id: String, overrides: Dictionary = {}) -> Dictionary:
 func cast(ctx: Dictionary, power: float) -> Dictionary:
 	trip["casts"] = int(trip["casts"]) + 1
 	seed_counter += 1
-	# A bait is used up on every cast (a lure is only lost to a break).
-	if Presentation.is_float(ctx["lure"]) and not save.is_empty():
-		var bait := _bait(ctx["lure"]["id"])
-		if bait.has("from_species"):
-			_hook_live(bait)   # a live fish stays on the hook between casts
-		else:
-			Presentation.use_bait(save, bait, db["species"])
 	var c := CatchModel.cast(k, ctx["rod"], ctx["lure"], ctx["angler"], ctx["position"], conditions, power)
 	c["cast_m"] = maxf(float(c["cast_m"]), float(k["WAIT_END_M"]) + 2.0)
+	# A natural bait that was badly put on may fly off the hook (R20).
+	c["bait_lost"] = false
+	if Presentation.is_float(ctx["lure"]) and _bait_out() and _rng.randf() < float(k["BAIT_FLYOFF"]) * (1.0 - rig_quality):
+		_lose_bait()
+		c["bait_lost"] = true
 	return c
+
+
+## True when the hook has to be baited (or the lure rigged) before a cast:
+## the rig changed, or the natural bait is gone.
+func needs_baiting(ctx: Dictionary) -> bool:
+	if Presentation.is_float(ctx["lure"]):
+		return not _bait_out()
+	return rigged != rig
+
+
+## The baiting is done with this quality: a shrimp or a live fish goes on the
+## hook (from the bag), or the lure is rigged. False when there is none to use.
+func bait_hook(ctx: Dictionary, quality: float) -> bool:
+	if Presentation.is_float(ctx["lure"]):
+		var bait := _bait(ctx["lure"]["id"])
+		if bait.has("from_species"):
+			_hook_live(bait)
+			if live.is_empty():
+				return false
+		else:
+			if save.is_empty() or not Presentation.use_bait(save, bait, db["species"]):
+				return false
+			shrimp_on = true
+	rigged = rig
+	rig_quality = clampf(quality, 0.0, 1.0)
+	return true
+
+
+## A fish mouthed the natural bait without being hooked: a shrimp may be
+## stolen, more likely when it was badly put on.
+func bait_mouthed() -> bool:
+	if shrimp_on and _rng.randf() < float(k["BAIT_STEAL"]) * (1.2 - rig_quality):
+		shrimp_on = false
+		return true
+	return false
+
+
+## The rig or the bait changed: the hook needs baiting again (a live fish that
+## was out goes back in the bag).
+func rig_changed() -> void:
+	release_live()
+	shrimp_on = false
+	rig_quality = 1.0
+
+
+func _bait_out() -> bool:
+	return shrimp_on or not live.is_empty()
+
+
+func _lose_bait() -> void:
+	shrimp_on = false
+	live = {}
 
 
 ## The wait for the lure that landed cast_m out, aim_rad to the side.
@@ -108,6 +170,7 @@ func record_outcome(outcome: String, fight_ctx: Dictionary, weight_kg: float) ->
 		(trip["catches"] as Array).append({"species_id": species_id, "length_cm": float(fight_ctx["play"]["fish_length_cm"]), "weight_kg": weight_kg, "kept": true})
 	elif outcome in [FightSim.OUTCOME_LINE_BREAK, FightSim.OUTCOME_LEADER_CUT]:
 		(trip["lost"] as Array).append({"item_id": fight_ctx["lure"]["id"], "reason": outcome})
+		rigged = ""   # the lure went with the line: tie on a new one by hand
 
 
 func add_time(seconds: float) -> void:
@@ -123,7 +186,7 @@ func result() -> Dictionary:
 func stock(ctx: Dictionary) -> int:
 	if Presentation.is_float(ctx["lure"]):
 		var bait := _bait(ctx["lure"]["id"])
-		return Presentation.bait_stock(save, bait, db["species"]) + (1 if bait.has("from_species") and not live.is_empty() else 0)
+		return Presentation.bait_stock(save, bait, db["species"]) + (1 if _bait_out() else 0)
 	return Inventory.count(save, ctx["lure"]["id"])
 
 
@@ -154,6 +217,7 @@ func wear_live(wait_s: float, bitten: bool = false) -> bool:
 	if live.is_empty():
 		return true
 	var wear := float(k["LIVE_WEAR_PER_CAST"]) + float(k["LIVE_WEAR_PER_S"]) * maxf(wait_s, 0.0) + (float(k["LIVE_BITTEN_WEAR"]) if bitten else 0.0)
+	wear *= 1.5 - 0.5 * rig_quality   # a well-hooked live fish lasts longer (R20)
 	live["vigor"] = float(live["vigor"]) - wear
 	if float(live["vigor"]) <= 0.0:
 		live = {}
@@ -161,9 +225,10 @@ func wear_live(wait_s: float, bitten: bool = false) -> bool:
 	return true
 
 
-## A hooked fish took the bait: it is gone.
+## A hooked fish took the bait: it is gone (a live fish or a shrimp).
 func lose_live() -> void:
 	live = {}
+	shrimp_on = false
 
 
 ## Leaving: a live bait still alive goes back into the bag.

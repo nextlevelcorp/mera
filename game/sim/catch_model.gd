@@ -176,10 +176,13 @@ static func attraction(k: Dictionary, sp: Dictionary, lure: Dictionary, play: Di
 	# Fish find a lure by sight (flash, action) and a bait by smell, whichever is stronger.
 	var cue := maxf(0.5 * n(float(lure["flash"])) + 0.5 * n(float(lure["action"])), n(float(lure.get("scent", 1))))
 	var detect: float = float(k["DETECT_BASE"]) + (1.0 - float(k["DETECT_BASE"])) * (vis + (1.0 - vis) * cue)
+	# How well the hook was baited or the lure rigged (R20): a crooked bait looks wrong.
+	var rig_q: float = float(k.get("RIG_Q_MIN", 1.0)) + (1.0 - float(k.get("RIG_Q_MIN", 1.0))) * clampf(float(lure.get("rig_quality", 1.0)), 0.0, 1.0)
 	return {
 		"inputs": {"lure_depth_m": lure_depth, "lure_length_cm": float(lure["length_cm"]), "retrieve_speed": float(play["retrieve_speed"]), "visibility": vis},
 		"G": reach, "M": diet_match, "Z": size_fit, "V": speed_fit, "F": detect,
-		"attraction": reach * diet_match * size_fit * speed_fit * detect,
+		"Q": rig_q,
+		"attraction": reach * diet_match * size_fit * speed_fit * detect * rig_q,
 	}
 
 
