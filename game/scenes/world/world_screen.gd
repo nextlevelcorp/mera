@@ -610,6 +610,7 @@ func _build_hud() -> void:
 	_pad.resized.connect(_center_knob)
 	# The action button under the right thumb, shown at a marker.
 	_action = _button(tr("WORLD_FISH_HERE"), 26)
+	_action.theme_type_variation = UiTheme.PRIMARY
 	_action.anchor_left = 1.0
 	_action.anchor_right = 1.0
 	_action.anchor_top = 1.0

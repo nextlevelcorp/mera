@@ -151,6 +151,7 @@ func _build_hud() -> void:
 
 	# Cast / strike: the same right-corner button.
 	main_button = _button(tr("FISH_CAST"), 32, Callable())
+	main_button.theme_type_variation = UiTheme.PRIMARY
 	_place_bottom(main_button, true, Vector2(220, 200), 16.0)
 	main_button.button_down.connect(scr._on_main_down)
 	main_button.button_up.connect(scr._on_main_up)
@@ -226,6 +227,7 @@ func _build_result() -> void:
 		scr._hud = {}
 		scr._set_phase(FishingScreen.Phase.READY))
 	again.custom_minimum_size = Vector2(0, 110)
+	again.theme_type_variation = UiTheme.PRIMARY
 	box.add_child(again)
 
 

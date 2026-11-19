@@ -14,6 +14,8 @@ const FISHING_SCREEN := "res://scenes/fishing/fishing_screen.tscn"
 
 
 func _ready() -> void:
+	UiTheme.install()   # every screen shares the controls' look (R21)
+	_walk.theme_type_variation = UiTheme.PRIMARY   # the world is the game; the rest are prototypes
 	_title.text = tr("TITLE")
 	_note.text = tr("SKELETON_NOTE")
 	_version.text = "v%s · Godot %s" % [
