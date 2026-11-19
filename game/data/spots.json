@@ -280,5 +280,243 @@
     }
    }
   }
+ },
+ {
+  "id": "sarayburnu",
+  "name_key": "SPOT_SARAYBURNU",
+  "region": "Istanbul, Seraglio Point (Sarayburnu), where the Bosphorus, the Sea of Marmara and the Golden Horn meet",
+  "lat": 41.01714,
+  "lon": 28.98605,
+  "shore_type": "rock",
+  "water_class": "marine",
+  "typical_clarity": 9,
+  "pressure": 12,
+  "access_difficulty": 4,
+  "water_temp_by_month_c": [
+   9.3,
+   8.2,
+   8.7,
+   11.3,
+   15.4,
+   20.2,
+   23.4,
+   24.2,
+   22.3,
+   18.8,
+   15.2,
+   12.0
+  ],
+  "species": [
+   {
+    "species_id": "istavrit",
+    "abundance_by_month": [
+     0.5,
+     0.5,
+     0.7,
+     0.8,
+     0.8,
+     0.7,
+     0.6,
+     0.6,
+     0.8,
+     0.9,
+     0.8,
+     0.6
+    ]
+   },
+   {
+    "species_id": "lufer",
+    "abundance_by_month": [
+     0.2,
+     0.1,
+     0.1,
+     0.2,
+     0.3,
+     0.3,
+     0.3,
+     0.4,
+     0.7,
+     1.0,
+     0.9,
+     0.5
+    ]
+   },
+   {
+    "species_id": "palamut",
+    "abundance_by_month": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.1,
+     0.3,
+     0.8,
+     1.0,
+     0.7,
+     0.1
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "sarayburnu_tip",
+    "name_key": "POS_SARAYBURNU_TIP",
+    "map_x": 0.55,
+    "map_y": 0.45,
+    "facing": "NE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 12
+     },
+     {
+      "distance_m": 35,
+      "depth_m": 24
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 15,
+    "structure_tags": [
+     "rock apron",
+     "strong current"
+    ],
+    "exposure_by_wind": {
+     "N": 0.6,
+     "NE": 0.8,
+     "E": 0.7,
+     "SE": 0.4,
+     "S": 0.2,
+     "SW": 0.1,
+     "W": 0.1,
+     "NW": 0.3
+    },
+    "current": 16,
+    "landing_difficulty": 0.7,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "sarayburnu_marmara",
+    "name_key": "POS_SARAYBURNU_MARMARA",
+    "map_x": 0.5,
+    "map_y": 0.7,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 12,
+      "depth_m": 9
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 18
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 11,
+    "structure_tags": [
+     "rubble",
+     "rocks"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.7,
+     "S": 0.9,
+     "SW": 0.8,
+     "W": 0.4,
+     "NW": 0.1
+    },
+    "current": 9,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "sarayburnu_horn",
+    "name_key": "POS_SARAYBURNU_HORN",
+    "map_x": 0.35,
+    "map_y": 0.4,
+    "facing": "NW",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 11
+     },
+     {
+      "distance_m": 35,
+      "depth_m": 20
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 9,
+    "structure_tags": [
+     "quay wall"
+    ],
+    "exposure_by_wind": {
+     "N": 0.3,
+     "NE": 0.2,
+     "E": 0.1,
+     "SE": 0.1,
+     "S": 0.2,
+     "SW": 0.4,
+     "W": 0.6,
+     "NW": 0.7
+    },
+    "current": 8,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q1247633 (Sarayburnu), P625, CC0",
+     "accessed": "2026-11-13"
+    },
+    "lon": {
+     "source": "Wikidata Q1247633 (Sarayburnu), P625, CC0",
+     "accessed": "2026-11-13"
+    },
+    "water_temp_by_month_c": {
+     "source": "MGM, Marmara Denizi deniz suyu sicaklik 2025, 1970-2025 monthly means (sea-wide mean, not a station): https://mgm.gov.tr/FILES/resmi-istatistikler/denizSuyu/2025-Marmara.pdf",
+     "accessed": "2026-11-13"
+    },
+    "species": {
+     "source": "Guide and news pages (yemek.com, ensonhaber.com) named horse mackerel, bluefish and bonito on the migration path at Sarayburnu (search-result summaries only, not read in full; see docs/spot_research.md). Monthly abundances are design fills shaped by Zengin (2009) seasons: https://dergipark.org.tr/en/download/article-file/204298",
+     "accessed": "2026-11-13"
+    }
+   }
+  }
  }
 ]

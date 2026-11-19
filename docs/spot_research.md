@@ -51,6 +51,10 @@ Marmara or Istanbul values for *S. smaris* were not found in a text that could b
 
 Other species named for Istanbul in sources already read: mullet (kefal, late spring, Zengin 2009), chub mackerel (kolyoz) and Atlantic mackerel at Sarayburnu (search summaries only), scorpionfish (iskorpit) and çinekop at Kuzguncuk (summary only). None has a read length-weight source yet. A Marmara study of *Scomber scombrus* exists (b above 3) but its values were not read.
 
+## Second spot chosen (2026-11-19)
+
+**Sarayburnu** (Q1247633; 41.01714, 28.98605, CC0) is spot 2 in `game/data/spots.json`: the point where the Bosphorus, the Sea of Marmara and the Golden Horn meet; rocky shore (stage `quay`), three positions (Bosphorus side facing NE, Marmara side facing S, Golden Horn side facing NW). Real values: the coordinates (Wikidata), the monthly sea temperature (MGM Marmara mean) and the species named for the place (guide and news pages, search-result summaries only, level S). Everything else (depth profiles, exposure by wind, structure, current, landing difficulty, clarity, pressure, monthly abundance) is a labelled design fill. The three species are the ones already in the game, so no new legal minimum size was needed.
+
 ## What the web cannot give
 
 - **Depth profiles at standing positions.** Charts are protected (SHODB); EMODnet is about 115 m per cell. Without a visit these stay design fills, labelled as such.

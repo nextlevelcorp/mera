@@ -169,12 +169,17 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 		rig = request["rig"]
 	elif save["last_rig"] in FightSetup.TACKLES:
 		rig = save["last_rig"]
-	if _position_index(String(request.get("position_id", ""))) >= 0:
-		position_id = request["position_id"]
-	elif _position_index(save["last_position"]) >= 0:
-		position_id = save["last_position"]
-	else:
-		position_id = _db["spot"][0]["positions"][0]["id"]
+	# The request's spot (the first one if it names none), then its position,
+	# else the last one used if it is at this spot, else the spot's first.
+	var want: Dictionary = _db["spot"][0]
+	for s: Dictionary in _db["spot"]:
+		if s["id"] == String(request.get("spot_id", "")):
+			want = s
+	position_id = want["positions"][0]["id"]
+	for candidate: String in [String(request.get("position_id", "")), String(save["last_position"])]:
+		if _spot_has(want, candidate):
+			position_id = candidate
+			break
 	_rng.seed = 7
 	# Shoals of the hour: the same for everyone at the same place and time.
 	_shoals = ShoalField.new(_k, int(conditions["month"]) * 1000 + int(Time.get_datetime_dict_from_system()["hour"]) if save_enabled else 77)
@@ -229,7 +234,7 @@ func _step_shoals(delta: float) -> void:
 
 ## Recomputes the environment from the conditions and updates the water.
 func apply_conditions() -> void:
-	_ctx = _base_context(_db["spot"][0]["species"][0]["species_id"])
+	_ctx = _base_context(spot()["species"][0]["species_id"])
 	apply_stage()
 	_env = CatchModel.environment(_k, _ctx["spot"], _ctx["position"], conditions)
 	# Neighbours get bites about as often as a bite comes here and now.
@@ -1256,7 +1261,7 @@ func _show_result() -> void:
 
 func _update_log() -> void:
 	var lines: Array[String] = []
-	for entry: Dictionary in _db["spot"][0]["species"]:
+	for entry: Dictionary in spot()["species"]:
 		var id: String = entry["species_id"]
 		var species_name := tr(_species_by_id(id)["name_key"])
 		if save["log"].has(id):
@@ -1290,7 +1295,7 @@ func _update_texts() -> void:
 		_ui.motion_chip.visible = st != DeviceMotion.STATUS_NONE and phase != Phase.RESULT
 		_ui.motion_chip.text = tr({DeviceMotion.STATUS_ON: "MOTION_ON", DeviceMotion.STATUS_TAP: "MOTION_TAP", DeviceMotion.STATUS_DENIED: "MOTION_DENIED"}.get(st, "MOTION_ON"))
 	var pos: Dictionary = _ctx["position"]
-	_ui.status_label.text = tr(_db["spot"][0]["name_key"]) + " · " + tr("FISH_STATUS") % [tr("SLOT_%s" % String(conditions["slot"]).to_upper()), conditions["wind_dir"], int(conditions["wind_ms"]), tr(pos["name_key"])]
+	_ui.status_label.text = tr(spot()["name_key"]) + " · " + tr("FISH_STATUS") % [tr("SLOT_%s" % String(conditions["slot"]).to_upper()), conditions["wind_dir"], int(conditions["wind_ms"]), tr(pos["name_key"])]
 	_ui.rig_cycle.text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_ctx["rod"]["name_key"])]
 	_ui.position_cycle.text = "%s: %s" % [tr("FISH_POSITION"), tr(pos["name_key"])]
 	var cast_check := CatchModel.cast(_k, _ctx["rod"], _ctx["lure"], _ctx["angler"], pos, conditions, 1.0)
@@ -1360,8 +1365,20 @@ func _species_by_id(id: String) -> Dictionary:
 	return {}
 
 
+## The spot being fished: the one that has the current position.
+func spot() -> Dictionary:
+	return FightSetup.spot_of(_db, position_id)
+
+
+static func _spot_has(spot_record: Dictionary, id: String) -> bool:
+	for p: Dictionary in spot_record["positions"]:
+		if p["id"] == id:
+			return true
+	return false
+
+
 func _position_index(id: String) -> int:
-	var positions: Array = _db["spot"][0]["positions"]
+	var positions: Array = spot()["positions"]
 	for i in positions.size():
 		if positions[i]["id"] == id:
 			return i
