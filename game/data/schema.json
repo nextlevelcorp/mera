@@ -466,6 +466,11 @@
      "type": "int",
      "min": 1,
      "max": 20
+    },
+    "blank_colour": {
+     "type": "string",
+     "pattern": "^#[0-9a-f]{6}$",
+     "required": false
     }
    }
   },

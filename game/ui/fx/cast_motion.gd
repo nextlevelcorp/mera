@@ -13,7 +13,7 @@ const SETTLE_STIFFNESS := 90.0
 const DAMPING := 0.32          ## share of critical damping
 const SNAP_SPEED := 9.0        ## rad/s forward at release, plus power share
 const SNAP_POWER := 10.0
-const AIM_MAX := 0.25          ## rad of aim either side
+const AIM_MAX := 0.5           ## rad of aim either side (about 29 degrees; R19)
 const AIM_SPAN := 0.3          ## share of screen width for a full aim swipe
 
 ## Rod swing relative to its rest pose: positive is back, negative forward.
@@ -47,6 +47,12 @@ static func paid_out(flight_s: float, flight_total_s: float, cast_m: float) -> f
 ## angle in radians, clamped to AIM_MAX either side.
 static func aim_from_drag(dx: float, screen_width: float) -> float:
 	return clampf(dx / maxf(screen_width * AIM_SPAN, 1.0), -1.0, 1.0) * AIM_MAX
+
+
+## Aim from a tap on the water (R19): the left edge of the screen is AIM_MAX
+## to the left, the right edge AIM_MAX to the right, the middle straight out.
+static func aim_from_screen(x: float, screen_width: float) -> float:
+	return clampf((x - screen_width * 0.5) / maxf(screen_width * 0.5, 1.0), -1.0, 1.0) * AIM_MAX
 
 
 func _spring(dt: float, target: float, k: float) -> void:

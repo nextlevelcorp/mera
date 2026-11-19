@@ -29,6 +29,9 @@ var _handle_arm: MeshInstance3D
 var _knob: MeshInstance3D
 var _hand_r: Node3D
 var _hand_l: Node3D
+var _blank_mat: StandardMaterial3D
+var _thick := 1.0                ## blank thickness, from the rod's power
+var _reel_scale := 1.0           ## reel body size, from the reel's size class
 var _centres := PackedVector3Array()
 var _radii := PackedFloat32Array()
 
@@ -40,6 +43,7 @@ func _init() -> void:
 	var dark := _mat(Color(0.1, 0.105, 0.12), 0.5, 0.4)
 	var sleeve := _mat(Color(0.14, 0.19, 0.27), 0.0, 0.92, 25.0)
 	var skin := _mat(Color(0.84, 0.63, 0.5), 0.0, 0.55)
+	_blank_mat = blank_mat
 	_blank = _holder(blank_mat)
 	_cork = _holder(cork_mat)
 	_seat = _holder(dark)
@@ -73,6 +77,22 @@ func _init() -> void:
 	_capsule(_hand_l, Vector3(-8, 4, 8), Vector3(10, -2, 8), 3.6, skin)
 
 
+## The rig in hand (R18): the blank's colour, its thickness from the rod's
+## power (1 to 20) and the reel's size from its size class (2000 to 4000).
+func set_look(colour: Color, power: int, reel_size: int) -> void:
+	_blank_mat.albedo_color = colour
+	_thick = look_thickness(power)
+	_reel_scale = look_reel_scale(reel_size)
+
+
+static func look_thickness(power: int) -> float:
+	return clampf(0.75 + 0.04 * float(power), 0.75, 1.55)
+
+
+static func look_reel_scale(reel_size: int) -> float:
+	return clampf(float(reel_size) / 3000.0, 0.7, 1.4)
+
+
 ## rig: the 2D rig after update(); pts: RodSpring.points(); size: the overlay's size.
 func pose(rig: AnglerRig, pts: PackedVector2Array, size: Vector2) -> void:
 	if pts.size() < 4 or size.y < 2.0:
@@ -87,7 +107,7 @@ func pose(rig: AnglerRig, pts: PackedVector2Array, size: Vector2) -> void:
 		normal2 = -normal2
 	var tremor := Vector2(sin(rig.time * 37.0), sin(rig.time * 29.0 + 1.0)) * rig.tension * rig.tension * 1.6
 	# Blank, cork grip and reel seat as tubes along the smoothed rod.
-	_tube_along(_blank, rig, 0.12, 1.0, 4.6, 1.3, BLANK_RINGS)
+	_tube_along(_blank, rig, 0.12, 1.0, 4.6 * _thick, 1.3 * _thick, BLANK_RINGS)
 	_tube_along(_cork, rig, 0.0, 0.13, 7.6, 7.2, 4)
 	_tube_along(_seat, rig, 0.13, 0.19, 6.2, 5.6, 3)
 	# Guides: rings standing off the blank.
@@ -107,7 +127,7 @@ func pose(rig: AnglerRig, pts: PackedVector2Array, size: Vector2) -> void:
 	var z_seat := _depth(0.16)
 	var frame := _frame(seat2, axis2, normal2, z_seat)
 	var reel2 := seat2 + normal2 * 36.0
-	_reel.transform = Transform3D(frame, _lift(reel2, z_seat))
+	_reel.transform = Transform3D(frame.scaled(Vector3.ONE * _reel_scale), _lift(reel2, z_seat))
 	_rotor.rotation.x = rig.crank
 	_spool_spin.rotation.x = rig.spool
 	_bail.position.x = -10.0 if rig.bail_open else 8.0

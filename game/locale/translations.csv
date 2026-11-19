@@ -257,3 +257,4 @@ BAG_TITLE,Bag,Çanta,Bolsa
 BAG_FISH,Fish: %d · worth %s,Balık: %d · değeri %s,Peces: %d · valen %s
 BAG_TACKLE,Tackle and bait,Takım ve yem,Aparejos y cebo
 BAG_TACKLE_LINE,%s × %d,%s × %d,%s × %d
+FISH_AIM_HINT,"Hold Cast, aim with your other thumb","Atış'a bas, öbür başparmakla nişan al","Mantén Lanzar y apunta con el otro pulgar"

@@ -21,7 +21,10 @@ func _draw() -> void:
 	match scr.phase:
 		FishingScreen.Phase.READY, FishingScreen.Phase.CHARGE:
 			_draw_line(false)
-			draw_circle(scr._end_pos, 4.0, Color(0.95, 0.75, 0.3))
+			if scr.is_float():
+				_draw_float(scr._end_pos + Vector2(0.0, 8.0), 0.0)   # the float hangs from the tip (R18)
+			else:
+				draw_circle(scr._end_pos, 4.0, Color(0.95, 0.75, 0.3))
 			if scr.phase == FishingScreen.Phase.CHARGE:
 				_draw_aim_marker(size)
 		FishingScreen.Phase.FLIGHT:
