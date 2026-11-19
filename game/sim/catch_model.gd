@@ -121,11 +121,13 @@ static func cast(k: Dictionary, rod: Dictionary, lure: Dictionary, angler: Dicti
 	var weight_fit: float = maxf(float(k["CAST_FIT_MIN"]), band(weight, float(rod["cast_weight_min_g"]), float(rod["cast_weight_max_g"]), float(rod["cast_weight_max_g"])))
 	var skill: float = float(k["CAST_SKILL_BASE"]) + (1.0 - float(k["CAST_SKILL_BASE"])) * n(float(angler["casting_distance"]))
 	var head := headwind(position["facing"], cond["wind_dir"], float(cond["wind_ms"]))
-	var cast_max: float = reach_ref * weight_fit * skill * (1.0 - float(k["CAST_HEADWIND"]) * head)
+	# A float with its bait hanging under it drags in the air and on the line (R12, design fill).
+	var rig_factor: float = float(k["FLOAT_CAST_FACTOR"]) if Presentation.is_float(lure) else 1.0
+	var cast_max: float = reach_ref * weight_fit * skill * (1.0 - float(k["CAST_HEADWIND"]) * head) * rig_factor
 	var cast_m: float = cast_max * clampf(power_input, 0.0, 1.0)
 	return {
 		"inputs": {"rod_length_m": float(rod["length_m"]), "lure_weight_g": weight, "cast_weight_min_g": float(rod["cast_weight_min_g"]), "cast_weight_max_g": float(rod["cast_weight_max_g"]), "casting_distance": float(angler["casting_distance"]), "facing": position["facing"], "wind_dir": cond["wind_dir"], "wind_ms": float(cond["wind_ms"]), "power_input": power_input},
-		"reach_ref_m": reach_ref, "weight_fit": weight_fit, "skill": skill, "headwind": head,
+		"reach_ref_m": reach_ref, "weight_fit": weight_fit, "skill": skill, "headwind": head, "rig_factor": rig_factor,
 		"cast_max_m": cast_max, "cast_m": cast_m,
 		"aim_sigma_rad": float(k["AIM_SIGMA_BASE"]) - float(k["AIM_SIGMA_SKILL"]) * n(float(angler["casting_accuracy"])),
 		"water_depth_m": depth_at(position["depth_profile"], cast_m),

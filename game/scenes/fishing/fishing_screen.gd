@@ -136,6 +136,7 @@ var _steer_hint_shown := false
 var _strike_queued := false
 ## The float on the water (R12), in screen pixels below its resting line:
 ## nibbles bob it, a take pulls it under. A damped spring, view only.
+var _bitten := false          ## a fish mouthed the live bait this cast
 var float_dip := 0.0
 var _float_vel := 0.0
 
@@ -416,7 +417,19 @@ func strike() -> void:
 
 func reel_in() -> void:
 	if phase == Phase.WAIT:
+		_end_cast_live()
 		_set_phase(Phase.READY)
+
+
+## A cast ended without a fish on: a live bait tires and may be spent.
+func _end_cast_live() -> void:
+	if _session.live.is_empty():
+		return
+	var alive := _session.wear_live(float(_wait_state.get("time_s", 0.0)), _bitten)
+	_bitten = false
+	if not alive:
+		_toast(tr("LIVE_BAIT_SPENT"), 3.0)
+	apply_conditions()   # the bait's vigor changes how it draws fish
 
 
 ## Debug menu: a committed take by this species; u < 0 draws the size.
@@ -442,6 +455,7 @@ func _step_wait(delta: float) -> void:
 		_start_fight(_wait_state["hooked"])
 	elif _wait_state["phase"] == WaitSim.PHASE_RETRIEVED:
 		_toast(tr("FISH_RETRIEVED"), 2.5)
+		_end_cast_live()
 		_set_phase(Phase.READY)
 
 
@@ -471,8 +485,10 @@ func _on_wait_event(e: Dictionary) -> void:
 			Input.vibrate_handheld(60)
 			_speed_on = false
 		"take_missed":
+			_bitten = true
 			_toast(tr("FISH_TAKE_MISSED"), 1.8)
 		"hook_failed":
+			_bitten = true
 			_toast(tr("FISH_HOOK_FAILED"), 1.8)
 		"strike_empty":
 			_tip_vel += 10.0
@@ -484,6 +500,8 @@ func _on_wait_event(e: Dictionary) -> void:
 func _start_fight(hooked: Dictionary) -> void:
 	_award({"type": "hooked", "timing": float(hooked["timing_quality"])})
 	_fight_ctx = _session.fight_context(hooked, forced_u)
+	_session.lose_live()   # the fish that took it has the bait
+	_bitten = false
 	forced_u = -1.0
 	_ui.drag_ratio = clampf(float(_fight_ctx["play"]["drag_kg"]) / float(_fight_ctx["reel"]["drag_max_kg"]), 0.0, 1.0)
 	_controller = _session.start_fight(_fight_ctx)
@@ -1187,6 +1205,9 @@ func _store() -> void:
 ## Leaves the fishing view: whoever opened it gets the result; opened on its
 ## own (tests, the old entry), it goes back to the title scene.
 func leave() -> void:
+	if not _session.live.is_empty():
+		_session.release_live()   # a live bait still alive goes back into the bag
+		_store()
 	if finished.get_connections().is_empty():
 		get_tree().change_scene_to_file.call_deferred(MAIN_SCENE)
 	else:

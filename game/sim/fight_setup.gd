@@ -42,6 +42,7 @@ static func build(database: Dictionary, species_id: String, tackle: String, posi
 	(ctx["play"] as Dictionary).merge(play_overrides, true)
 	ctx["play"].erase("float_depth_m")
 	ctx["play"].erase("float_bait")
+	ctx["play"].erase("float_vigor")
 	return ctx
 
 
@@ -50,7 +51,7 @@ static func float_lure(database: Dictionary, play_overrides: Dictionary = {}) ->
 	var f := _by_id(database.get("float", []), FLOAT_RIG)
 	var depth := float(play_overrides.get("float_depth_m", f["depth_default_m"]))
 	var bait := String(play_overrides.get("float_bait", FLOAT_BAIT))
-	return Presentation.float_lure(_by_id(database.get("bait", []), bait), f, depth)
+	return Presentation.float_lure(_by_id(database.get("bait", []), bait), f, depth, float(play_overrides.get("float_vigor", 1.0)))
 
 
 ## Lure id of a rig (the demo has one lure per rig).
