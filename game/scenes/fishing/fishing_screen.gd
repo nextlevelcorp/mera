@@ -96,6 +96,8 @@ var _rod_back := 0.0
 var _cast_motion := CastMotion.new()
 var _rig := AnglerRig.new()
 var _aim := 0.0
+var _aim_base := 0.0
+var _aim_hint_shown := false
 var _press_x := 0.0
 var _cast_pose := 0.0
 var _dangle := Vector2.ZERO
@@ -227,7 +229,10 @@ func _step_shoals(delta: float) -> void:
 			if _rng.randf() < power:
 				var at: Vector2 = (s["pos"] as Vector2) + Vector2.from_angle(_rng.randf() * TAU) * float(s["radius"]) * sqrt(_rng.randf()) * 0.8
 				_fx.add_ring(at, 0.15, 0.5 + 0.5 * _rng.randf(), 0.5)
-	if phase == Phase.READY and not _shoal_hint_shown and _time > 4.0:
+	if phase == Phase.READY and not _aim_hint_shown and _time > 1.0:
+		_aim_hint_shown = true
+		_toast(tr("FISH_AIM_HINT"), 4.0)
+	if phase == Phase.READY and not _shoal_hint_shown and _time > 6.0:
 		_shoal_hint_shown = true
 		_toast(tr("FISH_SHOAL_HINT"), 5.0)
 
@@ -236,6 +241,7 @@ func _step_shoals(delta: float) -> void:
 func apply_conditions() -> void:
 	_ctx = _base_context(spot()["species"][0]["species_id"])
 	apply_stage()
+	apply_rig_look()
 	_env = CatchModel.environment(_k, _ctx["spot"], _ctx["position"], conditions)
 	# Neighbours get bites about as often as a bite comes here and now.
 	_neighbours.set_pace(WaitSim.new(_ctx, _k, _db["species"], 15.0, 1).median_wait_s() * 1.3)
@@ -244,6 +250,22 @@ func apply_conditions() -> void:
 			_sound.set_conditions(float(conditions["wind_ms"]), float(_env["chop"]))
 		_water.set_conditions(conditions["slot"], clampf(float(_env["chop"]), 0.05, 1.0), float(_env["visibility"]), float(_env["light"]))
 	_update_texts()
+
+
+## How long the rod looks on screen, from its real length (R18): the spin rod
+## (2.7 m) is the reference; a 4 m float rod reaches further up the screen.
+func rod_length_factor() -> float:
+	if _ctx.is_empty():
+		return 1.0
+	return clampf(float(_ctx["rod"]["length_m"]) / 2.7, 0.8, 1.18)
+
+
+## The rod, reel and blank of the rig in hand, for the 3D rig.
+func apply_rig_look() -> void:
+	if _water == null or _water.rig3d == null or _ctx.is_empty():
+		return
+	var rod: Dictionary = _ctx["rod"]
+	_water.rig3d.set_look(Color.html(String(rod.get("blank_colour", "#121214"))), int(rod["power"]), int(_ctx["reel"]["size"]))
 
 
 func set_rig(new_rig: String, new_position: String) -> void:
@@ -364,7 +386,7 @@ func begin_charge() -> void:
 		_toast(tr(key), 3.5)
 		return
 	_charge_s = 0.0
-	_aim = 0.0
+	_aim_base = _aim   # the aim taken on the water stays; the thumb swipe adds to it
 	_set_phase(Phase.CHARGE)
 
 
@@ -814,6 +836,12 @@ func _update_motion(delta: float) -> void:
 ## Taps on the water during the wait twitch the lure: the touch version of
 ## working it with the phone.
 func _unhandled_input(event: InputEvent) -> void:
+	# While Cast is held the view faces the water: the other thumb taps or
+	# drags on the water to aim (R19). The aim stays for the next cast.
+	if phase == Phase.CHARGE:
+		if (event is InputEventScreenTouch and event.pressed) or event is InputEventScreenDrag:
+			aim_at(event.position.x)
+		return
 	if phase != Phase.WAIT:
 		return
 	var pressed: bool = (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed)
@@ -890,7 +918,7 @@ func _step_rod_and_line(delta: float) -> void:
 	var butt := Vector2(size.x * 0.66, size.y * 0.95) + breath
 	var rest_tip := Vector2(size.x * (0.76 + 0.07 * (_ui.steer if phase == Phase.FIGHT and _ui.pull_pressed else 0.0)), size.y * 0.30)
 	var base := (rest_tip - butt).angle()
-	var length := butt.distance_to(rest_tip)
+	var length := butt.distance_to(rest_tip) * rod_length_factor()
 	# The cast swing: back over the shoulder while charging, a forward snap on release.
 	if phase == Phase.CHARGE:
 		_cast_motion.charge(delta, power_at(_charge_s))
@@ -992,6 +1020,11 @@ func _process(delta: float) -> void:
 	match phase:
 		Phase.CHARGE:
 			_charge_s += delta
+			# Keyboard aim for desktop testing: left and right while charging.
+			var steer := Input.get_axis("ui_left", "ui_right")
+			if steer != 0.0:
+				_aim = clampf(_aim + steer * delta * 0.8, -CastMotion.AIM_MAX, CastMotion.AIM_MAX)
+				_aim_base = _aim
 		Phase.FLIGHT:
 			_flight_s += delta
 			if _flight_s >= _flight_total_s:
@@ -1097,13 +1130,20 @@ func _on_main_down() -> void:
 		strike()
 
 
-## Thumb travel sideways while holding Cast aims the cast.
+## Aims the next cast at screen x (a tap on the water).
+func aim_at(x: float) -> void:
+	_aim = CastMotion.aim_from_screen(x, _overlay.size.x if _overlay and _overlay.size.x > 2.0 else 1280.0)
+	_aim_base = _aim
+	_press_x = -1.0   # a swipe on Cast fine-tunes from here
+
+
+## Thumb travel sideways while holding Cast fine-tunes the aim.
 func _on_main_input(event: InputEvent) -> void:
 	var pressed: bool = (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed)
 	if pressed:
 		_press_x = event.position.x
-	elif phase == Phase.CHARGE and (event is InputEventScreenDrag or (event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))):
-		_aim = CastMotion.aim_from_drag(event.position.x - _press_x, _overlay.size.x if _overlay else 1280.0)
+	elif phase == Phase.CHARGE and _press_x >= 0.0 and (event is InputEventScreenDrag or (event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))):
+		_aim = clampf(_aim_base + CastMotion.aim_from_drag(event.position.x - _press_x, _overlay.size.x if _overlay else 1280.0), -CastMotion.AIM_MAX, CastMotion.AIM_MAX)
 
 
 func _on_main_up() -> void:

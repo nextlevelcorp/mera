@@ -123,7 +123,7 @@ Standing position (inside a spot):
 
 | Entity | Fields (type) | Used in 0.1 |
 | --- | --- | --- |
-| Rod | `length_m` (float), `power` (int20), `action` (int20), `cast_weight_min_g`, `cast_weight_max_g` (float), `sensitivity` (int20), `durability` (int20) | length, cast weights (cast); power (hook); sensitivity (strike window). `action`, `durability`: MVP |
+| Rod | `blank_colour` (optional, `#rrggbb`, look only, R18), `length_m` (float), `power` (int20), `action` (int20), `cast_weight_min_g`, `cast_weight_max_g` (float), `sensitivity` (int20), `durability` (int20) | length, cast weights (cast); power (hook); sensitivity (strike window). `action`, `durability`: MVP |
 | Reel | `size` (int), `drag_max_kg` (float), `retrieve_m_per_s` (float), `smoothness` (int20), `line_capacity_m` (float) | drag limit, retrieve speed, smoothness (tension spike). `line_capacity_m`: MVP |
 | Line | `type` (`mono`, `braid`, `fluorocarbon`), `diameter_mm`, `breaking_strain_kg` (float), `stretch`, `visibility`, `abrasion_resistance` (int20) | breaking strain, stretch |
 | Leader | `type`, `length_m`, `breaking_strain_kg` (float), `visibility`, `abrasion_resistance` (int20) | breaking strain, visibility (commit), abrasion |

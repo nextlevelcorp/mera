@@ -9,6 +9,7 @@
   "cast_weight_max_g": 7,
   "sensitivity": 16,
   "durability": 10,
+  "blank_colour": "#24406b",
   "provenance": {
    "default": {
     "design_fill": true
@@ -25,6 +26,7 @@
   "cast_weight_max_g": 28,
   "sensitivity": 11,
   "durability": 12,
+  "blank_colour": "#121214",
   "provenance": {
    "default": {
     "design_fill": true
@@ -41,6 +43,7 @@
   "cast_weight_max_g": 40,
   "sensitivity": 12,
   "durability": 12,
+  "blank_colour": "#6e1d1d",
   "provenance": {
    "default": {
     "design_fill": true
@@ -57,6 +60,7 @@
   "cast_weight_max_g": 20,
   "sensitivity": 16,
   "durability": 10,
+  "blank_colour": "#b89a62",
   "provenance": {
    "default": {
     "design_fill": true
