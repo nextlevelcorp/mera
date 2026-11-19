@@ -26,7 +26,7 @@ Findings of the repository scan on 2026-11-19 (a separate thread audits before r
 | Network calls from the game | None: no `HTTPRequest`, `HTTPClient`, `WebSocket` or `fetch` in `game/` (anonymous counters were declined by the owner, 2026-11-15) |
 | Secrets in the repository | None found: no key, token or password strings in `game/`; only `.env.example` (names, no values) is tracked; no keystore or certificate files tracked |
 | Debug menu in release builds | Absent: the release preset excludes `debug/*`, and the menu loads only with a debug build or the `mera_debug` feature |
-| `JavaScriptBridge` use | Only `game/ui/device_motion.gd` (reads the browser's motion event). It does not exist natively: see the Android spike |
+| `JavaScriptBridge` use | Only `game/ui/device_motion.gd` (reads the browser's motion event); a native branch exists in the same file and has never run on a device: see the Android spike |
 | Dependencies and actions | Godot 4.4.1 pinned in `.godot-version`; CI Actions pinned to a major version or SHA (`security.md`). No Godot plugins or addons |
 | Third-party assets | CC0 only (Poly Haven textures, recorded sounds, generated cues); rows in `reference_docs.md`. Poly Haven licence pages were not opened from the build environment: **Open**, confirm each page before release |
 | Player data | Local only (`user://save.json`, IndexedDB on the web). Nothing leaves the device |
@@ -52,6 +52,6 @@ Open. The owner signs after gates 1 to 3 are closed and recorded here.
 ## Order of work for R15
 
 1. **Part 1 (this document and `android_spike.md`)**: what is needed, nothing installed or changed. Done 2026-11-19.
-2. **Part 2, the Android spike** (owner approval first, because it adds an export preset, which changes export settings, and needs the Android SDK and templates): see `android_spike.md`.
+2. **Part 2, the Android spike** (owner approved 2026-11-19; the preset is in; the SDK needs `dl.google.com` on the network list and there is no phone or emulator to run it): see `android_spike.md`.
 3. **Part 3, iOS**: needs a Mac with Xcode (the owner's machine) and the paid account. Not before the Android spike works.
 4. **Part 4, the gates above**, one by one, each recorded here.
