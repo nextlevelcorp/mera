@@ -864,7 +864,11 @@ func _update_motion(delta: float) -> void:
 
 ## Taps on the water during the wait twitch the lure: the touch version of
 ## working it with the phone.
-func _unhandled_input(event: InputEvent) -> void:
+## Touches on the water reach this full-screen control (its mouse filter is
+## Stop): a touch that no button took lands here, and it must, because the
+## title's root control behind it would also stop it before any unhandled
+## input (found on 2026-11-20: the two-thumb aim did not work in the browser).
+func _gui_input(event: InputEvent) -> void:
 	# While Cast is held the view faces the water: the other thumb taps or
 	# drags on the water to aim (R19). The aim stays for the next cast.
 	if phase == Phase.CHARGE:
