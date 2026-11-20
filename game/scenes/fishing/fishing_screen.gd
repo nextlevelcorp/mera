@@ -168,10 +168,7 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	elif save_enabled:
 		# Real place, real time: the slot, month and wind come from the phone's clock.
 		conditions = SessionConditions.from_clock(Time.get_datetime_dict_from_system())
-	if String(request.get("rig", "")) in FightSetup.TACKLES:
-		rig = request["rig"]
-	elif save["last_rig"] in FightSetup.TACKLES:
-		rig = save["last_rig"]
+	rig = pick_rig(String(request.get("rig", "")), save, rig)
 	# The request's spot (the first one if it names none), then its position,
 	# else the last one used if it is at this spot, else the spot's first.
 	var want: Dictionary = _db["spot"][0]
@@ -271,6 +268,39 @@ func apply_rig_look() -> void:
 		return
 	var rod: Dictionary = _ctx["rod"]
 	_water.rig3d.set_look(Color.html(String(rod.get("blank_colour", "#121214"))), int(rod["power"]), int(_ctx["reel"]["size"]))
+
+
+## The rig to fish: the request's when it names one (tests and the debug
+## menu), else the saved one if the angler's rank opens it (R22), else the
+## light rod.
+static func pick_rig(requested: String, save: Dictionary, fallback: String) -> String:
+	if requested in FightSetup.TACKLES:
+		return requested
+	var saved := String(save.get("last_rig", ""))
+	if saved in FightSetup.TACKLES:
+		return saved if Db.is_open(save, "rig", saved) else "lrf"
+	return fallback
+
+
+## The rig panel's next rig that the angler's rank opens (R22); a locked
+## one is skipped and named in a toast.
+func next_open_rig() -> void:
+	var t := FightSetup.TACKLES
+	var i := t.find(rig)
+	for step in range(1, t.size() + 1):
+		var cand: String = t[(i + step) % t.size()]
+		if Db.is_open(save, "rig", cand):
+			set_rig(cand, position_id)
+			return
+		_toast(lock_text("rig", cand), 2.5)
+
+
+## "Float rod (4 m) opens at Bridge regular", for a locked rig or bait.
+func lock_text(kind: String, target: String) -> String:
+	var u := Mastery.unlock_for(Db.unlocks(), kind, target)
+	if u.is_empty():
+		return ""
+	return tr("UNLOCK_AT") % [tr(u["name_key"]), tr("RANK_%d" % int(u["rank"]))]
 
 
 func set_rig(new_rig: String, new_position: String) -> void:
@@ -408,7 +438,12 @@ func begin_charge() -> void:
 func open_baiting() -> void:
 	_ui.toast_label.visible = false
 	_toast_s = 0.0
-	_bait_screen.open_choose(Baiting.options(_db, save), _session.float_bait if is_float() else lure_id())
+	var options := Baiting.options(_db, save)
+	for o: Dictionary in options:
+		var u := Mastery.unlock_for(Db.unlocks(), "rig", o["rig"]) if not Db.is_open(save, "rig", o["rig"]) else Mastery.unlock_for(Db.unlocks(), "bait", o["item_id"])
+		if not u.is_empty() and not Db.is_open(save, String(u["kind"]), String(u["target"])):
+			o["locked"] = tr("UNLOCK_SHORT") % tr("RANK_%d" % int(u["rank"]))
+	_bait_screen.open_choose(options, _session.float_bait if is_float() else lure_id())
 
 
 ## A bait or lure was picked: switch to its rig (and float bait), then the hook.

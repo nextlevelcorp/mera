@@ -12,6 +12,7 @@ static var errors: Array[String] = []
 static var _shop := {}
 static var _goals: Array = []
 static var _weekly: Array = []
+static var _unlocks: Array = []
 
 
 ## The validated records by kind (species, spot, rod, ...); empty if loading failed.
@@ -65,11 +66,30 @@ static func weekly() -> Array:
 	return _weekly
 
 
+## What opens with rank (Mastery.load_unlocks); empty if it failed to load.
+static func unlocks() -> Array:
+	_load()
+	if _unlocks.is_empty() and errors.is_empty():
+		var loaded := Mastery.load_unlocks(_constants)
+		if loaded["ok"]:
+			_unlocks = loaded["unlocks"]
+		else:
+			for e: Variant in loaded["errors"]:
+				errors.append(str(e))
+	return _unlocks
+
+
+## True when the player's rank opens this rig, bait or the boat (R22).
+static func is_open(save: Dictionary, kind: String, target: String) -> bool:
+	return Mastery.is_open(unlocks(), goals(), save, constants(), kind, target)
+
+
 static func ok() -> bool:
 	_load()
 	shop()
 	goals()
 	weekly()
+	unlocks()
 	return errors.is_empty()
 
 

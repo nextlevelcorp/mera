@@ -327,3 +327,7 @@ JUR_ES_AN,"Spain, Andalusia","İspanya, Endülüs","España, Andalucía"
 JUR_IT,Italy,İtalya,Italia
 JUR_PT,Portugal,Portekiz,Portugal
 JUR_GR,Greece,Yunanistan,Grecia
+UNLOCK_AT,%s opens at %s,"%s, %s rütbesinde açılır",%s se abre en %s
+UNLOCK_NEXT,Next to open: %s at %s (%d/%d badges),"Sıradaki açılım: %s, %s rütbesinde (%d/%d rozet)",Lo siguiente: %s en %s (%d/%d insignias)
+UNLOCK_BOAT,A boat,Tekne,Una barca
+UNLOCK_SHORT,Opens at %s,%s rütbesinde,Se abre en %s

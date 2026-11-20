@@ -110,7 +110,7 @@ func _card(o: Dictionary, current: bool) -> Button:
 	var b := Button.new()
 	b.custom_minimum_size = Vector2(196, 250)
 	b.theme_type_variation = UiTheme.PRIMARY if current else &""
-	b.disabled = int(o["stock"]) <= 0
+	b.disabled = int(o["stock"]) <= 0 or o.has("locked")
 	var art := _CardArt.new(String(o["kind"]))
 	art.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	art.offset_top = 14.0
@@ -118,7 +118,7 @@ func _card(o: Dictionary, current: bool) -> Button:
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	b.add_child(art)
 	var words := Label.new()
-	words.text = "%s\n%s" % [tr(o["name_key"]), tr("BAIT_IN_BAG") % int(o["stock"])]
+	words.text = "%s\n%s" % [tr(o["name_key"]), String(o["locked"]) if o.has("locked") else tr("BAIT_IN_BAG") % int(o["stock"])]
 	words.add_theme_font_size_override("font_size", 18)
 	words.add_theme_color_override("font_color", UiTheme.SEA_DEEP if current else UiTheme.ROPE)
 	words.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

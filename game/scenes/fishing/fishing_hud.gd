@@ -210,8 +210,7 @@ func _build_rig_panel() -> void:
 	rig_panel.visible = false
 	var title := _plain_label(tr("FISH_RIG"), 30)
 	box.add_child(title)
-	rig_cycle = _button("", 24, func() -> void:
-		scr.set_rig(FightSetup.TACKLES[(FightSetup.TACKLES.find(scr.rig) + 1) % FightSetup.TACKLES.size()], scr.position_id))
+	rig_cycle = _button("", 24, func() -> void: scr.next_open_rig())
 	box.add_child(rig_cycle)
 	position_cycle = _button("", 24, func() -> void:
 		var positions: Array = scr.spot()["positions"]
