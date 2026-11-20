@@ -1,5 +1,14 @@
 # CLAUDE.md
 
+## ARCHITECTURE (big picture)
+- Two views of one world. World mode (top-down, `game/scenes/world/`, `WorldScreen`) walks an area from `game/data/areas/*.json`. Fishing mode (first person, `game/scenes/fishing/FishingScreen`) runs the cast, wait, bite and fight. Both read the same data and save.
+- Simulation is the rule layer. `game/sim/` is pure GDScript (no Node, no `randf()`, seeded). `CatchModel` stages (environment, cast, presence, attraction, commit, hook, fight, landing) feed `WaitSim` and `FightController`. `FishingSession` holds one visit's rules and builds the context via `FightSetup`; the screen only sequences phases and draws.
+- Static holders, not autoloads: `Db` (validated data, loaded once), `Profile` (the save; the only writer), `Game` (`FishingRequest` and `FishingResult`, the contract between the two views). The tests reach them the same way the game does.
+- Data flows one way: JSON in `game/data/` (schema in `schema.json`, checked by `DataValidator`) -> `Db` -> sim -> scenes. Player data goes through `SaveGame` (versioned, migrated) and `Inventory`, written only by `Profile`.
+- Presentation is separate: `game/ui/sea/` (3D sea, bridge, quay, rig, `Stage3D` family), `game/ui/fx/` (rod, rope, cast motion), `game/ui/audio/` (buses from `default_bus_layout.tres`, `WorldAudio`, `CueSynth`), `game/ui/UiTheme` (one theme merged into the default theme).
+- Debug menu lives in `game/debug/` and is excluded from release by `export_presets.cfg` (`exclude_filter`) and the `mera_debug` feature tag.
+- Status and history: `docs/architecture.md` (single technical reference), `docs/project_status.md` (roadmap R1-R23), `docs/data_model.md` (formulas), `docs/changelog.md`.
+
 ## ALWAYS ON
 
 ### Working principles
@@ -73,6 +82,9 @@ COMMANDS (run from repo root; GODOT = Godot binary, version pinned in .godot-ver
 - Web export: mkdir -p build/web && $GODOT --headless --path game --export-release Web
 - Serve: python3 -m http.server -d build/web 8000
 - Cloud setup: scripts/install_godot.sh installs Godot and the web templates.
+- Debug web export (the only build with the debug menu): $GODOT --headless --path game --export-debug "Web Debug" ../build/web/debug/index.html
+- Single test file or method: the runner has no filter flag. Run the whole suite and grep the output, or temporarily edit `_test_files()` / the `test_` loop in `game/tests/run_tests.gd` (revert before committing). Exit code is 1 on any failure or when no tests ran.
+- CI (`.github/workflows/ci.yml`, job "Test and export web build") runs the suite, both web exports and a check that the release export has no debug menu. A PR is mergeable only when that job is green.
 
 ACTIVE PLUGINS (how to use them)
 - New feature: use the superpowers or feature-dev workflow: plan first (scope in, out, done-when; files; tests), then code. Large work also follows .claude/skills/compound-engineering.md (brainstorm, plan, work, simplify, review, compound).
