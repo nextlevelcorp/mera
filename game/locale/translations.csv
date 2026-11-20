@@ -281,3 +281,28 @@ BAIT_STEP_SABIKI_UNWIND,Unwind the feathers,Tüyleri çöz,Desenreda las plumas
 BAIT_STEP_SABIKI_WEIGHT,Clip the weight on,Kurşunu tak,Engancha el plomo
 DBG_NEXT_SHOP,Next shop,Sonraki dükkân,Siguiente tienda
 DBG_NEXT_PERSON,Next person,Sonraki kişi,Siguiente persona
+GOAL_FIRST_FISH,Land your first fish,İlk balığını tut,Saca tu primer pez
+GOAL_FIRST_ISTAVRIT,Catch a horse mackerel,Bir istavrit tut,Pesca un jurel
+GOAL_CAST_2,Reach casting level 2,Atışta 2. seviyeye çık,Llega al nivel 2 de lanzado
+GOAL_TEN_FISH,Land 10 fish,10 balık tut,Saca 10 peces
+GOAL_FIRST_LUFER,Catch a bluefish,Bir lüfer tut,Pesca una anjova
+GOAL_FIRST_QUEST,Finish a quest,Bir görevi bitir,Termina un encargo
+GOAL_ISTAVRIT_17,A horse mackerel of 17 cm,17 cm'lik bir istavrit,Un jurel de 17 cm
+GOAL_THREE_SPECIES,Catch all three species,Üç türü de tut,Pesca las tres especies
+GOAL_STRIKE_3,Reach strike level 3,Kanca vurmada 3. seviyeye çık,Llega al nivel 3 de clavada
+GOAL_LUFER_35,A bluefish of 35 cm,35 cm'lik bir lüfer,Una anjova de 35 cm
+GOAL_THREE_QUESTS,Finish three quests,Üç görevi bitir,Termina tres encargos
+GOAL_FIFTY_FISH,Land 50 fish,50 balık tut,Saca 50 peces
+GOAL_KNOTS_4,Reach knots level 4,Düğümde 4. seviyeye çık,Llega al nivel 4 de nudos
+GOAL_PALAMUT_50,A bonito of 50 cm,50 cm'lik bir palamut,Un bonito de 50 cm
+GOAL_NEXT,Next: %s · %d/%d,Sıradaki: %s · %d/%d,Siguiente: %s · %d/%d
+GOAL_ALL_DONE,Every goal reached,Bütün hedefler tamam,Todas las metas logradas
+GOAL_DONE,%s · done,%s · tamam,%s · hecho
+GOAL_PROGRESS,%s · %d/%d,%s · %d/%d,%s · %d/%d
+BADGE_EARNED,Badge earned: %s,Rozet kazandın: %s,Insignia ganada: %s
+BAG_BADGES,Badges,Rozetler,Insignias
+RANK_LINE,%s · %d of %d badges,%s · %d/%d rozet,%s · %d de %d insignias
+RANK_0,Newcomer,Acemi,Novato
+RANK_1,Bridge regular,Köprü müdavimi,Habitual del puente
+RANK_2,Shore angler,Kıyı balıkçısı,Pescador de orilla
+RANK_3,Master of the bridge,Köprünün ustası,Maestro del puente

@@ -10,6 +10,7 @@ static var _database := {}
 static var _constants := {}
 static var errors: Array[String] = []
 static var _shop := {}
+static var _goals: Array = []
 
 
 ## The validated records by kind (species, spot, rod, ...); empty if loading failed.
@@ -37,9 +38,23 @@ static func shop() -> Dictionary:
 	return _shop
 
 
+## The mastery goals (Mastery.load_goals); empty if they failed to load.
+static func goals() -> Array:
+	_load()
+	if _goals.is_empty() and errors.is_empty():
+		var loaded := Mastery.load_goals(_database)
+		if loaded["ok"]:
+			_goals = loaded["goals"]
+		else:
+			for e: Variant in loaded["errors"]:
+				errors.append(str(e))
+	return _goals
+
+
 static func ok() -> bool:
 	_load()
 	shop()
+	goals()
 	return errors.is_empty()
 
 

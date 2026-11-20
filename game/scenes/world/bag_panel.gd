@@ -68,15 +68,23 @@ static func lines(save: Dictionary) -> Dictionary:
 		if record.is_empty():
 			record = Db.record("bait", item["id"])
 		tackle.append(TranslationServer.translate("BAG_TACKLE_LINE") % [TranslationServer.translate(record["name_key"]), Inventory.count(save, item["id"])])
+	var goals := Db.goals()
+	var got := Mastery.badges(goals, save, k)
+	var badges: Array[String] = []
+	for g: Dictionary in goals:
+		var p := Mastery.progress(g, save, k)
+		var title := TranslationServer.translate(g["title_key"])
+		badges.append(TranslationServer.translate("GOAL_DONE") % title if p["done"] else TranslationServer.translate("GOAL_PROGRESS") % [title, int(p["value"]), int(p["target"])])
+	var rank := TranslationServer.translate("RANK_LINE") % [TranslationServer.translate("RANK_%d" % Mastery.rank(got.size(), k)), got.size(), goals.size()]
 	return {"money": TranslationServer.translate("MONEY_FMT") % Economy.money(save), "skills": " · ".join(skills),
-		"fish": fish, "fish_value": total, "tackle": tackle}
+		"fish": fish, "fish_value": total, "tackle": tackle, "rank": rank, "badges": badges}
 
 
 func refresh() -> void:
 	for c in _rows.get_children():
 		c.queue_free()
 	var l := lines(Profile.save)
-	_money.text = l["money"]
+	_money.text = "%s · %s" % [l["money"], l["rank"]]
 	_skills.text = l["skills"]
 	_rows.add_child(_label(22, tr("BAG_FISH") % [(l["fish"] as Array).size(), tr("MONEY_FMT") % int(l["fish_value"])]))
 	if (l["fish"] as Array).is_empty():
@@ -100,6 +108,9 @@ func refresh() -> void:
 	_rows.add_child(_label(22, tr("BAG_TACKLE")))
 	for t: String in l["tackle"]:
 		_rows.add_child(_label(20, t))
+	_rows.add_child(_label(22, tr("BAG_BADGES")))
+	for b: String in l["badges"]:
+		_rows.add_child(_label(20, b))
 
 
 func _label(size: int, text: String = "") -> Label:
