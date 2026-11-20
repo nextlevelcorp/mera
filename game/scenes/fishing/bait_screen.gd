@@ -1,0 +1,546 @@
+class_name BaitScreen
+extends Control
+## The baiting screen (roadmap R20, owner 2026-11-20: "a separate screen:
+## first choose the bait, then put it on by hand, with realistic mechanics
+## and graphics"). Stage one lists what is in the bag for every rig; picking
+## one emits chosen(option) so the fishing screen switches the rig. Stage two
+## is a close-up of the hook and the bait, drawn in code: the hook's point
+## follows the thumb and each stroke of Baiting is made for real (peel and
+## thread a shrimp, hold a live fish and hook it behind the dorsal fin, thread
+## a soft plastic straight, clip a snap to a lure's eye, unwind a sabiki and
+## clip the weight). It emits done(quality). Baiting holds every rule; this
+## draws and passes the thumb's positions in the work area's 0..1 units.
+
+signal chosen(option: Dictionary)
+signal done(quality: float)
+signal cancelled
+
+const HOOK_OFFSET := Vector2(0, -0.05)   ## the point sits above the thumb so the thumb does not hide it
+
+var stage := ""          ## "choose" or "rig"
+var kind := ""
+var stroke := 0
+var scores: Array[float] = []
+var options: Array[Dictionary] = []
+var _samples: Array = []
+var _held := 0.0
+var _touching := false
+var _finger := Vector2(-1, -1)   ## thumb position in work units, -1 when none
+var _t := 0.0
+var _flash := ""                 ## the last stroke's rating, shown briefly
+var _flash_s := 0.0
+var _title: Label
+var _hint: Label
+var _cards: HBoxContainer
+var _back: Button
+
+
+func _init() -> void:
+	set_anchors_preset(Control.PRESET_FULL_RECT)
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	visible = false
+	_title = _text(32)
+	_title.position = Vector2(0, 18)
+	_title.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_title.offset_top = 22.0
+	_title.offset_bottom = 66.0
+	add_child(_title)
+	_hint = _text(22)
+	_hint.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	_hint.offset_top = 66.0
+	_hint.offset_bottom = 100.0
+	_hint.offset_left = 180.0
+	_hint.offset_right = -180.0
+	add_child(_hint)
+	_back = Button.new()
+	_back.text = tr("PROTO_BACK")
+	_back.theme_type_variation = UiTheme.GLASS_KEY
+	_back.position = Vector2(16, 16)
+	_back.custom_minimum_size = Vector2(150, 80)
+	_back.add_theme_font_size_override("font_size", 22)
+	_back.pressed.connect(func() -> void:
+		visible = false
+		cancelled.emit())
+	add_child(_back)
+	_cards = HBoxContainer.new()
+	_cards.set_anchors_preset(Control.PRESET_CENTER)
+	_cards.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_cards.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_cards.add_theme_constant_override("separation", 14)
+	add_child(_cards)
+
+
+## Opens on the choosing step with these options (Baiting.options).
+func open_choose(list: Array[Dictionary], current_item: String) -> void:
+	options = list
+	stage = "choose"
+	visible = true
+	_title.text = tr("BAIT_CHOOSE_TITLE")
+	_hint.text = tr("BAIT_CHOOSE_HINT")
+	for c in _cards.get_children():
+		c.queue_free()
+	for o: Dictionary in options:
+		_cards.add_child(_card(o, String(o["item_id"]) == current_item))
+	_cards.visible = true
+	queue_redraw()
+
+
+## Opens on the hook for one kind of bait.
+func open_rig(bait_kind: String, title_text: String) -> void:
+	kind = bait_kind
+	stage = "rig"
+	stroke = 0
+	scores.clear()
+	_samples.clear()
+	_held = 0.0
+	_flash_s = 0.0
+	visible = true
+	_cards.visible = false
+	_title.text = title_text
+	_show_step()
+	queue_redraw()
+
+
+func _show_step() -> void:
+	var s: Dictionary = Baiting.strokes(kind)[stroke]
+	_hint.text = "%d/%d · %s" % [stroke + 1, Baiting.strokes(kind).size(), tr(s["key"])]
+
+
+func _card(o: Dictionary, current: bool) -> Button:
+	var b := Button.new()
+	b.custom_minimum_size = Vector2(196, 250)
+	b.theme_type_variation = UiTheme.PRIMARY if current else &""
+	b.disabled = int(o["stock"]) <= 0
+	var art := _CardArt.new(String(o["kind"]))
+	art.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	art.offset_top = 14.0
+	art.offset_bottom = 130.0
+	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(art)
+	var words := Label.new()
+	words.text = "%s\n%s" % [tr(o["name_key"]), tr("BAIT_IN_BAG") % int(o["stock"])]
+	words.add_theme_font_size_override("font_size", 18)
+	words.add_theme_color_override("font_color", UiTheme.SEA_DEEP if current else UiTheme.ROPE)
+	words.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	words.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	words.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	words.offset_left = 10.0
+	words.offset_right = -10.0
+	words.offset_top = -110.0
+	words.offset_bottom = -14.0
+	words.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	b.add_child(words)
+	b.pressed.connect(func() -> void: chosen.emit(o))
+	return b
+
+
+func _process(delta: float) -> void:
+	if not visible:
+		return
+	_t += delta
+	_flash_s = maxf(_flash_s - delta, 0.0)
+	if stage == "rig" and _touching:
+		var s: Dictionary = Baiting.strokes(kind)[stroke]
+		if s["type"] == "hold":
+			_held += delta
+			_samples.append(_finger)
+			if Baiting.hold_score(s, _held, _samples)["finished"]:
+				_end_stroke()
+	queue_redraw()
+
+
+func _gui_input(event: InputEvent) -> void:
+	if stage != "rig":
+		return
+	if event is InputEventScreenTouch or event is InputEventMouseButton:
+		if event is InputEventMouseButton and (event as InputEventMouseButton).button_index != MOUSE_BUTTON_LEFT:
+			return
+		if event.pressed:
+			press(to_work(event.position))
+		else:
+			release()
+		accept_event()
+	elif event is InputEventScreenDrag or (event is InputEventMouseMotion and _touching):
+		move(to_work(event.position))
+		accept_event()
+
+
+## The thumb comes down at p (work units). A trace starts only near its start.
+func press(p: Vector2) -> void:
+	if not _rigging():
+		return
+	var s: Dictionary = Baiting.strokes(kind)[stroke]
+	var point := p + (HOOK_OFFSET if s["type"] == "trace" else Vector2.ZERO)
+	_finger = point
+	if s["type"] == "trace" and not Baiting.starts_trace(s, point):
+		_flash = tr("BAIT_START_HERE")
+		_flash_s = 1.2
+		return
+	_touching = true
+	_samples = [point]
+	_held = 0.0
+
+
+func move(p: Vector2) -> void:
+	if not _rigging():
+		return
+	var s: Dictionary = Baiting.strokes(kind)[stroke]
+	_finger = p + (HOOK_OFFSET if s["type"] == "trace" else Vector2.ZERO)
+	if _touching and s["type"] == "trace":
+		_samples.append(_finger)
+		if Baiting.trace_score(s, _samples)["finished"]:
+			_end_stroke()
+
+
+func release() -> void:
+	if not _rigging():
+		return
+	if not _touching:
+		return
+	_touching = false
+	var s: Dictionary = Baiting.strokes(kind)[stroke]
+	# Letting go early still counts what was done: the bait goes on as it is.
+	if s["type"] == "trace" and Baiting.trace_score(s, _samples)["progress"] > 0.2:
+		_end_stroke()
+	elif s["type"] == "hold" and _held > 0.25:
+		_end_stroke()
+
+
+## True while there is a stroke left to make.
+func _rigging() -> bool:
+	return visible and stage == "rig" and stroke < Baiting.strokes(kind).size()
+
+
+func _end_stroke() -> void:
+	var s: Dictionary = Baiting.strokes(kind)[stroke]
+	var score: float = (Baiting.trace_score(s, _samples) if s["type"] == "trace" else Baiting.hold_score(s, _held, _samples))["score"]
+	scores.append(score)
+	_flash = tr(Baiting.rating_key(score))
+	_flash_s = 1.0
+	_touching = false
+	_samples = []
+	_held = 0.0
+	stroke += 1
+	if stroke >= Baiting.strokes(kind).size():
+		visible = false
+		done.emit(Baiting.quality(scores))
+	else:
+		_show_step()
+
+
+# ------------------------------------------------------------------ geometry
+
+## The close-up's rectangle on screen: 1 unit wide, Baiting.ASPECT high.
+func work_rect() -> Rect2:
+	var w := minf(size.x - 80.0, (size.y - 150.0) / Baiting.ASPECT)
+	w = maxf(w, 200.0)
+	return Rect2(Vector2((size.x - w) * 0.5, 112.0), Vector2(w, w * Baiting.ASPECT))
+
+
+func to_work(screen: Vector2) -> Vector2:
+	var r := work_rect()
+	return (screen - r.position) / r.size.x
+
+
+func to_px(v: Vector2) -> Vector2:
+	var r := work_rect()
+	return r.position + v * r.size.x
+
+
+# ------------------------------------------------------------------ drawing
+
+func _draw() -> void:
+	# A wet board on the bridge rail, lit from above.
+	draw_rect(Rect2(Vector2.ZERO, size), Color("0a1a24"))
+	var r := work_rect()
+	if stage == "choose":
+		return
+	var board := StyleBoxFlat.new()
+	board.bg_color = Color("3a2b20")
+	board.set_corner_radius_all(18)
+	board.border_color = Color(UiTheme.BRASS, 0.35)
+	board.set_border_width_all(2)
+	board.shadow_color = Color(0, 0, 0, 0.5)
+	board.shadow_size = 14
+	draw_style_box(board, r.grow(14.0))
+	for i in 7:
+		var y := r.position.y + r.size.y * (float(i) + 0.5) / 7.0
+		draw_line(Vector2(r.position.x - 10, y), Vector2(r.end.x + 10, y), Color(0, 0, 0, 0.18), 2.0)
+	for i in 40:
+		var x := r.position.x + r.size.x * fmod(float(i) * 0.6180339, 1.0)
+		var y := r.position.y + r.size.y * fmod(float(i) * 0.7548776, 1.0)
+		draw_circle(Vector2(x, y), 1.5 + fmod(float(i) * 0.37, 1.0) * 2.0, Color(0.7, 0.85, 0.95, 0.10))   # water drops
+	var s := r.size.x
+	match kind:
+		"shrimp":
+			_draw_shrimp(s)
+		"live":
+			_draw_fish(s)
+		"soft_plastic":
+			_draw_soft(s)
+		"minnow":
+			_draw_minnow(s)
+		"sabiki":
+			_draw_sabiki(s)
+	_draw_guide(s)
+	_draw_hook(s)
+	if _flash_s > 0.0:
+		var font := get_theme_default_font()
+		var w := font.get_string_size(_flash, HORIZONTAL_ALIGNMENT_LEFT, -1, 30).x
+		var at := Vector2(size.x * 0.5 - w * 0.5, r.end.y - 18.0)
+		draw_string_outline(font, at, _flash, HORIZONTAL_ALIGNMENT_LEFT, -1, 30, 8, Color(0, 0, 0, 0.8))
+		draw_string(font, at, _flash, HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Color(UiTheme.ROPE, minf(_flash_s * 2.0, 1.0)))
+
+
+## The current stroke's path as a faint dotted guide, with its start ringed.
+func _draw_guide(s: float) -> void:
+	if stroke >= Baiting.strokes(kind).size():
+		return
+	var st: Dictionary = Baiting.strokes(kind)[stroke]
+	if st["type"] == "hold":
+		var c := to_px(st["at"])
+		var grow := clampf(_held / float(st["hold_s"]), 0.0, 1.0)
+		draw_arc(c, float(st["tol"]) * s, 0.0, TAU, 40, Color(UiTheme.ROPE, 0.5), 2.0, true)
+		if grow > 0.0:
+			draw_arc(c, float(st["tol"]) * s, -PI * 0.5, -PI * 0.5 + TAU * grow, 40, UiTheme.BRASS, 5.0, true)
+		return
+	var path: Array = st["path"]
+	for i in range(1, path.size()):
+		var a := to_px(path[i - 1])
+		var b := to_px(path[i])
+		var n := int(a.distance_to(b) / 12.0) + 1
+		for k in n:
+			draw_circle(a.lerp(b, (float(k) + 0.5) / n), 2.0, Color(UiTheme.ROPE, 0.35))
+	if not _touching:
+		var pulse := 1.0 + 0.15 * sin(_t * 5.0)
+		draw_arc(to_px(path[0]), float(st["tol"]) * s * 1.4 * pulse, 0.0, TAU, 32, Color(UiTheme.BRASS, 0.8), 2.5, true)
+
+
+## A forged J hook with its point at the thumb (or resting by the bait), the
+## leader running up out of the frame. Steel: dark core, bright edge.
+func _draw_hook(s: float) -> void:
+	var st: Dictionary = Baiting.strokes(kind)[mini(stroke, Baiting.strokes(kind).size() - 1)]
+	if st["type"] == "hold":
+		return
+	var tip: Vector2 = _finger if _touching else (st["path"][0] as Vector2) + Vector2(-0.03, -0.04)
+	var dir := Vector2.RIGHT
+	if _touching:
+		var path: Array = st["path"]
+		dir = ((path[path.size() - 1] as Vector2) - (path[0] as Vector2)).normalized()
+	var ang := dir.angle()
+	var k := s / 1000.0
+	# Hook outline in local units (point at the origin, pointing along +x).
+	var local := [Vector2(0, 0), Vector2(-12, 6), Vector2(-26, 14), Vector2(-42, 16), Vector2(-56, 10), Vector2(-62, -2), Vector2(-58, -14), Vector2(-40, -22), Vector2(10, -26), Vector2(70, -26)]
+	var pts := PackedVector2Array()
+	for v: Vector2 in local:
+		pts.append(to_px(tip) + (v * k * 1.4).rotated(ang))
+	var eye: Vector2 = pts[pts.size() - 1]
+	draw_line(eye, Vector2(eye.x + 30.0 * k, -10.0), Color(0.85, 0.9, 0.95, 0.55), 1.5, true)   # the leader
+	draw_polyline(pts, Color(0.1, 0.11, 0.13), 7.0 * k * 1.4 + 1.0, true)
+	draw_polyline(pts, Color(0.62, 0.66, 0.72), 4.0 * k * 1.4, true)
+	draw_polyline(pts.slice(0, 5), Color(0.92, 0.95, 1.0, 0.8), 1.5, true)
+	draw_arc(eye, 6.0 * k * 1.4, 0.0, TAU, 16, Color(0.62, 0.66, 0.72), 3.0, true)
+	var barb := to_px(tip) + (Vector2(-10, -7) * k * 1.4).rotated(ang)
+	draw_line(to_px(tip), barb, Color(0.62, 0.66, 0.72), 3.0, true)
+
+
+func _draw_shrimp(s: float) -> void:
+	var peel := _stroke_done(0)
+	var path: Array = Baiting.strokes("shrimp")[1]["path"]
+	var body := Color(0.86, 0.66, 0.60, 0.95)
+	# Tail fan, then body segments from tail to head, getting thicker.
+	var tail := to_px(Vector2(0.86, 0.31))
+	for a: float in [-0.5, 0.0, 0.5]:
+		draw_colored_polygon(PackedVector2Array([tail, tail + Vector2.from_angle(-0.6 + a) * 0.06 * s, tail + Vector2.from_angle(-0.2 + a) * 0.06 * s]), Color(0.78, 0.5, 0.45, 0.9))
+	for i in 9:
+		var t := float(i) / 8.0
+		var p := _along(path, t)
+		var rad := lerpf(0.022, 0.04, t) * s
+		draw_circle(p, rad, body.darkened(0.08 * float(i % 2)))
+		draw_arc(p, rad, PI * 1.1, PI * 1.9, 12, Color(1, 1, 1, 0.25), 2.0, true)
+	if not peel:
+		var shell := to_px(Vector2(0.8, 0.34))
+		draw_circle(shell, 0.032 * s, Color(0.72, 0.55, 0.5, 0.9))
+		draw_arc(shell, 0.032 * s, 0.0, TAU, 20, Color(0.45, 0.3, 0.28), 2.0, true)
+	var head := to_px(Vector2(0.33, 0.27))
+	draw_circle(head, 0.045 * s, body.lightened(0.05))
+	draw_circle(head + Vector2(-0.025, -0.01) * s, 0.006 * s, Color(0.05, 0.05, 0.05))
+	for a: float in [0.0, 0.25]:
+		draw_line(head, head + Vector2(-0.2, -0.12 - a * 0.2) * s, Color(0.75, 0.55, 0.5, 0.7), 1.5, true)
+	for i in 6:
+		var leg := _along(path, 0.3 + 0.1 * float(i))
+		draw_line(leg, leg + Vector2(0.004, 0.035) * s, Color(0.75, 0.55, 0.5, 0.8), 2.0, true)
+	if _stroke_done(1):
+		var hp := PackedVector2Array()
+		for i in 12:
+			hp.append(_along(path, float(i) / 11.0))
+		draw_polyline(hp, Color(0.55, 0.6, 0.66, 0.6), 3.0, true)   # the hook shows through the shrimp
+
+
+func _draw_fish(s: float) -> void:
+	var calm := clampf(_held / 1.2, 0.0, 1.0) if stroke == 0 else 1.0
+	var wr := sin(_t * 11.0) * 0.012 * (1.0 - calm)
+	var c := Vector2(0.45, 0.33 + wr)
+	var outline := PackedVector2Array()
+	var colours := PackedColorArray()
+	for i in 24:
+		var a := TAU * float(i) / 24.0
+		var v := Vector2(cos(a) * 0.25, sin(a) * 0.062 * (1.0 - 0.35 * maxf(cos(a), 0.0)))
+		v.y += sin(v.x * 12.0 + _t * 9.0) * 0.006 * (1.0 - calm)
+		outline.append(to_px(c + v))
+		colours.append(Color(0.2, 0.38, 0.45) if v.y < 0.0 else Color(0.85, 0.88, 0.9))
+	var tail := to_px(c + Vector2(0.25, 0.0))
+	draw_colored_polygon(PackedVector2Array([tail, tail + Vector2(0.07, -0.06) * s, tail + Vector2(0.04, 0.0) * s, tail + Vector2(0.07, 0.06) * s]), Color(0.35, 0.45, 0.5))
+	draw_polygon(outline, colours)
+	var fin := to_px(c + Vector2(0.06, -0.055))
+	draw_colored_polygon(PackedVector2Array([fin, fin + Vector2(0.04, -0.05) * s, fin + Vector2(0.1, 0.0) * s]), Color(0.25, 0.4, 0.48, 0.9))
+	# The horse mackerel's row of scutes along the lateral line.
+	for i in 14:
+		var x := -0.18 + 0.03 * float(i)
+		var p := to_px(c + Vector2(x, -0.005 + 0.012 * sin(x * 6.0)))
+		draw_rect(Rect2(p - Vector2(3, 2), Vector2(6, 4)), Color(0.75, 0.8, 0.82, 0.8))
+	var eye := to_px(c + Vector2(-0.19, -0.012))
+	draw_circle(eye, 0.016 * s, Color(0.9, 0.9, 0.85))
+	draw_circle(eye, 0.009 * s, Color(0.05, 0.05, 0.05))
+	if stroke == 0:
+		var thumb := to_px(Baiting.strokes("live")[0]["at"])
+		if _touching:
+			draw_circle(thumb, 0.045 * s, Color(0.93, 0.76, 0.62, 0.85))   # the thumb holding the fish
+	if _stroke_done(1):
+		draw_line(to_px(Vector2(0.56, 0.20)), to_px(Vector2(0.56, 0.26)), Color(0.6, 0.65, 0.7), 3.0, true)
+
+
+func _draw_soft(s: float) -> void:
+	var a := to_px(Vector2(0.27, 0.28))
+	var b := to_px(Vector2(0.66, 0.29))
+	var colour := Color(0.78, 0.92, 0.3, 0.92)
+	draw_line(a, b, colour.darkened(0.25), 0.05 * s, true)
+	draw_line(a, b, colour, 0.04 * s, true)
+	for i in 12:
+		var p := a.lerp(b, 0.35 + 0.05 * float(i))
+		draw_line(p + Vector2(0, -0.02) * s, p + Vector2(0, 0.02) * s, colour.darkened(0.3), 2.0, true)   # the ribs
+	draw_circle(a, 0.02 * s, colour)
+	draw_colored_polygon(PackedVector2Array([b, b + Vector2(0.05, -0.04) * s, b + Vector2(0.07, 0.0) * s, b + Vector2(0.05, 0.04) * s]), colour.darkened(0.1))
+	draw_line(a + Vector2(0, -0.01) * s, b + Vector2(0, -0.01) * s, Color(1, 1, 1, 0.25), 3.0, true)
+	if _stroke_done(1):
+		draw_line(a, to_px(Vector2(0.46, 0.28)), Color(0.55, 0.6, 0.66, 0.5), 3.0, true)
+
+
+func _draw_minnow(s: float) -> void:
+	var c := Vector2(0.64, 0.29)
+	var pts := PackedVector2Array()
+	var cols := PackedColorArray()
+	for i in 20:
+		var a := TAU * float(i) / 20.0
+		var v := Vector2(cos(a) * 0.15, sin(a) * 0.05)
+		pts.append(to_px(c + v))
+		cols.append(Color(0.15, 0.35, 0.65) if v.y < 0.0 else Color(0.88, 0.9, 0.92))
+	draw_polygon(pts, cols)
+	var lip := to_px(c + Vector2(-0.15, 0.01))
+	draw_colored_polygon(PackedVector2Array([lip, lip + Vector2(-0.05, 0.03) * s, lip + Vector2(-0.01, 0.04) * s]), Color(0.8, 0.85, 0.9, 0.6))
+	draw_circle(to_px(c + Vector2(-0.1, -0.01)), 0.012 * s, Color(0.95, 0.8, 0.2))
+	draw_circle(to_px(c + Vector2(-0.1, -0.01)), 0.006 * s, Color(0.05, 0.05, 0.05))
+	draw_line(to_px(c + Vector2(-0.08, 0.04)), to_px(c + Vector2(-0.06, 0.045)), Color(0.85, 0.2, 0.2), 4.0, true)
+	draw_arc(to_px(Vector2(0.49, 0.29)), 0.012 * s, 0.0, TAU, 16, Color(0.7, 0.72, 0.76), 3.0, true)   # the split ring
+	for hx: float in [0.6, 0.72]:
+		var h := to_px(Vector2(hx, 0.35))
+		draw_arc(h, 0.012 * s, 0.0, PI, 10, Color(0.5, 0.52, 0.56), 2.0, true)
+	# The snap: open after the first stroke, clipped after the second.
+	var snap := to_px(Vector2(0.30, 0.30))
+	draw_line(Vector2(snap.x, 0), snap, Color(0.85, 0.9, 0.95, 0.5), 1.5, true)
+	draw_arc(snap, 0.014 * s, 0.0, TAU, 12, Color(0.7, 0.72, 0.76), 3.0, true)
+	if _stroke_done(1):
+		draw_line(snap, to_px(Vector2(0.49, 0.29)), Color(0.7, 0.72, 0.76), 3.0, true)
+
+
+func _draw_sabiki(s: float) -> void:
+	var line_end := to_px(Vector2(0.5, 0.42))
+	if _stroke_done(0):
+		draw_line(Vector2(line_end.x, 0), line_end, Color(0.85, 0.9, 0.95, 0.6), 1.5, true)
+		for i in 5:
+			var y := lerpf(0.05, 0.38, float(i) / 4.0)
+			var p := to_px(Vector2(0.5, y))
+			draw_line(p, p + Vector2(0.05, 0.02) * s, Color(0.85, 0.9, 0.95, 0.5), 1.0, true)
+			_feather(p + Vector2(0.05, 0.02) * s, s)
+	else:
+		var tangle := PackedVector2Array()
+		for i in 60:
+			var a := float(i) * 0.53
+			tangle.append(to_px(Vector2(0.5, 0.28) + Vector2(cos(a), sin(a * 1.3)) * (0.08 + 0.05 * sin(float(i)))))
+		draw_polyline(tangle, Color(0.85, 0.9, 0.95, 0.55), 1.2, true)
+		for i in 5:
+			_feather(to_px(Vector2(0.5, 0.28) + Vector2.from_angle(float(i) * 1.3) * 0.09), s)
+	var lead := to_px(Vector2(0.5, 0.52)) if _stroke_done(1) else to_px(Vector2(0.78, 0.48))
+	draw_circle(lead, 0.03 * s, Color(0.35, 0.37, 0.4))
+	draw_arc(lead, 0.03 * s, PI * 1.1, PI * 1.6, 10, Color(1, 1, 1, 0.3), 2.0, true)
+
+
+func _feather(p: Vector2, s: float) -> void:
+	draw_colored_polygon(PackedVector2Array([p, p + Vector2(0.03, -0.008) * s, p + Vector2(0.035, 0.008) * s]), Color(0.95, 0.4, 0.55, 0.9))
+	draw_arc(p + Vector2(0.004, 0.006) * s, 0.008 * s, 0.0, PI, 8, Color(0.75, 0.78, 0.82), 1.5, true)
+
+
+func _stroke_done(i: int) -> bool:
+	return stroke > i
+
+
+## The point t (0..1) along a path, in pixels.
+func _along(path: Array, t: float) -> Vector2:
+	var total := 0.0
+	for i in range(1, path.size()):
+		total += (path[i] as Vector2).distance_to(path[i - 1])
+	var want := t * total
+	for i in range(1, path.size()):
+		var seg := (path[i] as Vector2).distance_to(path[i - 1])
+		if want <= seg or i == path.size() - 1:
+			return to_px((path[i - 1] as Vector2).lerp(path[i], clampf(want / maxf(seg, 1e-6), 0.0, 1.0)))
+		want -= seg
+	return to_px(path[0])
+
+
+func _text(font_size: int) -> Label:
+	var l := Label.new()
+	l.add_theme_font_size_override("font_size", font_size)
+	l.add_theme_color_override("font_color", UiTheme.ROPE)
+	l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	return l
+
+
+## A small drawing of a bait for its card on the choosing step.
+class _CardArt extends Control:
+	var kind := ""
+
+	func _init(bait_kind: String) -> void:
+		kind = bait_kind
+
+	func _draw() -> void:
+		var c := size * 0.5
+		var s := minf(size.x, size.y)
+		match kind:
+			"shrimp":
+				for i in 7:
+					var t := float(i) / 6.0
+					var p := c + Vector2(lerpf(0.32, -0.3, t), -0.12 * sin(t * PI)) * s
+					draw_circle(p, lerpf(0.05, 0.09, t) * s, Color(0.86, 0.66, 0.6))
+			"live":
+				var pts := PackedVector2Array()
+				for i in 18:
+					var a := TAU * float(i) / 18.0
+					pts.append(c + Vector2(cos(a) * 0.42, sin(a) * 0.12) * s)
+				draw_colored_polygon(pts, Color(0.62, 0.7, 0.74))
+				draw_circle(c + Vector2(-0.32, -0.02) * s, 0.03 * s, Color(0.05, 0.05, 0.05))
+			"soft_plastic":
+				draw_line(c + Vector2(-0.35, 0) * s, c + Vector2(0.3, 0) * s, Color(0.78, 0.92, 0.3), 0.1 * s, true)
+			"minnow":
+				var pts := PackedVector2Array()
+				for i in 16:
+					var a := TAU * float(i) / 16.0
+					pts.append(c + Vector2(cos(a) * 0.36, sin(a) * 0.12) * s)
+				draw_colored_polygon(pts, Color(0.2, 0.42, 0.7))
+			"sabiki":
+				draw_line(c + Vector2(0, -0.4) * s, c + Vector2(0, 0.35) * s, Color(0.85, 0.9, 0.95, 0.7), 1.5, true)
+				for i in 5:
+					var p := c + Vector2(0.03, -0.32 + 0.15 * float(i)) * s
+					draw_colored_polygon(PackedVector2Array([p, p + Vector2(0.14, -0.03) * s, p + Vector2(0.15, 0.03) * s]), Color(0.95, 0.4, 0.55))

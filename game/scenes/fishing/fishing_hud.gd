@@ -29,6 +29,7 @@ var reel_in_button: Button
 var speed_button: Button
 var rig_button: Button
 var log_button: Button
+var bait_button: Button
 var status_label: Label
 var toast_label: Label
 var hint_label: Label
@@ -193,6 +194,14 @@ func _build_hud() -> void:
 	_top_left(log_button, 232.0)
 	_glass_key(log_button, "log")
 	add_child(log_button)
+	# Choose and put on a bait at any time while getting ready (R20).
+	bait_button = _button(tr("FISH_BAIT"), 24, func() -> void:
+		rig_panel.visible = false
+		log_panel.visible = false
+		scr.open_baiting())
+	_top_left(bait_button, 336.0)
+	_glass_key(bait_button, "hook")
+	add_child(bait_button)
 
 
 func _build_rig_panel() -> void:
