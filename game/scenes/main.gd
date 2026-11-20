@@ -49,9 +49,11 @@ func _open_fishing(request: Dictionary, world: WorldScreen = null) -> void:
 	screen.request = request
 	screen.finished.connect(func(result: Dictionary) -> void:
 		screen.queue_free()
+		var before := Mastery.badges(Db.goals(), Profile.save, Db.constants())
 		Profile.apply(result)
+		var earned := Mastery.earned(before, Mastery.badges(Db.goals(), Profile.save, Db.constants()))
 		if world != null:
-			world.resume(result)
+			world.resume(result, earned)
 		else:
 			_show_title(true)
 			_note.text = tr("TRIP_SUMMARY") % [int(result["casts"]), (result["catches"] as Array).size()] + "\n" + tr("BAG_SUMMARY") % Inventory.fish_count(Profile.save))

@@ -42,6 +42,7 @@ var _shop: ShopPanel
 var _talk: TalkPanel
 var _bag: BagPanel
 var _journal: Label
+var _next_goal: Label
 var _quests: Array = []
 var _wallet: Label
 var _stick := Vector2.ZERO
@@ -161,7 +162,7 @@ func pause() -> void:
 
 
 ## Back from fishing: the result of the visit as a short toast.
-func resume(result: Dictionary) -> void:
+func resume(result: Dictionary, earned: Array = []) -> void:
 	visible = true
 	process_mode = Node.PROCESS_MODE_INHERIT
 	_canvas_tint.visible = true
@@ -172,7 +173,26 @@ func resume(result: Dictionary) -> void:
 	if _cam.is_inside_tree():
 		_cam.make_current()
 		_cam.reset_smoothing()
-	show_toast(tr("TRIP_SUMMARY") % [int(result["casts"]), (result["catches"] as Array).size()], 4.0)
+	var text := tr("TRIP_SUMMARY") % [int(result["casts"]), (result["catches"] as Array).size()]
+	for id: String in earned:
+		text += "\n" + tr("BADGE_EARNED") % tr(_goal(id)["title_key"])
+	show_toast(text, 4.0 + 2.0 * earned.size())
+
+
+func _goal(id: String) -> Dictionary:
+	for g: Dictionary in Db.goals():
+		if g["id"] == id:
+			return g
+	return {}
+
+
+## The next goal as one line ("Next: Land 10 fish · 3/10"), empty when all are done.
+static func next_goal_text(save: Dictionary) -> String:
+	var g := Mastery.next_goal(Db.goals(), save, Db.constants())
+	if g.is_empty():
+		return TranslationServer.translate("GOAL_ALL_DONE")
+	var p := Mastery.progress(g, save, Db.constants())
+	return TranslationServer.translate("GOAL_NEXT") % [TranslationServer.translate(g["title_key"]), int(p["value"]), int(p["target"])]
 
 
 func show_toast(text: String, seconds: float) -> void:
@@ -267,6 +287,7 @@ func _process(delta: float) -> void:
 		_action.text = tr("WORLD_FISH_HERE")
 	_wallet.text = "%s · %s" % [tr("MONEY_FMT") % Economy.money(Profile.save), tr("WORLD_BAG") % Inventory.fish_count(Profile.save)]
 	_journal.text = journal_text()
+	_next_goal.text = next_goal_text(Profile.save)
 	_toast_s = maxf(_toast_s - delta, 0.0)
 	_toast.visible = _toast_s > 0.0
 	queue_redraw()
@@ -645,6 +666,17 @@ func _build_hud() -> void:
 	_journal.offset_top = 92.0
 	_journal.offset_bottom = 120.0
 	_hud.add_child(_journal)
+	# The next mastery goal, under the Bag where the badges are (R22).
+	_next_goal = Label.new()
+	_next_goal.add_theme_font_size_override("font_size", 18)
+	_next_goal.add_theme_color_override("font_color", UiTheme.ROPE)
+	_next_goal.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_next_goal.add_theme_constant_override("outline_size", 6)
+	_next_goal.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_next_goal.position = Vector2(16, 212)
+	_next_goal.size = Vector2(300, 60)
+	_next_goal.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_hud.add_child(_next_goal)
 	_shop = ShopPanel.new()
 	_hud.add_child(_shop)
 	_talk = TalkPanel.new()

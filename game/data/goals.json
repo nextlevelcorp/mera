@@ -1,0 +1,20 @@
+{
+  "design_fill": true,
+  "note": "Goals and badges of the mastery progression (roadmap R22, owner decision D8). Every goal, target and order is a game-design fill; record targets stay inside the species' sourced length ranges (species.json length_max_cm).",
+  "goals": [
+    {"id": "first_fish", "title_key": "GOAL_FIRST_FISH", "kind": "fish_landed", "target": 1},
+    {"id": "first_istavrit", "title_key": "GOAL_FIRST_ISTAVRIT", "kind": "species_count", "species": "istavrit", "target": 1},
+    {"id": "cast_2", "title_key": "GOAL_CAST_2", "kind": "skill_level", "skill": "cast", "target": 2},
+    {"id": "ten_fish", "title_key": "GOAL_TEN_FISH", "kind": "fish_landed", "target": 10},
+    {"id": "first_lufer", "title_key": "GOAL_FIRST_LUFER", "kind": "species_count", "species": "lufer", "target": 1},
+    {"id": "first_quest", "title_key": "GOAL_FIRST_QUEST", "kind": "quests_done", "target": 1},
+    {"id": "istavrit_17", "title_key": "GOAL_ISTAVRIT_17", "kind": "record_length", "species": "istavrit", "target": 17},
+    {"id": "three_species", "title_key": "GOAL_THREE_SPECIES", "kind": "species_caught", "target": 3},
+    {"id": "strike_3", "title_key": "GOAL_STRIKE_3", "kind": "skill_level", "skill": "strike", "target": 3},
+    {"id": "lufer_35", "title_key": "GOAL_LUFER_35", "kind": "record_length", "species": "lufer", "target": 35},
+    {"id": "three_quests", "title_key": "GOAL_THREE_QUESTS", "kind": "quests_done", "target": 3},
+    {"id": "fifty_fish", "title_key": "GOAL_FIFTY_FISH", "kind": "fish_landed", "target": 50},
+    {"id": "knots_4", "title_key": "GOAL_KNOTS_4", "kind": "skill_level", "skill": "knots", "target": 4},
+    {"id": "palamut_50", "title_key": "GOAL_PALAMUT_50", "kind": "record_length", "species": "palamut", "target": 50}
+  ]
+}
