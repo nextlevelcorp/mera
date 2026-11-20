@@ -79,3 +79,12 @@ func test_sabiki_rig_catches_horse_mackerel() -> void:
 	assert_true(not CatchModel.cast(_k, ctx["rod"], ctx["lure"], ctx["angler"], ctx["position"], cond, 1.0)["lure_out_of_range"], "the sabiki weight suits the çapari rod")
 	var w := WaitSim.new(ctx, _k, _db["species"], 10.0, 1)
 	assert_true(float(w._rates["istavrit"]["rate_interest"]) > 0.0, "horse mackerel are interested in the sabiki")
+
+
+func test_horse_mackerel_legal_size_follows_the_2026_amendment() -> void:
+	var reg: Dictionary = Db.record("species", "istavrit")["regulation"]
+	assert_eq(float(reg["min_length_cm"]), 12.0, "Tebliğ 2026/26 Madde 5 lowered it from 13 to 12 cm")
+	assert_eq(String(reg["as_of"]), "2026-09-16", "in force on publication")
+	assert_true(String(reg["source"]).contains("2026/26"), "the amendment is cited")
+	assert_eq(float(Db.record("species", "lufer")["regulation"]["min_length_cm"]), 18.0, "bluefish unchanged")
+	assert_eq(float(Db.record("species", "palamut")["regulation"]["min_length_cm"]), 25.0, "bonito unchanged")

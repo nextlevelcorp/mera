@@ -13,6 +13,14 @@
 
 Add every data, art, audio and tool source here with its licence before it is used (spec 5.4, 7.8).
 
+## Legal minimum sizes, second pass (2026-11-20, R17)
+| Source | Licence or terms | How used |
+| --- | --- | --- |
+| Resmî Gazete: Tebliğ 6/2 (2024/21), Çizelge 7 (images), and Tebliğ 2026/26 (PDF), `resmigazete.gov.tr` | Official gazette, public legal text | Horse mackerel 12 cm since 16.09.2026 in `species.json`; facts in `spot_research.md` |
+| Tarım ve Orman Bakanlığı, HHGM news 267 (`www.tarimorman.gov.tr`) | Government site | Confirms the date and number of 2026/26 |
+| BOE: Real Decreto 347/2011 and Real Decreto 560/1995 (consolidated) | Official gazette, public legal text | Spain's recreational scope and Mediterranean sizes, research only |
+| Normattiva: DPR 1639/1968, Articles 87 and 138 to 144 | Official legal database | Italy's sizes and sport-fishing rules, research only |
+
 ## Fishing controls design plate (2026-11-20)
 `docs/design/tide_instruments.png` is a design reference, not a game asset (not exported). Drawn in code (Pillow) with fonts from the canvas-design skill folder, all SIL Open Font License 1.1: Italiana, Instrument Serif, Jura, DM Mono. The in-game controls (`game/ui/instrument.gd`) are drawn in code with the engine's default font; no font or image was added to the game.
 
