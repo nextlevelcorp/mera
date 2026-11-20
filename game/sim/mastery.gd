@@ -8,7 +8,7 @@ extends RefCounted
 ## design fills in game/data/goals.json, the rank steps in constants.json.
 
 const FILE := "res://data/goals.json"
-const KINDS: Array[String] = ["fish_landed", "species_caught", "species_count", "record_length", "skill_level", "quests_done"]
+const KINDS: Array[String] = ["fish_landed", "species_caught", "species_count", "record_length", "skill_level", "quests_done", "casts"]
 
 
 ## Reads and checks the goals. Returns {"ok", "errors", "goals"}.
@@ -66,6 +66,8 @@ static func progress(goal: Dictionary, save: Dictionary, k: Dictionary) -> Dicti
 			value = float(Progress.level(k, Progress.xp(save, String(goal["skill"]))))
 		"quests_done":
 			value = float(((save.get("quests", {}) as Dictionary).get("done", []) as Array).size())
+		"casts":
+			value = float((save.get("stats", {}) as Dictionary).get("casts", 0))
 	var target := float(goal["target"])
 	return {"value": value, "target": target, "done": value >= target}
 

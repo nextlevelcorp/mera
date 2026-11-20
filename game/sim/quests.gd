@@ -106,15 +106,9 @@ static func can_complete(save: Dictionary, quest: Dictionary, species: Dictionar
 	return is_active(save, quest["id"]) and matching(save, quest, species).size() >= int(quest["need"]["count"])
 
 
-## Hands the fish over and pays. Returns {ok, money, items, level_ups}.
-static func complete(save: Dictionary, quest: Dictionary, species: Dictionary, k: Dictionary) -> Dictionary:
-	if not can_complete(save, quest, species):
-		return {"ok": false}
-	var given := matching(save, quest, species)
-	given.reverse()   # from the end, so earlier indexes stay valid
-	for i in given:
-		Inventory.items(save).remove_at(i)
-	var reward: Dictionary = quest.get("reward", {})
+## Pays a reward {money, items, xp} into the save. Returns the skills that
+## levelled up. Shared by quests and weekly tasks.
+static func give_reward(save: Dictionary, reward: Dictionary, k: Dictionary) -> Array[String]:
 	save["money"] = Economy.money(save) + int(reward.get("money", 0))
 	var items: Dictionary = reward.get("items", {})
 	for id: String in items:
@@ -129,6 +123,20 @@ static func complete(save: Dictionary, quest: Dictionary, species: Dictionary, k
 			save["angler_xp"][skill] = Progress.xp(save, skill) + int(xp[skill])
 			if Progress.level(k, Progress.xp(save, skill)) > before:
 				ups.append(skill)
+	return ups
+
+
+## Hands the fish over and pays. Returns {ok, money, items, level_ups}.
+static func complete(save: Dictionary, quest: Dictionary, species: Dictionary, k: Dictionary) -> Dictionary:
+	if not can_complete(save, quest, species):
+		return {"ok": false}
+	var given := matching(save, quest, species)
+	given.reverse()   # from the end, so earlier indexes stay valid
+	for i in given:
+		Inventory.items(save).remove_at(i)
+	var reward: Dictionary = quest.get("reward", {})
+	var ups := give_reward(save, reward, k)
+	var items: Dictionary = reward.get("items", {})
 	var st := state(save)
 	(st["active"] as Array).erase(quest["id"])
 	(st["done"] as Array).append(quest["id"])

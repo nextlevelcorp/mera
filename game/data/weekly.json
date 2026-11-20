@@ -1,0 +1,10 @@
+{
+  "design_fill": true,
+  "note": "Fixed weekly tasks (roadmap R22, owner decision D8; save change approved by the owner on 2026-11-20). The same tasks every week; progress counts from the week's start; missing one costs nothing. Tasks, targets and rewards are game-design fills.",
+  "tasks": [
+    {"id": "w_fish_8", "title_key": "WEEK_FISH_8", "kind": "fish_landed", "target": 8, "reward": {"money": 30}},
+    {"id": "w_istavrit_5", "title_key": "WEEK_ISTAVRIT_5", "kind": "species_count", "species": "istavrit", "target": 5, "reward": {"money": 20, "items": {"shrimp": 6}}},
+    {"id": "w_casts_40", "title_key": "WEEK_CASTS_40", "kind": "casts", "target": 40, "reward": {"xp": {"cast": 15}}},
+    {"id": "w_quest_1", "title_key": "WEEK_QUEST_1", "kind": "quests_done", "target": 1, "reward": {"money": 40}}
+  ]
+}

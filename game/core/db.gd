@@ -11,6 +11,7 @@ static var _constants := {}
 static var errors: Array[String] = []
 static var _shop := {}
 static var _goals: Array = []
+static var _weekly: Array = []
 
 
 ## The validated records by kind (species, spot, rod, ...); empty if loading failed.
@@ -51,10 +52,24 @@ static func goals() -> Array:
 	return _goals
 
 
+## The fixed weekly tasks (Weekly.load_tasks); empty if they failed to load.
+static func weekly() -> Array:
+	_load()
+	if _weekly.is_empty() and errors.is_empty():
+		var loaded := Weekly.load_tasks(_database)
+		if loaded["ok"]:
+			_weekly = loaded["tasks"]
+		else:
+			for e: Variant in loaded["errors"]:
+				errors.append(str(e))
+	return _weekly
+
+
 static func ok() -> bool:
 	_load()
 	shop()
 	goals()
+	weekly()
 	return errors.is_empty()
 
 

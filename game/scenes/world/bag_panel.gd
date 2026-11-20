@@ -45,6 +45,8 @@ func _init() -> void:
 
 
 func open() -> void:
+	if Weekly.refresh(Profile.save, Db.weekly(), Db.constants(), Time.get_date_string_from_system()):
+		Profile.flush()
 	visible = true
 	refresh()
 
@@ -75,9 +77,15 @@ static func lines(save: Dictionary) -> Dictionary:
 		var p := Mastery.progress(g, save, k)
 		var title := TranslationServer.translate(g["title_key"])
 		badges.append(TranslationServer.translate("GOAL_DONE") % title if p["done"] else TranslationServer.translate("GOAL_PROGRESS") % [title, int(p["value"]), int(p["target"])])
+	var week: Array[Dictionary] = []
+	for t: Dictionary in Db.weekly():
+		var wp := Weekly.progress(t, save, k)
+		week.append({"id": t["id"], "text": TranslationServer.translate("GOAL_PROGRESS") % [TranslationServer.translate(t["title_key"]), mini(int(wp["value"]), int(wp["target"])), int(wp["target"])],
+			"claimable": wp["done"] and not wp["claimed"], "claimed": wp["claimed"]})
 	var rank := TranslationServer.translate("RANK_LINE") % [TranslationServer.translate("RANK_%d" % Mastery.rank(got.size(), k)), got.size(), goals.size()]
 	return {"money": TranslationServer.translate("MONEY_FMT") % Economy.money(save), "skills": " · ".join(skills),
-		"fish": fish, "fish_value": total, "tackle": tackle, "rank": rank, "badges": badges}
+		"fish": fish, "fish_value": total, "tackle": tackle, "rank": rank, "badges": badges,
+		"week_title": TranslationServer.translate("WEEK_TITLE") % String((save.get("weekly", {}) as Dictionary).get("week", "")), "week": week}
 
 
 func refresh() -> void:
@@ -108,6 +116,25 @@ func refresh() -> void:
 	_rows.add_child(_label(22, tr("BAG_TACKLE")))
 	for t: String in l["tackle"]:
 		_rows.add_child(_label(20, t))
+	_rows.add_child(_label(22, l["week_title"]))
+	for w: Dictionary in l["week"]:
+		var line := HBoxContainer.new()
+		var info := _label(20, w["text"] + (" · " + tr("WEEK_CLAIMED") if w["claimed"] else ""))
+		info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		line.add_child(info)
+		if w["claimable"]:
+			var id: String = w["id"]
+			var claim := _button(tr("WEEK_CLAIM"), 20)
+			claim.theme_type_variation = UiTheme.PRIMARY
+			claim.pressed.connect(func() -> void:
+				for t: Dictionary in Db.weekly():
+					if t["id"] == id:
+						Weekly.claim(Profile.save, t, Db.constants())
+				Profile.flush()
+				changed.emit()
+				refresh())
+			line.add_child(claim)
+		_rows.add_child(line)
 	_rows.add_child(_label(22, tr("BAG_BADGES")))
 	for b: String in l["badges"]:
 		_rows.add_child(_label(20, b))
