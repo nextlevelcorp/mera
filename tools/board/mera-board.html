@@ -1,0 +1,502 @@
+<title>Mera Proje Panosu</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a deep-water masthead (phase line, roadmap floats, numbers), then what the owner owes and the system map, then six lanes. Lanes scroll sideways on phones; cards drag between lanes. */
+:root {
+  --bg: #f1f4f3; --panel: #ffffff; --panel-2: #f7f9f8; --ink: #11212a; --muted: #5b6c74; --line: #dbe3e3;
+  --deep: #0f2d3a; --deep-ink: #e8f1f1; --deep-muted: #9db7bf; --brass: #c8963e;
+  --sea: #1c6680; --sea-soft: #dbeaf0; --float: #d4452f; --float-soft: #fae2dd;
+  --ok: #2c7a4d; --ok-soft: #ddefe4; --warn: #9e6400; --warn-soft: #f7ebd2; --idea: #6b5aa6; --idea-soft: #ebe7f6;
+  --shadow: 0 1px 2px rgba(17, 33, 42, 0.06), 0 4px 14px rgba(17, 33, 42, 0.06);
+  --x-graphics: #b4572c; --x-data: #6d7d1f; --x-product: #b3367a;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0b1418; --panel: #121e24; --panel-2: #17262d; --ink: #e3ecee; --muted: #8ea2aa; --line: #23343c;
+  --deep: #0a1f28; --deep-ink: #e8f1f1; --deep-muted: #8fabb4; --brass: #d9a95a;
+  --sea: #6fb6d1; --sea-soft: #16323e; --float: #f07a62; --float-soft: #3a211c;
+  --ok: #6cc893; --ok-soft: #163024; --warn: #e3ad4c; --warn-soft: #33270f; --idea: #ab9be6; --idea-soft: #262043;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.25); --x-graphics: #e48a5e; --x-data: #b5c860; --x-product: #e27bb2; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0b1418; --panel: #121e24; --panel-2: #17262d; --ink: #e3ecee; --muted: #8ea2aa; --line: #23343c;
+  --deep: #0a1f28; --deep-ink: #e8f1f1; --deep-muted: #8fabb4; --brass: #d9a95a;
+  --sea: #6fb6d1; --sea-soft: #16323e; --float: #f07a62; --float-soft: #3a211c;
+  --ok: #6cc893; --ok-soft: #163024; --warn: #e3ad4c; --warn-soft: #33270f; --idea: #ab9be6; --idea-soft: #262043;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.25); --x-graphics: #e48a5e; --x-data: #b5c860; --x-product: #e27bb2; color-scheme: dark }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 14px/1.5 var(--body); }
+.inner { max-width: 1520px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { font-family: var(--display); margin: 0; text-wrap: balance; }
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--muted); font-weight: 700; font-family: var(--body); }
+a { color: var(--sea); text-underline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--float); outline-offset: 2px; }
+
+/* Masthead */
+.mast { background: var(--deep); color: var(--deep-ink); padding-block: 22px 20px; border-bottom: 3px solid var(--brass); }
+.mast .inner { display: grid; gap: 18px; }
+.mast-top { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px 24px; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand svg { flex: none; }
+.brand h1 { font-size: 34px; line-height: 1; letter-spacing: -0.02em; }
+.brand p { margin: 4px 0 0; color: var(--deep-muted); font-size: 13px; }
+.links { display: flex; gap: 8px; flex-wrap: wrap; }
+.links a { color: var(--deep-ink); text-decoration: none; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; padding: 6px 12px; font-weight: 500; font-size: 13px; }
+.links a:hover { border-color: var(--brass); }
+
+.phases { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.ph { border-top: 3px solid rgba(255,255,255,0.15); padding-top: 8px; display: grid; gap: 2px; min-width: 0; }
+.ph b { font: 500 11px var(--mono); color: var(--deep-muted); }
+.ph span { font-size: 13px; font-weight: 600; overflow-wrap: anywhere; }
+.ph.done { border-top-color: var(--deep-muted); }
+.ph.now { border-top-color: var(--brass); }
+.ph.now b { color: var(--brass); }
+.ph.todo span { color: var(--deep-muted); font-weight: 500; }
+
+.road { display: grid; gap: 8px; }
+.road-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--deep-muted); }
+.road-head strong { color: var(--deep-ink); font: 700 18px var(--display); font-variant-numeric: tabular-nums; }
+.beads { position: relative; display: grid; grid-template-columns: repeat(var(--n, 15), minmax(0, 1fr)); gap: 4px; }
+.bead { height: 30px; border-radius: 5px; display: grid; place-items: center; font: 500 11px var(--mono); color: var(--deep-muted);
+  border: 1px dashed rgba(255,255,255,0.22); font-variant-numeric: tabular-nums; cursor: default; }
+.bead.done { background: rgba(255,255,255,0.12); border: 1px solid transparent; color: var(--deep-ink); }
+.bead.doing { background: var(--float); border: 1px solid var(--float); color: #fff; box-shadow: 0 0 0 3px rgba(212, 69, 47, 0.25); }
+
+/* Body */
+main { padding-block: 20px 56px; }
+main .inner { display: grid; gap: 20px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.stat { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 4px; }
+.stat b { font: 700 24px var(--display); font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat span { font-size: 12px; color: var(--muted); }
+
+.grid3 { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 1080px) { .grid3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); } .grid3 > :first-child { grid-column: 1 / -1; } }
+@media (max-width: 680px) { .grid3 { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.list li { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; align-items: baseline; }
+.chip { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 4px; white-space: nowrap; justify-self: start; }
+.c-ask { background: var(--warn-soft); color: var(--warn); }
+.c-block { background: var(--float-soft); color: var(--float); }
+.c-info { background: var(--sea-soft); color: var(--sea); }
+.sys { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.sys li { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.sys li:last-child { border-bottom: 0; padding-bottom: 0; }
+.pill { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 999px; white-space: nowrap; flex: none; }
+.s-Implemented { background: var(--ok-soft); color: var(--ok); }
+.s-Partial { background: var(--sea-soft); color: var(--sea); }
+.s-Designed { background: var(--idea-soft); color: var(--idea); }
+.s-Blocked { background: var(--float-soft); color: var(--float); }
+.s-Not { background: var(--panel-2); color: var(--muted); border: 1px solid var(--line); }
+.empty { color: var(--muted); font-size: 13px; }
+
+/* Board */
+.board-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tools { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.search { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 7px 11px; font: 13px var(--body); width: 200px; max-width: 100%; }
+.filters { display: flex; gap: 6px; flex-wrap: wrap; }
+.filters button { font: 500 12px var(--body); border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 999px; padding: 5px 11px; cursor: pointer; }
+.filters button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.hint { font-size: 12px; color: var(--muted); }
+.board-scroll { overflow-x: auto; padding-bottom: 8px; -webkit-overflow-scrolling: touch; }
+.board { display: grid; grid-template-columns: repeat(6, minmax(250px, 1fr)); gap: 12px; min-width: 1560px; align-items: start; }
+.lane { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; display: grid; grid-template-rows: auto minmax(0, 1fr); max-height: 78vh; min-height: 220px; transition: border-color .15s, background .15s; }
+.lane.over { border-color: var(--sea); background: var(--sea-soft); }
+.lane-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 12px 12px 10px; border-bottom: 1px solid var(--line); }
+.lane-head h3 { font-size: 15px; display: flex; align-items: center; gap: 8px; }
+.dot { width: 9px; height: 9px; border-radius: 50%; background: var(--lane); flex: none; }
+.lane-head .n { font: 500 12px var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.lane-body { overflow-y: auto; padding: 10px; display: grid; gap: 8px; align-content: start; min-height: 120px; }
+
+.card { background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--area, var(--line)); border-radius: 8px; padding: 10px 12px 10px 11px;
+  display: grid; gap: 6px; box-shadow: var(--shadow); touch-action: pan-x pan-y; user-select: none; -webkit-user-select: none; }
+.card.can-drag { cursor: grab; }
+.card .row { display: flex; gap: 8px; align-items: center; justify-content: space-between; }
+.card .tag { font: 500 11px var(--mono); color: var(--muted); }
+.card .area { font-size: 11px; font-weight: 600; color: var(--area); }
+.card .t { font-weight: 600; line-height: 1.35; }
+.card .note { color: var(--muted); font-size: 12.5px; }
+.card .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); min-height: 20px; }
+.card .move { display: flex; gap: 4px; opacity: 0; transition: opacity .15s; }
+.card:hover .move, .card:focus-within .move { opacity: 1; }
+@media (hover: none) { .card .move { display: none; } }
+.card .move button { border: 1px solid var(--line); background: var(--panel-2); color: var(--ink); border-radius: 5px; width: 26px; height: 24px; cursor: pointer; font-size: 12px; }
+.card .move button:disabled { opacity: 0.3; cursor: default; }
+.card.lifted { opacity: 0.35; }
+.ghost { position: fixed; z-index: 50; pointer-events: none; transform: rotate(2deg); box-shadow: 0 12px 30px rgba(0,0,0,0.25); width: 260px; }
+.slot { border: 2px dashed var(--sea); border-radius: 8px; height: 56px; background: transparent; }
+.notice { font-size: 13px; color: var(--warn); background: var(--warn-soft); border-radius: 8px; padding: 9px 12px; }
+.a-fishing { --area: var(--sea); } .a-world { --area: var(--ok); } .a-graphics { --area: var(--x-graphics); } .a-audio { --area: var(--idea); }
+.a-data { --area: var(--x-data); } .a-infra { --area: var(--muted); } .a-product { --area: var(--x-product); } .a-perf { --area: var(--brass); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* View switch and the visual summary (#ozet) */
+.views { display: inline-flex; border: 1px solid rgba(255,255,255,0.18); border-radius: 6px; overflow: hidden; }
+.links .views a { border: 0; border-radius: 0; }
+.links .views a[aria-selected="true"] { background: var(--brass); color: var(--deep); }
+.sum { display: grid; gap: 16px; }
+.sum-top { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 760px) { .sum-top { grid-template-columns: minmax(0, 1fr); } }
+.ring-card { display: grid; place-items: center; gap: 6px; text-align: center; }
+.ring-card svg { width: 100%; max-width: 220px; height: auto; }
+.ring-card .cap { font-size: 13px; color: var(--muted); }
+.now-card { display: grid; gap: 10px; align-content: start; }
+.now-card .big { font: 700 22px/1.25 var(--display); }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+.kpi { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; background: var(--panel-2); }
+.kpi b { display: block; font: 700 22px var(--display); font-variant-numeric: tabular-nums; }
+.kpi span { font-size: 12px; color: var(--muted); }
+.rm { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.rm-item { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; display: grid; gap: 2px; background: var(--panel); border-top: 4px solid var(--line); }
+.rm-item b { font: 500 11px var(--mono); color: var(--muted); }
+.rm-item span { font-size: 13px; font-weight: 600; line-height: 1.3; }
+.rm-item.done { border-top-color: var(--ok); }
+.rm-item.doing { border-top-color: var(--float); background: var(--float-soft); }
+.rm-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+.rm-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.stack { display: flex; height: 26px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); }
+.stack div { display: grid; place-items: center; font: 500 11px var(--mono); color: #fff; min-width: 0; overflow: hidden; }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: 96px minmax(0, 1fr) 34px; gap: 10px; align-items: center; font-size: 13px; }
+.bar .track { height: 12px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; display: flex; }
+.bar .track div { height: 100%; }
+.bar .n { font: 500 12px var(--mono); color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+.tl { list-style: none; margin: 0; padding: 0 0 0 14px; border-left: 2px solid var(--line); display: grid; gap: 12px; }
+.tl li { position: relative; }
+.tl li::before { content: ""; position: absolute; left: -20px; top: 6px; width: 10px; height: 10px; border-radius: 50%; background: var(--sea); }
+.tl a { font: 500 12px var(--mono); margin-right: 6px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<header class="mast">
+  <div class="inner">
+    <div class="mast-top">
+      <div class="brand">
+        <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+          <line x1="20" y1="2" x2="20" y2="10" stroke="var(--deep-muted)" stroke-width="1.5"/>
+          <rect x="16" y="10" width="8" height="9" rx="3" fill="var(--float)"/>
+          <rect x="16" y="18" width="8" height="10" rx="3" fill="var(--deep-ink)"/>
+          <path d="M4 30 q4 -3 8 0 t8 0 t8 0 t8 0" fill="none" stroke="var(--brass)" stroke-width="1.6"/>
+          <path d="M4 35 q4 -3 8 0 t8 0 t8 0 t8 0" fill="none" stroke="var(--deep-muted)" stroke-width="1.2" opacity="0.6"/>
+        </svg>
+        <div>
+          <h1>Mera</h1>
+          <p id="sub">Gerçek yerlerde kıyı balıkçılığı RPG'si · Galata Köprüsü</p>
+        </div>
+      </div>
+      <nav class="links" aria-label="Bağlantılar">
+        <span class="views" role="tablist" aria-label="Görünüm"><a href="#pano" data-view="pano" role="tab">Pano</a><a href="#ozet" data-view="ozet" role="tab">Özet</a></span>
+        <a href="https://nextlevelcorp.github.io/mera/" target="_blank" rel="noopener">Oyun</a>
+        <a href="https://nextlevelcorp.github.io/mera/debug/" target="_blank" rel="noopener">Debug sürümü</a>
+        <a href="https://github.com/nextlevelcorp/mera/pulls?q=is%3Apr" target="_blank" rel="noopener">Pull request'ler</a>
+      </nav>
+    </div>
+    <div class="phases" id="phases"></div>
+    <div class="road">
+      <div class="road-head"><span id="roadNote">Yol haritası R1–R23</span><strong id="roadPct">–</strong></div>
+      <div class="beads" id="beads"></div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="inner" id="summaryView" hidden>
+    <div class="sum">
+      <div class="sum-top">
+        <section class="panel ring-card" aria-label="Yol haritası ilerlemesi">
+          <h2>Yol haritası</h2>
+          <svg viewBox="0 0 200 200" role="img" aria-labelledby="ringLabel"><title id="ringLabel">Yol haritası ilerlemesi</title>
+            <circle cx="100" cy="100" r="80" fill="none" stroke="var(--line)" stroke-width="18"/>
+            <circle id="ringDoing" cx="100" cy="100" r="80" fill="none" stroke="var(--float)" stroke-width="18" stroke-linecap="butt" transform="rotate(-90 100 100)" stroke-dasharray="0 999"/>
+            <circle id="ringDone" cx="100" cy="100" r="80" fill="none" stroke="var(--ok)" stroke-width="18" stroke-linecap="butt" transform="rotate(-90 100 100)" stroke-dasharray="0 999"/>
+            <text id="ringPct" x="100" y="100" text-anchor="middle" font-family="var(--display)" font-size="40" font-weight="700" fill="var(--ink)">–</text>
+            <text id="ringSub" x="100" y="128" text-anchor="middle" font-size="13" fill="var(--muted)"></text>
+          </svg>
+          <div class="cap" id="ringCap"></div>
+        </section>
+        <section class="panel now-card" aria-label="Şu an">
+          <h2>Şu an</h2>
+          <div class="big" id="sumNow">–</div>
+          <div class="kpis" id="sumKpis"></div>
+        </section>
+      </div>
+      <section class="panel" aria-label="Yol haritası maddeleri">
+        <div class="board-bar"><h2>R1–R23</h2>
+          <div class="rm-legend"><span><i style="background:var(--ok)"></i>Bitti</span><span><i style="background:var(--float)"></i>Yapılıyor</span><span><i style="background:var(--line)"></i>Bekliyor</span></div></div>
+        <div class="rm" id="sumRoad"></div>
+      </section>
+      <div class="grid2">
+        <section class="panel" aria-label="Kartlar sütunlara göre">
+          <h2>Kartlar sütunlara göre</h2>
+          <div class="stack" id="sumStack"></div>
+          <div class="rm-legend" id="sumStackLegend"></div>
+        </section>
+        <section class="panel" aria-label="Açık işler alanlara göre">
+          <h2>Açık işler alanlara göre</h2>
+          <div class="bars" id="sumAreas"></div>
+        </section>
+      </div>
+      <div class="grid2">
+        <section class="panel" aria-label="Son birleşenler"><h2>Son birleşenler</h2><ul class="tl" id="sumRecent"></ul></section>
+        <section class="panel" aria-label="Senden beklenenler"><h2>Senden beklenenler</h2><ul class="list" id="sumAsks"></ul></section>
+      </div>
+      <div class="hint" id="sumFresh"></div>
+    </div>
+  </div>
+  <div class="inner" id="boardView">
+    <section class="stats" id="stats" aria-label="Sayılar"></section>
+    <div class="grid3">
+      <section class="panel" aria-label="Senden beklenenler"><h2>Senden beklenenler</h2><ul class="list" id="asks"></ul></section>
+      <section class="panel" aria-label="Sistem durumu"><h2>Sistem durumu</h2><ul class="sys" id="systems"></ul></section>
+      <section class="panel" aria-label="Son birleşenler"><h2>Son birleşenler</h2><ul class="list" id="recent"></ul></section>
+    </div>
+    <section style="display:grid;gap:12px" aria-label="Pano">
+      <div class="board-bar">
+        <h2>Pano</h2>
+        <div class="tools">
+          <input id="q" class="search" type="search" placeholder="Kartlarda ara" aria-label="Kartlarda ara">
+          <div class="filters" id="filters" role="group" aria-label="Alana göre süz"></div>
+        </div>
+      </div>
+      <div class="hint" id="hint">Kartı tutup başka bir sütuna sürükle. Dokunmatik ekranda kartı bir an basılı tut, sonra sürükle.</div>
+      <div id="notice" class="notice" hidden></div>
+      <div class="board-scroll" id="scroller"><div class="board" id="board"></div></div>
+      <div class="hint" id="fresh">Veriler yükleniyor…</div>
+    </section>
+  </div>
+</main>
+
+<script>
+const LANES = [
+  { id: "idea", name: "Tasarlandı", color: "var(--idea)" },
+  { id: "backlog", name: "Bekleyen", color: "var(--muted)" },
+  { id: "next", name: "Sıradaki", color: "var(--sea)" },
+  { id: "doing", name: "Yapılıyor", color: "var(--float)" },
+  { id: "owner", name: "Onayında", color: "var(--warn)" },
+  { id: "done", name: "Bitti", color: "var(--ok)" },
+];
+const AREAS = { fishing: "Balık", world: "Dünya", graphics: "Grafik", audio: "Ses", data: "Veri", infra: "Altyapı", product: "Ürün", perf: "Performans" };
+const STATE_TR = { Implemented: "Hazır", Partial: "Kısmen", Designed: "Tasarlandı", Blocked: "Engelli", "Not started": "Başlamadı" };
+const state = { cards: [], meta: null, area: "all", q: "", canWrite: false, db: null, loaded: false };
+const $ = (id) => document.getElementById(id);
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+
+function renderMeta() {
+  const m = state.meta; if (!m) return;
+  if (m.subtitle) $("sub").textContent = m.subtitle;
+  const ph = $("phases"); ph.replaceChildren();
+  for (const p of (m.phases || [])) { const d = el("div", "ph " + (p.state || "todo")); d.append(el("b", "", p.id), el("span", "", p.name)); d.title = p.note || ""; ph.append(d); }
+  const road = m.roadmap || [], beads = $("beads"); beads.replaceChildren(); beads.style.setProperty("--n", Math.max(road.length, 1));
+  let done = 0;
+  for (const r of road) { const b = el("div", "bead " + (r.state || ""), r.id); b.title = r.id + " · " + r.name; if (r.state === "done") done++; beads.append(b); }
+  $("roadPct").textContent = road.length ? done + " / " + road.length : "–";
+  const cur = road.find((r) => r.state === "doing");
+  $("roadNote").textContent = cur ? "Yol haritası · şu an " + cur.id + ": " + cur.name : "Yol haritası R1–R23";
+  const stats = $("stats"); stats.replaceChildren();
+  for (const s of (m.stats || [])) { const d = el("div", "stat"); d.append(el("b", "", s.value), el("span", "", s.label)); stats.append(d); }
+  const asks = $("asks"); asks.replaceChildren();
+  for (const a of (m.asks || [])) { const li = el("li"); li.append(el("span", "chip c-" + (a.kind || "ask"), a.code || "?"), el("span", "", a.text)); asks.append(li); }
+  if (!asks.children.length) asks.append(el("li", "empty", "Şu an senden beklenen bir karar yok."));
+  const sys = $("systems"); sys.replaceChildren();
+  for (const s of (m.systems || [])) { const li = el("li"); const k = String(s.state || "").split(" ")[0]; li.append(el("span", "", s.name), el("span", "pill s-" + k, STATE_TR[s.state] || s.state)); sys.append(li); }
+  const recent = $("recent"); recent.replaceChildren();
+  for (const r of (m.recent || [])) {
+    const li = el("li"); const a = el("a", "chip c-info", r.pr); a.href = "https://github.com/nextlevelcorp/mera/pull/" + String(r.pr).replace("#", ""); a.target = "_blank"; a.rel = "noopener";
+    li.append(a, el("span", "", r.text)); recent.append(li);
+  }
+  if (m.updated_at) $("fresh").textContent = "Son güncelleme: " + m.updated_at + " · Kartlar ve özet her birleşmede Claude tarafından yenilenir.";
+}
+
+function renderSummary() {
+  const m = state.meta || {}, road = m.roadmap || [], C = 2 * Math.PI * 80;
+  const done = road.filter((r) => r.state === "done").length, doing = road.filter((r) => r.state === "doing").length;
+  const n = Math.max(road.length, 1);
+  $("ringDone").setAttribute("stroke-dasharray", (C * done / n) + " " + C);
+  $("ringDoing").setAttribute("stroke-dasharray", (C * (done + doing) / n) + " " + C);
+  $("ringPct").textContent = road.length ? Math.round(100 * done / n) + "%" : "–";
+  $("ringSub").textContent = done + " / " + road.length + " bitti";
+  $("ringCap").textContent = doing + " madde yapılıyor";
+  const cur = road.filter((r) => r.state === "doing");
+  $("sumNow").textContent = cur.length ? cur.map((r) => r.id + " " + r.name).join(" · ") : "Yapılan madde yok";
+  const k = $("sumKpis"); k.replaceChildren();
+  for (const s of (m.stats || [])) { const d = el("div", "kpi"); d.append(el("b", "", s.value), el("span", "", s.label)); k.append(d); }
+  const rm = $("sumRoad"); rm.replaceChildren();
+  for (const r of road) { const d = el("div", "rm-item " + (r.state || "")); d.append(el("b", "", r.id), el("span", "", r.name)); rm.append(d); }
+  const stack = $("sumStack"), leg = $("sumStackLegend"); stack.replaceChildren(); leg.replaceChildren();
+  const total = Math.max(state.cards.length, 1);
+  for (const lane of LANES) {
+    const c = laneCards(lane.id).length; if (!c) continue;
+    const seg = el("div", "", String(c)); seg.style.flex = String(c / total); seg.style.background = lane.color; seg.title = lane.name + ": " + c; stack.append(seg);
+    const it = el("span"); const sw = el("i"); sw.style.background = lane.color; it.append(sw, document.createTextNode(lane.name + " " + c)); leg.append(it);
+  }
+  const bars = $("sumAreas"); bars.replaceChildren();
+  const open = state.cards.filter((c) => c.col !== "done");
+  const per = {}; for (const c of open) per[c.area] = (per[c.area] || 0) + 1;
+  const max = Math.max(1, ...Object.values(per));
+  for (const [a, c] of Object.entries(per).sort((x, y) => y[1] - x[1])) {
+    const row = el("div", "bar " + "a-" + a); const tr = el("div", "track"); const f = el("div"); f.style.width = (100 * c / max) + "%"; f.style.background = "var(--area)"; tr.append(f);
+    row.append(el("span", "", AREAS[a] || a), tr, el("span", "n", String(c))); bars.append(row);
+  }
+  if (!open.length) bars.append(el("div", "empty", state.loaded ? "Açık iş yok" : "Yükleniyor…"));
+  const tl = $("sumRecent"); tl.replaceChildren();
+  for (const r of (m.recent || [])) { const li = el("li"); const a = el("a", "", r.pr); a.href = "https://github.com/nextlevelcorp/mera/pull/" + String(r.pr).replace("#", ""); a.target = "_blank"; a.rel = "noopener"; li.append(a, document.createTextNode(r.text)); tl.append(li); }
+  const asks = $("sumAsks"); asks.replaceChildren();
+  for (const a of (m.asks || [])) { const li = el("li"); li.append(el("span", "chip c-" + (a.kind || "ask"), a.code || "?"), el("span", "", a.text)); asks.append(li); }
+  const owner = laneCards("owner");
+  for (const c of owner) { const li = el("li"); li.append(el("span", "chip c-ask", c.tag || "?"), el("span", "", c.title)); asks.append(li); }
+  if (!asks.children.length) asks.append(el("li", "empty", "Şu an senden beklenen bir karar yok."));
+  $("sumFresh").textContent = m.updated_at ? "Son güncelleme: " + m.updated_at + " · Pano ile aynı canlı veriden okunur." : "";
+}
+
+function route() {
+  const v = location.hash === "#ozet" ? "ozet" : "pano";
+  $("summaryView").hidden = v !== "ozet"; $("boardView").hidden = v !== "pano";
+  document.querySelectorAll(".views a").forEach((a) => a.setAttribute("aria-selected", String(a.dataset.view === v)));
+  if (v === "ozet") renderSummary();
+}
+
+function renderFilters() {
+  const used = new Set(state.cards.map((c) => c.area));
+  const f = $("filters"); f.replaceChildren();
+  for (const a of ["all", ...Object.keys(AREAS).filter((k) => used.has(k))]) {
+    const b = el("button", "", a === "all" ? "Tümü" : AREAS[a]); b.type = "button"; b.setAttribute("aria-pressed", String(state.area === a));
+    b.onclick = () => { state.area = a; renderFilters(); renderBoard(); }; f.append(b);
+  }
+}
+
+function visible(c) {
+  if (state.area !== "all" && c.area !== state.area) return false;
+  if (!state.q) return true;
+  return [c.title, c.note, c.tag, AREAS[c.area]].join(" ").toLocaleLowerCase("tr").includes(state.q);
+}
+const laneCards = (id) => state.cards.filter((c) => c.col === id).sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
+
+function renderBoard() {
+  const board = $("board"); board.replaceChildren();
+  for (const lane of LANES) {
+    const col = el("section", "lane"); col.dataset.lane = lane.id; col.style.setProperty("--lane", lane.color); col.setAttribute("aria-label", lane.name);
+    const all = laneCards(lane.id), items = all.filter(visible);
+    const head = el("div", "lane-head"); const h = el("h3"); h.append(el("span", "dot"), document.createTextNode(lane.name));
+    head.append(h, el("span", "n", items.length === all.length ? String(all.length) : items.length + " / " + all.length));
+    const body = el("div", "lane-body"); body.dataset.lane = lane.id;
+    for (const c of items) body.append(cardEl(c));
+    if (!items.length) body.append(el("div", "empty", state.loaded ? "Boş" : "Yükleniyor…"));
+    col.append(head, body); board.append(col);
+  }
+}
+
+function cardEl(c) {
+  const card = el("article", "card a-" + (c.area || "infra") + (state.canWrite ? " can-drag" : "")); card.dataset.id = c.id; card.tabIndex = 0;
+  const row = el("div", "row"); row.append(el("span", "area", AREAS[c.area] || ""), el("span", "tag", c.tag || ""));
+  card.append(row, el("div", "t", c.title || "(başlıksız)"));
+  if (c.note) card.append(el("div", "note", c.note));
+  const foot = el("div", "foot"); const left = el("span");
+  if (c.pr) for (const pr of String(c.pr).split(/[ ,]+/).filter(Boolean)) {
+    const a = el("a", "", pr); a.href = "https://github.com/nextlevelcorp/mera/pull/" + pr.replace("#", ""); a.target = "_blank"; a.rel = "noopener"; left.append(a, document.createTextNode(" "));
+  }
+  foot.append(left);
+  if (state.canWrite) {
+    const i = LANES.findIndex((l) => l.id === c.col), mv = el("div", "move");
+    const back = el("button", "", "←"), fwd = el("button", "", "→");
+    back.type = fwd.type = "button"; back.disabled = i <= 0; fwd.disabled = i >= LANES.length - 1;
+    back.setAttribute("aria-label", "Önceki sütuna taşı"); fwd.setAttribute("aria-label", "Sonraki sütuna taşı");
+    back.onclick = () => moveTo(c, LANES[i - 1].id, null); fwd.onclick = () => moveTo(c, LANES[i + 1].id, null);
+    mv.append(back, fwd); foot.append(mv);
+    card.addEventListener("pointerdown", (e) => startPress(e, c, card));
+  }
+  card.append(foot);
+  return card;
+}
+
+/* ---- drag and drop (mouse: move 5px; touch: hold 220 ms) ---- */
+let drag = null, press = null;
+function startPress(e, c, card) {
+  if (e.button > 0 || e.target.closest("a, button")) return;
+  press = { c, card, x: e.clientX, y: e.clientY, id: e.pointerId, touch: e.pointerType !== "mouse", timer: 0 };
+  if (press.touch) press.timer = setTimeout(() => { if (press) beginDrag(press.x, press.y); }, 220);
+}
+document.addEventListener("pointermove", (e) => {
+  if (drag) { e.preventDefault(); moveDrag(e.clientX, e.clientY); return; }
+  if (!press || e.pointerId !== press.id) return;
+  const d = Math.hypot(e.clientX - press.x, e.clientY - press.y);
+  if (press.touch) { if (d > 10) { clearTimeout(press.timer); press = null; } }
+  else if (d > 5) beginDrag(e.clientX, e.clientY);
+  if (press) { press.x = e.clientX; press.y = e.clientY; }
+}, { passive: false });
+document.addEventListener("touchmove", (e) => { if (drag) e.preventDefault(); }, { passive: false });
+document.addEventListener("pointerup", (e) => { if (press) clearTimeout(press.timer); if (drag) endDrag(e.clientX, e.clientY); press = null; });
+document.addEventListener("pointercancel", () => { if (press) clearTimeout(press.timer); press = null; if (drag) cancelDrag(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && drag) cancelDrag(); });
+
+function beginDrag(x, y) {
+  const { c, card } = press; const r = card.getBoundingClientRect();
+  const ghost = card.cloneNode(true); ghost.classList.add("ghost"); ghost.style.width = r.width + "px"; document.body.append(ghost);
+  card.classList.add("lifted");
+  const slot = el("div", "slot"); slot.style.height = r.height + "px";
+  drag = { c, card, ghost, slot, dx: x - r.left, dy: y - r.top, lane: null, before: null };
+  if (navigator.vibrate) try { navigator.vibrate(10); } catch (e) {}
+  moveDrag(x, y);
+}
+function moveDrag(x, y) {
+  drag.ghost.style.left = (x - drag.dx) + "px"; drag.ghost.style.top = (y - drag.dy) + "px";
+  const under = document.elementFromPoint(x, y); const body = under && under.closest(".lane")?.querySelector(".lane-body");
+  document.querySelectorAll(".lane.over").forEach((l) => l.classList.remove("over"));
+  if (!body) { drag.slot.remove(); drag.lane = null; edgeScroll(x); return; }
+  body.parentElement.classList.add("over");
+  const cards = [...body.querySelectorAll(".card")].filter((n) => n !== drag.card);
+  const before = cards.find((n) => { const r = n.getBoundingClientRect(); return y < r.top + r.height / 2; }) || null;
+  body.querySelector(".empty")?.remove();
+  if (before) body.insertBefore(drag.slot, before); else body.append(drag.slot);
+  drag.lane = body.dataset.lane; drag.before = before ? before.dataset.id : null;
+  edgeScroll(x);
+}
+function edgeScroll(x) { const s = $("scroller"), r = s.getBoundingClientRect(); if (x < r.left + 40) s.scrollLeft -= 14; else if (x > r.right - 40) s.scrollLeft += 14; }
+function cleanup() { drag.ghost.remove(); drag.slot.remove(); drag.card.classList.remove("lifted"); document.querySelectorAll(".lane.over").forEach((l) => l.classList.remove("over")); }
+function cancelDrag() { cleanup(); drag = null; renderBoard(); }
+function endDrag() { const d = drag; cleanup(); drag = null; if (d.lane) moveTo(d.c, d.lane, d.before); else renderBoard(); }
+
+async function moveTo(c, laneId, beforeId) {
+  const list = laneCards(laneId).filter((x) => x.id !== c.id);
+  const idx = beforeId ? list.findIndex((x) => x.id === beforeId) : list.length;
+  const prev = list[idx - 1], next = list[idx];
+  let order;
+  if (prev && next) order = ((prev.order ?? 0) + (next.order ?? 0)) / 2;
+  else if (prev) order = (prev.order ?? 0) + 1;
+  else if (next) order = (next.order ?? 1) - 1;
+  else order = 1;
+  if (c.col === laneId && c.order === order) { renderBoard(); return; }
+  const before = { col: c.col, order: c.order };
+  c.col = laneId; c.order = order; renderBoard();
+  try { await state.db.doc("cards/" + c.id).update({ col: laneId, order, moved_at: new Date().toISOString().slice(0, 10) }); }
+  catch (e) { Object.assign(c, before); renderBoard(); showNotice("Kart taşınamadı: bu panoda yazma iznin yok ya da bağlantı koptu."); }
+}
+
+function showNotice(t) { const n = $("notice"); n.textContent = t; n.hidden = !t; }
+$("q").addEventListener("input", (e) => { state.q = e.target.value.trim().toLocaleLowerCase("tr"); renderBoard(); });
+renderBoard();
+window.addEventListener("hashchange", route);
+route();
+
+(async () => {
+  const db = await window.claude?.use?.("db");
+  if (!db) { showNotice("Pano verisine bu görünümden ulaşılamıyor. claude.ai'de oturum açıkken aç."); state.loaded = true; renderBoard(); $("hint").hidden = true; return; }
+  state.db = db;
+  const user = await window.claude.use("user");
+  try { state.canWrite = (user ? await user.can("data.write") : false) !== false; } catch (e) { state.canWrite = false; }
+  $("hint").hidden = !state.canWrite;
+  let timer = setTimeout(() => showNotice("Veriye henüz ulaşılamadı; gösterilenler eski olabilir."), 10000);
+  const ok = (s) => { if (!s.metadata.fromCache) { clearTimeout(timer); if (!$("notice").textContent.startsWith("Kart")) showNotice(""); } };
+  db.collection("cards").onSnapshot((snap) => {
+    state.cards = snap.docs.map((d) => ({ id: d.id, ...d.data() })); state.loaded = true; ok(snap);
+    if (!drag) { renderFilters(); renderBoard(); renderSummary(); }
+  }, (e) => { clearTimeout(timer); showNotice("Kartlar okunamadı (" + e.code + ")."); });
+  db.doc("meta/summary").onSnapshot((snap) => { state.meta = snap.exists ? snap.data() : null; ok(snap); renderMeta(); renderSummary(); }, () => {});
+})();
+</script>

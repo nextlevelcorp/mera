@@ -9,6 +9,11 @@
 - Debug menu lives in `game/debug/` and is excluded from release by `export_presets.cfg` (`exclude_filter`) and the `mera_debug` feature tag.
 - Status and history: `docs/architecture.md` (single technical reference), `docs/project_status.md` (roadmap R1-R23), `docs/data_model.md` (formulas), `docs/changelog.md`.
 
+## PROJECT BOARD (every session)
+- The owner follows the project on the kanban artifact "Mera Proje Panosu": https://claude.ai/artifact/YGLJSk91E5XezTPpM3AVSa (board at `#pano`, visual summary at `#ozet`). At the start of every session open it with the Artifact tool (`action: "open"`) so it sits in the output panel.
+- Keep it current in every session: after each merged PR, update the `cards` collection (one card per roadmap item or owner decision; `col` is idea, backlog, next, doing, owner or done; set `pr`) and the `meta/summary` document (roadmap R1-R23 states, stats, asks, recent merges, `updated_at`) with the ArtifactData tool, pinning `if_version` to the version just read. Card text is Turkish, like the rest of what the owner reads.
+- The page source is `tools/board/mera-board.html`; republish it to the same URL with the Artifact tool after changing it (capabilities `db` and `user` carry forward).
+
 ## ALWAYS ON
 
 ### Working principles
