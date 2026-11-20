@@ -89,6 +89,9 @@ static func _check_value(spec: Dictionary, value: Variant, path: String, schema:
 				errors.append("%s: expected a number" % path)
 			else:
 				_check_range(spec, float(value), path, errors)
+		"bool":
+			if typeof(value) != TYPE_BOOL:
+				errors.append("%s: expected true or false" % path)
 		"enum":
 			if not (spec["values"] as Array).has(value):
 				errors.append("%s: '%s' is not one of %s" % [path, str(value), str(spec["values"])])

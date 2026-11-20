@@ -37,7 +37,7 @@ English Wikipedia (Golden Horn) gives a maximum depth of about 35 m where the Go
 
 ## R14 species research, picarel (izmarit), 2026-11-18
 
-Zengin (2009) names picarel (izmarit, *Spicara smaris*) at the Galata Bridge all year. A record is ready but **not added to `game/data/`**: every species must carry a legal minimum size (`test_galata_data.gd`, from the Tebliğ 6/2 table) and that value could not be checked, because `www.resmigazete.gov.tr` does not resolve from the session any more.
+Zengin (2009) names picarel (izmarit, *Spicara smaris*) at the Galata Bridge all year. **Added to `game/data/` on 2026-11-20** (owner decision: a checked "no minimum size" is enough; Çizelge 7 does not list it, so "Diğer türler: Yok"). Before that, a record was ready but not added: every species must carry a legal minimum size (`test_galata_data.gd`, from the Tebliğ 6/2 table) and that value could not be checked, because `www.resmigazete.gov.tr` does not resolve from the session any more.
 
 | Field | Value | Source |
 | --- | --- | --- |

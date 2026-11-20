@@ -180,6 +180,10 @@
        "max": 1000,
        "required": false
       },
+      "no_minimum": {
+       "type": "bool",
+       "required": false
+      },
       "daily_limit": {
        "type": "int",
        "min": 0,

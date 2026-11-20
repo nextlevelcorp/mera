@@ -28,7 +28,8 @@ func test_sourced_fields_carry_their_sources() -> void:
 		var fields: Dictionary = sp["provenance"]["fields"]
 		for field: String in ["scientific_name", "length_min_cm", "length_max_cm", "lw_a", "lw_b", "regulation"]:
 			assert_true(String(fields.get(field, {}).get("source", "")) != "", "%s %s has a source" % [sp["id"], field])
-		assert_true(sp.has("regulation") and sp["regulation"].has("min_length_cm"), "%s has a legal minimum size" % sp["id"])
+		# A legal minimum size, or a checked "no minimum" (owner decision 2026-11-20).
+		assert_true(sp.has("regulation") and (sp["regulation"].has("min_length_cm") or sp["regulation"].get("no_minimum") == true), "%s has a checked legal size" % sp["id"])
 
 
 func test_every_name_key_is_translated() -> void:
@@ -88,3 +89,24 @@ func test_horse_mackerel_legal_size_follows_the_2026_amendment() -> void:
 	assert_true(String(reg["source"]).contains("2026/26"), "the amendment is cited")
 	assert_eq(float(Db.record("species", "lufer")["regulation"]["min_length_cm"]), 18.0, "bluefish unchanged")
 	assert_eq(float(Db.record("species", "palamut")["regulation"]["min_length_cm"]), 25.0, "bonito unchanged")
+
+
+func test_picarel_joins_the_bridge_with_no_minimum_size() -> void:
+	var sp := Db.record("species", "izmarit")
+	assert_eq(sp["scientific_name"], "Spicara smaris", "picarel")
+	assert_true(sp["regulation"]["no_minimum"] == true and not sp["regulation"].has("min_length_cm"), "not in Çizelge 7: no minimum size")
+	assert_true(not Economy.is_undersize(sp, 9.5), "so no picarel is undersize")
+	var at_galata := false
+	for s: Dictionary in Db.record("spot", "galata_bridge")["species"]:
+		at_galata = at_galata or s["species_id"] == "izmarit"
+	assert_true(at_galata, "it is fished at the Galata Bridge (Zengin 2009)")
+	assert_true(Economy.load_catalog(Db.database())["ok"], "and the fishmonger buys it")
+
+
+func test_picarel_bites_on_a_sabiki_and_on_shrimp() -> void:
+	var cond := {"slot": "dawn", "month": 10, "wind_dir": "NE", "wind_ms": 3}
+	var pos: String = Db.record("spot", "galata_bridge")["positions"][0]["id"]
+	for rig: String in ["capari", "float"]:
+		var ctx := FightSetup.build(Db.database(), "izmarit", rig, pos, 0.5, cond)
+		var wait_s := WaitSim.new(ctx, Db.constants(), Db.database()["species"], 20.0, 1).median_wait_s()
+		assert_true(wait_s < 600.0, "picarel takes the %s in time (median %.0f s)" % [rig, wait_s])

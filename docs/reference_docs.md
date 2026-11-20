@@ -13,6 +13,13 @@
 
 Add every data, art, audio and tool source here with its licence before it is used (spec 5.4, 7.8).
 
+## Picarel in `game/data/` (2026-11-20)
+| Value | Source | Licence or terms |
+| --- | --- | --- |
+| Name *Spicara smaris* | WoRMS AphiaID 126830 | CC BY 4.0 (WoRMS) |
+| Length range, length-weight relation, diet | Özpiçak and İbitürk (2024) KMUJENS 6(2): 1-8, https://doi.org/10.55213/kmujens.1478476 | Open-access journal article; values cited, text not copied |
+| No legal minimum size | Tebliğ 6/2 (2024/21) Çizelge 7 ("Diğer türler") | Official gazette |
+
 ## Legal minimum sizes, second pass (2026-11-20, R17)
 | Source | Licence or terms | How used |
 | --- | --- | --- |
