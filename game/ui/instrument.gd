@@ -181,6 +181,10 @@ func _draw_glyph(c: Vector2, r: float) -> void:
 			for dx: float in [-0.9, 0.1]:
 				var o := c + Vector2(s * dx, 0)
 				draw_colored_polygon(PackedVector2Array([o + Vector2(0, -s * 0.8), o + Vector2(s * 0.85, 0), o + Vector2(0, s * 0.8)]), g)
+		"hook":
+			draw_arc(c + Vector2(0, s * 0.25), s * 0.5, 0.0, PI, 16, g, 3.0, true)
+			draw_line(c + Vector2(s * 0.5, s * 0.25), c + Vector2(s * 0.5, -s * 0.9), g, 3.0, true)
+			draw_line(c + Vector2(-s * 0.5, s * 0.25), c + Vector2(-s * 0.5, -s * 0.15), g, 3.0, true)
 		"settings":
 			draw_arc(c, s * 0.55, 0.0, TAU, 24, g, 3.0, true)
 			for i in 6:

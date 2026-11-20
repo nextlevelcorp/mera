@@ -17,27 +17,59 @@ func _session(rig: String) -> FishingSession:
 	return s
 
 
-func test_every_kind_of_bait_has_its_own_steps() -> void:
-	for kind: String in Baiting.STEPS:
-		var steps := Baiting.steps(kind)
-		assert_true(steps.size() >= 2 and steps.size() <= 3, "%s has two or three steps" % kind)
-		for st: Array in steps:
-			assert_true(TranslationServer.get_translation_object("en").get_message(st[0]) != "", "%s is translated" % st[0])
+func test_every_kind_of_bait_has_its_own_strokes() -> void:
+	for kind: String in Baiting.STROKES:
+		var strokes := Baiting.strokes(kind)
+		assert_true(strokes.size() >= 2 and strokes.size() <= 3, "%s has two or three strokes" % kind)
+		for st: Dictionary in strokes:
+			assert_true(TranslationServer.get_translation_object("en").get_message(st["key"]) != "", "%s is translated" % st["key"])
+			if st["type"] == "trace":
+				for v: Vector2 in st["path"]:
+					assert_true(v.x >= 0.0 and v.x <= 1.0 and v.y >= 0.0 and v.y <= Baiting.ASPECT, "%s stays in the close-up" % st["key"])
 	var db := Db.database()
 	assert_eq(Baiting.kind_of(FightSetup.build(db, "istavrit", "float", _pos(), 0.5, _cond())["lure"]), "shrimp", "the float takes a shrimp")
 	assert_eq(Baiting.kind_of(FightSetup.build(db, "istavrit", "float", _pos(), 0.5, _cond(), {"float_bait": "live_istavrit"})["lure"], Db.record("bait", "live_istavrit")), "live", "or a live fish")
 	assert_eq(Baiting.kind_of(FightSetup.build(db, "istavrit", "lrf", _pos(), 0.5, _cond())["lure"]), "soft_plastic", "an LRF rig threads a soft plastic")
 
 
-func test_the_needle_sweeps_and_the_taps_score() -> void:
-	assert_eq(Baiting.needle(0.0, 1.0), 0.0, "starts at the left")
-	assert_true(is_equal_approx(Baiting.needle(0.5, 1.0), 0.5), "half way")
-	assert_true(is_equal_approx(Baiting.needle(1.5, 1.0), 0.5), "and back")
-	assert_eq(Baiting.accuracy(0.5, 0.5, 0.2), 1.0, "a centre tap is perfect")
-	assert_eq(Baiting.accuracy(0.8, 0.5, 0.2), 0.0, "outside the zone scores nothing")
+func test_following_the_path_scores_and_wandering_does_not() -> void:
+	var st: Dictionary = Baiting.strokes("soft_plastic")[1]
+	var on: Array = []
+	var off: Array = []
+	for i in 21:
+		var t := float(i) / 20.0
+		on.append((st["path"][0] as Vector2).lerp(st["path"][1], t))
+		off.append((st["path"][0] as Vector2).lerp(st["path"][1], t) + Vector2(0, 0.02 * sin(t * 12.0)))
+	var good := Baiting.trace_score(st, on)
+	var wobbly := Baiting.trace_score(st, off)
+	assert_true(good["finished"] and good["score"] > 0.95, "straight along the body is a good threading (%.2f)" % good["score"])
+	assert_true(wobbly["score"] < good["score"] - 0.2, "a wobbly one scores less (%.2f)" % wobbly["score"])
+	var half := Baiting.trace_score(st, on.slice(0, 10))
+	assert_true(not half["finished"] and half["score"] < 0.6, "stopping half way is not done (%.2f)" % half["score"])
+	assert_true(Baiting.starts_trace(st, st["path"][0]), "a trace starts at its ring")
+	assert_true(not Baiting.starts_trace(st, Vector2(0.9, 0.5)), "not anywhere")
+	var hold: Dictionary = Baiting.strokes("live")[0]
+	assert_true(Baiting.hold_score(hold, 1.2, [hold["at"]])["finished"], "a steady hold of the fish is enough")
+	assert_true(Baiting.hold_score(hold, 1.2, [(hold["at"] as Vector2) + Vector2(0.06, 0)])["score"] < 0.4, "a thumb off the fish scores little")
 	assert_true(is_equal_approx(Baiting.quality([1.0, 0.5, 0.0]), 0.5), "the quality is the mean")
 	assert_eq(Baiting.rating_key(0.9), "BAIT_RESULT_GOOD", "good")
 	assert_eq(Baiting.rating_key(0.1), "BAIT_RESULT_POOR", "poor")
+
+
+func test_the_choice_lists_every_rig_with_its_stock() -> void:
+	var save := SaveGame.fresh()
+	Inventory.add(save, "shrimp", 4)
+	Inventory.add(save, "lrf_soft", 2)
+	var opts := Baiting.options(Db.database(), save)
+	var by_item := {}
+	for o: Dictionary in opts:
+		by_item[o["item_id"]] = o
+	assert_eq(int(by_item["shrimp"]["stock"]), 4, "shrimp from the bag")
+	assert_eq(by_item["shrimp"]["rig"], "float", "goes on the float rig")
+	assert_eq(int(by_item["lrf_soft"]["stock"]), 2, "soft plastics")
+	assert_eq(by_item["lrf_soft"]["rig"], "lrf", "on the light rod")
+	assert_eq(int(by_item["live_istavrit"]["stock"]), 0, "no legal horse mackerel yet")
+	assert_eq(by_item["live_istavrit"]["kind"], "live", "a live bait")
 
 
 func test_a_new_rig_must_be_rigged_by_hand_first() -> void:
@@ -102,19 +134,22 @@ func test_a_lost_lure_must_be_tied_on_again() -> void:
 	assert_true(s.needs_baiting(s.context("istavrit")), "a new lure goes on by hand")
 
 
-func test_the_baiting_panel_runs_the_steps() -> void:
-	var p := BaitPanel.new()
+func test_the_baiting_screen_runs_the_strokes_by_hand() -> void:
+	var p := BaitScreen.new()
 	var got := [-1.0]
 	p.done.connect(func(q: float) -> void: got[0] = q)
-	p.start("minnow", "x")
-	assert_true(p.visible, "it opens")
-	for i in Baiting.steps("minnow").size():
-		# Wait until the needle is at the zone's centre, then tap.
-		var speed := float(Baiting.steps("minnow")[i][2])
-		p._process(Baiting.zone_centre(i) / speed)
-		p.press()
-	assert_true(not p.visible, "it closes after the last step")
-	assert_true(got[0] > 0.95, "centre taps make a good baiting (%.2f)" % got[0])
+	p.open_rig("minnow", "x")
+	assert_true(p.visible, "it opens on the hook")
+	for st: Dictionary in Baiting.strokes("minnow"):
+		var path: Array = st["path"]
+		# The hook's point sits above the thumb: press below the path.
+		p.press((path[0] as Vector2) - BaitScreen.HOOK_OFFSET)
+		for i in range(1, path.size()):
+			for k in 11:
+				p.move((path[i - 1] as Vector2).lerp(path[i], float(k) / 10.0) - BaitScreen.HOOK_OFFSET)
+		p.release()
+	assert_true(not p.visible, "it closes after the last stroke")
+	assert_true(got[0] > 0.9, "following every path makes a good baiting (%.2f)" % got[0])
 	p.free()
 
 
@@ -124,8 +159,16 @@ func test_the_screen_asks_for_baiting_before_a_cast() -> void:
 	scr.setup("")
 	Inventory.add(Profile.save, "shrimp", 5)
 	scr.begin_charge()
-	assert_true(scr._bait_panel.visible, "a bare hook opens the baiting screen")
+	assert_true(scr._bait_screen.visible and scr._bait_screen.stage == "choose", "a bare hook opens the baiting screen on the choice")
 	assert_eq(scr.phase, FishingScreen.Phase.READY, "and does not start the cast")
+	var lrf := {}
+	for o: Dictionary in Baiting.options(Db.database(), Profile.save):
+		if o["rig"] == "lrf":
+			lrf = o
+	scr._on_bait_chosen(lrf)
+	assert_eq(scr.rig, "lrf", "choosing a soft plastic switches to the light rod")
+	assert_eq(scr._bait_screen.stage, "rig", "then the hook")
+	assert_eq(scr._bait_screen.kind, "soft_plastic", "with the soft plastic")
 	scr._on_baited(1.0)
 	scr.begin_charge()
 	assert_eq(scr.phase, FishingScreen.Phase.CHARGE, "baited, the cast charges")

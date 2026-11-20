@@ -98,6 +98,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Baiting by hand (2026-11-20): 261 tests pass with no script errors; debug web build played at 1280x720 (en and tr): the choice of five cards with counts; shrimp (three strokes traced with the mouse, "Baited: well done", the rig switched to the float); soft plastic, minnow and sabiki close-ups; a live horse mackerel from the world bag (held still, then hooked behind the dorsal fin, "Takıldı: iyi"); no console errors. Not checked: a real phone's thumb.
 - Aim readability (2026-11-20): 260 tests pass with no script errors; debug web build played with multi-touch at 1280x720 and 844x390 (tr): ready shows "Nişan: tam karşı" on the gauge; holding Cast and dragging left showed the dashed course, the brass ring "≈ 11 m" and "Nişan: 16° sol"; no console errors.
 - Legal sizes second pass (2026-11-20): 260 tests pass with no script errors; debug web build played at 1280x720 (tr): Hasan's quest now asks for horse mackerel "en az 12 cm"; no console errors.
 - R22 part 1 (2026-11-20): 259 tests pass with no script errors; debug web build played at 1280x720 (en) and 844x390 (tr): the world shows "Next: Land your first fish · 0/1" under the Bag; the bag shows "Newcomer · 0 of 14 badges" and every goal with its progress; a forced bite landed and back in the world the toast said "Badge earned: Land your first fish" and the next goal moved to "Catch all three species · 1/3"; no console errors. Not built: unlocks by level and the weekly tasks (the latter need a save change; owner's go-ahead).

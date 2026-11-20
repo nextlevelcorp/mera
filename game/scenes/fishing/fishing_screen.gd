@@ -138,7 +138,7 @@ var _steer_hint_shown := false
 var _strike_queued := false
 ## The float on the water (R12), in screen pixels below its resting line:
 ## nibbles bob it, a take pulls it under. A damped spring, view only.
-var _bait_panel: BaitPanel
+var _bait_screen: BaitScreen
 var _bitten := false          ## a fish mouthed the live bait this cast
 var float_dip := 0.0
 var _float_vel := 0.0
@@ -198,9 +198,10 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	add_child(_overlay)
 	_ui = FishingHud.new(self)
 	add_child(_ui)
-	_bait_panel = BaitPanel.new()
-	_bait_panel.done.connect(_on_baited)
-	_ui.add_child(_bait_panel)
+	_bait_screen = BaitScreen.new()
+	_bait_screen.chosen.connect(_on_bait_chosen)
+	_bait_screen.done.connect(_on_baited)
+	_ui.add_child(_bait_screen)
 	_build_audio()
 	_sound = SoundDirector.new()
 	add_child(_sound)
@@ -305,6 +306,7 @@ func _set_phase(p: int) -> void:
 	_ui.speed_button.visible = p == Phase.WAIT
 	_ui.rig_button.visible = p == Phase.READY
 	_ui.log_button.visible = p in [Phase.READY, Phase.RESULT]
+	_ui.bait_button.visible = p == Phase.READY
 	_ui.distance_label.visible = p in [Phase.WAIT, Phase.FIGHT]
 	_ui.depth_label.visible = p == Phase.WAIT
 	_ui.result_panel.visible = p == Phase.RESULT
@@ -402,11 +404,22 @@ func begin_charge() -> void:
 
 
 ## The baiting screen for the rig in hand (R20).
+## The baiting screen (R20): choose what goes on, then put it on by hand.
 func open_baiting() -> void:
-	var bait := Db.record("bait", String(_ctx["lure"]["id"])) if is_float() else {}
 	_ui.toast_label.visible = false
 	_toast_s = 0.0
-	_bait_panel.start(Baiting.kind_of(_ctx["lure"], bait), tr("BAIT_TITLE") % tr(_ctx["lure"]["name_key"]))
+	_bait_screen.open_choose(Baiting.options(_db, save), _session.float_bait if is_float() else lure_id())
+
+
+## A bait or lure was picked: switch to its rig (and float bait), then the hook.
+func _on_bait_chosen(option: Dictionary) -> void:
+	if String(option["rig"]) != rig:
+		set_rig(String(option["rig"]), position_id)
+	if is_float() and String(option["float_bait"]) != _session.float_bait:
+		_session.float_bait = String(option["float_bait"])
+		_session.rig_changed()
+		apply_conditions()
+	_bait_screen.open_rig(String(option["kind"]), tr("BAIT_TITLE") % tr(option["name_key"]))
 
 
 func _on_baited(quality: float) -> void:
