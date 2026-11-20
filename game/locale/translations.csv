@@ -313,3 +313,11 @@ BAIT_CHOOSE_HINT,Pick a bait or lure from your bag; the rig changes with it,Çan
 BAIT_IN_BAG,In your bag: %d,Çantada: %d,En la bolsa: %d
 BAIT_START_HERE,Start at the ring,Halkadan başla,Empieza en el aro
 FISH_BAIT,Bait,Yem,Cebo
+WEEK_TITLE,This week (%s),Bu hafta (%s),Esta semana (%s)
+WEEK_CLAIM,Claim,Al,Recoger
+WEEK_CLAIMED,claimed,alındı,recogido
+WEEK_DONE,Weekly task done: %s (claim it in the bag),Haftalık görev tamam: %s (çantadan al),Tarea semanal hecha: %s (recógela en la bolsa)
+WEEK_FISH_8,Land 8 fish,8 balık tut,Saca 8 peces
+WEEK_ISTAVRIT_5,Catch 5 horse mackerel,5 istavrit tut,Pesca 5 jureles
+WEEK_CASTS_40,Make 40 casts,40 atış yap,Haz 40 lances
+WEEK_QUEST_1,Finish a quest,Bir görev bitir,Termina un encargo

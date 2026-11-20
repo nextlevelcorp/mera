@@ -98,6 +98,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Weekly tasks (2026-11-20): 265 tests pass with no script errors (ISO week edges, the week start, a single claim, the next week resetting); debug web build at 1280x720 (tr): the bag shows "Bu hafta (2026-W47)" and "8 balık tut · 0/8"; no console errors. The Claim button was not pressed in the browser (a unit test claims).
 - Baiting by hand (2026-11-20): 261 tests pass with no script errors; debug web build played at 1280x720 (en and tr): the choice of five cards with counts; shrimp (three strokes traced with the mouse, "Baited: well done", the rig switched to the float); soft plastic, minnow and sabiki close-ups; a live horse mackerel from the world bag (held still, then hooked behind the dorsal fin, "Takıldı: iyi"); no console errors. Not checked: a real phone's thumb.
 - Aim readability (2026-11-20): 260 tests pass with no script errors; debug web build played with multi-touch at 1280x720 and 844x390 (tr): ready shows "Nişan: tam karşı" on the gauge; holding Cast and dragging left showed the dashed course, the brass ring "≈ 11 m" and "Nişan: 16° sol"; no console errors.
 - Legal sizes second pass (2026-11-20): 260 tests pass with no script errors; debug web build played at 1280x720 (tr): Hasan's quest now asks for horse mackerel "en az 12 cm"; no console errors.

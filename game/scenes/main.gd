@@ -49,9 +49,14 @@ func _open_fishing(request: Dictionary, world: WorldScreen = null) -> void:
 	screen.request = request
 	screen.finished.connect(func(result: Dictionary) -> void:
 		screen.queue_free()
+		Weekly.refresh(Profile.save, Db.weekly(), Db.constants(), Time.get_date_string_from_system())
 		var before := Mastery.badges(Db.goals(), Profile.save, Db.constants())
+		var week_before := _weekly_done()
 		Profile.apply(result)
 		var earned := Mastery.earned(before, Mastery.badges(Db.goals(), Profile.save, Db.constants()))
+		for id: String in _weekly_done():
+			if not week_before.has(id):
+				earned.append("week:" + id)
 		if world != null:
 			world.resume(result, earned)
 		else:
@@ -68,3 +73,12 @@ func _open_fishing(request: Dictionary, world: WorldScreen = null) -> void:
 func _show_title(on: bool) -> void:
 	$Column.visible = on
 	$Background.visible = on
+
+
+## The weekly tasks done this week (for announcing new ones after a trip).
+func _weekly_done() -> Array[String]:
+	var out: Array[String] = []
+	for t: Dictionary in Db.weekly():
+		if Weekly.progress(t, Profile.save, Db.constants())["done"]:
+			out.append(String(t["id"]))
+	return out

@@ -175,7 +175,12 @@ func resume(result: Dictionary, earned: Array = []) -> void:
 		_cam.reset_smoothing()
 	var text := tr("TRIP_SUMMARY") % [int(result["casts"]), (result["catches"] as Array).size()]
 	for id: String in earned:
-		text += "\n" + tr("BADGE_EARNED") % tr(_goal(id)["title_key"])
+		if id.begins_with("week:"):
+			for t: Dictionary in Db.weekly():
+				if t["id"] == id.trim_prefix("week:"):
+					text += "\n" + tr("WEEK_DONE") % tr(t["title_key"])
+		else:
+			text += "\n" + tr("BADGE_EARNED") % tr(_goal(id)["title_key"])
 	show_toast(text, 4.0 + 2.0 * earned.size())
 
 
