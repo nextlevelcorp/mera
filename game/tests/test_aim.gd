@@ -24,12 +24,12 @@ func test_the_other_thumb_aims_while_cast_is_held_and_the_aim_stays() -> void:
 	touch.index = 1
 	touch.pressed = true
 	touch.position = Vector2(100.0, 300.0)
-	scr._unhandled_input(touch)
+	scr._gui_input(touch)
 	assert_true(scr._aim < -0.3, "a tap on the left aims left (%.2f)" % scr._aim)
 	var drag := InputEventScreenDrag.new()
 	drag.index = 1
 	drag.position = Vector2(1180.0, 300.0)
-	scr._unhandled_input(drag)
+	scr._gui_input(drag)
 	assert_true(scr._aim > 0.3, "dragging to the right aims right")
 	var aimed := scr._aim
 	scr.release_cast()
@@ -37,4 +37,12 @@ func test_the_other_thumb_aims_while_cast_is_held_and_the_aim_stays() -> void:
 	scr._set_phase(FishingScreen.Phase.READY)
 	scr.begin_charge()
 	assert_eq(scr._aim, aimed, "the next cast keeps the aim")
+	scr.free()
+
+
+func test_water_touches_reach_the_screen_not_the_title_behind_it() -> void:
+	var scr := _screen()
+	assert_eq(scr.mouse_filter, Control.MOUSE_FILTER_STOP, "the fishing view takes the touches no button took")
+	for c: Control in [scr._ui, scr._overlay, scr._water]:
+		assert_eq(c.mouse_filter, Control.MOUSE_FILTER_IGNORE, "%s lets them through" % c.get_class())
 	scr.free()

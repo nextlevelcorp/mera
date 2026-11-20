@@ -10,6 +10,8 @@ var _world: WorldScreen
 var _panel: PanelContainer
 var _slot: Button
 var _marker_i := 0
+var _shop_i := 0
+var _person_i := 0
 
 
 func _init(world: WorldScreen) -> void:
@@ -59,6 +61,37 @@ func _ready() -> void:
 		_world.walk.teleport(m["pos"] + Vector2(0.0, 1.2))
 		_panel.visible = false)
 	box.add_child(jump)
+	# Reach the shops and the people quickly, to check their panels.
+	var to_shop := Button.new()
+	to_shop.text = tr("DBG_NEXT_SHOP")
+	to_shop.add_theme_font_size_override("font_size", 20)
+	to_shop.custom_minimum_size = Vector2(360, 64)
+	to_shop.pressed.connect(func() -> void:
+		var sh: Dictionary = _world.area.shops[_shop_i % _world.area.shops.size()]
+		_shop_i += 1
+		_world.walk.teleport(sh["pos"])
+		_panel.visible = false)
+	box.add_child(to_shop)
+	var to_person := Button.new()
+	to_person.text = tr("DBG_NEXT_PERSON")
+	to_person.add_theme_font_size_override("font_size", 20)
+	to_person.custom_minimum_size = Vector2(360, 64)
+	to_person.pressed.connect(func() -> void:
+		var here: Array = []
+		for n: Dictionary in _world._npcs:
+			var st: Dictionary = _world._npc_state[n["id"]]
+			if st["present"]:
+				here.append(st["target"])
+		if here.is_empty():
+			return
+		var at: Vector2 = here[_person_i % here.size()]
+		_person_i += 1
+		for off: Vector2 in [Vector2(0, 1.2), Vector2(0, -1.2), Vector2(1.2, 0), Vector2(-1.2, 0)]:
+			if not _world.area.blocked_at(at + off, float(Db.constants()["WALK_RADIUS_M"])):
+				_world.walk.teleport(at + off)
+				break
+		_panel.visible = false)
+	box.add_child(to_person)
 	for entry: Array in [["DBG_GIVE_MONEY", 0], ["DBG_GIVE_FISH", 1], ["DBG_GIVE_LURES", 2]]:
 		var give := Button.new()
 		give.text = tr(entry[0])

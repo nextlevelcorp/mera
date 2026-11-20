@@ -279,3 +279,5 @@ BAIT_STEP_SNAP_OPEN,Open the snap,Klipsi aç,Abre el imperdible
 BAIT_STEP_SNAP_CLIP,Clip the lure's eye,Yemin halkasını tak,Engancha la anilla del señuelo
 BAIT_STEP_SABIKI_UNWIND,Unwind the feathers,Tüyleri çöz,Desenreda las plumas
 BAIT_STEP_SABIKI_WEIGHT,Clip the weight on,Kurşunu tak,Engancha el plomo
+DBG_NEXT_SHOP,Next shop,Sonraki dükkân,Siguiente tienda
+DBG_NEXT_PERSON,Next person,Sonraki kişi,Siguiente persona
