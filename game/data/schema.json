@@ -864,6 +864,76 @@
     }
    },
    "optional_file": true
+  },
+  "jurisdiction": {
+   "file": "jurisdictions.json",
+   "optional_file": true,
+   "fields": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "name_key": {
+     "type": "string",
+     "pattern": "^[A-Z][A-Z0-9_]*$"
+    },
+    "country": {
+     "type": "string",
+     "pattern": "^[A-Z]{2}$"
+    },
+    "scope": {
+     "type": "string"
+    },
+    "official": {
+     "type": "bool"
+    },
+    "day_limit_kg": {
+     "type": "number",
+     "min": 0,
+     "max": 100,
+     "required": false
+    },
+    "rules": {
+     "type": "list",
+     "min_items": 1,
+     "max_items": 40,
+     "item": {
+      "type": "object",
+      "fields": {
+       "species_id": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]*$"
+       },
+       "min_length_cm": {
+        "type": "number",
+        "min": 1,
+        "max": 1000,
+        "required": false
+       },
+       "no_minimum": {
+        "type": "bool",
+        "required": false
+       },
+       "closed_season": {
+        "type": "string",
+        "required": false
+       },
+       "status": {
+        "type": "enum",
+        "values": [
+         "read",
+         "applied_by_design",
+         "unofficial"
+        ]
+       },
+       "note": {
+        "type": "string",
+        "required": false
+       }
+      }
+     }
+    }
+   }
   }
  }
 }

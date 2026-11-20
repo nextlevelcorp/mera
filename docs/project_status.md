@@ -28,6 +28,13 @@
 | CC0 PBR textures on the stages (six sets) | Implemented (R7, 2026-11-17) | `reference_docs.md` |
 | CC0 first-person hand model | Blocked: no reachable CC0 source | `reference_docs.md` |
 
+## Owner decisions (2026-11-20)
+- D10 Spain: choose the region first; Andalusia (shore fishing is mostly in inner waters, which the regions regulate).
+- D11 Italy: the owner left it to Claude; the stricter EU size (horse mackerel 15 cm, Annex IX) is applied where Article 87 is silent, marked `applied_by_design`.
+- D12 A checked "no minimum size" is enough to add a species (picarel added).
+- D13 Greece stays, researched from the web even without the official text (marked unofficial); countries whose official texts can be read are added too (Portugal so far; France was tried and is blocked).
+- D14 Weekly tasks: the weekly save counter is approved (built).
+
 ## Owner decisions (2026-11-19)
 - **D6 places**: a map screen (country, then spot) and places in four countries: Turkey (Galata, Sarayburnu and one more), Spain, Greece and Italy. All Mediterranean, so the three species carry over; legal sizes move from the species to the country or region, each with an official source.
 - **D7 boats**: shore fishing stays the core; boat fishing opens at higher levels at some spots (R23), after the shore work.
@@ -67,7 +74,7 @@
 | R14 | Content: spots 2 and 3, species towards 15 **(2026-11-19: spot 2, Sarayburnu, is in with the three existing species and a debug spot switch, no world area yet; new species wait for a checked legal size, owner decision)** | R5 | Sourced records | Data tests pass; sources recorded | `data/`, `spot_research.md` |
 | R15 | Native export spike (Android first), then release gates **(part 1 done 2026-11-19: `release_checklist.md` and `android_spike.md`; part 2: the "Android Debug" preset exports a signed 29 MB arm64 debug APK (`scripts/android_setup.sh`), checked statically; it has never run on a device, see `android_spike.md`)** | R4 | An installable test build | Owner approval for each release step | `release_checklist.md` |
 | R16 | Bag screen **(done 2026-11-19)** | R8, R9 | See fish, tackle, money, skills; release undersize fish | Panel tests; played | `scenes/world/bag_panel.gd` |
-| R17 | Map screen and places in four countries (D6) | R14 | Pick a country, then a spot; Turkey (Galata, Sarayburnu, one Aegean spot), Spain, Greece, Italy | Legal sizes per jurisdiction in the data, each with an official source; data tests | `data/`, `scenes/map/` |
+| R17 | Map screen and places in four countries (D6) **(Partial 2026-11-20: legal sizes by jurisdiction in `jurisdictions.json` for Turkey, Andalusia, Italy, Portugal and Greece (unofficial); map screen and the new spots not started)** | R14 | Pick a country, then a spot; Turkey (Galata, Sarayburnu, one Aegean spot), Spain, Greece, Italy | Legal sizes per jurisdiction in the data, each with an official source; data tests | `data/`, `scenes/map/` |
 | R18 | Each rig looks like itself in 3D (rod length, colour, reel, float) **(done 2026-11-19)** | R12 | Changing the rig changes the rod in hand | Played; screenshots of every rig | `ui/sea/rig_3d.gd` |
 | R19 | Cast left and right (aim), readable before release **(done 2026-11-19)** | R12 | The thumb swipe aims; the marker shows where | Aim tests; played | `scenes/fishing/` |
 | R20 | Baiting minigame (D9) **(done 2026-11-19)**: a short hand-skill screen when the bait or rig changes or the bait is spent, per bait type | R12 | Good baiting holds longer and looks more natural | Pure scoring tests; played | `sim/`, `scenes/fishing/` |
@@ -98,6 +105,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Jurisdictions (2026-11-20): 270 tests pass with no script errors; data only (no screen uses it yet), so nothing new to play in the browser.
 - Picarel (2026-11-20): 267 tests pass with no script errors; debug web build at 1280x720 (tr): the debug menu's species switch reaches "İzmarit", a forced bite on the light rod hooked one and the fight ran; no console errors. Not checked: landing one in the browser (the script's reel hold ended mid-fight).
 - Weekly tasks (2026-11-20): 265 tests pass with no script errors (ISO week edges, the week start, a single claim, the next week resetting); debug web build at 1280x720 (tr): the bag shows "Bu hafta (2026-W47)" and "8 balık tut · 0/8"; no console errors. The Claim button was not pressed in the browser (a unit test claims).
 - Baiting by hand (2026-11-20): 261 tests pass with no script errors; debug web build played at 1280x720 (en and tr): the choice of five cards with counts; shrimp (three strokes traced with the mouse, "Baited: well done", the rig switched to the float); soft plastic, minnow and sabiki close-ups; a live horse mackerel from the world bag (held still, then hooked behind the dorsal fin, "Takıldı: iyi"); no console errors. Not checked: a real phone's thumb.

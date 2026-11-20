@@ -79,6 +79,20 @@ Not read yet: Spain's recreational rules (Real Decreto 347/2011 and regional rul
 
 **For the owner (legal reading, not decided here):** (1) Spain: a shore spot is almost always in inner waters, so its sizes are the region's; choose the region before the spot. (2) Italy: do the EU Annex IX sizes apply to recreational anglers? (3) Turkey: the picarel has no minimum size under 6/2 ("Diğer türler: Yok"); is "checked: no minimum" enough to add it (owner decision 2026-11-19 was: no species without a checked legal size)? (4) Greece: keep it in R17 and wait for the source, or replace it with a country whose texts are reachable.
 
+## R17 legal sizes, third pass (2026-11-20)
+
+After the owner's decisions D10 to D14 and a network update (`www.juntadeandalucia.es`, `www.dgrm.pt`, `dgrm.pt`, `www.legifrance.gouv.fr`, `www.dirm.mediterranee.developpement-durable.gouv.fr`, `www.vgo.gr`, `fishradar.ai`). The values are in `game/data/jurisdictions.json`.
+
+| Jurisdiction | Read | Horse mackerel | Bluefish | Bonito | Picarel | Source |
+| --- | --- | --- | --- | --- | --- | --- |
+| Spain, Andalusia (inner waters) | Decreto 205/2023 (BOJA 169, 4.9.2023), Article 8: recreational fishing respects the EU minimum conservation reference sizes (Reg. 2019/1241); Article 9: 5 kg a day | 15 cm (Annex IX) | not listed | not listed | not listed | https://www.juntadeandalucia.es/boja/2023/169/BOJA23-169-00019-13843-01_00288842.pdf |
+| Italy | (second pass) Article 87 is silent on horse mackerel | 15 cm by design (D11: the stricter EU size) | 7 cm (Article 87's juvenile rule) | 25 cm | 7 cm | Normattiva, DPR 1639/1968 |
+| Portugal (mainland) | DGRM table of minimum sizes, 27.02.2026; DGRM FAQ (2018): the sizes apply to recreational fishing (Portaria 14/2014, Article 10(2)) | 15 cm | "não se aplica" | "não se aplica" | not checked | https://www.dgrm.pt/documents/20143/121101/Esp%C3%A9cies+-+Peixes+-+2026-02-27.pdf/163f9588-b859-eb23-c134-4413c40da185 ; https://www.dgrm.pt/documents/20143/0/FAQ-PescaLudica2018.pdf/730e6d56-1f8c-66a2-a020-aecc016685bb |
+| Greece (unofficial) | vgo.gr guide (2025) citing P.D. 373/1985 and its revisions: sea bass 25 cm, groupers 45 cm, octopus 750 g, other fish under 150 g go back, 5 kg a day; fishradar.ai lists sea bass 23 cm, sea bream 20 cm | 15 cm (guides apply the EU sizes) | unknown | unknown | unknown | https://www.vgo.gr/tips/177.html?lang=En ; https://fishradar.ai/fishing/regulations/greece/ |
+| France | **Blocked**: Légifrance answers HTTP 403, the DIRM Méditerranée table 404. A search summary gives chinchard 15 cm and bar 30 cm in the Mediterranean (arrêté of 26 October 2012) | — | — | — | — | not read |
+
+Still open for R17: the map screen, a spot per country with its species list (sourced), and which spots use which jurisdiction.
+
 ## What the web cannot give
 
 - **Depth profiles at standing positions.** Charts are protected (SHODB); EMODnet is about 115 m per cell. Without a visit these stay design fills, labelled as such.
