@@ -1,0 +1,175 @@
+[
+ {
+  "id": "tr_national",
+  "name_key": "JUR_TR",
+  "country": "TR",
+  "scope": "Turkish seas, amateur fishing (Tebliğ 6/2)",
+  "official": true,
+  "day_limit_kg": 5,
+  "rules": [
+   {
+    "species_id": "istavrit",
+    "min_length_cm": 12,
+    "status": "read"
+   },
+   {
+    "species_id": "lufer",
+    "min_length_cm": 18,
+    "status": "read"
+   },
+   {
+    "species_id": "palamut",
+    "min_length_cm": 25,
+    "closed_season": "1 April - 14 August",
+    "status": "read"
+   },
+   {
+    "species_id": "izmarit",
+    "no_minimum": true,
+    "status": "read",
+    "note": "Not in Çizelge 7: 'Diğer türler', no size limit"
+   }
+  ],
+  "provenance": {
+   "default": {
+    "source": "Tebliğ 6/2 (2024/21) Çizelge 7, Resmî Gazete 32629, amended by Tebliğ 2026/26 (Resmî Gazete 33372): https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm",
+    "accessed": "2026-11-20"
+   }
+  }
+ },
+ {
+  "id": "es_andalusia",
+  "name_key": "JUR_ES_AN",
+  "country": "ES",
+  "scope": "Andalusia, inner waters (shore fishing), recreational",
+  "official": true,
+  "day_limit_kg": 5,
+  "rules": [
+   {
+    "species_id": "istavrit",
+    "min_length_cm": 15,
+    "status": "read",
+    "note": "Trachurus spp., EU Annex IX Part A"
+   },
+   {
+    "species_id": "lufer",
+    "no_minimum": true,
+    "status": "read",
+    "note": "Pomatomus saltatrix is not in Annex IX"
+   },
+   {
+    "species_id": "palamut",
+    "no_minimum": true,
+    "status": "read",
+    "note": "Sarda sarda is not in Annex IX"
+   },
+   {
+    "species_id": "izmarit",
+    "no_minimum": true,
+    "status": "read",
+    "note": "Spicara smaris is not in Annex IX"
+   }
+  ],
+  "provenance": {
+   "default": {
+    "source": "Decreto 205/2023 (BOJA 169, 4.9.2023), Article 8: recreational fishing in Andalusia's inner waters respects the minimum conservation reference sizes of Regulation (EU) 2019/1241; Article 9: 5 kg a day. https://www.juntadeandalucia.es/boja/2023/169/BOJA23-169-00019-13843-01_00288842.pdf ; Regulation (EU) 2019/1241 Annex IX Part A (Mediterranean): https://publications.europa.eu/resource/celex/32019R1241",
+    "accessed": "2026-11-20"
+   }
+  }
+ },
+ {
+  "id": "it_national",
+  "name_key": "JUR_IT",
+  "country": "IT",
+  "scope": "Italian seas, sport fishing",
+  "official": true,
+  "day_limit_kg": 5,
+  "rules": [
+   {
+    "species_id": "istavrit",
+    "min_length_cm": 15,
+    "status": "applied_by_design",
+    "note": "Not in Article 87; the EU Annex IX size (15 cm) is applied, the stricter reading (owner left it to Claude, 2026-11-20)"
+   },
+   {
+    "species_id": "lufer",
+    "min_length_cm": 7,
+    "status": "read",
+    "note": "Not listed; Article 87 makes every fish under 7 cm a juvenile"
+   },
+   {
+    "species_id": "palamut",
+    "min_length_cm": 25,
+    "status": "read",
+    "note": "palamita (Sarda sarda) 25 cm"
+   },
+   {
+    "species_id": "izmarit",
+    "min_length_cm": 7,
+    "status": "read",
+    "note": "Not listed; the 7 cm juvenile rule"
+   }
+  ],
+  "provenance": {
+   "default": {
+    "source": "DPR 1639/1968, Article 87 (text in force since 30.06.1987) and Article 142 (5 kg a day), Normattiva: https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.del.presidente.della.repubblica:1968-10-02;1639~art87",
+    "accessed": "2026-11-20"
+   }
+  }
+ },
+ {
+  "id": "pt_national",
+  "name_key": "JUR_PT",
+  "country": "PT",
+  "scope": "Portuguese mainland waters, recreational (pesca lúdica)",
+  "official": true,
+  "rules": [
+   {
+    "species_id": "istavrit",
+    "min_length_cm": 15,
+    "status": "read",
+    "note": "Carapaus, Trachurus spp."
+   },
+   {
+    "species_id": "lufer",
+    "no_minimum": true,
+    "status": "read",
+    "note": "Anchova: 'não se aplica'"
+   },
+   {
+    "species_id": "palamut",
+    "no_minimum": true,
+    "status": "read",
+    "note": "Sarrajão: 'não se aplica'"
+   }
+  ],
+  "provenance": {
+   "default": {
+    "source": "DGRM, Tabela de tamanhos mínimos (espécies, peixes), 27.02.2026; the DGRM recreational fishing FAQ (2018) says the sizes apply to recreational fishing too (Portaria 14/2014, Article 10(2)): https://www.dgrm.pt/documents/20143/121101/Esp%C3%A9cies+-+Peixes+-+2026-02-27.pdf/163f9588-b859-eb23-c134-4413c40da185",
+    "accessed": "2026-11-20"
+   }
+  }
+ },
+ {
+  "id": "gr_national",
+  "name_key": "JUR_GR",
+  "country": "GR",
+  "scope": "Greek seas, recreational (unofficial reading)",
+  "official": false,
+  "day_limit_kg": 5,
+  "rules": [
+   {
+    "species_id": "istavrit",
+    "min_length_cm": 15,
+    "status": "unofficial",
+    "note": "Guides apply the EU sizes; Trachurus 15 cm in Annex IX"
+   }
+  ],
+  "provenance": {
+   "default": {
+    "source": "Unofficial: vgo.gr recreational fishing guide (2025), citing P.D. 373/1985 and its revisions (sea bass 25 cm, groupers 45 cm, octopus 750 g, other fish under 150 g go back): https://www.vgo.gr/tips/177.html?lang=En ; the official texts (minagric.gr) could not be read from the cloud (HTTP 403)",
+    "accessed": "2026-11-20"
+   }
+  }
+ }
+]

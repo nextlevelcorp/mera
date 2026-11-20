@@ -13,6 +13,15 @@
 
 Add every data, art, audio and tool source here with its licence before it is used (spec 5.4, 7.8).
 
+## Jurisdictions in `game/data/jurisdictions.json` (2026-11-20, R17)
+| Source | Licence or terms | How used |
+| --- | --- | --- |
+| BOJA: Decreto 205/2023 (Andalusia) | Official gazette | Andalusia's rule: EU sizes apply to recreational fishing in inner waters |
+| Regulation (EU) 2019/1241 Annex IX | Official EU legal text | Horse mackerel 15 cm where it applies |
+| DGRM size table (27.02.2026) and recreational FAQ (2018), Portugal | Government site | Portugal's sizes |
+| Normattiva: DPR 1639/1968 | Official legal database | Italy's sizes |
+| vgo.gr guide; fishradar.ai | Third-party web pages, read only | Greece, marked unofficial; values cited, text not copied |
+
 ## Picarel in `game/data/` (2026-11-20)
 | Value | Source | Licence or terms |
 | --- | --- | --- |
