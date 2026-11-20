@@ -1,0 +1,10 @@
+{
+  "design_fill": true,
+  "note": "What opens with the angler's rank (roadmap R22, owner decision D8). Ranks come from badges (Mastery.rank, RANK_STEPS). Which rig or bait opens at which rank is a game-design fill. A rig or bait not listed is open from the start.",
+  "unlocks": [
+    {"id": "rig_spin", "kind": "rig", "target": "spin", "rank": 1, "name_key": "TACKLE_ROD_SPIN"},
+    {"id": "rig_float", "kind": "rig", "target": "float", "rank": 1, "name_key": "TACKLE_ROD_FLOAT"},
+    {"id": "bait_live", "kind": "bait", "target": "live_istavrit", "rank": 2, "name_key": "TACKLE_BAIT_LIVE_ISTAVRIT"},
+    {"id": "boat", "kind": "boat", "target": "boat", "rank": 3, "name_key": "UNLOCK_BOAT"}
+  ]
+}

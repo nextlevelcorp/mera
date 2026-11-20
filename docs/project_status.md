@@ -79,7 +79,7 @@
 | R19 | Cast left and right (aim), readable before release **(done 2026-11-19)** | R12 | The thumb swipe aims; the marker shows where | Aim tests; played | `scenes/fishing/` |
 | R20 | Baiting minigame (D9) **(done 2026-11-19)**: a short hand-skill screen when the bait or rig changes or the bait is spent, per bait type | R12 | Good baiting holds longer and looks more natural | Pure scoring tests; played | `sim/`, `scenes/fishing/` |
 | R21 | Buttons and interface redesign (one theme for every screen) **(done 2026-11-19)** | R16 | A designed, consistent HUD | Screenshots at 1280x720 and 844x390 | `ui/theme/` |
-| R22 | Mastery progression (D8) **(part 1 done 2026-11-20: goals, badges, rank, next goal; open: unlocks, weekly tasks)**: species collection and records, goals and badges per spot, unlocks by level (spots, tackle, boat), a "next goal" line, fixed weekly tasks with no penalty for missing them | R9, R17 | A reason to come back without timers | Rule tests; played | `sim/progress.gd`, `data/goals.json` |
+| R22 | Mastery progression (D8) **(done 2026-11-20: goals, badges, rank, next goal, weekly tasks, unlocks of rigs and live bait by rank; spot unlocks wait for the map, R17)**: species collection and records, goals and badges per spot, unlocks by level (spots, tackle, boat), a "next goal" line, fixed weekly tasks with no penalty for missing them | R9, R17 | A reason to come back without timers | Rule tests; played | `sim/progress.gd`, `data/goals.json` |
 | R23 | Boat fishing at higher levels (D7) | R22 | Rent a boat at some spots, fish deeper water | Simulation tests; played | `sim/`, `ui/sea/` |
 
 ## Owner decisions (2026-11-11)
@@ -105,6 +105,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Unlocks (2026-11-20): 274 tests pass with no script errors; debug web build at 1280x720 (tr): a newcomer's baiting screen shows the minnow, shrimp and live bait cards closed with the rank they open at; the rig panel skipped the spinning rod and went to the sabiki; the bag shows "Sıradaki açılım: Orta spin oltası, Köprü müdavimi rütbesinde (0/3 rozet)"; no console errors.
 - Jurisdictions (2026-11-20): 270 tests pass with no script errors; data only (no screen uses it yet), so nothing new to play in the browser.
 - Picarel (2026-11-20): 267 tests pass with no script errors; debug web build at 1280x720 (tr): the debug menu's species switch reaches "İzmarit", a forced bite on the light rod hooked one and the fight ran; no console errors. Not checked: landing one in the browser (the script's reel hold ended mid-fight).
 - Weekly tasks (2026-11-20): 265 tests pass with no script errors (ISO week edges, the week start, a single claim, the next week resetting); debug web build at 1280x720 (tr): the bag shows "Bu hafta (2026-W47)" and "8 balık tut · 0/8"; no console errors. The Claim button was not pressed in the browser (a unit test claims).

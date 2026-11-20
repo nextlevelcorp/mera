@@ -124,3 +124,57 @@ static func earned(before: Array, after: Array) -> Array[String]:
 		if not before.has(id):
 			out.append(String(id))
 	return out
+
+
+# ------------------------------------------------------------------ unlocks
+
+const UNLOCKS_FILE := "res://data/unlocks.json"
+const UNLOCK_KINDS: Array[String] = ["rig", "bait", "boat"]
+
+
+## Reads and checks what opens with rank. Returns {"ok", "errors", "unlocks"}.
+static func load_unlocks(k: Dictionary) -> Dictionary:
+	var f := FileAccess.open(UNLOCKS_FILE, FileAccess.READ)
+	if f == null:
+		return {"ok": false, "errors": ["cannot open %s" % UNLOCKS_FILE], "unlocks": []}
+	var d: Variant = JSON.parse_string(f.get_as_text())
+	if typeof(d) != TYPE_DICTIONARY:
+		return {"ok": false, "errors": ["%s is not a JSON object" % UNLOCKS_FILE], "unlocks": []}
+	var errors: Array[String] = []
+	if d.get("design_fill") != true and not d.has("source"):
+		errors.append("unlocks: needs design_fill or a source")
+	for u: Dictionary in d.get("unlocks", []):
+		if not String(u.get("kind", "")) in UNLOCK_KINDS:
+			errors.append("%s: unknown kind %s" % [u.get("id"), u.get("kind")])
+		if typeof(u.get("rank")) not in [TYPE_INT, TYPE_FLOAT] or int(u["rank"]) < 0 or int(u["rank"]) >= (k["RANK_STEPS"] as Array).size():
+			errors.append("%s: rank must be one of the rank steps" % u.get("id"))
+	return {"ok": errors.is_empty(), "errors": errors, "unlocks": d.get("unlocks", [])}
+
+
+## The angler's rank now.
+static func rank_of(goals: Array, save: Dictionary, k: Dictionary) -> int:
+	return rank(badges(goals, save, k).size(), k)
+
+
+## The unlock entry for a rig, bait or the boat, or empty when it is open from the start.
+static func unlock_for(unlocks: Array, kind: String, target: String) -> Dictionary:
+	for u: Dictionary in unlocks:
+		if u["kind"] == kind and u["target"] == target:
+			return u
+	return {}
+
+
+## True when the angler's rank opens this rig, bait or the boat.
+static func is_open(unlocks: Array, goals: Array, save: Dictionary, k: Dictionary, kind: String, target: String) -> bool:
+	var u := unlock_for(unlocks, kind, target)
+	return u.is_empty() or rank_of(goals, save, k) >= int(u["rank"])
+
+
+## The next thing to open (the lowest rank not reached), or empty.
+static func next_unlock(unlocks: Array, goals: Array, save: Dictionary, k: Dictionary) -> Dictionary:
+	var r := rank_of(goals, save, k)
+	var best := {}
+	for u: Dictionary in unlocks:
+		if int(u["rank"]) > r and (best.is_empty() or int(u["rank"]) < int(best["rank"])):
+			best = u
+	return best

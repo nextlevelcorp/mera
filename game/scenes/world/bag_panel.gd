@@ -83,8 +83,12 @@ static func lines(save: Dictionary) -> Dictionary:
 		week.append({"id": t["id"], "text": TranslationServer.translate("GOAL_PROGRESS") % [TranslationServer.translate(t["title_key"]), mini(int(wp["value"]), int(wp["target"])), int(wp["target"])],
 			"claimable": wp["done"] and not wp["claimed"], "claimed": wp["claimed"]})
 	var rank := TranslationServer.translate("RANK_LINE") % [TranslationServer.translate("RANK_%d" % Mastery.rank(got.size(), k)), got.size(), goals.size()]
+	var nu := Mastery.next_unlock(Db.unlocks(), goals, save, k)
+	var next_unlock := ""
+	if not nu.is_empty():
+		next_unlock = TranslationServer.translate("UNLOCK_NEXT") % [TranslationServer.translate(nu["name_key"]), TranslationServer.translate("RANK_%d" % int(nu["rank"])), got.size(), int((k["RANK_STEPS"] as Array)[int(nu["rank"])])]
 	return {"money": TranslationServer.translate("MONEY_FMT") % Economy.money(save), "skills": " · ".join(skills),
-		"fish": fish, "fish_value": total, "tackle": tackle, "rank": rank, "badges": badges,
+		"fish": fish, "fish_value": total, "tackle": tackle, "rank": rank, "badges": badges, "next_unlock": next_unlock,
 		"week_title": TranslationServer.translate("WEEK_TITLE") % String((save.get("weekly", {}) as Dictionary).get("week", "")), "week": week}
 
 
@@ -93,7 +97,7 @@ func refresh() -> void:
 		c.queue_free()
 	var l := lines(Profile.save)
 	_money.text = "%s · %s" % [l["money"], l["rank"]]
-	_skills.text = l["skills"]
+	_skills.text = l["skills"] + ("\n" + l["next_unlock"] if l["next_unlock"] != "" else "")
 	_rows.add_child(_label(22, tr("BAG_FISH") % [(l["fish"] as Array).size(), tr("MONEY_FMT") % int(l["fish_value"])]))
 	if (l["fish"] as Array).is_empty():
 		_rows.add_child(_label(20, tr("SHOP_NO_FISH")))
