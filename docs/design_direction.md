@@ -165,6 +165,16 @@ The owner asked for Stardew Valley style in the 2D world (pixel art, a three-qua
 ## 6h. Controls and panels (R21, 2026-11-19)
 The owner found the buttons "barely designed". One theme now styles every control (`UiTheme`, `game/ui/ui_theme.gd`, merged into the engine's default theme at start so it also reaches the world HUD on its CanvasLayer). Palette from the scene, as named tokens: `SEA_DEEP` #0d2433 (panels), `SEA_MID` #17384a (keys), `BRASS` #d1a957 (a reel's fittings: edges, focus, the primary key), `BRASS_DARK` #8d6d2c, `ROPE` #f3e9d2 (text), `STONE` #8a939a (unavailable), `SIGNAL` #e0604a (danger, reserved). The memorable element: keys built like hardware, with a raised lower lip that sinks when pressed (the face moves down 4 px), so a press reads by shape, not colour alone. Exactly one primary (brass) key per screen: Cast, Fish here, Tap while baiting, Cast again, and Walk the bridge on the title. Panels: deep sea at 94 %, a thin brass edge, 20 px corners, a soft shadow. The engine's default font stays (no licence change).
 
+## 6i. Fishing controls as instruments (2026-11-20)
+The owner found the fishing buttons still undesigned after R21. Direction: "Tide Instruments" (`docs/design/tide_instruments.md`, plate `docs/design/tide_instruments.png`): every control takes the shape of the motion it asks for. Built with `Instrument` (`game/ui/instrument.gd`), which only draws inside the existing control, so input and rules are unchanged:
+- Cast: a brass dial (220 px square); the power swing is a rope-cream arc that fills clockwise, the best-release band (top 10 %) is marked on the ring, and the face turns signal red with "Strike!" when a take is on. It replaces the vertical power bar.
+- Reel: a smoked-glass pad with a speed scale (up is faster, as the thumb) and a crank that turns at the reel speed.
+- Drag: a lever with ten detents, a red last fifth and a brass knob; the kilograms sit above it.
+- Pull: a thumb well with the two steer arrows at the outer thirds (`FightController.steer_from_pad`); the hub and arrow follow the thumb.
+- Secondary keys (Back, Rig, Catch log, Reel in, Faster, Settings): smoked-glass pills (`UiTheme.GLASS_KEY`) with an engraved glyph before the word.
+- The tension bar keeps its shapes (strain tick, break block, drag notch) on a rounded glass track in the same palette.
+Fonts stay the engine default in the game; the plate uses OFL fonts and is not shipped.
+
 ## 7. Out of scope here
 
 Colour palette, character and tackle sprites, the exact screen layout of the rig editor and the log, and store art. They follow the art decision and the water prototype.

@@ -1092,6 +1092,8 @@ func _process(delta: float) -> void:
 	_fx.step(delta)
 	_update_scene_effects()
 	_update_texts()
+	var striking: bool = phase == Phase.WAIT and _wait_state.get("phase", "") == WaitSim.PHASE_TAKE
+	_ui.refresh_instruments(delta, power_at(_charge_s) if phase == Phase.CHARGE else 0.0, striking)
 	_overlay.queue_redraw()
 
 

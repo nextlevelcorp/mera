@@ -13,6 +13,9 @@
 
 Add every data, art, audio and tool source here with its licence before it is used (spec 5.4, 7.8).
 
+## Fishing controls design plate (2026-11-20)
+`docs/design/tide_instruments.png` is a design reference, not a game asset (not exported). Drawn in code (Pillow) with fonts from the canvas-design skill folder, all SIL Open Font License 1.1: Italiana, Instrument Serif, Jura, DM Mono. The in-game controls (`game/ui/instrument.gd`) are drawn in code with the engine's default font; no font or image was added to the game.
+
 ## Galata Bridge look in the top-down world (2026-11-18)
 All pixel art is drawn in code for this project (`game/ui/pixel_art.gd`, `game/scenes/world/world_painter.gd`); no image is downloaded. The landmarks (Galata Tower, New Mosque, Spice Bazaar, the T1 tram line across the bridge, city ferries, simit carts, the pigeons of Eminönü) are drawn from general knowledge of the place, simplified and placed for recognition; layout and distances are design fills. Reference for the place: https://en.wikipedia.org/wiki/Galata_Bridge (not opened from the build environment). Place names on signs are proper names (Karaköy, Eminönü, Mısır Çarşısı).
 
