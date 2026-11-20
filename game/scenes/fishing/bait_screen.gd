@@ -317,64 +317,114 @@ func _draw_guide(s: float) -> void:
 
 
 ## A forged J hook with its point at the thumb (or resting by the bait), the
-## leader running up out of the frame. Steel: dark core, bright edge.
+## leader running up out of the frame. In local units the point leads along
+## +x: a short arm back from the point, the round bend, and the long shank
+## running forward past the point to the eye. Steel: dark rim, grey body,
+## a bright edge where the sky catches it.
 func _draw_hook(s: float) -> void:
 	var st: Dictionary = Baiting.strokes(kind)[mini(stroke, Baiting.strokes(kind).size() - 1)]
 	if st["type"] == "hold":
 		return
 	var tip: Vector2 = _finger if _touching else (st["path"][0] as Vector2) + Vector2(-0.03, -0.04)
-	var dir := Vector2.RIGHT
-	if _touching:
-		var path: Array = st["path"]
-		dir = ((path[path.size() - 1] as Vector2) - (path[0] as Vector2)).normalized()
-	var ang := dir.angle()
-	var k := s / 1000.0
-	# Hook outline in local units (point at the origin, pointing along +x).
-	var local := [Vector2(0, 0), Vector2(-12, 6), Vector2(-26, 14), Vector2(-42, 16), Vector2(-56, 10), Vector2(-62, -2), Vector2(-58, -14), Vector2(-40, -22), Vector2(10, -26), Vector2(70, -26)]
-	var pts := PackedVector2Array()
-	for v: Vector2 in local:
-		pts.append(to_px(tip) + (v * k * 1.4).rotated(ang))
+	var path: Array = st["path"]
+	var dir := ((path[path.size() - 1] as Vector2) - (path[0] as Vector2)).normalized()
+	var pts := hook_points(to_px(tip), dir.angle(), s * 0.0026)
 	var eye: Vector2 = pts[pts.size() - 1]
-	draw_line(eye, Vector2(eye.x + 30.0 * k, -10.0), Color(0.85, 0.9, 0.95, 0.55), 1.5, true)   # the leader
-	draw_polyline(pts, Color(0.1, 0.11, 0.13), 7.0 * k * 1.4 + 1.0, true)
-	draw_polyline(pts, Color(0.62, 0.66, 0.72), 4.0 * k * 1.4, true)
-	draw_polyline(pts.slice(0, 5), Color(0.92, 0.95, 1.0, 0.8), 1.5, true)
-	draw_arc(eye, 6.0 * k * 1.4, 0.0, TAU, 16, Color(0.62, 0.66, 0.72), 3.0, true)
-	var barb := to_px(tip) + (Vector2(-10, -7) * k * 1.4).rotated(ang)
-	draw_line(to_px(tip), barb, Color(0.62, 0.66, 0.72), 3.0, true)
+	draw_line(eye, Vector2(eye.x + 0.02 * s, -10.0), Color(0.85, 0.9, 0.95, 0.55), 1.5, true)   # the leader
+	var w := maxf(s * 0.006, 3.0)
+	draw_polyline(pts, Color(0.08, 0.09, 0.1), w + 2.5, true)
+	draw_polyline(pts, Color(0.55, 0.59, 0.64), w, true)
+	draw_polyline(pts, Color(0.9, 0.94, 1.0, 0.75), maxf(w * 0.3, 1.0), true)
+	draw_arc(eye, w * 1.6, 0.0, TAU, 18, Color(0.08, 0.09, 0.1), 2.5, true)
+	draw_arc(eye, w * 1.6, 0.0, TAU, 18, Color(0.62, 0.66, 0.72), 1.5, true)
+
+
+## The hook's centreline in screen pixels, from the point to the eye.
+static func hook_points(point: Vector2, angle: float, k: float) -> PackedVector2Array:
+	var local := PackedVector2Array()
+	local.append(Vector2(0, 0))
+	local.append(Vector2(-5, 1.5))          # the barb's spine
+	local.append(Vector2(-3, -4))           # the barb
+	local.append(Vector2(-6, 1.5))
+	for i in range(0, 11):                  # the short arm, then the round bend
+		local.append(Vector2(-6 - 2.2 * i, 2.0 + 0.1 * i))
+	var bend_c := Vector2(-30, 11)
+	for i in range(0, 13):
+		var a := -PI * 0.5 - PI * float(i) / 12.0
+		local.append(bend_c + Vector2(cos(a), -sin(a)) * 9.0 * Vector2(1, -1))
+	for i in range(1, 7):                   # the shank, forward past the point
+		local.append(Vector2(-30 + 7.5 * i, 20))
+	var out := PackedVector2Array()
+	for v: Vector2 in local:
+		out.append(point + (v * k).rotated(angle))
+	return out
 
 
 func _draw_shrimp(s: float) -> void:
 	var peel := _stroke_done(0)
 	var path: Array = Baiting.strokes("shrimp")[1]["path"]
-	var body := Color(0.86, 0.66, 0.60, 0.95)
-	# Tail fan, then body segments from tail to head, getting thicker.
-	var tail := to_px(Vector2(0.86, 0.31))
-	for a: float in [-0.5, 0.0, 0.5]:
-		draw_colored_polygon(PackedVector2Array([tail, tail + Vector2.from_angle(-0.6 + a) * 0.06 * s, tail + Vector2.from_angle(-0.2 + a) * 0.06 * s]), Color(0.78, 0.5, 0.45, 0.9))
-	for i in 9:
-		var t := float(i) / 8.0
+	# The body: a tapered, translucent tube along the threading path, from
+	# the tail (thin) to the head (thick), with a segment line every ninth.
+	var top := PackedVector2Array()
+	var bottom := PackedVector2Array()
+	var n := 24
+	var centre: Array[Vector2] = []
+	for i in n + 1:
+		var t := float(i) / n
 		var p := _along(path, t)
-		var rad := lerpf(0.022, 0.04, t) * s
-		draw_circle(p, rad, body.darkened(0.08 * float(i % 2)))
-		draw_arc(p, rad, PI * 1.1, PI * 1.9, 12, Color(1, 1, 1, 0.25), 2.0, true)
-	if not peel:
-		var shell := to_px(Vector2(0.8, 0.34))
-		draw_circle(shell, 0.032 * s, Color(0.72, 0.55, 0.5, 0.9))
-		draw_arc(shell, 0.032 * s, 0.0, TAU, 20, Color(0.45, 0.3, 0.28), 2.0, true)
-	var head := to_px(Vector2(0.33, 0.27))
-	draw_circle(head, 0.045 * s, body.lightened(0.05))
-	draw_circle(head + Vector2(-0.025, -0.01) * s, 0.006 * s, Color(0.05, 0.05, 0.05))
-	for a: float in [0.0, 0.25]:
-		draw_line(head, head + Vector2(-0.2, -0.12 - a * 0.2) * s, Color(0.75, 0.55, 0.5, 0.7), 1.5, true)
-	for i in 6:
-		var leg := _along(path, 0.3 + 0.1 * float(i))
-		draw_line(leg, leg + Vector2(0.004, 0.035) * s, Color(0.75, 0.55, 0.5, 0.8), 2.0, true)
+		var q := _along(path, minf(t + 0.02, 1.0)) if t < 1.0 else p + (p - _along(path, 0.98))
+		var normal := (q - p).normalized().orthogonal()
+		var rad := lerpf(0.018, 0.045, pow(t, 0.8)) * s
+		top.append(p + normal * rad)
+		bottom.append(p - normal * rad)
+		centre.append(p)
+	var outline := top.duplicate()
+	for i in range(bottom.size() - 1, -1, -1):
+		outline.append(bottom[i])
+	var flesh := Color(0.9, 0.7, 0.64, 0.92)
+	draw_colored_polygon(outline, flesh)
+	draw_polyline(top, Color(0.98, 0.86, 0.8, 0.8), 2.0, true)       # light on the back
+	draw_polyline(bottom, Color(0.62, 0.42, 0.38, 0.9), 2.0, true)
+	for i in range(3, n, 3):                                          # the segments
+		draw_line(top[i], bottom[i], Color(0.65, 0.45, 0.4, 0.6), 1.5, true)
+	if not peel:                                                      # the tail's shell, until it is peeled
+		var shell := PackedVector2Array()
+		for i in range(0, 6):
+			shell.append(top[i] + (top[i] - bottom[i]) * 0.08)
+		for i in range(5, -1, -1):
+			shell.append(bottom[i] - (top[i] - bottom[i]) * 0.08)
+		draw_colored_polygon(shell, Color(0.78, 0.6, 0.55, 0.95))
+		draw_polyline(shell, Color(0.45, 0.3, 0.28), 1.5, true)
+	# Tail fan at the thin end.
+	var tail: Vector2 = centre[0]
+	var back := (centre[0] - centre[2]).normalized()
+	for a: float in [-0.55, 0.0, 0.55]:
+		var d := back.rotated(a)
+		draw_colored_polygon(PackedVector2Array([tail, tail + d.rotated(-0.25) * 0.06 * s, tail + d.rotated(0.25) * 0.06 * s]), Color(0.8, 0.52, 0.46, 0.9))
+	# Head: carapace, rostrum, eye, long antennae, legs under the body.
+	var head: Vector2 = centre[n]
+	var fwd := (centre[n] - centre[n - 2]).normalized()
+	var cara := PackedVector2Array()
+	for i in 14:
+		var a := TAU * float(i) / 14.0
+		cara.append(head + (Vector2(cos(a) * 0.055, sin(a) * 0.04) * s).rotated(fwd.angle()))
+	draw_colored_polygon(cara, flesh.lightened(0.04))
+	draw_line(head + fwd * 0.04 * s, head + fwd * 0.09 * s + fwd.orthogonal() * -0.01 * s, Color(0.8, 0.58, 0.52), 3.0, true)
+	var eye := head + fwd * 0.03 * s + fwd.orthogonal() * -0.02 * s
+	draw_circle(eye, 0.007 * s, Color(0.05, 0.05, 0.05))
+	for bend: float in [-0.35, -0.15]:
+		var ant := PackedVector2Array()
+		for i in 8:
+			ant.append(head + fwd.rotated(bend - 0.06 * i) * (0.04 + 0.03 * i) * s)
+		draw_polyline(ant, Color(0.78, 0.55, 0.5, 0.75), 1.5, true)
+	for i in range(6, n - 2, 3):
+		var leg: Vector2 = bottom[i]
+		draw_line(leg, leg + (bottom[i] - top[i]).normalized() * 0.025 * s + fwd * 0.008 * s, Color(0.75, 0.52, 0.47, 0.85), 1.5, true)
 	if _stroke_done(1):
 		var hp := PackedVector2Array()
-		for i in 12:
-			hp.append(_along(path, float(i) / 11.0))
-		draw_polyline(hp, Color(0.55, 0.6, 0.66, 0.6), 3.0, true)   # the hook shows through the shrimp
+		for p: Vector2 in centre:
+			hp.append(p)
+		draw_polyline(hp, Color(0.55, 0.6, 0.66, 0.45), 3.0, true)   # the hook shows through the shrimp
 
 
 func _draw_fish(s: float) -> void:
@@ -407,7 +457,7 @@ func _draw_fish(s: float) -> void:
 		if _touching:
 			draw_circle(thumb, 0.045 * s, Color(0.93, 0.76, 0.62, 0.85))   # the thumb holding the fish
 	if _stroke_done(1):
-		draw_line(to_px(Vector2(0.56, 0.20)), to_px(Vector2(0.56, 0.26)), Color(0.6, 0.65, 0.7), 3.0, true)
+		draw_line(to_px(Vector2(0.56, 0.25)), to_px(Vector2(0.56, 0.29)), Color(0.6, 0.65, 0.7), 3.0, true)
 
 
 func _draw_soft(s: float) -> void:

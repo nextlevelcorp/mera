@@ -27,7 +27,7 @@ const STROKES := {
 	],
 	"live": [
 		{"key": "BAIT_STEP_LIVE_HOLD", "type": "hold", "at": Vector2(0.40, 0.33), "hold_s": 1.2, "tol": 0.08},
-		{"key": "BAIT_STEP_LIVE_HOOK", "type": "trace", "tol": 0.03, "path": [Vector2(0.56, 0.12), Vector2(0.56, 0.24)]},
+		{"key": "BAIT_STEP_LIVE_HOOK", "type": "trace", "tol": 0.03, "path": [Vector2(0.56, 0.17), Vector2(0.56, 0.29)]},
 	],
 	"soft_plastic": [
 		{"key": "BAIT_STEP_SOFT_LINE_UP", "type": "trace", "tol": 0.05, "path": [Vector2(0.20, 0.16), Vector2(0.27, 0.28)]},
