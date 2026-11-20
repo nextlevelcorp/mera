@@ -4,7 +4,8 @@
  "price_per_kg": {
   "istavrit": 90,
   "lufer": 160,
-  "palamut": 180
+  "palamut": 180,
+  "izmarit": 70
  },
  "default_price_per_kg": 80,
  "lures": [

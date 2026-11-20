@@ -221,5 +221,83 @@
    "as_of": "2024-09-01",
    "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, 11.08.2024, Çizelge 7 and Madde 15(4): https://www.resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm"
   }
+ },
+ {
+  "id": "izmarit",
+  "name_key": "SPECIES_PICAREL",
+  "scientific_name": "Spicara smaris",
+  "strength": 3,
+  "stamina": 4,
+  "speed": 8,
+  "caution": 4,
+  "aggression": 8,
+  "schooling": 15,
+  "feeding_depth_min_m": 2,
+  "feeding_depth_max_m": 40,
+  "temp_min_c": 10,
+  "temp_max_c": 24,
+  "activity_by_slot": {
+   "dawn": 0.8,
+   "day": 0.7,
+   "evening": 0.9,
+   "night": 0.3
+  },
+  "salinity": [
+   "marine"
+  ],
+  "mouth_gape_mm": 8,
+  "diet_tags": [
+   "plankton",
+   "crustacean"
+  ],
+  "surface_thrash": 2,
+  "teeth": 1,
+  "length_min_cm": 9.5,
+  "length_max_cm": 17.5,
+  "length_record_cm": 20,
+  "weight_record_kg": 0.1,
+  "rarity": 2,
+  "lw_a": 0.004,
+  "lw_b": 3.365,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   },
+   "fields": {
+    "scientific_name": {
+     "source": "WoRMS AphiaID 126830: https://www.marinespecies.org/aphia.php?p=taxdetails&id=126830",
+     "accessed": "2026-11-18"
+    },
+    "length_min_cm": {
+     "source": "Özpiçak & İbitürk (2024) KMUJENS 6(2): 1-8, Black Sea n=50, TL 9.5-17.5 cm: https://doi.org/10.55213/kmujens.1478476",
+     "accessed": "2026-11-18"
+    },
+    "length_max_cm": {
+     "source": "Özpiçak & İbitürk (2024) KMUJENS 6(2): 1-8, Black Sea n=50, TL 9.5-17.5 cm: https://doi.org/10.55213/kmujens.1478476",
+     "accessed": "2026-11-18"
+    },
+    "lw_a": {
+     "source": "Özpiçak & İbitürk (2024) KMUJENS 6(2): 1-8, both sexes, W=0.004 L^3.365, R2 0.963: https://doi.org/10.55213/kmujens.1478476",
+     "accessed": "2026-11-18"
+    },
+    "lw_b": {
+     "source": "Özpiçak & İbitürk (2024) KMUJENS 6(2): 1-8, both sexes, W=0.004 L^3.365, R2 0.963: https://doi.org/10.55213/kmujens.1478476",
+     "accessed": "2026-11-18"
+    },
+    "diet_tags": {
+     "source": "Özpiçak & İbitürk (2024), introduction: plankton and small crustaceans: https://doi.org/10.55213/kmujens.1478476",
+     "accessed": "2026-11-18"
+    },
+    "regulation": {
+     "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, Çizelge 7: not listed, so 'Diğer türler' (size limit 'Yok', quantity in the 5 kg day limit); unchanged by Tebliğ 2026/26: https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm",
+     "accessed": "2026-11-20"
+    }
+   }
+  },
+  "regulation": {
+   "no_minimum": true,
+   "as_of": "2026-09-16",
+   "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, 11.08.2024, Çizelge 7: Spicara smaris is not listed, so it falls under 'Diğer türler' with size limit 'Yok' (none) and the 5 kg day limit; Tebliğ 2026/26 (Resmî Gazete 33372, 16.09.2026) did not change it. Owner decision 2026-11-20: a checked 'no minimum' is enough to add the species. https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm"
+  }
  }
 ]
