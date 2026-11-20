@@ -27,6 +27,7 @@ func _draw() -> void:
 				draw_circle(scr._end_pos, 4.0, Color(0.95, 0.75, 0.3))
 			if scr.phase == FishingScreen.Phase.CHARGE:
 				_draw_aim_marker(size)
+			_draw_aim_gauge(size)   # where the cast will go, before and while charging
 		FishingScreen.Phase.FLIGHT:
 			_draw_line(false)
 			draw_circle(scr._end_pos, 4.0, Color(0.95, 0.75, 0.3))
@@ -115,17 +116,64 @@ func _draw_line(strained: bool) -> void:
 
 
 ## While charging: where the lure would land at the current power and aim
-## (the skill error is not shown; it is added at release).
+## (the skill error is not shown; it is added at release). A dashed course
+## on the water from the angler to a brass target ring, with the distance.
 func _draw_aim_marker(size: Vector2) -> void:
 	var c := CatchModel.cast(scr._k, scr._ctx["rod"], scr._ctx["lure"], scr._ctx["angler"], scr._ctx["position"], scr.conditions, maxf(FishingScreen.power_at(scr._charge_s), 0.15))
 	var d := maxf(float(c["cast_m"]), float(scr._k["WAIT_END_M"]) + 2.0)
 	var world := Vector2(-0.3 + tan(scr._aim) * d, FishingScreen.NEAR_DRAW_M + d)
 	var centre := WaterView.project(world, 0.0, size)
+	# The course: dashes from just in front of the angler out to the target.
+	var start := Vector2(-0.3, FishingScreen.NEAR_DRAW_M + 2.0)
+	for i in 14:
+		var t0 := float(i) / 14.0
+		var t1 := t0 + 0.6 / 14.0
+		var a := WaterView.project(start.lerp(world, t0), 0.0, size)
+		var b := WaterView.project(start.lerp(world, t1), 0.0, size)
+		draw_line(a, b, Color(UiTheme.ROPE, 0.75 - 0.35 * t0), lerpf(4.0, 2.0, t0), true)
 	var aspect := size.x / maxf(size.y, 1.0)
-	var rx := 0.8 / (world.y * aspect * WaterView.FOV) * size.x
-	var ry := WaterView.CAM_HEIGHT * 0.8 / (world.y * world.y * WaterView.FOV) * size.y
-	_ellipse(centre, maxf(rx, 6.0), maxf(ry, 2.0), Color(1, 1, 1, 0.6))
-	_ellipse(centre, maxf(rx, 6.0) * 0.4, maxf(ry, 2.0) * 0.4, Color(1, 1, 1, 0.45))
+	var rx := maxf(1.2 / (world.y * aspect * WaterView.FOV) * size.x, 22.0)
+	var ry := maxf(WaterView.CAM_HEIGHT * 1.2 / (world.y * world.y * WaterView.FOV) * size.y, 7.0)
+	var pulse := 1.0 + 0.08 * sin(scr._time * 6.0)
+	_ellipse(centre, rx * pulse + 2.0, ry * pulse + 1.0, Color(0, 0, 0, 0.45))
+	_ellipse(centre, rx * pulse, ry * pulse, UiTheme.BRASS)
+	_ellipse(centre, rx * 0.45, ry * 0.45, Color(UiTheme.ROPE, 0.8))
+	draw_line(centre - Vector2(rx * 0.7, 0), centre + Vector2(rx * 0.7, 0), Color(UiTheme.ROPE, 0.8), 1.5, true)
+	draw_line(centre - Vector2(0, ry * 1.6), centre + Vector2(0, ry * 0.6), Color(UiTheme.ROPE, 0.8), 1.5, true)
+	var font := get_theme_default_font()
+	var text := tr("FISH_AIM_DIST") % roundi(d)
+	var w := font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, 22).x
+	var at := centre + Vector2(-w * 0.5, -ry - 14.0)
+	draw_string_outline(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, 6, Color(0, 0, 0, 0.85))
+	draw_string(font, at, text, HORIZONTAL_ALIGNMENT_LEFT, -1, 22, UiTheme.ROPE)
+
+
+## The aim gauge at the bottom centre: a shallow arc from full left to full
+## right with a needle at the current aim and its angle, so the direction is
+## readable before the cast (shape and position, not colour alone).
+func _draw_aim_gauge(size: Vector2) -> void:
+	var c := Vector2(size.x * 0.5, size.y - 26.0)
+	var r := 130.0
+	var span := 0.62   # half the arc, radians on screen
+	draw_arc(c, r, -PI * 0.5 - span, -PI * 0.5 + span, 40, Color(0, 0, 0, 0.45), 10.0, true)
+	draw_arc(c, r, -PI * 0.5 - span, -PI * 0.5 + span, 40, Color(UiTheme.SEA_MID, 0.9), 6.0, true)
+	for i in 9:
+		var a := -PI * 0.5 - span + span * 2.0 * float(i) / 8.0
+		var long := i % 4 == 0
+		draw_line(c + Vector2.from_angle(a) * (r - (12.0 if long else 7.0)), c + Vector2.from_angle(a) * (r + 3.0), Color(UiTheme.ROPE, 0.8 if long else 0.5), 2.0, true)
+	var share := clampf(scr._aim / CastMotion.AIM_MAX, -1.0, 1.0)
+	var na := -PI * 0.5 + span * share
+	var tip := c + Vector2.from_angle(na) * (r + 8.0)
+	draw_line(c + Vector2.from_angle(na) * (r - 26.0), tip, Color(0, 0, 0, 0.5), 7.0, true)
+	draw_line(c + Vector2.from_angle(na) * (r - 26.0), tip, UiTheme.BRASS, 4.0, true)
+	draw_circle(tip, 6.0, UiTheme.BRASS)
+	var font := get_theme_default_font()
+	var deg := roundi(rad_to_deg(scr._aim))
+	var label := tr("FISH_AIM_STRAIGHT") if deg == 0 else (tr("FISH_AIM_LEFT") if deg < 0 else tr("FISH_AIM_RIGHT")) % absi(deg)
+	var w := font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+	var at := c + Vector2(-w * 0.5, -r - 18.0)
+	draw_string_outline(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, 6, Color(0, 0, 0, 0.85))
+	draw_string(font, at, label, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, UiTheme.ROPE)
 
 
 func _ellipse(centre: Vector2, rx: float, ry: float, color: Color) -> void:

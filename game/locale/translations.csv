@@ -306,3 +306,7 @@ RANK_0,Newcomer,Acemi,Novato
 RANK_1,Bridge regular,Köprü müdavimi,Habitual del puente
 RANK_2,Shore angler,Kıyı balıkçısı,Pescador de orilla
 RANK_3,Master of the bridge,Köprünün ustası,Maestro del puente
+FISH_AIM_DIST,≈ %d m,≈ %d m,≈ %d m
+FISH_AIM_STRAIGHT,Aim: straight out,Nişan: tam karşı,Puntería: al frente
+FISH_AIM_LEFT,Aim: %d° left,Nişan: %d° sol,Puntería: %d° izquierda
+FISH_AIM_RIGHT,Aim: %d° right,Nişan: %d° sağ,Puntería: %d° derecha
