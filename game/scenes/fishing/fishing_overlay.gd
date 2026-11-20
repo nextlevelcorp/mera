@@ -2,7 +2,7 @@ class_name FishingOverlay
 extends Control
 ## The 2D layer over the 3D fishing scene: the line, lure, aim marker, water
 ## rings, splashes, gulls, the fish near the surface and on the line, the
-## neighbours' lines, the cast power gauge and the tension bar. It reads the
+## neighbours' lines and the tension bar (the cast power is on the Cast dial, Instrument). It reads the
 ## fishing screen's state and never changes a rule or a simulation; the two
 ## exceptions are view-only poses it hands to the 3D scene each frame (the
 ## bridge's neighbours and the angler's rig). Split from fishing_screen.gd
@@ -50,8 +50,6 @@ func _draw() -> void:
 	scr._water.rig3d.pose(scr._rig, scr._rod.points(), size)
 	if scr.phase == FishingScreen.Phase.FIGHT or (scr.phase == FishingScreen.Phase.RESULT and not scr._hud.is_empty()):
 		_draw_tension_bar(size)
-	if scr.phase == FishingScreen.Phase.CHARGE:
-		_draw_power(size)
 
 
 func _draw_fight(size: Vector2) -> void:
@@ -140,20 +138,6 @@ func _ellipse(centre: Vector2, rx: float, ry: float, color: Color) -> void:
 	draw_polyline(points, color, 1.2, true)
 
 
-## Cast power: a vertical gauge beside the Cast button; the marker swings up
-## and down and the top band is the best release.
-func _draw_power(size: Vector2) -> void:
-	var x := size.x - 290.0
-	var y0 := size.y - 300.0
-	var h := 260.0
-	var p := FishingScreen.power_at(scr._charge_s)
-	draw_rect(Rect2(x - 3, y0 - 3, 34, h + 6), Color(0, 0, 0, 0.55))
-	draw_rect(Rect2(x, y0, 28, h), Color(0.12, 0.14, 0.18, 0.9))
-	draw_rect(Rect2(x, y0, 28, h * 0.1), Color(0.55, 0.85, 0.6))
-	draw_rect(Rect2(x, y0 + h * (1.0 - p), 28, h * p), Color(0.95, 0.8, 0.35, 0.8))
-	draw_rect(Rect2(x - 8, y0 + h * (1.0 - p) - 3, 44, 6), Color(1, 1, 1))
-
-
 ## Tension against the line's strength. Shape, not colour, tells the danger:
 ## a tick at the strain threshold, a thick block at the break point, and the
 ## numbers in kilograms (PRD F8, F18).
@@ -163,16 +147,33 @@ func _draw_tension_bar(size: Vector2) -> void:
 	var x := (size.x - w) * 0.5
 	var y := 26.0
 	var ratio: float = clampf(float(scr._hud["tension_ratio"]), 0.0, 1.0)
-	draw_rect(Rect2(x - 3, y - 3, w + 6, h + 6), Color(0, 0, 0, 0.55))
-	draw_rect(Rect2(x, y, w, h), Color(0.12, 0.14, 0.18, 0.9))
-	var fill := Color(0.55, 0.85, 0.6) if ratio < 0.6 else (Color(0.95, 0.8, 0.35) if ratio < 0.8 else Color(0.95, 0.4, 0.3))
-	draw_rect(Rect2(x, y, w * ratio, h), fill)
+	# A smoked-glass track like the instruments (Tide Instruments); the shapes
+	# that carry the meaning are unchanged.
+	var track := StyleBoxFlat.new()
+	track.bg_color = Color(UiTheme.SEA_DEEP, 0.85)
+	track.border_color = Color(UiTheme.BRASS, 0.5)
+	track.set_border_width_all(2)
+	track.set_corner_radius_all(int(h * 0.5))
+	track.shadow_color = Color(0, 0, 0, 0.35)
+	track.shadow_size = 6
+	track.anti_aliasing = true
+	draw_style_box(track, Rect2(x - 4, y - 4, w + 8, h + 8))
+	var fill := Color("6fb7a0") if ratio < 0.6 else (UiTheme.BRASS if ratio < 0.8 else UiTheme.SIGNAL)
+	if ratio > 0.0:
+		var bar := StyleBoxFlat.new()
+		bar.bg_color = fill
+		bar.set_corner_radius_all(int(h * 0.5) - 2)
+		bar.anti_aliasing = true
+		draw_style_box(bar, Rect2(x, y, maxf(w * ratio, h), h))
+	for i in range(1, 10):
+		var tx := x + w * float(i) / 10.0
+		draw_line(Vector2(tx, y + h - 8.0), Vector2(tx, y + h), Color(UiTheme.ROPE, 0.35), 1.5)
 	var thr := float(scr._hud["strain_threshold_ratio"])
-	draw_line(Vector2(x + w * thr, y - 8), Vector2(x + w * thr, y + h + 8), Color(1, 1, 1), 3.0)
-	draw_rect(Rect2(x + w - 8, y - 8, 8, h + 16), Color(1, 1, 1))
+	draw_line(Vector2(x + w * thr, y - 8), Vector2(x + w * thr, y + h + 8), UiTheme.ROPE, 3.0)
+	draw_rect(Rect2(x + w - 8, y - 8, 8, h + 16), UiTheme.SIGNAL)
 	var drag_ratio: float = clampf(float(scr._hud["drag_set_kg"]) / float(scr._hud["line_strength_kg"]), 0.0, 1.0)
 	var nx := x + w * drag_ratio
-	draw_colored_polygon(PackedVector2Array([Vector2(nx, y + h + 3), Vector2(nx - 9, y + h + 18), Vector2(nx + 9, y + h + 18)]), Color(1, 1, 1))
+	draw_colored_polygon(PackedVector2Array([Vector2(nx, y + h + 3), Vector2(nx - 9, y + h + 18), Vector2(nx + 9, y + h + 18)]), UiTheme.BRASS)
 	var strain: float = clampf(float(scr._hud["strain_ratio"]), 0.0, 1.0)
 	if strain > 0.0:
-		draw_rect(Rect2(x, y - 14, w * strain, 6), Color(1.0, 0.35, 0.25))
+		draw_rect(Rect2(x, y - 14, w * strain, 6), UiTheme.SIGNAL)

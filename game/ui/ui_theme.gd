@@ -17,6 +17,8 @@ const SIGNAL := Color("e0604a")
 
 ## The type variation for the one main action of a screen (Cast, Fish here, Tap).
 const PRIMARY := &"PrimaryButton"
+## Secondary keys of the fishing view: smoked-glass pills with room for a glyph.
+const GLASS_KEY := &"GlassKey"
 const RADIUS := 16
 
 
@@ -32,6 +34,12 @@ static func make() -> Theme:
 	_buttons(t, &"Button", Color(SEA_MID, 0.9), ROPE, Color(SEA_DEEP, 0.95), Color(BRASS, 0.7))
 	_buttons(t, PRIMARY, BRASS, SEA_DEEP, BRASS_DARK, BRASS_DARK.darkened(0.2))
 	t.set_type_variation(PRIMARY, &"Button")
+	_buttons(t, GLASS_KEY, Color(SEA_MID, 0.82), ROPE, Color(ROPE, 0.18), Color(BRASS, 0.7))
+	t.set_type_variation(GLASS_KEY, &"Button")
+	for state: StringName in [&"normal", &"hover", &"pressed", &"hover_pressed", &"disabled"]:
+		var pill := t.get_stylebox(state, GLASS_KEY) as StyleBoxFlat
+		pill.set_corner_radius_all(48)
+		pill.content_margin_left = 64.0
 	t.set_color(&"font_color", &"Label", ROPE)
 	t.set_stylebox(&"panel", &"PanelContainer", panel_box())
 	t.set_stylebox(&"panel", &"Panel", panel_box())

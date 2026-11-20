@@ -1,0 +1,13 @@
+# Tide Instruments
+
+*A design philosophy for controls that live on the water.*
+
+Tide Instruments treats every control as a physical object that has been turned, worn and trusted at the edge of the sea. Nothing is a rectangle by accident. The circle is the native form: the spool, the dial, the porthole, the ripple. A control earns its place by the shape of the motion it asks for. A thumb that winds is given a wheel. A thumb that holds and releases is given a dial that fills. A thumb that slides is given a lever with detents. Form is instruction, so the hand understands the object before the eye reads a word.
+
+Color is borrowed, never invented. Night water supplies the ground: a blue so deep it is almost black, glazed and translucent so the sea keeps moving beneath it. Brass supplies the signal: warm, slightly aged, reserved for the single most important act on the screen. Rope-cream carries the few words that remain. One alarm red exists and is spent only when the line is about to part. The palette is small on purpose. Every hue must be justified by the shore, and the result should feel meticulously calibrated, the product of patient trial against real light.
+
+Space is measured like a nautical chart. Controls sit at the corners where thumbs rest, held off the edges by a constant margin. The center of the frame is left open for the horizon, because the water is the true interface. Rhythm comes from repetition: concentric rings, evenly spaced ticks, graduations that read at a glance. A ring of twelve marks says "this turns"; a column of notches says "this sets"; a filling arc says "this is building." The marks are fine and dense, laid down with the painstaking care of an engraver working a sextant.
+
+Hierarchy is weight, not volume. The primary instrument is larger, warmer and lit from within; everything else recedes into smoked glass. Secondary keys carry a small engraved glyph so they read even when the label is too small to see. State changes by shape as well as hue: a pressed key sinks, a charging dial fills clockwise, a straining lever leans into its red zone. Nothing depends on color alone, and nothing shouts. The calm is the point, so when tension does arrive it lands with force.
+
+Craft is the whole argument. Each ring is concentric to the pixel, each tick evenly divided, each highlight placed where a single low sun would place it. The work should look as if a master instrument maker spent seasons refining it, removing everything that did not need to be there. When in doubt, refine rather than add: thinner lines, truer circles, quieter glass. The finished set should feel inevitable, as though the sea had always used these instruments and we had only uncovered them.

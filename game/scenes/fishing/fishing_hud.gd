@@ -55,6 +55,11 @@ var vol_slider: HSlider
 var sens_slider: HSlider
 var flip_check: CheckButton
 var log_text: Label
+## The drawn instruments over the fight and cast controls (Tide Instruments).
+var cast_dial: Instrument
+var reel_gauge: Instrument
+var drag_lever: Instrument
+var pull_well: Instrument
 
 
 func _init(screen: FishingScreen) -> void:
@@ -73,6 +78,7 @@ func _build_hud() -> void:
 	var back := _button(tr("PROTO_BACK"), 22, func() -> void: scr.leave())
 	back.custom_minimum_size = Vector2(160, TOUCH_MIN)
 	back.position = Vector2(16, 16)
+	_glass_key(back, "back")
 	add_child(back)
 
 	status_label = _label(20)
@@ -125,16 +131,18 @@ func _build_hud() -> void:
 	reel_pad = _pad(tr("FIGHT_REEL"))
 	_place_bottom(reel_pad, false, Vector2(260, 300), 16.0)
 	reel_pad.gui_input.connect(_on_reel_input)
+	reel_gauge = _skin(reel_pad, Instrument.Kind.REEL, tr("FIGHT_REEL"))
 	drag_slider = _pad(tr("FIGHT_DRAG"))
 	_place_bottom(drag_slider, true, Vector2(120, 300), 230.0)
 	drag_slider.gui_input.connect(_on_drag_input)
-	drag_label = _label(22)
+	drag_lever = _skin(drag_slider, Instrument.Kind.LEVER, tr("FIGHT_DRAG"))
+	drag_label = _label(20)
 	drag_slider.add_child(drag_label)
-	drag_label.set_anchors_preset(Control.PRESET_CENTER)
-	drag_label.offset_left = -60.0
-	drag_label.offset_right = 60.0
-	drag_label.offset_top = -14.0
-	drag_label.offset_bottom = 14.0
+	drag_label.set_anchors_preset(Control.PRESET_TOP_WIDE)
+	drag_label.offset_left = -40.0
+	drag_label.offset_right = 40.0
+	drag_label.offset_top = -30.0
+	drag_label.offset_bottom = -4.0
 	drag_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	pull_button = _button(tr("FIGHT_PULL"), 28, Callable())
 	_place_bottom(pull_button, true, Vector2(210, 210), 16.0)
@@ -147,12 +155,14 @@ func _build_hud() -> void:
 		# Where the thumb sits sideways on the button is the side strain.
 		if event is InputEventScreenTouch or event is InputEventScreenDrag or event is InputEventMouse:
 			steer = FightController.steer_from_pad(event.position.x, pull_button.size.x))
+	pull_well = _skin(pull_button, Instrument.Kind.WELL, tr("FIGHT_PULL"))
 	add_child(pull_button)
 
 	# Cast / strike: the same right-corner button.
 	main_button = _button(tr("FISH_CAST"), 32, Callable())
 	main_button.theme_type_variation = UiTheme.PRIMARY
-	_place_bottom(main_button, true, Vector2(220, 200), 16.0)
+	_place_bottom(main_button, true, Vector2(220, 220), 16.0)
+	cast_dial = _skin(main_button, Instrument.Kind.DIAL, main_button.text)
 	main_button.button_down.connect(scr._on_main_down)
 	main_button.button_up.connect(scr._on_main_up)
 	main_button.gui_input.connect(scr._on_main_input)
@@ -161,10 +171,12 @@ func _build_hud() -> void:
 	# Wait controls on the left.
 	reel_in_button = _button(tr("FISH_REEL_IN"), 24, scr.reel_in)
 	_top_left(reel_in_button, 128.0)
+	_glass_key(reel_in_button, "reel_in")
 	add_child(reel_in_button)
 	speed_button = _button(tr("FISH_SPEED"), 24, func() -> void: scr._speed_on = not scr._speed_on)
 	speed_button.toggle_mode = true
 	_top_left(speed_button, 232.0)
+	_glass_key(speed_button, "speed")
 	add_child(speed_button)
 
 	# Ready controls on the left.
@@ -172,12 +184,14 @@ func _build_hud() -> void:
 		log_panel.visible = false
 		rig_panel.visible = not rig_panel.visible)
 	_top_left(rig_button, 128.0)
+	_glass_key(rig_button, "rig")
 	add_child(rig_button)
 	log_button = _button(tr("FISH_LOG"), 24, func() -> void:
 		rig_panel.visible = false
 		log_panel.visible = not log_panel.visible
 		scr._update_log())
 	_top_left(log_button, 232.0)
+	_glass_key(log_button, "log")
 	add_child(log_button)
 
 
@@ -262,6 +276,7 @@ func _build_settings() -> void:
 		rig_panel.visible = false
 		log_panel.visible = false
 		settings_panel.visible = not settings_panel.visible)
+	_glass_key(settings_button, "settings")
 	settings_button.anchor_left = 1.0
 	settings_button.anchor_right = 1.0
 	settings_button.offset_left = -296.0
@@ -334,6 +349,58 @@ func _on_drag_input(event: InputEvent) -> void:
 	var moving: bool = (event is InputEventScreenDrag) or (event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))
 	if down or moving:
 		drag_ratio = clampf(1.0 - event.position.y / maxf(drag_slider.size.y, 1.0), 0.0, 1.0)
+
+
+## Puts the drawn instrument over a control and hides the control's own look;
+## the control keeps its input.
+func _skin(control: Control, instrument_kind: Instrument.Kind, caption: String) -> Instrument:
+	var empty := StyleBoxEmpty.new()
+	if control is Button:
+		for state: StringName in [&"normal", &"hover", &"pressed", &"hover_pressed", &"disabled", &"focus"]:
+			control.add_theme_stylebox_override(state, empty)
+		for c: StringName in [&"font_color", &"font_hover_color", &"font_pressed_color", &"font_hover_pressed_color", &"font_focus_color", &"font_disabled_color"]:
+			control.add_theme_color_override(c, Color(0, 0, 0, 0))
+	else:
+		control.add_theme_stylebox_override("panel", empty)
+		control.self_modulate = Color(1, 1, 1, 1)
+		for child: Node in control.get_children():
+			if child is Label:
+				(child as Label).visible = false   # the instrument draws its caption
+	var inst := Instrument.new(instrument_kind, caption)
+	control.add_child(inst)
+	return inst
+
+
+## A secondary key: a smoked-glass pill with an engraved glyph before the word.
+func _glass_key(button: Button, glyph: String) -> void:
+	button.theme_type_variation = UiTheme.GLASS_KEY
+	var g := Instrument.new(Instrument.Kind.GLYPH)
+	g.glyph = glyph
+	g.set_anchors_preset(Control.PRESET_CENTER_LEFT)
+	g.offset_left = 14.0
+	g.offset_right = 58.0
+	g.offset_top = -22.0
+	g.offset_bottom = 22.0
+	button.add_child(g)
+
+
+## Feeds the instruments from the screen's state each frame.
+func refresh_instruments(delta: float, power: float, striking: bool) -> void:
+	cast_dial.caption = main_button.text
+	cast_dial.value = power
+	cast_dial.alert = striking
+	cast_dial.pressed = main_button.button_pressed
+	var speed := FightController.reel_from_pad(reel_pressed, reel_y, reel_pad.size.y)
+	reel_gauge.value = speed
+	reel_gauge.pressed = reel_pressed
+	reel_gauge.thumb_y = reel_y if reel_pressed else -1.0
+	reel_gauge.spin = fmod(reel_gauge.spin + delta * speed * 12.0, TAU)
+	drag_lever.value = drag_ratio
+	pull_well.pressed = pull_pressed
+	pull_well.steer = steer if pull_pressed else 0.0
+	for inst: Instrument in [cast_dial, reel_gauge, drag_lever, pull_well]:
+		if inst.is_visible_in_tree():
+			inst.queue_redraw()
 
 
 func _place_bottom(control: Control, right_side: bool, control_size: Vector2, dx: float) -> void:
