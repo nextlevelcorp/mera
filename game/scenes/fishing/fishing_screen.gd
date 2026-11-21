@@ -1476,7 +1476,7 @@ func _show_result() -> void:
 			lines.append(tr("FISH_FIRST"))
 		elif _result.get("length_record", false) or _result.get("weight_record", false):
 			lines.append(tr("FISH_RECORD"))
-		var rule: Dictionary = _fight_ctx["species"].get("regulation", {})
+		var rule := Regulations.rule(_db, _session.jurisdiction(), String(_fight_ctx["species"]["id"]))
 		var small := _session.undersize_count(1 + extra.size())
 		if small > 0:
 			lines.append(tr("FISH_UNDERSIZE") % float(rule["min_length_cm"]))

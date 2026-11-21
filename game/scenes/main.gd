@@ -11,6 +11,7 @@ const FISHING_SCREEN := "res://scenes/fishing/fishing_screen.tscn"
 @onready var _prototype: Button = $Column/WaterPrototype
 @onready var _fishing: Button = $Column/Fishing
 @onready var _walk: Button = $Column/Walk
+var _map_button: Button
 
 
 func _ready() -> void:
@@ -28,6 +29,32 @@ func _ready() -> void:
 	_fishing.pressed.connect(func() -> void: _open_fishing(Game.fishing_request()))
 	_walk.text = tr("MAIN_WALK")
 	_walk.pressed.connect(_open_world)
+	# The map (R17): a country, then a spot; the primary way in.
+	_map_button = Button.new()
+	_map_button.text = tr("MAIN_MAP")
+	_map_button.theme_type_variation = UiTheme.PRIMARY
+	_map_button.custom_minimum_size = _walk.custom_minimum_size
+	_map_button.pressed.connect(_open_map)
+	$Column.add_child(_map_button)
+	$Column.move_child(_map_button, _walk.get_index())
+	_walk.theme_type_variation = &""
+
+
+## The map opens over the title; a spot with a walkable area opens the
+## world, any other spot opens the fishing view there.
+func _open_map() -> void:
+	var map := MapScreen.new()
+	map.closed.connect(func() -> void:
+		map.queue_free()
+		_show_title(true))
+	map.spot_chosen.connect(func(spot_id: String) -> void:
+		map.queue_free()
+		if FileAccess.file_exists("res://data/areas/%s.json" % spot_id):
+			_open_world()
+		else:
+			_open_fishing(Game.fishing_request(spot_id)))
+	_show_title(false)
+	add_child(map)
 
 
 ## The top-down world opens over the title. Its fishing markers open the

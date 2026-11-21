@@ -223,6 +223,11 @@
     "region": {
      "type": "string"
     },
+    "jurisdiction": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_]*$",
+     "required": false
+    },
     "lat": {
      "type": "number",
      "min": -90,
