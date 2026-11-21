@@ -79,6 +79,7 @@ FishingResult  = { catches: [{species_id, length_cm, weight_kg, kept}], lost: [{
 | Rings, boils, the lure's ripple | `sea.gdshader` (12 rings from `SplashFx` through `WaterView.set_rings`) | Implemented (R6) |
 | Fish under the water | A shadow in `sea.gdshader` (8 blobs along the spine, `WaterView.set_fish_shadow`) | Implemented (R6) |
 | Fish in the air, on the line | `Fish3D` (`fish_world` for a jump, `fish_hand` as a child of the camera for the landing and lift) | Implemented (R6) |
+| The tackle at the rod tip | `TerminalTackle` (`game/ui/fx/`): jig and grub, minnow, sabiki and lead, float rig with shrimp or live bait, bare hook; drawn by `FishingOverlay` | Implemented (2026-11-21) |
 | The landing close-up and the bucket | `LandingView` (looking down over the rail: the wall, the water, the fish on the line, a height ruler; under the controls) and `BucketView` (the visit's kept fish swimming in a bucket beside the result) in `game/scenes/fishing/` | Implemented (2026-11-21) |
 | Gulls | `GullFlock.pose` into one `MultiMesh`, flap in `gull.gdshader` | Implemented (R6) |
 | Line, splash droplets, heading arrow, neighbours' lines | 2D overlay through `project()` | Implemented in 2D; the line stays 2D on purpose (it is in front of everything) |

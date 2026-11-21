@@ -21,16 +21,13 @@ func _draw() -> void:
 	match scr.phase:
 		FishingScreen.Phase.READY, FishingScreen.Phase.CHARGE:
 			_draw_line(false)
-			if scr.is_float():
-				_draw_float(scr._end_pos + Vector2(0.0, 8.0), 0.0)   # the float hangs from the tip (R18)
-			else:
-				draw_circle(scr._end_pos, 4.0, Color(0.95, 0.75, 0.3))
+			_draw_tackle(1.0)   # what hangs from the tip, by rig and bait (2026-11-21)
 			if scr.phase == FishingScreen.Phase.CHARGE:
 				_draw_aim_marker(size)
 			_draw_aim_gauge(size)   # where the cast will go, before and while charging
 		FishingScreen.Phase.FLIGHT:
 			_draw_line(false)
-			draw_circle(scr._end_pos, 4.0, Color(0.95, 0.75, 0.3))
+			_draw_tackle(lerpf(1.0, 0.15, clampf(scr._flight_s / maxf(scr._flight_total_s, 0.01) * 3.0, 0.0, 1.0)))
 		FishingScreen.Phase.WAIT:
 			_draw_line(false)
 			if scr.is_float():
@@ -79,6 +76,16 @@ func _draw_stage(size: Vector2) -> void:
 		tips.append(WaterView.project(Vector2(t.x, t.z), t.y, size))
 		lures.append(WaterView.project(bridge.lure_water(i, float(p["cast_m"]), float(p["side"])), 0.0, size))
 	scr._neighbours.draw_lines(self, size, float(scr._env.get("light", 0.6)), tips, lures)
+
+
+## The terminal tackle at the line's end, at `scale` of its size in hand
+## (it shrinks as it flies away).
+func _draw_tackle(scale: float) -> void:
+	if scr._ctx.is_empty():
+		return
+	var look := TerminalTackle.look_of(scr._ctx["lure"], scr._session.float_bait, not scr._session.needs_baiting(scr._ctx))
+	var sway := 0.12 * sin(scr._time * 1.3) + 0.04 * sin(scr._time * 3.7)
+	TerminalTackle.draw(self, scr._end_pos, look, size.y / 90.0 * scale, sway, scr._time)
 
 
 ## The float on the water (R12): a red tip over a white body, cut off at the

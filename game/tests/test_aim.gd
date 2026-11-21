@@ -94,3 +94,16 @@ func test_the_anglers_stand_differently_every_session() -> void:
 			states[int(p["state"])] = true
 	assert_true(states.has(NeighborAnglers.S.IDLE) and states.has(NeighborAnglers.S.BAIT) and states.has(NeighborAnglers.S.REST) and states.has(NeighborAnglers.S.FIGHT),
 		"sessions start them waiting, baiting, resting or into a fish: %s" % str(states.keys()))
+
+
+func test_the_tackle_in_hand_looks_like_the_rig_and_bait() -> void:
+	var lures: Dictionary = {}
+	for l: Dictionary in Db.database()["lure"]:
+		lures[l["type"]] = l
+	assert_eq(TerminalTackle.look_of(lures["soft_plastic"], "shrimp", true), "soft_plastic", "jig and grub")
+	assert_eq(TerminalTackle.look_of(lures["minnow"], "shrimp", true), "minnow", "hard minnow")
+	assert_eq(TerminalTackle.look_of(lures["sabiki"], "shrimp", true), "sabiki", "sabiki")
+	var float_rig: Dictionary = FightSetup.build(Db.database(), "istavrit", "float", Db.database()["spot"][0]["positions"][0]["id"], 0.5, {"slot": "day", "month": 10, "wind_dir": "NE", "wind_ms": 3})["lure"]
+	assert_eq(TerminalTackle.look_of(float_rig, "shrimp", true), "float_shrimp", "float with shrimp")
+	assert_eq(TerminalTackle.look_of(float_rig, "live_istavrit", true), "float_live", "float with a live fish")
+	assert_eq(TerminalTackle.look_of(lures["minnow"], "shrimp", false), "bare", "a bare hook before baiting")
