@@ -232,3 +232,12 @@ func test_a_steady_hook_ignores_tremble_but_follows_a_move() -> void:
 	var path := [Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)]
 	assert_eq(Baiting.point_at(path, 0.75), Vector2(1, 0.5), "three quarters along")
 	assert_eq(Baiting.tangent_at(path, 0.75), Vector2(0, 1), "and heading down there")
+
+
+func test_each_bait_says_what_it_suits() -> void:
+	var by_item := {}
+	for o: Dictionary in Baiting.options(Db.database(), Profile.save):
+		by_item[o["item_id"]] = Baiting.good_for(Db.database(), o)
+	assert_true("SPECIES_BLUEFISH" in by_item["spin_minnow"] and not "SPECIES_PICAREL" in by_item["spin_minnow"], "a minnow for the hunters, not the picarel: %s" % str(by_item["spin_minnow"]))
+	assert_true("SPECIES_PICAREL" in by_item["shrimp"] and not "SPECIES_BLUEFISH" in by_item["shrimp"], "shrimp for the crustacean eaters: %s" % str(by_item["shrimp"]))
+	assert_true("SPECIES_PICAREL" in by_item["capari_rig"], "the sabiki takes the plankton picker")

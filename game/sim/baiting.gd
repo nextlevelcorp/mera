@@ -82,6 +82,26 @@ static func options(database: Dictionary, save: Dictionary) -> Array[Dictionary]
 	return out
 
 
+## The species a bait or lure suits, by what it imitates (a lure) or what
+## it smells of (a bait) against each species' diet. Name keys, for the
+## choosing step's "good for" line (2026-11-21).
+static func good_for(database: Dictionary, option: Dictionary) -> Array[String]:
+	var tags: Array = []
+	for b: Dictionary in database.get("bait", []):
+		if b["id"] == option["item_id"]:
+			tags = b.get("target_diet_tags", [])
+	for l: Dictionary in database.get("lure", []):
+		if l["id"] == option["item_id"]:
+			tags = l.get("imitates", [])
+	var out: Array[String] = []
+	for sp: Dictionary in database.get("species", []):
+		for tag: Variant in sp.get("diet_tags", []):
+			if tag in tags:
+				out.append(String(sp["name_key"]))
+				break
+	return out
+
+
 ## Distance from a point to a polyline, and how far along it (0..1) the
 ## nearest point lies.
 static func nearest_on(path: Array, p: Vector2) -> Dictionary:

@@ -108,31 +108,46 @@ func _show_step() -> void:
 	_hint.text = "%d/%d · %s" % [stroke + 1, Baiting.strokes(kind).size(), tr(s["key"])]
 
 
+## One compartment of the tackle box: the bait drawn large, its name, how
+## many are in the bag, what it suits, or the rank that opens it.
 func _card(o: Dictionary, current: bool) -> Button:
 	var b := Button.new()
-	b.custom_minimum_size = Vector2(196, 250)
-	b.theme_type_variation = UiTheme.PRIMARY if current else &""
+	b.custom_minimum_size = Vector2(206, 300)
 	b.disabled = int(o["stock"]) <= 0 or o.has("locked")
-	var art := _CardArt.new(String(o["kind"]))
+	b.focus_mode = Control.FOCUS_NONE
+	for state: String in ["normal", "hover", "pressed", "disabled", "focus"]:
+		b.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+	b.set_meta("current", current)
+	var art := _CardArt.new(String(o["kind"]), o.has("locked"))
 	art.set_anchors_preset(Control.PRESET_TOP_WIDE)
-	art.offset_top = 14.0
-	art.offset_bottom = 130.0
+	art.offset_top = 16.0
+	art.offset_bottom = 126.0
+	art.offset_left = 12.0
+	art.offset_right = -12.0
 	art.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	b.add_child(art)
-	var words := Label.new()
-	words.text = "%s\n%s" % [tr(o["name_key"]), String(o["locked"]) if o.has("locked") else tr("BAIT_IN_BAG") % int(o["stock"])]
-	words.add_theme_font_size_override("font_size", 18)
-	words.add_theme_color_override("font_color", UiTheme.SEA_DEEP if current else UiTheme.ROPE)
-	words.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	words.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	var words := RichTextLabel.new()
+	words.bbcode_enabled = true
+	words.fit_content = true
+	words.scroll_active = false
+	words.add_theme_font_size_override("normal_font_size", 17)
+	words.add_theme_color_override("default_color", UiTheme.ROPE)
+	var names: Array[String] = []
+	for key: String in Baiting.good_for(Db.database(), o):
+		names.append(tr(key))
+	var status := "[color=#e0b060]%s[/color]" % String(o["locked"]) if o.has("locked") else tr("BAIT_IN_BAG") % int(o["stock"])
+	var suits := "" if names.is_empty() else "\n[font_size=14][color=#9fb4bd]%s[/color][/font_size]" % (tr("BAIT_GOOD_FOR") % ", ".join(names))
+	words.text = "[center][b]%s[/b]\n%s%s[/center]" % [tr(o["name_key"]), status, suits]
 	words.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	words.offset_left = 10.0
-	words.offset_right = -10.0
-	words.offset_top = -110.0
-	words.offset_bottom = -14.0
+	words.offset_left = 12.0
+	words.offset_right = -12.0
+	words.offset_top = -168.0
+	words.offset_bottom = -12.0
 	words.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	b.add_child(words)
 	b.pressed.connect(func() -> void: chosen.emit(o))
+	b.mouse_entered.connect(queue_redraw)
+	b.mouse_exited.connect(queue_redraw)
 	return b
 
 
@@ -284,6 +299,7 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, size), Color("0a1a24"))
 	var r := work_rect()
 	if stage == "choose":
+		_draw_tackle_box()
 		return
 	var board := StyleBoxFlat.new()
 	board.bg_color = Color("3a2b20")
@@ -320,6 +336,52 @@ func _draw() -> void:
 		var at := Vector2(size.x * 0.5 - w * 0.5, r.end.y - 18.0)
 		draw_string_outline(font, at, _flash, HORIZONTAL_ALIGNMENT_LEFT, -1, 30, 8, Color(0, 0, 0, 0.8))
 		draw_string(font, at, _flash, HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Color(UiTheme.ROPE, minf(_flash_s * 2.0, 1.0)))
+
+
+## The choosing step: an open tackle box, its tray of compartments behind
+## the cards, the chosen one lit in brass, a closed one sunk in shadow.
+func _draw_tackle_box() -> void:
+	if not _cards.visible or _cards.get_child_count() == 0:
+		return
+	var tray := Rect2(_cards.position, _cards.size).grow(26.0)
+	var lid := Rect2(tray.position + Vector2(18, -64), Vector2(tray.size.x - 36, 52))
+	var plastic := StyleBoxFlat.new()
+	plastic.bg_color = Color("1d3b33")
+	plastic.set_corner_radius_all(22)
+	plastic.shadow_color = Color(0, 0, 0, 0.55)
+	plastic.shadow_size = 18
+	plastic.shadow_offset = Vector2(0, 8)
+	draw_style_box(plastic, tray)
+	# The lid stands open behind the tray, with its hinges.
+	var lid_box := plastic.duplicate() as StyleBoxFlat
+	lid_box.bg_color = Color("16302a")
+	lid_box.shadow_size = 0
+	lid_box.corner_radius_bottom_left = 4
+	lid_box.corner_radius_bottom_right = 4
+	draw_style_box(lid_box, lid)
+	for hx: float in [0.2, 0.8]:
+		var h := Vector2(lid.position.x + lid.size.x * hx, lid.end.y)
+		draw_rect(Rect2(h + Vector2(-26, -6), Vector2(52, 12)), UiTheme.BRASS.darkened(0.25))
+		draw_circle(h, 5.0, UiTheme.BRASS)
+	draw_line(tray.position + Vector2(24, 2), Vector2(tray.end.x - 24, tray.position.y + 2), Color(1, 1, 1, 0.12), 2.0)   # the rim's light
+	for c in _cards.get_children():
+		var b := c as Button
+		if b == null or b.is_queued_for_deletion():
+			continue
+		var cell := Rect2(b.position + _cards.position, b.size)
+		var well := StyleBoxFlat.new()
+		well.bg_color = Color("0f231e") if not b.disabled else Color("0b1916")
+		well.set_corner_radius_all(14)
+		well.border_color = Color(0, 0, 0, 0.6)
+		well.border_width_top = 4   # the inner shadow under the rim
+		well.border_width_left = 2
+		if bool(b.get_meta("current", false)):
+			well.border_color = UiTheme.BRASS
+			well.set_border_width_all(4)
+		elif b.is_hovered() and not b.disabled:
+			well.border_color = Color(UiTheme.BRASS, 0.5)
+			well.set_border_width_all(2)
+		draw_style_box(well, cell)
 
 
 ## The current stroke's path as a faint dotted guide, with its start ringed.
@@ -591,39 +653,32 @@ func _text(font_size: int) -> Label:
 	return l
 
 
-## A small drawing of a bait for its card on the choosing step.
+## A bait or lure laid in its compartment, drawn as it hangs from the rod
+## (TerminalTackle), turned to lie flat; a padlock over it while closed.
 class _CardArt extends Control:
 	var kind := ""
+	var locked := false
 
-	func _init(bait_kind: String) -> void:
+	func _init(bait_kind: String, is_locked: bool) -> void:
 		kind = bait_kind
+		locked = is_locked
+
+	func _process(_delta: float) -> void:
+		queue_redraw()
 
 	func _draw() -> void:
-		var c := size * 0.5
-		var s := minf(size.x, size.y)
-		match kind:
-			"shrimp":
-				for i in 7:
-					var t := float(i) / 6.0
-					var p := c + Vector2(lerpf(0.32, -0.3, t), -0.12 * sin(t * PI)) * s
-					draw_circle(p, lerpf(0.05, 0.09, t) * s, Color(0.86, 0.66, 0.6))
-			"live":
-				var pts := PackedVector2Array()
-				for i in 18:
-					var a := TAU * float(i) / 18.0
-					pts.append(c + Vector2(cos(a) * 0.42, sin(a) * 0.12) * s)
-				draw_colored_polygon(pts, Color(0.62, 0.7, 0.74))
-				draw_circle(c + Vector2(-0.32, -0.02) * s, 0.03 * s, Color(0.05, 0.05, 0.05))
-			"soft_plastic":
-				draw_line(c + Vector2(-0.35, 0) * s, c + Vector2(0.3, 0) * s, Color(0.78, 0.92, 0.3), 0.1 * s, true)
-			"minnow":
-				var pts := PackedVector2Array()
-				for i in 16:
-					var a := TAU * float(i) / 16.0
-					pts.append(c + Vector2(cos(a) * 0.36, sin(a) * 0.12) * s)
-				draw_colored_polygon(pts, Color(0.2, 0.42, 0.7))
-			"sabiki":
-				draw_line(c + Vector2(0, -0.4) * s, c + Vector2(0, 0.35) * s, Color(0.85, 0.9, 0.95, 0.7), 1.5, true)
-				for i in 5:
-					var p := c + Vector2(0.03, -0.32 + 0.15 * float(i)) * s
-					draw_colored_polygon(PackedVector2Array([p, p + Vector2(0.14, -0.03) * s, p + Vector2(0.15, 0.03) * s]), Color(0.95, 0.4, 0.55))
+		var look := kind
+		var t := Time.get_ticks_msec() / 1000.0 * (0.0 if locked else 1.0)
+		if look == "live":
+			# The fish lies across its hook, so the hook hangs and the fish lies flat.
+			TerminalTackle.draw(self, Vector2(size.x * 0.5, size.y * 0.12), look, size.y * 0.13, 0.0, t)
+		else:
+			var k := minf(size.x * 0.8 / TerminalTackle.extent_cm(look), size.y * 0.16)
+			var right := Vector2(size.x * 0.5 + TerminalTackle.extent_cm(look) * k * 0.5, size.y * 0.5)
+			TerminalTackle.draw(self, right, look, k, -PI * 0.5, t)
+		if locked:
+			draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.05, 0.06, 0.55))
+			var c := size * 0.5
+			draw_arc(c + Vector2(0, -10), 14.0, PI, TAU, 16, UiTheme.BRASS, 4.0, true)
+			draw_rect(Rect2(c + Vector2(-20, -10), Vector2(40, 32)), UiTheme.BRASS)
+			draw_circle(c + Vector2(0, 4), 4.0, Color(0.1, 0.1, 0.1))

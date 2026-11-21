@@ -340,3 +340,4 @@ DBG_FORCE_WEED,Force weed,Yosun zorla,Forzar algas
 DBG_FORCE_SNAG,Force a snag,Dibe takılma zorla,Forzar enganche
 FISH_RELEASE_SMALL,Put the undersize back (%d),Küçükleri denize bırak (%d),Devolver los pequeños (%d)
 BAIT_RESUME,Carry on from the ring,Halkadan devam et,Sigue desde el aro
+BAIT_GOOD_FOR,Good for: %s,Uygun: %s,Bueno para: %s
