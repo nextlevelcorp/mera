@@ -25,6 +25,8 @@ var options: Array[Dictionary] = []
 var _samples: Array = []
 var _held := 0.0
 var _touching := false
+var _touch_index := -1           ## the one finger that bait; a second touch (a palm) is ignored
+var _paused := false             ## a trace the thumb lifted from, to carry on
 var _finger := Vector2(-1, -1)   ## thumb position in work units, -1 when none
 var _t := 0.0
 var _flash := ""                 ## the last stroke's rating, shown briefly
@@ -152,15 +154,29 @@ func _process(delta: float) -> void:
 func _gui_input(event: InputEvent) -> void:
 	if stage != "rig":
 		return
-	if event is InputEventScreenTouch or event is InputEventMouseButton:
-		if event is InputEventMouseButton and (event as InputEventMouseButton).button_index != MOUSE_BUTTON_LEFT:
+	# On a phone each touch also arrives as an emulated mouse event: take the
+	# touch only, and only the finger that started (2026-11-21, stability).
+	if (event is InputEventMouseButton or event is InputEventMouseMotion) and event.device == InputEvent.DEVICE_ID_EMULATION:
+		accept_event()
+		return
+	if event is InputEventScreenTouch:
+		var t := event as InputEventScreenTouch
+		if t.pressed and _touch_index == -1:
+			_touch_index = t.index
+			press(to_work(t.position))
+		elif not t.pressed and t.index == _touch_index:
+			_touch_index = -1
+			release()
+		accept_event()
+	elif event is InputEventMouseButton:
+		if (event as InputEventMouseButton).button_index != MOUSE_BUTTON_LEFT:
 			return
 		if event.pressed:
 			press(to_work(event.position))
 		else:
 			release()
 		accept_event()
-	elif event is InputEventScreenDrag or (event is InputEventMouseMotion and _touching):
+	elif (event is InputEventScreenDrag and (event as InputEventScreenDrag).index == _touch_index) or (event is InputEventMouseMotion and _touching):
 		move(to_work(event.position))
 		accept_event()
 
@@ -172,12 +188,20 @@ func press(p: Vector2) -> void:
 	var s: Dictionary = Baiting.strokes(kind)[stroke]
 	var point := p + (HOOK_OFFSET if s["type"] == "trace" else Vector2.ZERO)
 	_finger = point
-	if s["type"] == "trace" and not Baiting.starts_trace(s, point):
-		_flash = tr("BAIT_START_HERE")
-		_flash_s = 1.2
-		return
+	if s["type"] == "trace":
+		if _paused:
+			if not Baiting.resumes_trace(s, _samples, point):
+				_flash = tr("BAIT_RESUME")
+				_flash_s = 1.2
+				return
+		elif not Baiting.starts_trace(s, point):
+			_flash = tr("BAIT_START_HERE")
+			_flash_s = 1.2
+			return
 	_touching = true
-	_samples = [point]
+	if not _paused:
+		_samples = [point]
+	_paused = false
 	_held = 0.0
 
 
@@ -185,7 +209,8 @@ func move(p: Vector2) -> void:
 	if not _rigging():
 		return
 	var s: Dictionary = Baiting.strokes(kind)[stroke]
-	_finger = p + (HOOK_OFFSET if s["type"] == "trace" else Vector2.ZERO)
+	var target := p + (HOOK_OFFSET if s["type"] == "trace" else Vector2.ZERO)
+	_finger = Baiting.steady(_finger, target) if _touching else target
 	if _touching and s["type"] == "trace":
 		_samples.append(_finger)
 		if Baiting.trace_score(s, _samples)["finished"]:
@@ -199,11 +224,15 @@ func release() -> void:
 		return
 	_touching = false
 	var s: Dictionary = Baiting.strokes(kind)[stroke]
-	# Letting go early still counts what was done: the bait goes on as it is.
-	if s["type"] == "trace" and Baiting.trace_score(s, _samples)["progress"] > 0.2:
-		_end_stroke()
-	elif s["type"] == "hold" and _held > 0.25:
-		_end_stroke()
+	# Lifting the thumb pauses a trace: put it back where the point stopped
+	# and carry on. A live fish slips and must be held again from the start.
+	if s["type"] == "trace" and float(Baiting.trace_score(s, _samples)["progress"]) > 0.02:
+		_paused = true
+		_flash = tr("BAIT_RESUME")
+		_flash_s = 1.2
+	elif s["type"] == "hold":
+		_held = 0.0
+		_samples = []
 
 
 ## True while there is a stroke left to make.
@@ -218,6 +247,7 @@ func _end_stroke() -> void:
 	_flash = tr(Baiting.rating_key(score))
 	_flash_s = 1.0
 	_touching = false
+	_paused = false
 	_samples = []
 	_held = 0.0
 	stroke += 1
@@ -313,7 +343,8 @@ func _draw_guide(s: float) -> void:
 			draw_circle(a.lerp(b, (float(k) + 0.5) / n), 2.0, Color(UiTheme.ROPE, 0.35))
 	if not _touching:
 		var pulse := 1.0 + 0.15 * sin(_t * 5.0)
-		draw_arc(to_px(path[0]), float(st["tol"]) * s * 1.4 * pulse, 0.0, TAU, 32, Color(UiTheme.BRASS, 0.8), 2.5, true)
+		var ring: Vector2 = Baiting.resume_point(st, _samples) if _paused else path[0]
+		draw_arc(to_px(ring), float(st["tol"]) * s * 1.4 * pulse, 0.0, TAU, 32, Color(UiTheme.BRASS, 0.8), 2.5, true)
 
 
 ## A forged J hook with its point at the thumb (or resting by the bait), the
@@ -325,9 +356,11 @@ func _draw_hook(s: float) -> void:
 	var st: Dictionary = Baiting.strokes(kind)[mini(stroke, Baiting.strokes(kind).size() - 1)]
 	if st["type"] == "hold":
 		return
-	var tip: Vector2 = _finger if _touching else (st["path"][0] as Vector2) + Vector2(-0.03, -0.04)
 	var path: Array = st["path"]
-	var dir := ((path[path.size() - 1] as Vector2) - (path[0] as Vector2)).normalized()
+	var rest: Vector2 = Baiting.resume_point(st, _samples) if _paused else (path[0] as Vector2) + Vector2(-0.03, -0.04)
+	var tip: Vector2 = _finger if _touching else rest
+	# The point leads along the path where it is, as a hook is pushed through a bait.
+	var dir := Baiting.tangent_at(path, float(Baiting.nearest_on(path, tip)["along"]))
 	var pts := hook_points(to_px(tip), dir.angle(), s * 0.0026)
 	var eye: Vector2 = pts[pts.size() - 1]
 	draw_line(eye, Vector2(eye.x + 0.02 * s, -10.0), Color(0.85, 0.9, 0.95, 0.55), 1.5, true)   # the leader

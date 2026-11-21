@@ -17,6 +17,9 @@ extends RefCounted
 const ASPECT := 0.56
 ## A trace counts as finished when the point got this far along its path.
 const FINISH := 0.92
+## A steady hand (2026-11-21): the point ignores finger tremble smaller than
+## this (work units), so a shaking thumb does not shake the hook.
+const STEADY := 0.006
 
 ## Strokes per kind: {key, type "trace" (path, tol) or "hold" (at, hold_s, tol)}.
 const STROKES := {
@@ -104,6 +107,48 @@ static func nearest_on(path: Array, p: Vector2) -> Dictionary:
 ## True when a touch at p may start this trace (close to its start).
 static func starts_trace(stroke: Dictionary, p: Vector2) -> bool:
 	return p.distance_to(stroke["path"][0]) <= float(stroke["tol"]) * 2.5
+
+
+## Where a paused trace picks up again: the point on the path as far as the
+## samples got (the thumb may lift and come back, 2026-11-21).
+static func resume_point(stroke: Dictionary, samples: Array) -> Vector2:
+	var progress := float(trace_score(stroke, samples)["progress"]) if not samples.is_empty() else 0.0
+	return point_at(stroke["path"], progress)
+
+
+## True when a touch at p may carry on a paused trace.
+static func resumes_trace(stroke: Dictionary, samples: Array, p: Vector2) -> bool:
+	return p.distance_to(resume_point(stroke, samples)) <= float(stroke["tol"]) * 2.5
+
+
+## The point a share s (0..1) along a polyline, and its direction there.
+static func point_at(path: Array, s: float) -> Vector2:
+	return _walk(path, s)[0]
+
+
+static func tangent_at(path: Array, s: float) -> Vector2:
+	return _walk(path, s)[1]
+
+
+static func _walk(path: Array, s: float) -> Array:
+	var total := 0.0
+	for i in range(1, path.size()):
+		total += (path[i] as Vector2).distance_to(path[i - 1])
+	var want := clampf(s, 0.0, 1.0) * total
+	for i in range(1, path.size()):
+		var a: Vector2 = path[i - 1]
+		var b: Vector2 = path[i]
+		var seg := a.distance_to(b)
+		if want <= seg or i == path.size() - 1:
+			return [a.lerp(b, clampf(want / maxf(seg, 1e-9), 0.0, 1.0)), (b - a).normalized()]
+		want -= seg
+	return [path[0], Vector2.RIGHT]
+
+
+## The hook's point after a new finger sample: still for a tremble, on the
+## finger for a real move (no lag, so the point never trails the thumb).
+static func steady(point: Vector2, finger: Vector2) -> Vector2:
+	return point if point.distance_to(finger) < STEADY else finger
 
 
 ## A trace's score from the finger's samples: accuracy (1 on the path, 0 at
