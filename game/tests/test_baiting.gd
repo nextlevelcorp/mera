@@ -173,3 +173,62 @@ func test_the_screen_asks_for_baiting_before_a_cast() -> void:
 	scr.begin_charge()
 	assert_eq(scr.phase, FishingScreen.Phase.CHARGE, "baited, the cast charges")
 	scr.free()
+
+
+## Thumb moves along a stroke's path from share a to b, in steps.
+func _trace(p: BaitScreen, path: Array, a: float, b: float) -> void:
+	for k in 21:
+		p.move(Baiting.point_at(path, lerpf(a, b, float(k) / 20.0)) - BaitScreen.HOOK_OFFSET)
+
+
+func test_lifting_the_thumb_pauses_a_trace_and_it_carries_on() -> void:
+	var p := BaitScreen.new()
+	var got := [-1.0]
+	p.done.connect(func(q: float) -> void: got[0] = q)
+	p.open_rig("minnow", "x")
+	var path: Array = Baiting.strokes("minnow")[0]["path"]
+	p.press((path[0] as Vector2) - BaitScreen.HOOK_OFFSET)
+	_trace(p, path, 0.0, 0.5)
+	p.release()
+	assert_eq(p.stroke, 0, "half way and lifted: the stroke is not over")
+	p.press(Vector2(0.9, 0.5) - BaitScreen.HOOK_OFFSET)
+	assert_true(not p._touching, "a touch far from where it stopped does not take it up")
+	p.press(Baiting.point_at(path, 0.5) - BaitScreen.HOOK_OFFSET)
+	_trace(p, path, 0.5, 1.0)
+	assert_eq(p.stroke, 1, "carried on from the ring, the stroke is done")
+	assert_true(p.scores[0] > 0.9, "and scores as one clean stroke (%.2f)" % p.scores[0])
+	p.free()
+
+
+func test_a_second_finger_or_an_emulated_mouse_does_not_end_a_stroke() -> void:
+	var p := BaitScreen.new()
+	p.open_rig("minnow", "x")
+	p.size = Vector2(1280, 720)
+	var path: Array = Baiting.strokes("minnow")[0]["path"]
+	var touch := func(index: int, at: Vector2, down: bool) -> void:
+		var e := InputEventScreenTouch.new()
+		e.index = index
+		e.position = p.to_px(at - BaitScreen.HOOK_OFFSET)
+		e.pressed = down
+		p._gui_input(e)
+	touch.call(0, path[0], true)
+	assert_true(p._touching, "the thumb took the hook")
+	touch.call(1, Vector2(0.1, 0.1), true)
+	touch.call(1, Vector2(0.1, 0.1), false)
+	assert_true(p._touching, "a palm touching and lifting does not let go of it")
+	var m := InputEventMouseButton.new()
+	m.device = InputEvent.DEVICE_ID_EMULATION
+	m.button_index = MOUSE_BUTTON_LEFT
+	m.pressed = false
+	p._gui_input(m)
+	assert_true(p._touching, "nor does the mouse event the phone makes from the touch")
+	p.free()
+
+
+func test_a_steady_hook_ignores_tremble_but_follows_a_move() -> void:
+	var at := Vector2(0.5, 0.3)
+	assert_eq(Baiting.steady(at, at + Vector2(0.003, 0.0)), at, "a tremble does not move the point")
+	assert_eq(Baiting.steady(at, at + Vector2(0.02, 0.0)), at + Vector2(0.02, 0.0), "a move does, with no lag")
+	var path := [Vector2(0, 0), Vector2(1, 0), Vector2(1, 1)]
+	assert_eq(Baiting.point_at(path, 0.75), Vector2(1, 0.5), "three quarters along")
+	assert_eq(Baiting.tangent_at(path, 0.75), Vector2(0, 1), "and heading down there")
