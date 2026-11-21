@@ -3,7 +3,7 @@ extends RefCounted
 ## Builds the context of a fight (the same dictionary CatchModel and FightSim
 ## take) from a loaded database. Used by the fight screen with the demo data.
 
-const TACKLES := ["lrf", "spin", "capari", "float"]
+const TACKLES := ["lrf", "spin", "capari", "float", "egi"]
 ## The float rig fishes this bait under this float (R12).
 const FLOAT_BAIT := "shrimp"
 const FLOAT_RIG := "float_rig"
@@ -70,7 +70,7 @@ static func spot_of(database: Dictionary, position_id: String) -> Dictionary:
 
 ## Lure id of a rig (the demo has one lure per rig).
 static func lure_id(tackle: String) -> String:
-	return {"lrf": "lrf_soft", "spin": "spin_minnow", "capari": "capari_rig", "float": FLOAT_BAIT}.get(tackle, "lrf_soft")
+	return {"lrf": "lrf_soft", "spin": "spin_minnow", "capari": "capari_rig", "float": FLOAT_BAIT, "egi": "egi_jig"}.get(tackle, "lrf_soft")
 
 
 static func _by_id(records: Array, id: String) -> Dictionary:

@@ -57,6 +57,8 @@ static func kind_of(lure: Dictionary, bait_record: Dictionary = {}) -> String:
 		return "sabiki"
 	if t == "soft_plastic":
 		return "soft_plastic"
+	if t == "squid_jig":
+		return "egi"   # clipped on a snap like a minnow (Baiting.strokes falls back to it)
 	return "minnow"
 
 
@@ -87,14 +89,19 @@ static func options(database: Dictionary, save: Dictionary) -> Array[Dictionary]
 ## choosing step's "good for" line (2026-11-21).
 static func good_for(database: Dictionary, option: Dictionary) -> Array[String]:
 	var tags: Array = []
+	var squid_jig := false
 	for b: Dictionary in database.get("bait", []):
 		if b["id"] == option["item_id"]:
 			tags = b.get("target_diet_tags", [])
 	for l: Dictionary in database.get("lure", []):
 		if l["id"] == option["item_id"]:
 			tags = l.get("imitates", [])
+			squid_jig = String(l.get("hook_pattern", "")) == "squid_jig"
 	var out: Array[String] = []
 	for sp: Dictionary in database.get("species", []):
+		# A squid is landed on a squid jig's pins and a fish on a hook (CatchModel.hook).
+		if bool(sp.get("cephalopod", false)) != squid_jig:
+			continue
 		for tag: Variant in sp.get("diet_tags", []):
 			if tag in tags:
 				out.append(String(sp["name_key"]))

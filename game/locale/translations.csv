@@ -341,3 +341,9 @@ DBG_FORCE_SNAG,Force a snag,Dibe takılma zorla,Forzar enganche
 FISH_RELEASE_SMALL,Put the undersize back (%d),Küçükleri denize bırak (%d),Devolver los pequeños (%d)
 BAIT_RESUME,Carry on from the ring,Halkadan devam et,Sigue desde el aro
 BAIT_GOOD_FOR,Good for: %s,Uygun: %s,Bueno para: %s
+SPECIES_SQUID,European squid,Kalamar,Calamar
+TACKLE_ROD_EGI,Squid rod,Kalamar oltası,Caña de calamar
+TACKLE_REEL_EGI,Squid reel,Kalamar makarası,Carrete de calamar
+TACKLE_LINE_EGI,Squid braid,Kalamar örgü misinası,Trenzado de calamar
+TACKLE_LEADER_EGI,Squid leader,Kalamar lideri,Bajo de línea de calamar
+TACKLE_LURE_EGI,Squid jig (egi),Kalamar zokası (egi),Jibionera (egi)

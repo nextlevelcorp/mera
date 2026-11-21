@@ -22,6 +22,14 @@ Add every data, art, audio and tool source here with its licence before it is us
 | Normattiva: DPR 1639/1968 | Official legal database | Italy's sizes |
 | vgo.gr guide; fishradar.ai | Third-party web pages, read only | Greece, marked unofficial; values cited, text not copied |
 
+## European squid in `game/data/` (2026-11-21)
+| Value | Source | Licence or terms |
+| --- | --- | --- |
+| Name *Loligo vulgaris* Lamarck, 1798 | WoRMS AphiaID 140271 (REST API) | CC BY 4.0 (WoRMS) |
+| Mantle length 10.8-39.7 cm, heaviest 755 g, mean 18.2 cm and 166.7 g (n=288, Izmir Bay, Oct-Nov 2003); fished at night | Gökçe, Metin, Aydın and Bayramiç (2005) E.Ü. Su Ürünleri Dergisi 22(3-4): 419-422, https://dergipark.org.tr/tr/download/article-file/57843 | Open-access journal article; values cited, text not copied |
+| No legal minimum size | Tebliğ 6/2 (2024/21) Çizelge 7 (not listed: "Diğer türler") | Official gazette |
+| Presence at the Galata Bridge, activity, depths, temperatures, diet, the length-weight exponent, fight values, the squid jig and rod, the price | Design fill (owner decision 2026-11-21); GBIF has no occurrence in the Istanbul Strait or the Sea of Marmara (checked 2026-11-21) | Not applicable |
+
 ## Picarel in `game/data/` (2026-11-20)
 | Value | Source | Licence or terms |
 | --- | --- | --- |

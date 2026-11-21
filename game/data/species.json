@@ -299,5 +299,89 @@
    "as_of": "2026-09-16",
    "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, 11.08.2024, Çizelge 7: Spicara smaris is not listed, so it falls under 'Diğer türler' with size limit 'Yok' (none) and the 5 kg day limit; Tebliğ 2026/26 (Resmî Gazete 33372, 16.09.2026) did not change it. Owner decision 2026-11-20: a checked 'no minimum' is enough to add the species. https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm"
   }
+ },
+ {
+  "id": "kalamar",
+  "name_key": "SPECIES_SQUID",
+  "scientific_name": "Loligo vulgaris",
+  "strength": 4,
+  "stamina": 4,
+  "speed": 10,
+  "caution": 6,
+  "aggression": 12,
+  "schooling": 8,
+  "feeding_depth_min_m": 1,
+  "feeding_depth_max_m": 30,
+  "temp_min_c": 10,
+  "temp_max_c": 24,
+  "activity_by_slot": {
+   "dawn": 0.5,
+   "day": 0.1,
+   "evening": 0.8,
+   "night": 1.0
+  },
+  "salinity": [
+   "marine"
+  ],
+  "mouth_gape_mm": 25,
+  "diet_tags": [
+   "small_fish",
+   "crustacean"
+  ],
+  "surface_thrash": 3,
+  "teeth": 1,
+  "length_min_cm": 10.8,
+  "length_max_cm": 39.7,
+  "length_record_cm": 39.7,
+  "weight_record_kg": 0.755,
+  "rarity": 14,
+  "lw_a": 0.211,
+  "lw_b": 2.3,
+  "cephalopod": true,
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "Lengths are mantle lengths. Presence at the Galata Bridge, the activity by time of day, depths, temperatures, diet and behaviour are design fills (owner decision 2026-11-21: add the squid with its presence at Galata as a design fill; no occurrence record was found in GBIF for the Istanbul Strait or the Sea of Marmara). mouth_gape_mm stands for the size of prey its arms can seize (it sets which lure sizes it takes); a squid is not hooked by the mouth."
+   },
+   "fields": {
+    "scientific_name": {
+     "source": "WoRMS AphiaID 140271, Loligo vulgaris Lamarck, 1798, accepted: https://www.marinespecies.org/aphia.php?p=taxdetails&id=140271",
+     "accessed": "2026-11-21"
+    },
+    "length_min_cm": {
+     "source": "Gökçe, Metin, Aydın & Bayramiç (2005) E.Ü. Su Ürünleri Dergisi 22(3-4): 419-422, Izmir Bay, Oct-Nov 2003, n=288, mantle length 10.8-39.7 cm: https://dergipark.org.tr/tr/download/article-file/57843",
+     "accessed": "2026-11-21"
+    },
+    "length_max_cm": {
+     "source": "Gökçe, Metin, Aydın & Bayramiç (2005) E.Ü. Su Ürünleri Dergisi 22(3-4): 419-422, Izmir Bay, Oct-Nov 2003, n=288, mantle length 10.8-39.7 cm: https://dergipark.org.tr/tr/download/article-file/57843",
+     "accessed": "2026-11-21"
+    },
+    "length_record_cm": {
+     "source": "Gökçe, Metin, Aydın & Bayramiç (2005) E.Ü. Su Ürünleri Dergisi 22(3-4): 419-422, Izmir Bay, Oct-Nov 2003, n=288, the largest in the sample (not a world record): https://dergipark.org.tr/tr/download/article-file/57843",
+     "accessed": "2026-11-21"
+    },
+    "weight_record_kg": {
+     "source": "Gökçe, Metin, Aydın & Bayramiç (2005) E.Ü. Su Ürünleri Dergisi 22(3-4): 419-422, Izmir Bay, Oct-Nov 2003, n=288, heaviest 755 g (not a world record): https://dergipark.org.tr/tr/download/article-file/57843",
+     "accessed": "2026-11-21"
+    },
+    "lw_a": {
+     "source": "Design fill fitted to Gökçe, Metin, Aydın & Bayramiç (2005) E.Ü. Su Ürünleri Dergisi 22(3-4): 419-422, Izmir Bay, Oct-Nov 2003, n=288: mean mantle length 18.2 cm and mean weight 166.7 g, with b = 2.3 chosen so the 10.8 cm and 39.7 cm ends give about 50 g and 1 kg (the sample's lightest 43 g, heaviest 755 g); the paper gives no length-weight equation: https://dergipark.org.tr/tr/download/article-file/57843",
+     "accessed": "2026-11-21"
+    },
+    "lw_b": {
+     "source": "Design fill, see lw_a: https://dergipark.org.tr/tr/download/article-file/57843",
+     "accessed": "2026-11-21"
+    },
+    "regulation": {
+     "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, Çizelge 7: not listed, so 'Diğer türler' (size limit 'Yok', quantity in the 5 kg day limit); unchanged by Tebliğ 2026/26. Gökçe et al. (2005) also note no size, weight, gear or season limit for L. vulgaris in Turkey: https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm",
+     "accessed": "2026-11-21"
+    }
+   }
+  },
+  "regulation": {
+   "no_minimum": true,
+   "as_of": "2026-09-16",
+   "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, 11.08.2024, Çizelge 7: Loligo vulgaris is not listed, so it falls under 'Diğer türler' with size limit 'Yok' (none) and the 5 kg day limit; Tebliğ 2026/26 (Resmî Gazete 33372, 16.09.2026) did not change it. https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm"
+  }
  }
 ]

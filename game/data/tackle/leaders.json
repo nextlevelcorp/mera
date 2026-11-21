@@ -68,5 +68,19 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "egi_leader",
+  "name_key": "TACKLE_LEADER_EGI",
+  "type": "fluorocarbon",
+  "length_m": 1.5,
+  "breaking_strain_kg": 4.0,
+  "visibility": 4,
+  "abrasion_resistance": 12,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]

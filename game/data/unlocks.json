@@ -4,6 +4,7 @@
   "unlocks": [
     {"id": "rig_spin", "kind": "rig", "target": "spin", "rank": 1, "name_key": "TACKLE_ROD_SPIN"},
     {"id": "rig_float", "kind": "rig", "target": "float", "rank": 1, "name_key": "TACKLE_ROD_FLOAT"},
+    {"id": "rig_egi", "kind": "rig", "target": "egi", "rank": 1, "name_key": "TACKLE_ROD_EGI"},
     {"id": "bait_live", "kind": "bait", "target": "live_istavrit", "rank": 2, "name_key": "TACKLE_BAIT_LIVE_ISTAVRIT"},
     {"id": "boat", "kind": "boat", "target": "boat", "rank": 3, "name_key": "UNLOCK_BOAT"}
   ]

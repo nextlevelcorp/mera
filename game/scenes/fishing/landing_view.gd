@@ -20,6 +20,7 @@ const LOOKS := {
 	"lufer": [Color(0.2, 0.42, 0.42), Color(0.55, 0.68, 0.66), Color(0.88, 0.9, 0.88), ""],
 	"palamut": [Color(0.12, 0.2, 0.38), Color(0.6, 0.66, 0.72), Color(0.9, 0.91, 0.92), "stripes"],
 	"izmarit": [Color(0.42, 0.45, 0.5), Color(0.68, 0.7, 0.74), Color(0.88, 0.88, 0.9), "spot"],
+	"kalamar": [Color(0.82, 0.55, 0.6), Color(0.95, 0.82, 0.8), Color(0.97, 0.92, 0.9), "squid"],
 }
 
 var lift := 0.0            ## 0 at the water, 1 at the rail
@@ -234,7 +235,8 @@ func _draw_fish(m: Vector2, dusk: float) -> void:
 	var tail_dir := (tail_root - spine[spine.size() - 2]).normalized()
 	var tail_side := Vector2(-tail_dir.y, tail_dir.x)
 	var shade := lerpf(0.5, 1.0, dusk)
-	draw_colored_polygon(PackedVector2Array([tail_root, tail_root + tail_dir * depth * 1.1 + tail_side * depth * 0.9, tail_root + tail_dir * depth * 0.55, tail_root + tail_dir * depth * 1.1 - tail_side * depth * 0.9]), (look[0] as Color) * shade)
+	if String(look[3]) != "squid":
+		draw_colored_polygon(PackedVector2Array([tail_root, tail_root + tail_dir * depth * 1.1 + tail_side * depth * 0.9, tail_root + tail_dir * depth * 0.55, tail_root + tail_dir * depth * 1.1 - tail_side * depth * 0.9]), (look[0] as Color) * shade)
 	var body := PackedVector2Array(top_edge)
 	var reversed := bottom_edge.duplicate()
 	reversed.reverse()
@@ -259,6 +261,21 @@ func _draw_fish(m: Vector2, dusk: float) -> void:
 				draw_line(top_edge[i], spine[i].lerp(top_edge[i], 0.3), Color(0.08, 0.12, 0.25, 0.85), maxf(depth * 0.1, 2.0), true)
 		"spot":
 			draw_circle(spine[5].lerp(top_edge[5], 0.3), maxf(depth * 0.22, 3.0), Color(0.1, 0.1, 0.12, 0.8))
+		"squid":
+			# Arms wrapped round the jig at the top, the fins' diamond at the mantle's tip.
+			var up := (spine[0] - spine[1]).normalized()
+			var across := Vector2(-up.y, up.x)
+			for a in 8:
+				var off := (float(a) - 3.5) / 3.5
+				var arm := PackedVector2Array()
+				for j in 6:
+					var u := float(j) / 5.0
+					arm.append(spine[0] + across * off * depth * 0.6 + up * u * len_px * 0.28 + across * sin(_t * 4.0 + float(a) + u * 3.0) * depth * 0.2 * u)
+				draw_polyline(arm, (look[0] as Color) * shade, maxf(depth * 0.16, 2.0), true)
+			var tip := spine[spine.size() - 1]
+			var back := spine[spine.size() - 4]
+			var fin_side := Vector2(-tail_dir.y, tail_dir.x)
+			draw_colored_polygon(PackedVector2Array([back, back.lerp(tip, 0.5) + fin_side * depth * 1.3, tip, back.lerp(tip, 0.5) - fin_side * depth * 1.3]), Color((look[0] as Color) * shade, 0.85))
 	var eye := spine[1].lerp(top_edge[1], 0.3)
 	draw_circle(eye, maxf(depth * 0.18, 3.0), Color(0.92, 0.9, 0.8))
 	draw_circle(eye, maxf(depth * 0.1, 1.5), Color(0.05, 0.05, 0.05))

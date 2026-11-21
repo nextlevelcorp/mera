@@ -202,6 +202,10 @@
       }
      },
      "required": false
+    },
+    "cephalopod": {
+     "type": "bool",
+     "required": false
     }
    }
   },
@@ -622,7 +626,8 @@
       "spoon",
       "minnow",
       "popper",
-      "sabiki"
+      "sabiki",
+      "squid_jig"
      ]
     },
     "length_cm": {

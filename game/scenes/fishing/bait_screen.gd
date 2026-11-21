@@ -112,7 +112,7 @@ func _show_step() -> void:
 ## many are in the bag, what it suits, or the rank that opens it.
 func _card(o: Dictionary, current: bool) -> Button:
 	var b := Button.new()
-	b.custom_minimum_size = Vector2(206, 300)
+	b.custom_minimum_size = Vector2(180, 340)
 	b.disabled = int(o["stock"]) <= 0 or o.has("locked")
 	b.focus_mode = Control.FOCUS_NONE
 	for state: String in ["normal", "hover", "pressed", "disabled", "focus"]:
@@ -141,7 +141,7 @@ func _card(o: Dictionary, current: bool) -> Button:
 	words.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
 	words.offset_left = 12.0
 	words.offset_right = -12.0
-	words.offset_top = -168.0
+	words.offset_top = -210.0
 	words.offset_bottom = -12.0
 	words.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	b.add_child(words)
@@ -324,6 +324,8 @@ func _draw() -> void:
 			_draw_fish(s)
 		"soft_plastic":
 			_draw_soft(s)
+		"egi":
+			_draw_egi(s)
 		"minnow":
 			_draw_minnow(s)
 		"sabiki":
@@ -591,6 +593,17 @@ func _draw_minnow(s: float) -> void:
 		var h := to_px(Vector2(hx, 0.35))
 		draw_arc(h, 0.012 * s, 0.0, PI, 10, Color(0.5, 0.52, 0.56), 2.0, true)
 	# The snap: open after the first stroke, clipped after the second.
+	var snap := to_px(Vector2(0.30, 0.30))
+	draw_line(Vector2(snap.x, 0), snap, Color(0.85, 0.9, 0.95, 0.5), 1.5, true)
+	draw_arc(snap, 0.014 * s, 0.0, TAU, 12, Color(0.7, 0.72, 0.76), 3.0, true)
+	if _stroke_done(1):
+		draw_line(snap, to_px(Vector2(0.49, 0.29)), Color(0.7, 0.72, 0.76), 3.0, true)
+
+
+## A squid jig on the board, its eye ring where the minnow's is (the same
+## snap strokes).
+func _draw_egi(s: float) -> void:
+	TerminalTackle.draw(self, to_px(Vector2(0.47, 0.29)), "egi", s * 0.028, PI * 0.5, _t)
 	var snap := to_px(Vector2(0.30, 0.30))
 	draw_line(Vector2(snap.x, 0), snap, Color(0.85, 0.9, 0.95, 0.5), 1.5, true)
 	draw_arc(snap, 0.014 * s, 0.0, TAU, 12, Color(0.7, 0.72, 0.76), 3.0, true)

@@ -22,12 +22,14 @@ static func look_of(lure: Dictionary, float_bait: String, baited: bool) -> Strin
 	if Presentation.is_float(lure):
 		return "float_live" if float_bait.begins_with("live") else "float_shrimp"
 	var t := String(lure.get("type", ""))
+	if t == "squid_jig":
+		return "egi"
 	return t if t in ["soft_plastic", "minnow", "sabiki"] else "minnow"
 
 
 ## How long it is, in centimetres from the line's end (to fit it in a box).
 static func extent_cm(look: String) -> float:
-	return {"soft_plastic": 5.6, "minnow": 7.0, "sabiki": 11.2, "shrimp": 3.4, "live": 5.0, "float_shrimp": 12.0, "float_live": 13.0}.get(look, 3.0)
+	return {"soft_plastic": 5.6, "minnow": 7.0, "sabiki": 11.2, "shrimp": 3.4, "egi": 10.5, "live": 5.0, "float_shrimp": 12.0, "float_live": 13.0}.get(look, 3.0)
 
 
 ## Draws it hanging from `top` (the line's end), k pixels per centimetre.
@@ -40,6 +42,8 @@ static func draw(c: CanvasItem, top: Vector2, look: String, k: float, sway: floa
 			_minnow(c, top, down, k, t)
 		"sabiki":
 			_sabiki(c, top, down, k, t)
+		"egi":
+			_egi(c, top, down, k, t)
 		"shrimp":
 			_shrimp(c, _hook(c, top, down, k), down, k)
 		"live":
@@ -180,3 +184,31 @@ static func _live(c: CanvasItem, at: Vector2, down: Vector2, k: float, t: float)
 	c.draw_colored_polygon(PackedVector2Array([head, at - side * 1.0 * k - down * 0.6 * k, at + side * 1.6 * k - down * 0.35 * k, tail]), Color(0.22, 0.42, 0.5))
 	c.draw_colored_polygon(PackedVector2Array([tail, tail + side * 0.8 * k - down * 0.6 * k, tail + side * 0.4 * k, tail + side * 0.8 * k + down * 0.6 * k]), Color(0.3, 0.45, 0.5))
 	c.draw_circle(head + side * 0.5 * k - down * 0.1 * k, 0.2 * k, Color(0.05, 0.05, 0.05))
+
+
+## A squid jig (egi): a shrimp-shaped body wrapped in cloth, a lead keel
+## under its nose, side fins, and a crown of fine pins at the tail.
+static func _egi(c: CanvasItem, top: Vector2, down: Vector2, k: float, t: float) -> void:
+	var side := Vector2(-down.y, down.x)
+	var snap := top + down * 0.6 * k
+	c.draw_line(top, snap, STEEL, maxf(0.15 * k, 1.0), true)
+	var nose := snap + down * 0.3 * k
+	var axis := down.rotated(sin(t * 2.0) * 0.05)
+	var ax := Vector2(-axis.y, axis.x)
+	var body := PackedVector2Array([nose, nose + axis * 1.5 * k + ax * 0.75 * k, nose + axis * 7.0 * k + ax * 0.55 * k,
+		nose + axis * 8.0 * k, nose + axis * 7.0 * k - ax * 0.55 * k, nose + axis * 1.5 * k - ax * 0.75 * k])
+	c.draw_colored_polygon(body, Color(0.95, 0.5, 0.2))
+	c.draw_colored_polygon(PackedVector2Array([nose + axis * 1.4 * k + ax * 0.7 * k, nose + axis * 7.0 * k + ax * 0.5 * k, nose + axis * 7.0 * k, nose + axis * 1.5 * k]), Color(0.55, 0.25, 0.45))   # the cloth's back
+	for i in 5:
+		var at := nose + axis * (2.0 + 1.1 * float(i)) * k
+		c.draw_line(at + ax * 0.6 * k, at - ax * 0.6 * k, Color(1, 0.85, 0.5, 0.5), maxf(0.1 * k, 1.0), true)   # the cloth's weave
+	c.draw_colored_polygon(PackedVector2Array([nose + axis * 0.6 * k - ax * 0.6 * k, nose + axis * 2.4 * k - ax * 1.2 * k, nose + axis * 2.6 * k - ax * 0.6 * k]), LEAD)   # the keel
+	for sgn: float in [1.0, -1.0]:
+		var fin := nose + axis * 2.2 * k + ax * sgn * 0.6 * k
+		c.draw_colored_polygon(PackedVector2Array([fin, fin + (ax * sgn * 0.9 + axis * 0.6) * k, fin + axis * 1.2 * k]), Color(0.95, 0.75, 0.3, 0.8))
+	c.draw_circle(nose + axis * 1.0 * k + ax * 0.3 * k, 0.25 * k, Color(0.1, 0.1, 0.1))   # the eye
+	var crown := nose + axis * 8.0 * k
+	for j in 2:
+		for i in 8:
+			var d := axis.rotated(-1.2 + 2.4 * float(i) / 7.0)
+			c.draw_line(crown + axis * 0.4 * k * float(j), crown + axis * 0.4 * k * float(j) + d * 0.8 * k, STEEL, maxf(0.08 * k, 1.0), true)
