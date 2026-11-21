@@ -331,3 +331,10 @@ UNLOCK_AT,%s opens at %s,"%s, %s rütbesinde açılır",%s se abre en %s
 UNLOCK_NEXT,Next to open: %s at %s (%d/%d badges),"Sıradaki açılım: %s, %s rütbesinde (%d/%d rozet)",Lo siguiente: %s en %s (%d/%d insignias)
 UNLOCK_BOAT,A boat,Tekne,Una barca
 UNLOCK_SHORT,Opens at %s,%s rütbesinde,Se abre en %s
+LURE_TORN,It tore the soft plastic's tail off: put a new one on,Balık silikonun kuyruğunu koparıp kaçtı: yenisini tak,Arrancó la cola del vinilo: pon uno nuevo
+FOUL_WEED,Not a fish: a clump of weed came up,Balık değil: bir tutam yosun geldi,No era un pez: salió un manojo de algas
+FOUL_SNAG_FREED,Snagged on the bottom; it came free,Dibe takıldı; kurtuldu,Enganchado en el fondo; se soltó
+FOUL_SNAG_BREAK,Snagged on the bottom and the line parted,Dibe takıldı ve misina koptu,Enganchado en el fondo y el sedal se rompió
+FISH_SABIKI_EXTRA,"+%d more on the other hooks, %d empty (%s)","Diğer iğnelerde +%d balık daha, %d boş (%s)","+%d más en los otros anzuelos, %d vacíos (%s)"
+DBG_FORCE_WEED,Force weed,Yosun zorla,Forzar algas
+DBG_FORCE_SNAG,Force a snag,Dibe takılma zorla,Forzar enganche

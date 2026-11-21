@@ -162,15 +162,53 @@ func start_fight(fight_ctx: Dictionary) -> FightController:
 	return FightController.new(fight_ctx, k, seed_counter)
 
 
-## Writes the end of a fight into the trip.
-func record_outcome(outcome: String, fight_ctx: Dictionary, weight_kg: float) -> void:
+## Writes the end of a fight into the trip. Returns the extra fish a sabiki
+## brought up with the one that was fought (also written into the trip).
+func record_outcome(outcome: String, fight_ctx: Dictionary, weight_kg: float) -> Array[Dictionary]:
 	var species_id: String = fight_ctx["species"]["id"]
 	(trip["events"] as Array).append({"type": outcome, "species_id": species_id})
+	var extra: Array[Dictionary] = []
 	if outcome == FightSim.OUTCOME_LANDED:
 		(trip["catches"] as Array).append({"species_id": species_id, "length_cm": float(fight_ctx["play"]["fish_length_cm"]), "weight_kg": weight_kg, "kept": true})
+		extra = sabiki_extras(fight_ctx)
+		for e: Dictionary in extra:
+			(trip["catches"] as Array).append({"species_id": e["species_id"], "length_cm": e["length_cm"], "weight_kg": e["weight_kg"], "kept": true})
 	elif outcome in [FightSim.OUTCOME_LINE_BREAK, FightSim.OUTCOME_LEADER_CUT]:
 		(trip["lost"] as Array).append({"item_id": fight_ctx["lure"]["id"], "reason": outcome})
 		rigged = ""   # the lure went with the line: tie on a new one by hand
+	return extra
+
+
+## A sabiki has several hooks (SABIKI_HOOKS); a schooling fish often brings
+## company: each other hook holds one more of the same species with chance
+## SABIKI_EXTRA_P * n(schooling), and some hooks stay empty. Sizes are drawn
+## like any fish. Nothing for other rigs.
+func sabiki_extras(fight_ctx: Dictionary) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if String(fight_ctx["lure"].get("type", "")) != "sabiki":
+		return out
+	var sp: Dictionary = fight_ctx["species"]
+	var p := float(k["SABIKI_EXTRA_P"]) * CatchModel.n(float(sp["schooling"]))
+	for i in int(k["SABIKI_HOOKS"]) - 1:
+		if _rng.randf() < p:
+			var length := FightController.draw_length_cm(sp, _rng.randf())
+			out.append({"species_id": sp["id"], "length_cm": length, "weight_kg": float(sp["lw_a"]) * pow(length, float(sp["lw_b"])) / 1000.0})
+	return out
+
+
+## The fish that missed the hook tore a soft plastic's tail off (it is spent).
+func lure_torn(ctx: Dictionary) -> bool:
+	return String(ctx["lure"].get("type", "")) == "soft_plastic" and _rng.randf() < float(k["SOFT_TEAR"])
+
+
+## The line parted on the bottom: a lure is gone and must be tied on again; a
+## float rig loses its bait.
+func lose_to_snag(ctx: Dictionary) -> void:
+	(trip["lost"] as Array).append({"item_id": ctx["lure"]["id"], "reason": "snag"})
+	if Presentation.is_float(ctx["lure"]):
+		_lose_bait()
+	else:
+		rigged = ""
 
 
 func add_time(seconds: float) -> void:
