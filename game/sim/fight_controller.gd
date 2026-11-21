@@ -62,7 +62,7 @@ func hud() -> Dictionary:
 		"fish_state": s["fish_state"], "time_s": s["time_s"],
 		"outcome": s["outcome"], "cap_applied": s["cap_applied"],
 		"side_m": s["side_m"], "heading": s["heading"], "jumping": s["jumping"], "jump_left_s": s["jump_left_s"],
-		"thrown_on_jump": s["thrown_on_jump"], "lift": s["lift"], "kicking": s["kicking"],
+		"thrown_on_jump": s["thrown_on_jump"], "lift": s["lift"], "kicking": s["kicking"], "lift_height_m": s["lift_height_m"],
 		"max_tension_kg": max_tension_kg, "drag_set_kg": float(_last_input.get("drag_kg", 0.0)),
 	}
 

@@ -141,6 +141,8 @@ var _strike_queued := false
 ## The float on the water (R12), in screen pixels below its resting line:
 ## nibbles bob it, a take pulls it under. A damped spring, view only.
 var _bait_screen: BaitScreen
+var _landing_view: LandingView
+var _bucket_view: BucketView
 var _bitten := false          ## a fish mouthed the live bait this cast
 var float_dip := 0.0
 var _float_vel := 0.0
@@ -201,6 +203,13 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 	_bait_screen.chosen.connect(_on_bait_chosen)
 	_bait_screen.done.connect(_on_baited)
 	_ui.add_child(_bait_screen)
+	# Under every control: the close-up landing, then the bucket.
+	_landing_view = LandingView.new()
+	_ui.add_child(_landing_view)
+	_ui.move_child(_landing_view, 0)
+	_bucket_view = BucketView.new()
+	_ui.add_child(_bucket_view)
+	_ui.move_child(_bucket_view, 1)
 	_build_audio()
 	_sound = SoundDirector.new()
 	add_child(_sound)
@@ -344,6 +353,10 @@ func _set_phase(p: int) -> void:
 	_ui.distance_label.visible = p in [Phase.WAIT, Phase.FIGHT]
 	_ui.depth_label.visible = p == Phase.WAIT
 	_ui.result_panel.visible = p == Phase.RESULT
+	if p != Phase.RESULT:
+		_bucket_view.visible = false
+		_ui.result_panel.anchor_left = 0.5
+		_ui.result_panel.anchor_right = 0.5
 	_ui.settings_button.visible = p in [Phase.READY, Phase.WAIT]
 	if p != Phase.RESULT:
 		_ui.why_panel.visible = false
@@ -718,8 +731,9 @@ func _finish_fight() -> void:
 		_store()
 		_play("landed")
 		if _hud["in_landing"]:
-			# The player reeled it up: it is already hanging at the rail.
+			# The player reeled it up the wall: swing it over the rail.
 			_lift_t = LIFT_RISE_S
+			_landing_view.finish("over")
 		else:
 			_lift_t = 0.0
 			_lift_from = WaterView.project(_fish_world(), 0.0, _overlay.size)
@@ -729,6 +743,7 @@ func _finish_fight() -> void:
 			_snd("splash", -2.0)
 		_set_phase(Phase.LIFT)
 		return
+	_landing_view.finish("fall")   # lost on the wall: it falls back
 	if outcome == FightSim.OUTCOME_LOST_AT_EDGE:
 		# It drops back into the water.
 		_fx.splash(_lift_from, _fish_world(), 0.9)
@@ -750,12 +765,21 @@ func _step_lift(delta: float) -> void:
 		kick = 9.0 * sin(_lift_t * 7.3) * maxf(0.0, sin(_lift_t * 1.7))
 	_swing_v += (gravity_term - 1.6 * _swing_v + kick) * delta
 	_swing += _swing_v * delta
+	if _landing_view.visible:
+		_landing_view.swing = _swing
+		_landing_view.light = float(_env.get("light", 1.0))
+		if _landing_now():
+			_landing_view.lift = float(_hud["lift"])
+			_landing_view.kicking = bool(_hud["kicking"])
+			_landing_view.tension_share = float(_hud["tension_ratio"])
 	_drip_clock -= delta
 	if _drip_clock <= 0.0 and (_lift_t > LIFT_RISE_S * 0.5 or _landing_now()):
 		_drip_clock = 0.18
 		var tail := _lift_points()[1]
 		_fx.splash(tail, _fish_world(), 0.12)
-	if phase == Phase.LIFT and _lift_t >= LIFT_RISE_S + LIFT_HOLD_S:
+	# Reeled up the wall: the result waits for the swing over the rail.
+	var shown := _landing_view.is_done() if _landing_view.ended() else _lift_t >= LIFT_RISE_S + LIFT_HOLD_S
+	if phase == Phase.LIFT and shown:
 		_show_result()
 		_set_phase(Phase.RESULT)
 
@@ -893,6 +917,8 @@ func _fight_effects(delta: float) -> void:
 		_swing_v = 0.0
 		_fx.splash(_lift_from, pos, 0.8)
 		_snd("splash", -3.0)
+		_landing_view.open(String(_fight_ctx["species"]["id"]), float(_fight_ctx["play"]["fish_length_cm"]), float(_hud["lift_height_m"]), String(_fight_ctx["position"].get("stage", "bridge")) == "quay")
+		_ui.distance_label.visible = false   # the wall's ruler gives the height now
 	if _hud["in_landing"]:
 		_step_lift(delta)
 		if _hud["kicking"] and not _was_kicking:
@@ -1150,6 +1176,7 @@ func _process(delta: float) -> void:
 	_session.add_time(delta)
 	_stats.add(delta)
 	_update_motion(delta)
+	_landing_view.advance(delta)
 	match phase:
 		Phase.CHARGE:
 			_charge_s += delta
@@ -1408,7 +1435,32 @@ func _toast(text: String, seconds: float) -> void:
 	_ui.toast_label.visible = true
 
 
+## The bucket beside the result: the visit's kept fish, the newest dropping in.
+func _open_bucket(new_count: int) -> void:
+	var kept: Array = []
+	var fresh := 0
+	var catches: Array = _session.trip["catches"]
+	for i in catches.size():
+		if catches[i].get("kept", false):
+			kept.append(catches[i])
+			if i >= catches.size() - new_count:
+				fresh += 1
+	_bucket_view.open(kept, fresh)
+	_ui.result_panel.anchor_left = 0.72
+	_ui.result_panel.anchor_right = 0.72
+
+
+## The result's button: put this landing's undersize fish back in the sea.
+func release_small() -> void:
+	var n := 1 + (_result.get("extra", []) as Array).size()
+	_session.release_undersize(n)
+	_ui.release_button.visible = false
+	_snd("splash", -6.0)
+	_open_bucket(0)
+
+
 func _show_result() -> void:
+	_ui.release_button.visible = false
 	var outcome: String = _result["outcome"]
 	_ui.result_label.text = tr("FIGHT_%s" % outcome.to_upper())
 	var lines: Array[String] = []
@@ -1425,8 +1477,12 @@ func _show_result() -> void:
 		elif _result.get("length_record", false) or _result.get("weight_record", false):
 			lines.append(tr("FISH_RECORD"))
 		var rule: Dictionary = _fight_ctx["species"].get("regulation", {})
-		if rule.has("min_length_cm") and float(_result["length_cm"]) < float(rule["min_length_cm"]):
+		var small := _session.undersize_count(1 + extra.size())
+		if small > 0:
 			lines.append(tr("FISH_UNDERSIZE") % float(rule["min_length_cm"]))
+		_ui.release_button.text = tr("FISH_RELEASE_SMALL") % small
+		_ui.release_button.visible = small > 0
+		_open_bucket(1 + extra.size())
 	var xp_parts: Array[String] = []
 	for skill: String in _xp["gained"]:
 		xp_parts.append("%s +%d" % [tr("SKILL_%s" % skill.to_upper()), int(_xp["gained"][skill])])

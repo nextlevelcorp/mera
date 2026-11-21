@@ -338,3 +338,4 @@ FOUL_SNAG_BREAK,Snagged on the bottom and the line parted,Dibe takıldı ve misi
 FISH_SABIKI_EXTRA,"+%d more on the other hooks, %d empty (%s)","Diğer iğnelerde +%d balık daha, %d boş (%s)","+%d más en los otros anzuelos, %d vacíos (%s)"
 DBG_FORCE_WEED,Force weed,Yosun zorla,Forzar algas
 DBG_FORCE_SNAG,Force a snag,Dibe takılma zorla,Forzar enganche
+FISH_RELEASE_SMALL,Put the undersize back (%d),Küçükleri denize bırak (%d),Devolver los pequeños (%d)

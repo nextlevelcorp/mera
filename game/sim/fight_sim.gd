@@ -63,6 +63,7 @@ var jump_left_s := 0.0
 var thrown_on_jump := false
 var lift := 0.0            ## landing: 0 at the water, 1 over the rail
 var kicking := false       ## landing: the fish is kicking on the line
+var lift_height_m := 1.0   ## landing: from the water to the rail or the quay edge
 var _kick_left_s := 0.0
 var events: Array[Dictionary] = []
 
@@ -86,6 +87,7 @@ func _init(ctx: Dictionary, k: Dictionary, hook_hold_value: float, seed_value: i
 	b_eff = est["Beff"]
 	cut_rate = est["cut_rate_per_s"]
 	landing_q = CatchModel.landing(k, ctx["position"], env, weight_kg, b_eff)["landing_q"]
+	lift_height_m = lift_height(k, ctx["position"])
 	hook_hold = hook_hold_value
 	run_speed = float(k["RUN_SPEED_BASE"]) + float(k["RUN_SPEED_RANGE"]) * CatchModel.n(float(sp["speed"]))
 	angler_pull_max = float(k["ANGLER_PULL_BASE"]) + float(k["ANGLER_PULL_RANGE"]) * CatchModel.n(float(ctx["rod"]["power"]))
@@ -220,6 +222,7 @@ func snapshot() -> Dictionary:
 		"strain_s": strain_s, "outcome": outcome, "cap_applied": cap_applied,
 		"side_m": side_m, "heading": heading, "jumping": jumping, "jump_left_s": jump_left_s,
 		"thrown_on_jump": thrown_on_jump, "lift": lift, "kicking": kicking,
+		"lift_height_m": lift_height_m,
 	}
 
 
@@ -231,28 +234,46 @@ func run(policy: Callable) -> Dictionary:
 	return state
 
 
-## The landing is the player's (owner, 2026-11-15): the fish hangs on the line
-## and is reeled up to the rail. It kicks now and then; reeling through a kick
-## can shake it off, more easily the worse the landing chance (landing_q) of
-## this fish at this place. Waiting costs a little too: a fish left hanging
-## may work the hook loose.
+## The landing is the player's (owner, 2026-11-15 and 2026-11-21): the fish
+## hangs on the line and is reeled straight up the bridge or quay wall,
+## lift_height_m of it (LIFT_HEIGHT_*_M), at LAND_LIFT_M_PER_S at full reel.
+## Its whole weight is on the line now, and a kick adds a surge: up to
+## LAND_KICK_SURGE of its weight while reeling through it, 40 % of that when
+## the reel is still or within LAND_KICK_GRACE_S of the kick. More than the line holds parts it, so a heavy fish on a
+## light line must be lifted between kicks. A kick reeled through can also
+## shake the hook, more easily the worse the landing chance (landing_q) of
+## this fish at this place; a fish left hanging may work the hook loose.
 func _step_landing(reel: float) -> void:
 	landing_s += DT
-	tension = minf(weight_kg, b_eff)
 	_kick_left_s -= DT
 	if _kick_left_s <= 0.0:
 		kicking = not kicking
 		_kick_left_s = float(_k["LAND_KICK_S"]) if kicking else _rng_b.randf_range(1.0, 2.2)
+	var reeling := reel > 0.3
+	var surge := 0.0
+	# The angler gets LAND_KICK_GRACE_S to feel the kick and stop the reel.
+	if kicking:
+		var into_kick := float(_k["LAND_KICK_S"]) - _kick_left_s
+		surge = float(_k["LAND_KICK_SURGE"]) * (1.0 if reeling and into_kick > float(_k["LAND_KICK_GRACE_S"]) else 0.4)
+	tension = weight_kg * (1.0 + surge)
+	if tension > b_eff:
+		_finish(OUTCOME_LINE_BREAK)
+		return
 	var risk := 1.0 - landing_q
 	var hazard := float(_k["LAND_HANG_HAZARD"])
-	if kicking and reel > 0.3:
+	if kicking and reeling:
 		hazard += float(_k["LAND_KICK_HAZARD"])
 	if _rng_b.randf() < hazard * risk * DT:
 		_finish(OUTCOME_LOST_AT_EDGE)
 		return
-	lift = minf(lift + reel * DT / float(_k["LAND_PHASE"]), 1.0)
+	lift = minf(lift + reel * float(_k["LAND_LIFT_M_PER_S"]) * DT / lift_height_m, 1.0)
 	if lift >= 1.0:
 		_finish(OUTCOME_LOST_AT_EDGE if _rng.randf() < risk * float(_k["LAND_BASE_SHARE"]) else OUTCOME_LANDED)
+
+
+## How far the fish is lifted at the end: up a bridge's side or a quay's edge.
+static func lift_height(k: Dictionary, position: Dictionary) -> float:
+	return float(k["LIFT_HEIGHT_QUAY_M"]) if String(position.get("stage", "bridge")) == "quay" else float(k["LIFT_HEIGHT_BRIDGE_M"])
 
 
 func _finish(result: String) -> Dictionary:

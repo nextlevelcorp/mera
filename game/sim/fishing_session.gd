@@ -179,6 +179,39 @@ func record_outcome(outcome: String, fight_ctx: Dictionary, weight_kg: float) ->
 	return extra
 
 
+## How many of the last n fish in the trip are under their legal size.
+func undersize_count(n: int) -> int:
+	var count := 0
+	for c: Dictionary in _last_catches(n):
+		if c.get("kept", false) and _undersize(c):
+			count += 1
+	return count
+
+
+## Puts the undersize ones among the last n fish back: they leave the trip's
+## bucket (kept false) and never reach the bag.
+func release_undersize(n: int) -> int:
+	var count := 0
+	for c: Dictionary in _last_catches(n):
+		if c.get("kept", false) and _undersize(c):
+			c["kept"] = false
+			count += 1
+	return count
+
+
+func _last_catches(n: int) -> Array:
+	var catches: Array = trip["catches"]
+	return catches.slice(maxi(catches.size() - n, 0))
+
+
+func _undersize(c: Dictionary) -> bool:
+	for sp: Dictionary in db["species"]:
+		if sp["id"] == c["species_id"]:
+			var rule: Dictionary = sp.get("regulation", {})
+			return rule.has("min_length_cm") and float(c["length_cm"]) < float(rule["min_length_cm"])
+	return false
+
+
 ## A sabiki has several hooks (SABIKI_HOOKS); a schooling fish often brings
 ## company: each other hook holds one more of the same species with chance
 ## SABIKI_EXTRA_P * n(schooling), and some hooks stay empty. Sizes are drawn
