@@ -25,6 +25,11 @@ static func look_of(lure: Dictionary, float_bait: String, baited: bool) -> Strin
 	return t if t in ["soft_plastic", "minnow", "sabiki"] else "minnow"
 
 
+## How long it is, in centimetres from the line's end (to fit it in a box).
+static func extent_cm(look: String) -> float:
+	return {"soft_plastic": 5.6, "minnow": 7.0, "sabiki": 11.2, "shrimp": 3.4, "live": 5.0, "float_shrimp": 12.0, "float_live": 13.0}.get(look, 3.0)
+
+
 ## Draws it hanging from `top` (the line's end), k pixels per centimetre.
 static func draw(c: CanvasItem, top: Vector2, look: String, k: float, sway: float, t: float) -> void:
 	var down := Vector2(sin(sway), cos(sway))
@@ -35,6 +40,10 @@ static func draw(c: CanvasItem, top: Vector2, look: String, k: float, sway: floa
 			_minnow(c, top, down, k, t)
 		"sabiki":
 			_sabiki(c, top, down, k, t)
+		"shrimp":
+			_shrimp(c, _hook(c, top, down, k), down, k)
+		"live":
+			_live(c, _hook(c, top, down, k), down, k, t)
 		"float_shrimp", "float_live":
 			var hook_at := _float_rig(c, top, down, k)
 			if look == "float_live":
