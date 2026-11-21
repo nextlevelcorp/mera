@@ -174,7 +174,7 @@ The owner found the fishing buttons still undesigned after R21. Direction: "Tide
 - Secondary keys (Back, Rig, Catch log, Reel in, Faster, Settings): smoked-glass pills (`UiTheme.GLASS_KEY`) with an engraved glyph before the word.
 - The tension bar keeps its shapes (strain tick, break block, drag notch) on a rounded glass track in the same palette.
 Fonts stay the engine default in the game; the plate uses OFL fonts and is not shipped.
-- Aim (2026-11-20): while charging, a dashed rope-cream course on the water from the angler to a brass target ring with a crosshair and the distance; an aim gauge at the bottom centre (arc, needle, angle in words) in ready and charge.
+- Aim (2026-11-20; gauge moved to the bottom left 2026-11-21): while charging, a dashed rope-cream course on the water from the angler to a brass target ring with a crosshair and the distance; an aim gauge under the left thumb (arc, needle, angle in words) that the left thumb drags, in ready and charge.
 
 ## 7. Out of scope here
 

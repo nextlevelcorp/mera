@@ -7,13 +7,16 @@ extends RefCounted
 ## deterministic for the same updates. The screen reads take_events() for the
 ## fish they lift (a distant splash).
 
-enum S { IDLE, NIBBLE, FIGHT, LIFT, RECAST }
+enum S { IDLE, NIBBLE, FIGHT, LIFT, RECAST, BAIT, REST }
 
 const COUNT := 4
 const FIGHT_S := Vector2(3.0, 9.0)
 const LIFT_S := 1.7
 const RECAST_S := 1.4
 const NIBBLE_S := 0.7
+const BAIT_S := Vector2(4.0, 9.0)       ## rod up, putting a new bait on
+const REST_S := Vector2(8.0, 25.0)      ## rod laid on the rail, a break
+const MIN_GAP_M := 1.6                  ## how close two anglers stand along the rail
 
 var people: Array[Dictionary] = []
 var events: Array[Dictionary] = []
@@ -35,8 +38,44 @@ func _init(seed_value: int = 5) -> void:
 			"x": xs[i], "scale": scales[i], "reach": reach[i], "rig": rig[i],
 			"state": S.IDLE, "t": 0.0, "wait": _draw_wait(), "bend": 0.0, "bob": _rng.randf() * TAU,
 			"cast_m": 5.0 + _rng.randf() * 9.0, "side": _rng.randf_range(-0.2, 0.2),
-			"fish": 1, "tint": _rng.randf(), "jig": 0.0, "kick": 0.0,
+			"fish": 1, "tint": _rng.randf(), "jig": 0.0, "kick": 0.0, "raise": 0.0, "lay": 0.0,
 		})
+	# Each session finds them in the middle of something different (owner,
+	# 2026-11-21: "not robots in a row"): waiting, baiting, resting or into a fish.
+	for p: Dictionary in people:
+		var roll := _rng.randf()
+		if roll < 0.5:
+			p["wait"] = _draw_wait() * _rng.randf()
+		elif roll < 0.68:
+			_to(p, S.BAIT)
+			p["dur"] = _rng.randf_range(BAIT_S.x, BAIT_S.y)
+			p["t"] = _rng.randf() * float(p["dur"])
+		elif roll < 0.86:
+			_to(p, S.REST)
+			p["dur"] = _rng.randf_range(REST_S.x, REST_S.y)
+			p["t"] = _rng.randf() * float(p["dur"])
+		else:
+			p["fish"] = _rng.randi_range(1, 3) if String(p["rig"]) == "sabiki" else 1
+			p["dur"] = _rng.randf_range(FIGHT_S.x, FIGHT_S.y)
+			_to(p, S.FIGHT)
+			p["t"] = _rng.randf() * float(p["dur"]) * 0.6
+
+
+## Where the anglers stand this session: along the rail between first_m and
+## last_m, at random but never closer than MIN_GAP_M, a little nearer or
+## further from the edge and turned a little. Same seed, same layout.
+static func layout(seed_value: int, n: int, first_m: float, last_m: float) -> Array[Dictionary]:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var span := maxf(last_m - first_m - MIN_GAP_M * (n - 1), 0.0)
+	var cuts: Array[float] = []
+	for i in n:
+		cuts.append(rng.randf() * span)
+	cuts.sort()
+	var out: Array[Dictionary] = []
+	for i in n:
+		out.append({"x": first_m + cuts[i] + MIN_GAP_M * i, "back": rng.randf_range(0.0, 0.35), "turn": rng.randf_range(-0.45, 0.45)})
+	return out
 
 
 ## mean_wait_s: how long a bite takes here and now (the player's median wait).
@@ -50,7 +89,10 @@ func update(dt: float) -> void:
 		p["t"] = float(p["t"]) + dt
 		p["bob"] = float(p["bob"]) + dt
 		p["kick"] = float(p["kick"]) * exp(-dt * 6.0)
-		match int(p["state"]):
+		var st := int(p["state"])
+		p["raise"] = lerpf(float(p["raise"]), 1.0 if st == S.BAIT else 0.0, minf(dt * 3.0, 1.0))
+		p["lay"] = lerpf(float(p["lay"]), 1.0 if st == S.REST else 0.0, minf(dt * 2.0, 1.0))
+		match st:
 			S.IDLE:
 				p["wait"] = float(p["wait"]) - dt
 				# A little work on the lure now and then.
@@ -61,6 +103,9 @@ func update(dt: float) -> void:
 				p["bend"] = lerpf(float(p["bend"]), 0.05, minf(dt * 4.0, 1.0))
 				if float(p["wait"]) <= 0.0:
 					_to(p, S.NIBBLE)
+				elif _rng.randf() < dt * 0.01:
+					p["dur"] = _rng.randf_range(REST_S.x, REST_S.y)
+					_to(p, S.REST)
 			S.NIBBLE:
 				p["kick"] = float(p["kick"]) - 3.0 * dt * (1.0 if _rng.randf() < 0.5 else 0.2)
 				if float(p["t"]) >= NIBBLE_S:
@@ -78,6 +123,15 @@ func update(dt: float) -> void:
 				p["bend"] = lerpf(float(p["bend"]), 0.7, minf(dt * 6.0, 1.0))
 				if float(p["t"]) >= LIFT_S:
 					events.append({"type": "lift", "x": p["x"], "fish": p["fish"]})
+					# Most put a new bait on before the next cast.
+					if _rng.randf() < 0.65:
+						p["dur"] = _rng.randf_range(BAIT_S.x, BAIT_S.y)
+						_to(p, S.BAIT)
+					else:
+						_to(p, S.RECAST)
+			S.BAIT, S.REST:
+				p["bend"] = lerpf(float(p["bend"]), 0.0, minf(dt * 4.0, 1.0))
+				if float(p["t"]) >= float(p["dur"]):
 					_to(p, S.RECAST)
 			S.RECAST:
 				p["bend"] = lerpf(float(p["bend"]), 0.0, minf(dt * 5.0, 1.0))
@@ -119,8 +173,8 @@ func draw_lines(ci: CanvasItem, size: Vector2, light: float, tips: PackedVector2
 		var hang := size.y * 0.55 / maxf(float(i) * 0.9 + 2.0, 1.0)
 		if state == S.LIFT:
 			lure = lure.lerp(tip + Vector2(0.0, hang), smoothstep(0.0, LIFT_S, float(p["t"])))
-		elif state == S.RECAST:
-			lure = tip + Vector2(0.0, hang)
+		elif state == S.RECAST or state == S.BAIT:
+			lure = tip + Vector2(0.0, hang * (0.35 if state == S.BAIT else 1.0))   # baiting: the line hangs short by the hands
 		# A quadratic curve tip -> lure; the belly shrinks as the line comes tight.
 		var belly := (1.0 - clampf(float(p["bend"]) * 1.4, 0.0, 1.0)) * size.y * 0.07
 		var ctrl := tip.lerp(lure, 0.5) + Vector2(0.0, belly)

@@ -257,7 +257,7 @@ BAG_TITLE,Bag,Çanta,Bolsa
 BAG_FISH,Fish: %d · worth %s,Balık: %d · değeri %s,Peces: %d · valen %s
 BAG_TACKLE,Tackle and bait,Takım ve yem,Aparejos y cebo
 BAG_TACKLE_LINE,%s × %d,%s × %d,%s × %d
-FISH_AIM_HINT,"Hold Cast, aim with your other thumb","Atış'a bas, öbür başparmakla nişan al",Mantén Lanzar y apunta con el otro pulgar
+FISH_AIM_HINT,"Aim with your left thumb on the gauge, then hold Cast","Sol başparmağınla göstergeden nişan al, sonra At'a basılı tut",Apunta con el pulgar izquierdo en el indicador y mantén Lanzar
 BAIT_TITLE,Bait the hook: %s,İğneye tak: %s,Ceba el anzuelo: %s
 BAIT_DONE,Baited: %s,Takıldı: %s,Cebado: %s
 BAIT_RESULT_GOOD,well done,iyi,bien

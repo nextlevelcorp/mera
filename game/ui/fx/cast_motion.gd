@@ -49,10 +49,16 @@ static func aim_from_drag(dx: float, screen_width: float) -> float:
 	return clampf(dx / maxf(screen_width * AIM_SPAN, 1.0), -1.0, 1.0) * AIM_MAX
 
 
-## Aim from a tap on the water (R19): the left edge of the screen is AIM_MAX
-## to the left, the right edge AIM_MAX to the right, the middle straight out.
-static func aim_from_screen(x: float, screen_width: float) -> float:
-	return clampf((x - screen_width * 0.5) / maxf(screen_width * 0.5, 1.0), -1.0, 1.0) * AIM_MAX
+## Where the aim gauge sits, under the left thumb (owner, 2026-11-21: "on the
+## left, not in the middle, so the thumb can use it"), in design pixels.
+const GAUGE_CENTRE_X := 250.0
+const GAUGE_HALF_W := 130.0
+
+
+## Aim from the left thumb on the gauge: its centre is straight out, its ends
+## AIM_MAX to either side; beyond the ends the aim stays at the end.
+static func aim_from_gauge(x: float) -> float:
+	return clampf((x - GAUGE_CENTRE_X) / GAUGE_HALF_W, -1.0, 1.0) * AIM_MAX
 
 
 func _spring(dt: float, target: float, k: float) -> void:

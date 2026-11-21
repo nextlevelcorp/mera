@@ -110,3 +110,10 @@ static func gull_transform(g: Dictionary) -> Transform3D:
 	var forward := Vector3(dir.x, 0.0, -dir.y)
 	var right := forward.cross(Vector3.UP)
 	return Transform3D(Basis(right, Vector3.UP, -forward) * SPAN, Vector3(pos.x, pos.y, -pos.z))
+
+
+## Gulls fly over the water by day, at dawn and in the evening, and roost at
+## night (a design fill; the owner, 2026-11-21: "gulls flying at night make
+## no sense").
+static func flies_at(slot: String) -> bool:
+	return slot != "night"
