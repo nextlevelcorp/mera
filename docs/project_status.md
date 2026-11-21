@@ -105,6 +105,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Play notes part 2 (2026-11-21): 284 tests pass with no script errors; debug web build at 1280x720 and 844x390 (tr): "Yosun zorla" then a strike showed "Balık değil: bir tutam yosun geldi" and ended the cast; "Dibe takılma zorla" then a strike showed "Dibe takıldı ve misina koptu"; a forced bite on the sabiki was landed and the result said "Diğer iğnelerde +1 balık daha, 4 boş (11 cm)". Found and fixed: the first-run aim hint overwrote the weed message. No console errors.
 - Play notes part 1 (2026-11-21): 278 tests pass with no script errors; debug web build played with multi-touch at 1280x720 and 844x390 (tr): the gauge at the bottom left, a touch right of its centre in ready gave "Nişan: 20° sağ", dragging left with the left thumb while holding Cast gave "Nişan: 26° sol" and moved the target; the neighbours stood differently in two runs; at night no gulls over the water; the new hint shows; no console errors.
 - Unlocks (2026-11-20): 274 tests pass with no script errors; debug web build at 1280x720 (tr): a newcomer's baiting screen shows the minnow, shrimp and live bait cards closed with the rank they open at; the rig panel skipped the spinning rod and went to the sabiki; the bag shows "Sıradaki açılım: Orta spin oltası, Köprü müdavimi rütbesinde (0/3 rozet)"; no console errors.
 - Jurisdictions (2026-11-20): 270 tests pass with no script errors; data only (no screen uses it yet), so nothing new to play in the browser.

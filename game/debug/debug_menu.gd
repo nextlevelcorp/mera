@@ -128,6 +128,19 @@ func _ready() -> void:
 		_screen.force_bite(_species_ids[_species_i], SIZES[_size_i])
 		_panel.visible = false)
 	box.add_child(bite)
+	# Pulls that are not fish (2026-11-21): weed, or the bottom.
+	var fouls := HBoxContainer.new()
+	for kind: String in ["weed", "snag"]:
+		var b := Button.new()
+		b.text = tr("DBG_FORCE_%s" % kind.to_upper())
+		b.add_theme_font_size_override("font_size", 18)
+		b.custom_minimum_size = Vector2(250, 52)
+		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		b.pressed.connect(func() -> void:
+			_screen.force_foul(kind)
+			_panel.visible = false)
+		fouls.add_child(b)
+	box.add_child(fouls)
 	_info = Label.new()
 	_info.add_theme_font_size_override("font_size", 14)
 	_info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART

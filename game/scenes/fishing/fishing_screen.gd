@@ -235,10 +235,10 @@ func _step_shoals(delta: float) -> void:
 			if _rng.randf() < power:
 				var at: Vector2 = (s["pos"] as Vector2) + Vector2.from_angle(_rng.randf() * TAU) * float(s["radius"]) * sqrt(_rng.randf()) * 0.8
 				_fx.add_ring(at, 0.15, 0.5 + 0.5 * _rng.randf(), 0.5)
-	if phase == Phase.READY and not _aim_hint_shown and _time > 1.0:
+	if phase == Phase.READY and not _aim_hint_shown and _time > 1.0 and _toast_s <= 0.0:   # never over an outcome
 		_aim_hint_shown = true
 		_toast(tr("FISH_AIM_HINT"), 4.0)
-	if phase == Phase.READY and not _shoal_hint_shown and _time > 6.0:
+	if phase == Phase.READY and not _shoal_hint_shown and _time > 6.0 and _toast_s <= 0.0:
 		_shoal_hint_shown = true
 		_toast(tr("FISH_SHOAL_HINT"), 5.0)
 
@@ -555,6 +555,16 @@ func force_bite(species_id: String, u: float = -1.0) -> void:
 		_wait.force_take(species_id)
 
 
+## Debug menu: a pull that is not a fish ("weed" or "snag"), after a cast if needed.
+func force_foul(kind: String) -> void:
+	if phase in [Phase.READY, Phase.CHARGE]:
+		cast_with_power(0.7)
+		_flight_s = _flight_total_s
+		_land_lure()
+	if phase == Phase.WAIT:
+		_wait.force_foul(kind)
+
+
 func _step_wait(delta: float) -> void:
 	var input := {"strike": _strike_queued, "jig": jig_amount(),
 		"reel": FightController.reel_from_pad(_ui.reel_pressed, _ui.reel_y, _ui.reel_pad.size.y)}
@@ -566,7 +576,8 @@ func _step_wait(delta: float) -> void:
 	if _wait_state["phase"] == WaitSim.PHASE_HOOKED:
 		_start_fight(_wait_state["hooked"])
 	elif _wait_state["phase"] == WaitSim.PHASE_RETRIEVED:
-		_toast(tr("FISH_RETRIEVED"), 2.5)
+		if String(_wait_state.get("fouled", "")) == "":
+			_toast(tr("FISH_RETRIEVED"), 2.5)
 		_end_cast_live()
 		_set_phase(Phase.READY)
 
@@ -597,13 +608,33 @@ func _on_wait_event(e: Dictionary) -> void:
 			Input.vibrate_handheld(60)
 			_speed_on = false
 		"take_missed":
+			if String(e.get("kind", "")) != "":
+				_toast(tr("FISH_TAKE_MISSED"), 1.8)   # it was not a fish; nothing is lost
+				return
 			_bitten = true
 			if _session.bait_mouthed():
 				_toast(tr("BAIT_STOLEN"), 2.2)
+				return
 			_toast(tr("FISH_TAKE_MISSED"), 1.8)
 		"hook_failed":
 			_bitten = true
+			if _session.lure_torn(_ctx) and Economy.lose_lure(save, _ctx["lure"]["id"]):
+				_session.rigged = ""   # put a new one on by hand
+				_store()
+				_toast(tr("LURE_TORN"), 2.6)
+				return
 			_toast(tr("FISH_HOOK_FAILED"), 1.8)
+		"weed":
+			_toast(tr("FOUL_WEED"), 2.8)
+		"snag_freed":
+			_rod.kick(-3.0)
+			_toast(tr("FOUL_SNAG_FREED"), 2.2)
+		"snag_break":
+			_session.lose_to_snag(_ctx)
+			if not Presentation.is_float(_ctx["lure"]) and Economy.lose_lure(save, _ctx["lure"]["id"]):
+				_store()
+			_play("line_break")
+			_toast(tr("FOUL_SNAG_BREAK"), 3.0)
 		"strike_empty":
 			_tip_vel += 10.0
 			_toast(tr("FISH_STRIKE_EMPTY"), 1.2)
@@ -671,7 +702,10 @@ func _finish_fight() -> void:
 	var outcome: String = _hud["outcome"]
 	var sp: Dictionary = _fight_ctx["species"]
 	_result = {"outcome": outcome, "species_id": sp["id"], "length_cm": float(_fight_ctx["play"]["fish_length_cm"]), "weight_kg": _controller.sim.weight_kg}
-	_session.record_outcome(outcome, _fight_ctx, _controller.sim.weight_kg)
+	var extra := _session.record_outcome(outcome, _fight_ctx, _controller.sim.weight_kg)
+	_result["extra"] = extra
+	for x: Dictionary in extra:
+		SaveGame.record_catch(save, x["species_id"], x["length_cm"], x["weight_kg"], Time.get_date_string_from_system())
 	# A broken line or a bitten-through leader takes the lure with it, now, so
 	# closing the tab does not bring it back.
 	# A bait was used on the cast already; a lure goes with the line.
@@ -1380,6 +1414,12 @@ func _show_result() -> void:
 	var lines: Array[String] = []
 	if outcome == FightSim.OUTCOME_LANDED:
 		lines.append(tr("FISH_CATCH") % [tr(_fight_ctx["species"]["name_key"]), _result["length_cm"], _result["weight_kg"]])
+		var extra: Array = _result.get("extra", [])
+		if not extra.is_empty():
+			var sizes: Array[String] = []
+			for x: Dictionary in extra:
+				sizes.append("%.0f cm" % float(x["length_cm"]))
+			lines.append(tr("FISH_SABIKI_EXTRA") % [extra.size(), int(_k["SABIKI_HOOKS"]) - 1 - extra.size(), ", ".join(sizes)])
 		if _result.get("first", false):
 			lines.append(tr("FISH_FIRST"))
 		elif _result.get("length_record", false) or _result.get("weight_record", false):

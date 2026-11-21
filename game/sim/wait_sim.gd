@@ -29,6 +29,9 @@ var events: Array[Dictionary] = []
 ## Filled when phase is hooked: species_id, u (size draw), timing_quality,
 ## hook (probability that was rolled), distance_m.
 var hooked := {}
+## What came up instead of a fish (2026-11-21): "" for nothing, "weed" (weed
+## or rubbish on the hook), "snag_break" (stuck on the bottom, the line went).
+var fouled := ""
 
 var _ctx: Dictionary
 var _k: Dictionary
@@ -111,7 +114,7 @@ func step() -> void:
 	if phase == PHASE_TAKE:
 		_take["elapsed_s"] = float(_take["elapsed_s"]) + DT
 		if float(_take["elapsed_s"]) > float(_take["window_s"]):
-			_log("take_missed", {"species_id": _take["species_id"]})
+			_log("take_missed", {"species_id": _take["species_id"], "kind": _take.get("kind", "")})
 			_end_take()
 		return
 
@@ -129,6 +132,15 @@ func step() -> void:
 	if _refresh_left <= 0.0:
 		_refresh_rates()
 
+	# Not every pull is a fish (owner, 2026-11-21): drifting weed or rubbish
+	# anywhere, the bottom when the lure is near it. It looks like a take.
+	var near_bottom := not Presentation.is_float(_ctx["lure"]) and depth_m >= CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m) - float(_k["SNAG_NEAR_BOTTOM_M"])
+	if _rng.randf() < float(_k["WEED_RATE_PER_S"]) * DT:
+		_open_foul("weed")
+		return
+	if near_bottom and _rng.randf() < float(_k["SNAG_RATE_PER_S"]) * DT:
+		_open_foul("snag")
+		return
 	for sp: Dictionary in _species:
 		var id: String = sp["id"]
 		var r: Dictionary = _rates[id]
@@ -162,7 +174,7 @@ func snapshot() -> Dictionary:
 		"depth_m": depth_m, "retrieve_ms": retrieve_ms, "controlled": controlled,
 		"water_depth_m": CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m),
 		"take_progress": float(_take.get("elapsed_s", 0.0)) / window if window > 0.0 else 0.0,
-		"hooked": hooked,
+		"hooked": hooked, "fouled": fouled,
 	}
 
 
@@ -184,6 +196,9 @@ func _strike() -> void:
 	if phase != PHASE_TAKE:
 		_log("strike_empty", {})
 		return
+	if _take.get("kind", "") != "":
+		_strike_foul(String(_take["kind"]))
+		return
 	var window := float(_take["window_s"])
 	var half := window * 0.5
 	var timing := clampf(1.0 - absf(float(_take["elapsed_s"]) - half) / half, 0.0, 1.0)
@@ -200,6 +215,39 @@ func _strike() -> void:
 	else:
 		_log("hook_failed", {"species_id": id, "timing_quality": timing, "stage_hook": hk, "roll": roll})
 		_end_take()
+
+
+## A pull that is not a fish: weed (or rubbish) or the bottom.
+func _open_foul(kind: String) -> void:
+	_take = {"species_id": "", "kind": kind, "window_s": float(_k["FOUL_WINDOW_S"]), "elapsed_s": 0.0}
+	phase = PHASE_TAKE
+	_log("take", {"species_id": "", "kind": kind, "window_s": _take["window_s"]})
+
+
+## Striking into it: weed comes in and ends the cast; the bottom either lets
+## go (fishing on) or the line parts and the lure stays down.
+func _strike_foul(kind: String) -> void:
+	_take = {}
+	if kind == "weed":
+		fouled = "weed"
+		_log("weed", {})
+		phase = PHASE_RETRIEVED
+	elif _rng.randf() < float(_k["SNAG_BREAK"]):
+		fouled = "snag_break"
+		_log("snag_break", {})
+		phase = PHASE_RETRIEVED
+	else:
+		_log("snag_freed", {})
+		phase = PHASE_FISHING
+
+
+## Debug menu: a pull that is not a fish, now ("weed" or "snag").
+func force_foul(kind: String) -> void:
+	if is_over():
+		return
+	if phase == PHASE_TAKE:
+		_end_take()
+	_open_foul(kind)
 
 
 func _open_take(id: String) -> void:
