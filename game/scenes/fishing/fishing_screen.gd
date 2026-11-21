@@ -104,7 +104,9 @@ var _dangle := Vector2.ZERO
 var _dangle_vel := Vector2.ZERO
 var _line_rate := 0.0
 var _paid_m := 0.0
-var _neighbours := NeighborAnglers.new(5)
+## A new arrangement and new doings every session (visual only, so not seeded from the save).
+var _session_seed := int(Time.get_unix_time_from_system()) ^ Time.get_ticks_usec()
+var _neighbours := NeighborAnglers.new(_session_seed)
 var _shoals: ShoalField
 var _gulls: GullFlock
 var _boil_clock := 0.0
@@ -219,6 +221,8 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 ## Shoals drift, gulls work over them, and the water boils where they feed.
 func _step_shoals(delta: float) -> void:
 	_shoals.advance(delta)
+	if not GullFlock.flies_at(String(conditions.get("slot", "day"))):
+		return   # gulls roost at night: no birds and no dives (owner, 2026-11-21)
 	_gulls.update(delta, _shoals)
 	for hit: Vector2 in _gulls.take_dives():
 		_fx.add_ring(hit, 0.3, 1.2, 0.7)
@@ -461,6 +465,12 @@ func _on_baited(quality: float) -> void:
 	if _session.bait_hook(_ctx, quality):
 		_toast(tr("BAIT_DONE") % tr(Baiting.rating_key(quality)), 2.5)
 	apply_conditions()   # the bait's quality changes how it draws fish
+
+
+## How far back the rod is drawn while Cast is held: up to the top of the
+## first power swing, then held there (the dial keeps swinging; owner 2026-11-21).
+static func windup_target(charge_s: float) -> float:
+	return minf(charge_s / (POWER_PERIOD_S * 0.5), 1.0)
 
 
 ## The power swing: rises to 1 and falls back, so letting go at the top is the skill.
@@ -777,7 +787,10 @@ func _update_scene_effects() -> void:
 		extra.append(Vector4(_lure_x(dw), -(NEAR_DRAW_M + dw), 0.2 + 0.04 * sin(_time * 3.1), 0.35))
 	_water.set_fish_shadow(shadow, shadow_radius, shadow_strength)
 	_water.set_rings(_fx.rings, extra)
-	_gulls.pose(_water.gulls_mm.multimesh)
+	if GullFlock.flies_at(String(conditions.get("slot", "day"))):
+		_gulls.pose(_water.gulls_mm.multimesh)
+	else:
+		_water.gulls_mm.multimesh.instance_count = 0
 
 
 ## The fish's spine on the water, head first, scaled up for readability.
@@ -917,10 +930,13 @@ func _update_motion(delta: float) -> void:
 ## title's root control behind it would also stop it before any unhandled
 ## input (found on 2026-11-20: the two-thumb aim did not work in the browser).
 func _gui_input(event: InputEvent) -> void:
-	# While Cast is held the view faces the water: the other thumb taps or
-	# drags on the water to aim (R19). The aim stays for the next cast.
-	if phase == Phase.CHARGE:
-		if (event is InputEventScreenTouch and event.pressed) or event is InputEventScreenDrag:
+	# The left thumb aims on the gauge at the bottom left, before and while
+	# Cast is held (R19; moved to the left 2026-11-21). The aim stays for the
+	# next cast. Mouse drags count too, for desktop testing.
+	if phase == Phase.CHARGE or phase == Phase.READY:
+		var down: bool = (event is InputEventScreenTouch and event.pressed) or (event is InputEventMouseButton and event.pressed)
+		var drag: bool = event is InputEventScreenDrag or (event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT))
+		if (down or drag) and event.position.x < (_overlay.size.x if _overlay and _overlay.size.x > 2.0 else 1280.0) * 0.45:
 			aim_at(event.position.x)
 		return
 	if phase != Phase.WAIT:
@@ -1002,7 +1018,9 @@ func _step_rod_and_line(delta: float) -> void:
 	var length := butt.distance_to(rest_tip) * rod_length_factor()
 	# The cast swing: back over the shoulder while charging, a forward snap on release.
 	if phase == Phase.CHARGE:
-		_cast_motion.charge(delta, power_at(_charge_s))
+		# The rod goes back once, to the top of the first swing, and stays there;
+		# only the dial keeps swinging (owner, 2026-11-21).
+		_cast_motion.charge(delta, windup_target(_charge_s))
 	else:
 		_cast_motion.settle(delta)
 	# Seen from the angler: winding up turns the rod upright and past the
@@ -1176,6 +1194,9 @@ func _ready_yaw() -> float:
 func apply_stage() -> void:
 	if _water:
 		_water.set_stage(stage_kind())
+		if _water.stage:
+			var places: Array[float] = _water.stage.people_at
+			_water.stage.arrange(NeighborAnglers.layout(_session_seed, places.size(), places[0], places[places.size() - 1] + 2.0))
 		if _water.stage and request.has("neighbours"):
 			var colors: Array = []
 			for nb: Dictionary in request["neighbours"]:
@@ -1213,9 +1234,9 @@ func _on_main_down() -> void:
 		strike()
 
 
-## Aims the next cast at screen x (a tap on the water).
+## Aims the next cast from the left thumb at screen x on the aim gauge.
 func aim_at(x: float) -> void:
-	_aim = CastMotion.aim_from_screen(x, _overlay.size.x if _overlay and _overlay.size.x > 2.0 else 1280.0)
+	_aim = CastMotion.aim_from_gauge(x)
 	_aim_base = _aim
 	_press_x = -1.0   # a swipe on Cast fine-tunes from here
 

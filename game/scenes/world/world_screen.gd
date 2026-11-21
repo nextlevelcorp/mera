@@ -509,7 +509,7 @@ func _draw() -> void:
 	for it: Array in items:
 		_draw_item(it[1], it[2], lit)
 	WorldPainter.pigeons(self, Rect2(3.0, 93.0, 11.0, 6.0), _time, 9)
-	for i in GULLS:
+	for i in (GULLS if GullFlock.flies_at(String(conditions.get("slot", "day"))) else 0):
 		var a := _time * (0.18 + i * 0.03) + i * 1.7
 		var centre := Vector2(7.0 if i % 2 == 0 else 53.0, 30.0 + i * 12.0)
 		WorldPainter.gull(self, centre + Vector2(cos(a) * 5.0, sin(a) * 3.0), _time + i * 0.4, 3.0)

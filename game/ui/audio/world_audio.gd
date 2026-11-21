@@ -105,7 +105,8 @@ func update(delta: float, pos: Vector2, area: WorldArea, conditions: Dictionary,
 	_gull_clock -= delta
 	if _gull_clock <= 0.0:
 		_gull_clock = _rng.randf_range(6.0, 14.0)
-		_shot("gull", levels["sea"] * 0.5 * gain, _rng.randf_range(0.85, 1.15))
+		if GullFlock.flies_at(String(conditions.get("slot", "day"))):
+			_shot("gull", levels["sea"] * 0.5 * gain, _rng.randf_range(0.85, 1.15))
 	_bell_clock -= delta
 	if _bell_clock <= 0.0:
 		for t: Dictionary in Crowd.trams(area, time_s, k):

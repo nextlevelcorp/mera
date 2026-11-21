@@ -36,8 +36,13 @@ func test_same_seed_same_neighbours() -> void:
 func test_a_hitch_does_not_skip_the_whole_bite() -> void:
 	var n := NeighborAnglers.new(2)
 	n.set_pace(15.0)
+	var before: Array[float] = []
+	for p: Dictionary in n.people:
+		before.append(float(p["t"]))
 	n.update(30.0)   # a long freeze counts as at most one capped step
 	var ticks := 0
-	for p: Dictionary in n.people:
-		ticks += 1 if float(p["t"]) <= 0.25 + 1e-6 else 0
+	for i in n.people.size():
+		var t := float(n.people[i]["t"])
+		# Either a step of at most 0.25 s, or a new state that started from 0.
+		ticks += 1 if t - before[i] <= 0.25 + 1e-6 or t <= 0.25 + 1e-6 else 0
 	assert_eq(ticks, NeighborAnglers.COUNT, "one frame never advances more than 0.25 s")

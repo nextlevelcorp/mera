@@ -152,9 +152,9 @@ func _draw_aim_marker(size: Vector2) -> void:
 ## right with a needle at the current aim and its angle, so the direction is
 ## readable before the cast (shape and position, not colour alone).
 func _draw_aim_gauge(size: Vector2) -> void:
-	var c := Vector2(size.x * 0.5, size.y - 26.0)
-	var r := 130.0
-	var span := 0.62   # half the arc, radians on screen
+	var r := 220.0
+	var span := asin(CastMotion.GAUGE_HALF_W / r)   # half the arc: its ends sit at the aim's limits
+	var c := Vector2(CastMotion.GAUGE_CENTRE_X, size.y - 30.0)
 	draw_arc(c, r, -PI * 0.5 - span, -PI * 0.5 + span, 40, Color(0, 0, 0, 0.45), 10.0, true)
 	draw_arc(c, r, -PI * 0.5 - span, -PI * 0.5 + span, 40, Color(UiTheme.SEA_MID, 0.9), 6.0, true)
 	for i in 9:

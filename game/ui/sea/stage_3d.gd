@@ -99,11 +99,21 @@ func visible_people() -> int:
 	return n
 
 
-## Poses the neighbours' rods from NeighborAnglers.people.
+## Moves the anglers to this session's places (NeighborAnglers.layout).
+func arrange(spots: Array[Dictionary]) -> void:
+	for i in mini(spots.size(), _people.size()):
+		_people[i].position = Vector3(float(spots[i]["x"]), 0.0, -stand_back - float(spots[i]["back"]))
+		_people[i].rotation.y = float(spots[i]["turn"])
+
+
+## Poses the neighbours' rods from NeighborAnglers.people: fishing, raised
+## upright to bait the hook, or laid along the rail for a rest.
 func pose(people: Array[Dictionary], time: float) -> void:
-	var dir := ROD_DIR.normalized()
 	for i in mini(people.size(), _people.size()):
 		var p: Dictionary = people[i]
+		var dir := ROD_DIR.normalized()
+		dir = dir.lerp(Vector3(0.05, 1.0, 0.22).normalized(), float(p.get("raise", 0.0)))
+		dir = dir.lerp(Vector3(0.95, 0.08, 0.3).normalized(), float(p.get("lay", 0.0))).normalized()
 		var bend: float = float(p["bend"]) + 0.15 * float(p["kick"])
 		var tip_free := HANDS + dir * ROD_LEN
 		var droop := Vector3(0.0, -0.95 * bend, 0.22 * bend)
