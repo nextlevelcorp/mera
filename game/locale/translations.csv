@@ -347,3 +347,18 @@ TACKLE_REEL_EGI,Squid reel,Kalamar makarası,Carrete de calamar
 TACKLE_LINE_EGI,Squid braid,Kalamar örgü misinası,Trenzado de calamar
 TACKLE_LEADER_EGI,Squid leader,Kalamar lideri,Bajo de línea de calamar
 TACKLE_LURE_EGI,Squid jig (egi),Kalamar zokası (egi),Jibionera (egi)
+MAIN_MAP,Map,Harita,Mapa
+MAP_TITLE,Where to fish?,Nerede balık tutacaksın?,¿Dónde pescar?
+MAP_HINT,Pick a country; its own rules decide the legal sizes,Bir ülke seç; yasal boyları oranın kuralları belirler,Elige un país; sus normas fijan las tallas legales
+MAP_PICK_SPOT,Tap a pin on the chart,Haritada bir iğneye dokun,Toca un alfiler en la carta
+MAP_FISH_HERE,Fish here,Burada balık tut,Pescar aquí
+MAP_SPOTS,%d spots,%d yer,%d lugares
+MAP_COMING,Spots coming,Yerler yakında,Lugares próximamente
+MAP_RULES_READ,Rules read from the official text,Kurallar resmî metinden okundu,Normas leídas del texto oficial
+MAP_RULES_UNOFFICIAL,Rules from guides (unofficial),Kurallar rehberlerden (resmî değil),Normas de guías (no oficial)
+MAP_SPECIES,Species: %s,Türler: %s,Especies: %s
+MAP_POSITIONS,%d places to stand,%d durulacak yer,%d puestos
+MAP_SHORE_PIER,A bridge over the water,Suyun üstünde bir köprü,Un puente sobre el agua
+MAP_SHORE_ROCK,A rocky shore,Kayalık bir kıyı,Una costa rocosa
+MAP_SHORE_HARBOUR,A harbour,Bir liman,Un puerto
+MAP_SHORE_SAND,A sandy shore,Kumluk bir kıyı,Una costa de arena

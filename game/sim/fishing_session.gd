@@ -205,11 +205,12 @@ func _last_catches(n: int) -> Array:
 
 
 func _undersize(c: Dictionary) -> bool:
-	for sp: Dictionary in db["species"]:
-		if sp["id"] == c["species_id"]:
-			var rule: Dictionary = sp.get("regulation", {})
-			return rule.has("min_length_cm") and float(c["length_cm"]) < float(rule["min_length_cm"])
-	return false
+	return Regulations.is_undersize(db, jurisdiction(), String(c["species_id"]), float(c["length_cm"]))
+
+
+## The legal rules that hold where this visit is (R17: the size belongs to the place).
+func jurisdiction() -> String:
+	return String(FightSetup.spot_of(db, position_id).get("jurisdiction", "tr_national"))
 
 
 ## A sabiki has several hooks (SABIKI_HOOKS); a schooling fish often brings
