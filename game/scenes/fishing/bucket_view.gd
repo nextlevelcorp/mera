@@ -107,7 +107,14 @@ func _draw_fish(f: Dictionary, c: Vector2, r: float) -> void:
 	var tail_dir := (-dir).rotated(flick)
 	var body := PackedVector2Array([head, at + dir * len_px * 0.2 + side * w, at - dir * len_px * 0.25 + side * w * 0.7, tail,
 		at - dir * len_px * 0.25 - side * w * 0.7, at + dir * len_px * 0.2 - side * w])
-	draw_colored_polygon(PackedVector2Array([tail, tail + tail_dir.rotated(0.5) * w * 2.4, tail + tail_dir * w * 1.2, tail + tail_dir.rotated(-0.5) * w * 2.4]), (look[0] as Color).darkened(0.1))
+	if String(look[3]) == "squid":
+		# A squid swims mantle first: the fins' diamond at the front, the arms trailing.
+		for a in 8:
+			var d := tail_dir.rotated((float(a) - 3.5) * 0.09)
+			draw_line(tail, tail + d * w * (2.6 + 0.4 * sin(_t * 5.0 + float(a))), (look[0] as Color).darkened(0.15), maxf(w * 0.25, 1.2), true)
+		draw_colored_polygon(PackedVector2Array([head, at + dir * len_px * 0.2 + side * w * 1.8, at + dir * len_px * 0.05, at + dir * len_px * 0.2 - side * w * 1.8]), Color(look[0] as Color, 0.85))
+	else:
+		draw_colored_polygon(PackedVector2Array([tail, tail + tail_dir.rotated(0.5) * w * 2.4, tail + tail_dir * w * 1.2, tail + tail_dir.rotated(-0.5) * w * 2.4]), (look[0] as Color).darkened(0.1))
 	draw_colored_polygon(body, look[0])
 	draw_line(head - dir * len_px * 0.1, tail + dir * len_px * 0.1, (look[1] as Color).darkened(0.1), maxf(w * 0.35, 1.5), true)
 	draw_circle(head - dir * len_px * 0.12 + side * w * 0.45, maxf(w * 0.18, 1.5), Color(0.05, 0.05, 0.05))

@@ -66,5 +66,22 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "egi_rod",
+  "name_key": "TACKLE_ROD_EGI",
+  "length_m": 2.4,
+  "power": 6,
+  "action": 10,
+  "cast_weight_min_g": 8,
+  "cast_weight_max_g": 25,
+  "sensitivity": 15,
+  "durability": 10,
+  "blank_colour": "#5a2b55",
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]

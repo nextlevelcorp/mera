@@ -28,6 +28,12 @@
     "no_minimum": true,
     "status": "read",
     "note": "Not in Çizelge 7: 'Diğer türler', no size limit"
+   },
+   {
+    "species_id": "kalamar",
+    "no_minimum": true,
+    "status": "read",
+    "note": "Loligo vulgaris is not in Çizelge 7: 'Diğer türler', no size limit"
    }
   ],
   "provenance": {

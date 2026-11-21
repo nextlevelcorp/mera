@@ -5,7 +5,8 @@
   "istavrit": 90,
   "lufer": 160,
   "palamut": 180,
-  "izmarit": 70
+  "izmarit": 70,
+  "kalamar": 420
  },
  "default_price_per_kg": 80,
  "lures": [
@@ -24,12 +25,17 @@
   {
    "id": "shrimp",
    "price": 4
+  },
+  {
+   "id": "egi_jig",
+   "price": 120
   }
  ],
  "starting_stock": {
   "lrf_soft": 6,
   "spin_minnow": 3,
   "capari_rig": 3,
-  "shrimp": 10
+  "shrimp": 10,
+  "egi_jig": 2
  }
 }

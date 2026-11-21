@@ -14,7 +14,9 @@ func _init() -> void:
 func _wait(tackle: String, reel: float, seconds: float, start_s: float = 0.0, start_reel: float = 0.0) -> WaitSim:
 	var cond := {"slot": "evening", "month": 10, "wind_dir": "NE", "wind_ms": 3}
 	var ctx := FightSetup.build(_db, "lufer", tackle, "karakoy_east", 0.5, cond)
-	var w := WaitSim.new(ctx, _k, _db["species"], 20.0, 4)
+	# Only the bluefish swims here, so another species' take does not stop the
+	# lure (the tests are about the retrieve, not about who bites).
+	var w := WaitSim.new(ctx, _k, _db["species"].filter(func(sp: Dictionary) -> bool: return sp["id"] == "lufer"), 20.0, 4)
 	for i in int(start_s * 30.0):
 		w.advance(1.0 / 30.0, {"reel": start_reel})
 	for i in int(seconds * 30.0):

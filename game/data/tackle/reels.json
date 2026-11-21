@@ -54,5 +54,19 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "egi_reel",
+  "name_key": "TACKLE_REEL_EGI",
+  "size": 2500,
+  "drag_max_kg": 3.5,
+  "retrieve_m_per_s": 0.9,
+  "smoothness": 13,
+  "line_capacity_m": 150,
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]

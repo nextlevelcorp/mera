@@ -211,6 +211,14 @@ static func commit(k: Dictionary, sp: Dictionary, spot: Dictionary, rod: Diction
 static func hook(k: Dictionary, sp: Dictionary, rod: Dictionary, line: Dictionary, lure: Dictionary, timing_quality: float) -> Dictionary:
 	var mouth: float = float(sp["mouth_gape_mm"])
 	var gape_fit := band(float(lure["hook_gape_mm"]), float(k["GAPE_LO"]) * mouth, float(k["GAPE_HI"]) * mouth, float(k["GAPE_M"]) * mouth)
+	# A squid wraps its arms round its prey and holds on; it is caught on a
+	# squid jig's crown of pins, which a fish's mouth rarely meets, and slips
+	# off an ordinary hook (2026-11-21, design fill).
+	var squid_jig := String(lure.get("hook_pattern", "")) == "squid_jig"
+	if sp.get("cephalopod", false):
+		gape_fit = 1.0 if squid_jig else float(k["SQUID_ON_HOOK"])
+	elif squid_jig:
+		gape_fit *= float(k["FISH_ON_SQUID_JIG"])
 	var penetration: float = float(k["PEN_BASE"]) + (1.0 - float(k["PEN_BASE"])) * (0.5 * n(float(rod["power"])) + 0.5 * (1.0 - n(float(line["stretch"]))))
 	var timing: float = float(k["TIMING_BASE"]) + (1.0 - float(k["TIMING_BASE"])) * timing_quality
 	return {

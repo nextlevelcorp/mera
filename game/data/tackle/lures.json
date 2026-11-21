@@ -72,5 +72,30 @@
     "design_fill": true
    }
   }
+ },
+ {
+  "id": "egi_jig",
+  "name_key": "TACKLE_LURE_EGI",
+  "type": "squid_jig",
+  "length_cm": 9,
+  "weight_g": 15,
+  "flash": 8,
+  "action": 11,
+  "scent": 2,
+  "durability": 12,
+  "imitates": [
+   "crustacean",
+   "small_fish"
+  ],
+  "run_depth_min_m": 0.5,
+  "run_depth_max_m": 10,
+  "sink_rate_m_per_s": 0.33,
+  "hook_gape_mm": 10,
+  "hook_pattern": "squid_jig",
+  "provenance": {
+   "default": {
+    "design_fill": true
+   }
+  }
  }
 ]
