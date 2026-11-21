@@ -44,6 +44,7 @@ var bait_cycle: Button
 var rig_cycle: Button
 var position_cycle: Button
 var result_panel: Control
+var release_button: Button
 var result_label: Label
 var result_detail: Label
 var log_panel: Control
@@ -243,6 +244,9 @@ func _build_result() -> void:
 	result_detail = _plain_label("", 22)
 	result_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	box.add_child(result_detail)
+	release_button = _button("", 24, scr.release_small)
+	release_button.visible = false
+	box.add_child(release_button)
 	why_button = _button(tr("WHY_BUTTON"), 24, scr._show_why)
 	box.add_child(why_button)
 	var again := _button(tr("FISH_CAST_AGAIN"), 28, func() -> void:
