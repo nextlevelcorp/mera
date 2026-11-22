@@ -219,6 +219,18 @@
     "min_length_cm": 17,
     "status": "read",
     "note": "DGRM table: Sargo legítimo 17 cm"
+   },
+   {
+    "species_id": "kalamar",
+    "no_minimum": true,
+    "status": "read",
+    "note": "Loligo vulgaris is not in the DGRM size table"
+   },
+   {
+    "species_id": "izmarit",
+    "no_minimum": true,
+    "status": "read",
+    "note": "Spicara smaris is not in the DGRM size table"
    }
   ],
   "provenance": {

@@ -119,3 +119,14 @@ func test_italy_has_three_spots_under_italian_rules() -> void:
 	var ctx := FightSetup.build(Db.database(), "palamut", "spin", "trieste_tip", 0.5, {"slot": "dawn", "month": 9, "wind_dir": "NE", "wind_ms": 3})
 	var w := WaitSim.new(ctx, Db.constants(), Db.database()["species"], 15.0, 1)
 	assert_true(not w._rates.has("lufer") or float(w._rates["lufer"]["rate_interest"]) == 0.0, "no bluefish at Trieste (no GBIF record)")
+
+
+func test_greece_and_portugal_have_three_spots_each() -> void:
+	assert_eq(MapModel.spots_in(Db.database(), "GR").size(), 3, "Thessaloniki, Kavala, Patras")
+	assert_eq(MapModel.spots_in(Db.database(), "PT").size(), 3, "Sesimbra, Lagos, Cascais")
+	var s := FishingSession.new(Db.database(), Db.constants(), "lrf", "cascais_pier", {"slot": "dawn", "month": 1, "wind_dir": "N", "wind_ms": 3})
+	(s.trip["catches"] as Array).append({"species_id": "levrek", "length_cm": 30.0, "weight_kg": 0.3, "kept": true})
+	assert_eq(s.undersize_count(1), 1, "a 30 cm sea bass goes back in Portugal (36 cm)")
+	var lisbon := FightSetup.build(Db.database(), "levrek", "lrf", "cascais_pier", 0.5, {"slot": "day", "month": 8, "wind_dir": "N", "wind_ms": 3})
+	var kavala := FightSetup.build(Db.database(), "levrek", "lrf", "kavala_quay", 0.5, {"slot": "day", "month": 8, "wind_dir": "N", "wind_ms": 3})
+	assert_true(float(lisbon["spot"]["water_temp_by_month_c"][7]) < float(kavala["spot"]["water_temp_by_month_c"][7]) - 5.0, "the Atlantic at Cascais is far cooler in August than the Aegean (NOAA)")
