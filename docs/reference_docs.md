@@ -22,6 +22,14 @@ Add every data, art, audio and tool source here with its licence before it is us
 | Normattiva: DPR 1639/1968 | Official legal database | Italy's sizes |
 | vgo.gr guide; fishradar.ai | Third-party web pages, read only | Greece, marked unofficial; values cited, text not copied |
 
+## Italy's spots (2026-11-22, R17)
+| Value | Source | Licence or terms |
+| --- | --- | --- |
+| Coordinates: Port of Naples Q3398528, Molo Audace Q1535578, Punta Vagno lighthouse Q55630795 (Boccadasse Q3641485) | Wikidata, P625 | CC0 |
+| Monthly sea-surface temperature, 1991-2020 | NOAA OISST v2.1 (`tools/data/sst_climatology.py`) | US public domain |
+| Species present near each spot: occurrence counts in a box round it, a species listed with at least 3 records | GBIF.org occurrence search API, accessed 2026-11-22 | Counts only; the records carry their datasets' licences (CC0, CC BY, CC BY-NC) |
+| Fishing from the Naples piers: mullet, sea bass, some bream and striped sea bream | Visit Naples (Comune di Napoli tourism site), search summary only | Facts cited, text not copied |
+
 ## Andalusia's spots (2026-11-22, R17)
 | Value | Source | Licence or terms |
 | --- | --- | --- |

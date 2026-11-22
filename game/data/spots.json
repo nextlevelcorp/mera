@@ -1510,5 +1510,824 @@
     }
    }
   }
+ },
+ {
+  "id": "napoli_moli",
+  "name_key": "SPOT_IT_NAPOLI",
+  "region": "Naples: the harbour piers from the Molo Beverello to the Molo San Vincenzo",
+  "jurisdiction": "it_national",
+  "lat": 40.84216,
+  "lon": 14.25736,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 10,
+  "pressure": 14,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   15.0,
+   14.2,
+   14.2,
+   15.7,
+   18.8,
+   22.6,
+   25.1,
+   26.1,
+   24.2,
+   21.8,
+   19.4,
+   16.8
+  ],
+  "species": [
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.45,
+     0.45,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.25,
+     0.25,
+     0.3,
+     0.4,
+     0.45,
+     0.5
+    ]
+   },
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6
+    ]
+   },
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.7,
+     0.65,
+     0.5,
+     0.45
+    ]
+   },
+   {
+    "species_id": "izmarit",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4
+    ]
+   },
+   {
+    "species_id": "kalamar",
+    "abundance_by_month": [
+     0.25,
+     0.2,
+     0.1,
+     0.05,
+     0.03,
+     0.02,
+     0.02,
+     0.03,
+     0.08,
+     0.2,
+     0.3,
+     0.3
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "napoli_san_vincenzo",
+    "name_key": "POS_NAPOLI_SAN_VINCENZO",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 9
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 14
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 12,
+    "structure_tags": [
+     "pier",
+     "lighthouse"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "napoli_beverello",
+    "name_key": "POS_NAPOLI_BEVERELLO",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 7
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 11
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 9,
+    "structure_tags": [
+     "ferry pier"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "napoli_molosiglio",
+    "name_key": "POS_NAPOLI_MOLOSIGLIO",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 8,
+    "structure_tags": [
+     "marina wall"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "The Molo San Vincenzo is reached through a navy area and public access has been limited (Napolike, undated). Depths, exposure and the places to stand are design fills."
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q3398528 (Port of Naples), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q3398528 (Port of Naples), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 40.875 N, 14.375 E (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "Fishing from the Naples piers (Beverello to San Vincenzo, the latter for competitions): mullet, sea bass, some bream and striped sea bream, per Visit Naples (Comune di Napoli tourism site), read as a search summary only: https://www.visitnaples.eu/en/neapolitanity/discover-naples/fishing-in-naples-the-best-places-for-fans. GBIF.org occurrence search (api.gbif.org, accessed 2026-11-22), records in the box 40.70-40.95 N, 14.00-14.45 E: Diplodus sargus 25, Spicara smaris 6, Loligo vulgaris 5, Sparus aurata 4, Dicentrarchus labrax 3, Sarda sarda 3, Trachurus trachurus 1, Pomatomus saltatrix 1. A species is listed with at least 3 records. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
+ },
+ {
+  "id": "trieste_audace",
+  "name_key": "SPOT_IT_TRIESTE",
+  "region": "Trieste: the Molo Audace, between the San Giorgio and San Giusto basins",
+  "jurisdiction": "it_national",
+  "lat": 45.652068,
+  "lon": 13.766486,
+  "shore_type": "pier",
+  "water_class": "marine",
+  "typical_clarity": 10,
+  "pressure": 14,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   10.8,
+   9.5,
+   10.2,
+   13.2,
+   17.9,
+   22.5,
+   25.0,
+   25.5,
+   22.7,
+   19.4,
+   16.2,
+   13.2
+  ],
+  "species": [
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.7,
+     0.65,
+     0.5,
+     0.45
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.45,
+     0.45,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.25,
+     0.25,
+     0.3,
+     0.4,
+     0.45,
+     0.5
+    ]
+   },
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6
+    ]
+   },
+   {
+    "species_id": "istavrit",
+    "abundance_by_month": [
+     0.5,
+     0.45,
+     0.45,
+     0.5,
+     0.6,
+     0.65,
+     0.65,
+     0.65,
+     0.6,
+     0.55,
+     0.5,
+     0.5
+    ]
+   },
+   {
+    "species_id": "kalamar",
+    "abundance_by_month": [
+     0.25,
+     0.2,
+     0.1,
+     0.05,
+     0.03,
+     0.02,
+     0.02,
+     0.03,
+     0.08,
+     0.2,
+     0.3,
+     0.3
+    ]
+   },
+   {
+    "species_id": "palamut",
+    "abundance_by_month": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.05,
+     0.1,
+     0.2,
+     0.4,
+     0.6,
+     0.6,
+     0.3,
+     0.05
+    ]
+   },
+   {
+    "species_id": "izmarit",
+    "abundance_by_month": [
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "trieste_tip",
+    "name_key": "POS_TRIESTE_TIP",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "W",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 9
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 13
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 10,
+    "structure_tags": [
+     "pier head"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "trieste_san_giorgio",
+    "name_key": "POS_TRIESTE_SAN_GIORGIO",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "N",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 7
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 10
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 8,
+    "structure_tags": [
+     "basin"
+    ],
+    "exposure_by_wind": {
+     "N": 0.3,
+     "NE": 0.6,
+     "E": 0.2,
+     "SE": 0.1,
+     "S": 0.05,
+     "SW": 0.1,
+     "W": 0.3,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "trieste_san_giusto",
+    "name_key": "POS_TRIESTE_SAN_GIUSTO",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 7,
+    "structure_tags": [
+     "basin"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "No source read says anglers fish from the Molo Audace itself; that it is a place to fish is a design fill (it is the city's best-known pier, Wikidata Q1535578). The Gulf of Trieste is the coldest water on the map in winter (NOAA)."
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q1535578 (Molo Audace), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q1535578 (Molo Audace), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 45.625 N, 13.625 E (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "GBIF.org occurrence search (api.gbif.org, accessed 2026-11-22), records in the box 45.55-45.75 N, 13.60-13.85 E: Sparus aurata 80, Dicentrarchus labrax 70, Diplodus sargus 60, Loligo vulgaris 56, Trachurus trachurus 55, Sarda sarda 53, Spicara smaris 9, Pomatomus saltatrix 0 (no bluefish). A species is listed with at least 3 records. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
+ },
+ {
+  "id": "genova_corso_italia",
+  "name_key": "SPOT_IT_GENOVA",
+  "region": "Genoa: the rocks along Corso Italia, from the Punta Vagno lighthouse to Boccadasse",
+  "jurisdiction": "it_national",
+  "lat": 44.391997,
+  "lon": 8.952753,
+  "shore_type": "rock",
+  "water_class": "marine",
+  "typical_clarity": 10,
+  "pressure": 14,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   14.1,
+   13.4,
+   13.6,
+   15.0,
+   18.0,
+   21.7,
+   24.4,
+   25.1,
+   23.0,
+   20.4,
+   17.9,
+   15.6
+  ],
+  "species": [
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6
+    ]
+   },
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.7,
+     0.65,
+     0.5,
+     0.45
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.45,
+     0.45,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.25,
+     0.25,
+     0.3,
+     0.4,
+     0.45,
+     0.5
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "genova_punta_vagno",
+    "name_key": "POS_GENOVA_PUNTA_VAGNO",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 10,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 11
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 14,
+    "structure_tags": [
+     "rocks",
+     "lighthouse"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "genova_scogliera",
+    "name_key": "POS_GENOVA_SCOGLIERA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 2
+     },
+     {
+      "distance_m": 10,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 13,
+    "structure_tags": [
+     "rock armour"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "genova_boccadasse",
+    "name_key": "POS_GENOVA_BOCCADASSE",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 2
+     },
+     {
+      "distance_m": 10,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 8
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 11,
+    "structure_tags": [
+     "fishing village",
+     "rocks"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "A Comune di Genova planning document notes few sea spaces for sport and amateur fishing in the port area, so the open rocks of Corso Italia are chosen; that they are fished is a design fill. Boccadasse is Wikidata Q3641485."
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q55630795 (Punta Vagno lighthouse), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q55630795 (Punta Vagno lighthouse), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 44.375 N, 8.875 E (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "GBIF.org occurrence search (api.gbif.org, accessed 2026-11-22), records in the box 44.30-44.45 N, 8.70-9.10 E: Diplodus sargus 13, Sparus aurata 9, Dicentrarchus labrax 3, Loligo vulgaris 2, Sarda sarda 2, Pomatomus saltatrix 1, Trachurus trachurus 0. A species is listed with at least 3 records. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
  }
 ]
