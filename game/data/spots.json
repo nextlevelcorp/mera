@@ -554,5 +554,245 @@
     }
    }
   }
+ },
+ {
+  "id": "izmir_kordon",
+  "name_key": "SPOT_IZMIR_KORDON",
+  "region": "İzmir, the Kordon waterfront of the inner bay, from Alsancak to Konak",
+  "jurisdiction": "tr_national",
+  "lat": 38.435555555,
+  "lon": 27.139444444,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 5,
+  "pressure": 16,
+  "access_difficulty": 1,
+  "water_temp_by_month_c": [
+   13.9,
+   13.3,
+   14.0,
+   15.9,
+   18.8,
+   22.1,
+   24.2,
+   24.6,
+   23.3,
+   20.8,
+   18.0,
+   15.6
+  ],
+  "species": [
+   {
+    "species_id": "istavrit",
+    "abundance_by_month": [
+     0.3,
+     0.3,
+     0.4,
+     0.5,
+     0.5,
+     0.4,
+     0.3,
+     0.3,
+     0.4,
+     0.5,
+     0.5,
+     0.4
+    ]
+   },
+   {
+    "species_id": "izmarit",
+    "abundance_by_month": [
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3
+    ]
+   },
+   {
+    "species_id": "kalamar",
+    "abundance_by_month": [
+     0.35,
+     0.3,
+     0.15,
+     0.08,
+     0.04,
+     0.03,
+     0.03,
+     0.04,
+     0.1,
+     0.3,
+     0.4,
+     0.4
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "izmir_alsancak",
+    "name_key": "POS_IZMIR_ALSANCAK",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "W",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 8,
+    "structure_tags": [
+     "quay wall",
+     "ferry wash"
+    ],
+    "exposure_by_wind": {
+     "N": 0.3,
+     "NE": 0.1,
+     "E": 0.05,
+     "SE": 0.1,
+     "S": 0.4,
+     "SW": 0.7,
+     "W": 0.8,
+     "NW": 0.6
+    },
+    "current": 4,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "izmir_pasaport",
+    "name_key": "POS_IZMIR_PASAPORT",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "W",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 7
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 10
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 10,
+    "structure_tags": [
+     "ferry pier",
+     "quay wall"
+    ],
+    "exposure_by_wind": {
+     "N": 0.3,
+     "NE": 0.1,
+     "E": 0.05,
+     "SE": 0.1,
+     "S": 0.4,
+     "SW": 0.7,
+     "W": 0.8,
+     "NW": 0.6
+    },
+    "current": 4,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "izmir_konak",
+    "name_key": "POS_IZMIR_KONAK",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "NW",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 9,
+    "structure_tags": [
+     "pier",
+     "quay wall"
+    ],
+    "exposure_by_wind": {
+     "N": 0.3,
+     "NE": 0.1,
+     "E": 0.05,
+     "SE": 0.1,
+     "S": 0.4,
+     "SW": 0.7,
+     "W": 0.8,
+     "NW": 0.6
+    },
+    "current": 4,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q6013884 (Kordon, İzmir), P625, CC0; positions at Alsancak Ferry Terminal Q55808401, Pasaport Ferry Terminal Q18209626 and Konak Pier Q6428725",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q6013884 (Kordon, İzmir), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "MGM, Ege Denizi deniz suyu sıcaklık 2025, 1970-2025 monthly means (sea-wide mean, not a station): https://mgm.gov.tr/FILES/resmi-istatistikler/denizSuyu/2025-Ege.pdf",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "Horse mackerel (T. trachurus) and squid (L. vulgaris) among shore anglers' catches: Ulaş, Tunca & Aydın (2019) Acta Adriatica 60(2): 157-180, 634 shore anglers interviewed in 2016 in eight districts of İzmir Inner Bay including Konak, Pasaport and Alsancak: https://hrcak.srce.hr/file/336364; picarel (S. smaris), horse mackerel and squid in the bay: Gökçe et al. (2005) E.Ü. Su Ürünleri Dergisi 22(3-4): 419-422, İzmir Bay trammel-net catches Oct-Nov 2003: https://dergipark.org.tr/tr/download/article-file/57843. Bluefish and bonito were not reported by the bay's shore anglers, so they are left out. Monthly abundances are design fills (squid strongest October to January, Gökçe et al. 2005).",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
  }
 ]

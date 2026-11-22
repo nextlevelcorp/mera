@@ -11,7 +11,7 @@ func test_every_spot_names_a_known_jurisdiction() -> void:
 func test_countries_with_spots_come_first_and_the_rest_are_coming() -> void:
 	var list := MapModel.countries(Db.database())
 	assert_eq(list[0]["country"], "TR", "Turkey, where the spots are, first")
-	assert_eq((list[0]["spots"] as Array).size(), 2, "with Galata and Sarayburnu")
+	assert_eq((list[0]["spots"] as Array).size(), 3, "with Galata, Sarayburnu and İzmir Kordon")
 	var codes: Array[String] = []
 	for c: Dictionary in list:
 		codes.append(String(c["country"]))
@@ -76,3 +76,21 @@ func test_the_land_file_covers_the_countries_and_says_where_it_comes_from() -> v
 	for ring: PackedVector2Array in MapModel.rings_in(rings, b):
 		pieces += Geometry2D.intersect_polygons(ring, view).size()
 	assert_true(pieces >= 2, "Europe and Asia on either side of the Strait (%d pieces)" % pieces)
+
+
+func test_izmir_has_its_own_fish_and_its_own_water() -> void:
+	var cond := {"slot": "night", "month": 11, "wind_dir": "NE", "wind_ms": 3}
+	var ctx := FightSetup.build(Db.database(), "kalamar", "egi", "izmir_pasaport", 0.5, cond)
+	assert_eq(ctx["spot"]["id"], "izmir_kordon", "Pasaport is on the Kordon")
+	var w := WaitSim.new(ctx, Db.constants(), Db.database()["species"], 20.0, 1)
+	assert_true(float(w._rates["kalamar"]["rate_interest"]) > 0.0, "squid in the bay (Ulaş et al. 2019)")
+	assert_true(not w._rates.has("lufer") or float(w._rates["lufer"]["rate_interest"]) == 0.0, "no bluefish: the bay's shore anglers did not report it")
+	var galata := FightSetup.build(Db.database(), "istavrit", "lrf", "karakoy_east", 0.5, {"slot": "day", "month": 1, "wind_dir": "NE", "wind_ms": 3})
+	var izmir := FightSetup.build(Db.database(), "istavrit", "lrf", "izmir_konak", 0.5, {"slot": "day", "month": 1, "wind_dir": "NE", "wind_ms": 3})
+	assert_true(float(izmir["spot"]["water_temp_by_month_c"][0]) > float(galata["spot"]["water_temp_by_month_c"][0]), "the Aegean is warmer in January than the Marmara (MGM)")
+
+
+func test_close_pins_are_spread_so_each_can_be_tapped() -> void:
+	var shown := MapModel.spread([Vector2(100, 100), Vector2(104, 102), Vector2(400, 300)] as Array[Vector2], 46.0)
+	assert_true(shown[0].distance_to(shown[1]) >= 46.0 * 0.9 * 1.9, "the two close pins move apart (%.0f px)" % shown[0].distance_to(shown[1]))
+	assert_eq(shown[2], Vector2(400, 300), "a lone pin stays put")

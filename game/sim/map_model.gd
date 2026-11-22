@@ -94,3 +94,34 @@ static func rings_in(rings: Array[PackedVector2Array], b: Array[float]) -> Array
 		if Rect2(lo, hi - lo).intersects(box, true):
 			out.append(ring)
 	return out
+
+
+## Pins closer than min_px are spread on a small ring round their middle so
+## each can be tapped and read; a lone pin stays where it is. Returns the
+## shown positions in the same order.
+static func spread(points: Array[Vector2], min_px: float) -> Array[Vector2]:
+	var group: Array[int] = []
+	for i in points.size():
+		group.append(i)
+	for i in points.size():
+		for j in range(i + 1, points.size()):
+			if points[i].distance_to(points[j]) < min_px:
+				var from := group[j]
+				for k in points.size():
+					if group[k] == from:
+						group[k] = group[i]
+	var out: Array[Vector2] = points.duplicate()
+	for g in points.size():
+		var members: Array[int] = []
+		for k in points.size():
+			if group[k] == g:
+				members.append(k)
+		if members.size() < 2:
+			continue
+		var mid := Vector2.ZERO
+		for k: int in members:
+			mid += points[k]
+		mid /= members.size()
+		for n in members.size():
+			out[members[n]] = mid + Vector2.from_angle(-PI * 0.5 + TAU * float(n) / members.size()) * min_px * 0.9
+	return out
