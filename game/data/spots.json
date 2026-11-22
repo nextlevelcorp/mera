@@ -2329,5 +2329,1553 @@
     }
    }
   }
+ },
+ {
+  "id": "thessaloniki_paralia",
+  "name_key": "SPOT_GR_THESSALONIKI",
+  "region": "Thessaloniki: the waterfront (Nea Paralia) on the Thermaic Gulf",
+  "jurisdiction": "gr_national",
+  "lat": 40.640277777,
+  "lon": 22.935555555,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 11,
+  "pressure": 12,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   13.5,
+   12.8,
+   13.2,
+   15.0,
+   18.8,
+   23.0,
+   25.6,
+   26.5,
+   24.6,
+   21.3,
+   18.1,
+   15.3
+  ],
+  "species": [
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.7,
+     0.65,
+     0.5,
+     0.45
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.45,
+     0.45,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.25,
+     0.25,
+     0.3,
+     0.4,
+     0.45,
+     0.5
+    ]
+   },
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "thessaloniki_nea_paralia",
+    "name_key": "POS_GR_NEA_PARALIA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SW",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 8
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 8,
+    "structure_tags": [
+     "promenade wall"
+    ],
+    "exposure_by_wind": {
+     "N": 0.5,
+     "NE": 0.2,
+     "E": 0.1,
+     "SE": 0.2,
+     "S": 0.5,
+     "SW": 0.8,
+     "W": 0.9,
+     "NW": 0.8
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "thessaloniki_white_tower",
+    "name_key": "POS_GR_WHITE_TOWER",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 9,
+    "structure_tags": [
+     "quay"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "thessaloniki_port",
+    "name_key": "POS_GR_THESS_PORT",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SW",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 8
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 11
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 10,
+    "structure_tags": [
+     "harbour mole"
+    ],
+    "exposure_by_wind": {
+     "N": 0.5,
+     "NE": 0.2,
+     "E": 0.1,
+     "SE": 0.2,
+     "S": 0.5,
+     "SW": 0.8,
+     "W": 0.9,
+     "NW": 0.8
+    },
+    "current": 5,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "The waterfront or harbour as a place to fish, the places to stand, depths and exposure are design fills."
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q17151 (Thessaloniki), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q17151 (Thessaloniki), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 40.375,22.875 (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "Shore anglers in the Ionian and the northern and central Aegean (406 surveyed, 2008-2012): gilthead sea bream, mullets and Diplodus species were more than 48% of the catch, sea bass prominent; Moutopoulos, Katselis and Kios, 'Estimation and reconstruction of shore-based recreational angling fisheries catches in the Greek Seas (1950-2010)', read as a search summary only: https://ir.lib.uth.gr/xmlui/handle/11615/31176. GBIF.org occurrence search (api.gbif.org, accessed 2026-11-22), records in the box 40.50-40.68 N, 22.80-23.05 E: Sparus aurata 3, Dicentrarchus labrax 2, Pomatomus saltatrix 2, Loligo vulgaris 1, Diplodus sargus 0. A species is listed with at least 3 records. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
+ },
+ {
+  "id": "kavala_port",
+  "name_key": "SPOT_GR_KAVALA",
+  "region": "Kavala: the harbour moles under the old town",
+  "jurisdiction": "gr_national",
+  "lat": 40.931315,
+  "lon": 24.402075,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 11,
+  "pressure": 12,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   13.1,
+   12.3,
+   12.5,
+   14.4,
+   18.5,
+   22.7,
+   25.4,
+   26.1,
+   23.9,
+   20.5,
+   17.2,
+   14.7
+  ],
+  "species": [
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.7,
+     0.65,
+     0.5,
+     0.45
+    ]
+   },
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.45,
+     0.45,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.25,
+     0.25,
+     0.3,
+     0.4,
+     0.45,
+     0.5
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "kavala_mole",
+    "name_key": "POS_GR_KAVALA_MOLE",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 8
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 12
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 12,
+    "structure_tags": [
+     "breakwater"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "kavala_quay",
+    "name_key": "POS_GR_KAVALA_QUAY",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 9,
+    "structure_tags": [
+     "fishing harbour quay"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "kavala_rocks",
+    "name_key": "POS_GR_KAVALA_ROCKS",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 2
+     },
+     {
+      "distance_m": 10,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 10
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 14,
+    "structure_tags": [
+     "rocks under the old town"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "The waterfront or harbour as a place to fish, the places to stand, depths and exposure are design fills. Sea bass has no GBIF record in the box; it is listed from the regional angling study."
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q60614830 (Port of Kavala), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q60614830 (Port of Kavala), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 40.875,24.375 (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "Shore anglers in the Ionian and the northern and central Aegean (406 surveyed, 2008-2012): gilthead sea bream, mullets and Diplodus species were more than 48% of the catch, sea bass prominent; Moutopoulos, Katselis and Kios, 'Estimation and reconstruction of shore-based recreational angling fisheries catches in the Greek Seas (1950-2010)', read as a search summary only: https://ir.lib.uth.gr/xmlui/handle/11615/31176. GBIF.org occurrence search (api.gbif.org, accessed 2026-11-22), records in the box 40.85-40.98 N, 24.30-24.50 E: Sparus aurata 6, Diplodus sargus 5, Dicentrarchus labrax 0. A species is listed with at least 3 records. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
+ },
+ {
+  "id": "patras_port",
+  "name_key": "SPOT_GR_PATRAS",
+  "region": "Patras: the harbour moles on the Gulf of Patras (Ionian side)",
+  "jurisdiction": "gr_national",
+  "lat": 38.246383,
+  "lon": 21.734911,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 11,
+  "pressure": 12,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   15.5,
+   14.6,
+   14.7,
+   16.1,
+   18.8,
+   22.3,
+   24.6,
+   25.7,
+   24.8,
+   22.6,
+   20.2,
+   17.5
+  ],
+  "species": [
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.7,
+     0.65,
+     0.5,
+     0.45
+    ]
+   },
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.45,
+     0.45,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.25,
+     0.25,
+     0.3,
+     0.4,
+     0.45,
+     0.5
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "patras_mole",
+    "name_key": "POS_GR_PATRAS_MOLE",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "W",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 8
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 12
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 11,
+    "structure_tags": [
+     "harbour mole"
+    ],
+    "exposure_by_wind": {
+     "N": 0.5,
+     "NE": 0.2,
+     "E": 0.1,
+     "SE": 0.2,
+     "S": 0.5,
+     "SW": 0.8,
+     "W": 0.9,
+     "NW": 0.8
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "patras_quay",
+    "name_key": "POS_GR_PATRAS_QUAY",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "W",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 10
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 9,
+    "structure_tags": [
+     "old harbour quay"
+    ],
+    "exposure_by_wind": {
+     "N": 0.5,
+     "NE": 0.2,
+     "E": 0.1,
+     "SE": 0.2,
+     "S": 0.5,
+     "SW": 0.8,
+     "W": 0.9,
+     "NW": 0.8
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "patras_beach",
+    "name_key": "POS_GR_PATRAS_BEACH",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SW",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 1
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 6
+     }
+    ],
+    "bottom_type": "sand",
+    "structure": 6,
+    "structure_tags": [
+     "beach groyne"
+    ],
+    "exposure_by_wind": {
+     "N": 0.5,
+     "NE": 0.2,
+     "E": 0.1,
+     "SE": 0.2,
+     "S": 0.5,
+     "SW": 0.8,
+     "W": 0.9,
+     "NW": 0.8
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "The waterfront or harbour as a place to fish, the places to stand, depths and exposure are design fills."
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q133123 (Patras), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q133123 (Patras), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 38.375,21.625 (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "Shore anglers in the Ionian and the northern and central Aegean (406 surveyed, 2008-2012): gilthead sea bream, mullets and Diplodus species were more than 48% of the catch, sea bass prominent; Moutopoulos, Katselis and Kios, 'Estimation and reconstruction of shore-based recreational angling fisheries catches in the Greek Seas (1950-2010)', read as a search summary only: https://ir.lib.uth.gr/xmlui/handle/11615/31176. GBIF.org occurrence search (api.gbif.org, accessed 2026-11-22), records in the box 38.20-38.32 N, 21.65-21.80 E: Sparus aurata 3, Dicentrarchus labrax 1, Diplodus sargus 1. A species is listed with at least 3 records. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
+ },
+ {
+  "id": "sesimbra_port",
+  "name_key": "SPOT_PT_SESIMBRA",
+  "region": "Sesimbra: the fishing harbour and its breakwater, on the Arrábida coast",
+  "jurisdiction": "pt_national",
+  "lat": 38.436229058,
+  "lon": -9.114867511,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 11,
+  "pressure": 12,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   15.4,
+   14.8,
+   14.8,
+   15.6,
+   16.6,
+   17.9,
+   18.4,
+   18.9,
+   19.0,
+   18.5,
+   17.3,
+   16.2
+  ],
+  "species": [
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6,
+     0.6
+    ]
+   },
+   {
+    "species_id": "istavrit",
+    "abundance_by_month": [
+     0.5,
+     0.45,
+     0.45,
+     0.5,
+     0.6,
+     0.65,
+     0.65,
+     0.65,
+     0.6,
+     0.55,
+     0.5,
+     0.5
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.45,
+     0.45,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.25,
+     0.25,
+     0.3,
+     0.4,
+     0.45,
+     0.5
+    ]
+   },
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.7,
+     0.65,
+     0.5,
+     0.45
+    ]
+   },
+   {
+    "species_id": "kalamar",
+    "abundance_by_month": [
+     0.25,
+     0.2,
+     0.1,
+     0.05,
+     0.03,
+     0.02,
+     0.02,
+     0.03,
+     0.08,
+     0.2,
+     0.3,
+     0.3
+    ]
+   },
+   {
+    "species_id": "palamut",
+    "abundance_by_month": [
+     0.0,
+     0.0,
+     0.0,
+     0.0,
+     0.05,
+     0.1,
+     0.2,
+     0.4,
+     0.6,
+     0.6,
+     0.3,
+     0.05
+    ]
+   },
+   {
+    "species_id": "lufer",
+    "abundance_by_month": [
+     0.2,
+     0.1,
+     0.1,
+     0.1,
+     0.15,
+     0.2,
+     0.3,
+     0.4,
+     0.5,
+     0.5,
+     0.4,
+     0.3
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "sesimbra_breakwater",
+    "name_key": "POS_PT_SESIMBRA_BREAKWATER",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 10
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 16
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 14,
+    "structure_tags": [
+     "breakwater"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "sesimbra_harbour",
+    "name_key": "POS_PT_SESIMBRA_HARBOUR",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 10
+     }
+    ],
+    "bottom_type": "sand",
+    "structure": 9,
+    "structure_tags": [
+     "fishing harbour"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "sesimbra_rocks",
+    "name_key": "POS_PT_SESIMBRA_ROCKS",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 10,
+      "depth_m": 7
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 13
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 16,
+    "structure_tags": [
+     "rocks west of the town"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.7,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "The harbour as a place to fish, the places to stand, depths and exposure are design fills. Portuguese sizes from the DGRM table; squid and picarel are not in it."
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q10351944 (Porto de Sesimbra), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q10351944 (Porto de Sesimbra), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 38.375,-9.125 (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "GBIF.org occurrence search (api.gbif.org, accessed 2026-11-22), records in the box 38.38-38.47 N, 9.20-9.05 W: Trachurus trachurus 928, Diplodus sargus 719, Dicentrarchus labrax 120, Sparus aurata 69, Loligo vulgaris 22, Sarda sarda 20, Pomatomus saltatrix 13. A species is listed with at least 3 records. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
+ },
+ {
+  "id": "lagos_pier",
+  "name_key": "SPOT_PT_LAGOS",
+  "region": "Lagos (Algarve): the harbour mouth and its moles",
+  "jurisdiction": "pt_national",
+  "lat": 37.102777777,
+  "lon": -8.672777777,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 11,
+  "pressure": 12,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   15.9,
+   15.1,
+   15.2,
+   15.9,
+   17.0,
+   18.5,
+   19.3,
+   19.9,
+   20.1,
+   19.4,
+   18.0,
+   16.8
+  ],
+  "species": [
+   {
+    "species_id": "istavrit",
+    "abundance_by_month": [
+     0.5,
+     0.45,
+     0.45,
+     0.5,
+     0.6,
+     0.65,
+     0.65,
+     0.65,
+     0.6,
+     0.55,
+     0.5,
+     0.5
+    ]
+   },
+   {
+    "species_id": "kalamar",
+    "abundance_by_month": [
+     0.25,
+     0.2,
+     0.1,
+     0.05,
+     0.03,
+     0.02,
+     0.02,
+     0.03,
+     0.08,
+     0.2,
+     0.3,
+     0.3
+    ]
+   },
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.7,
+     0.65,
+     0.5,
+     0.45
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.45,
+     0.45,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.25,
+     0.25,
+     0.3,
+     0.4,
+     0.45,
+     0.5
+    ]
+   },
+   {
+    "species_id": "izmarit",
+    "abundance_by_month": [
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3,
+     0.3
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "lagos_east_mole",
+    "name_key": "POS_PT_LAGOS_EAST",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "sand",
+    "structure": 10,
+    "structure_tags": [
+     "mole"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "lagos_west_mole",
+    "name_key": "POS_PT_LAGOS_WEST",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SW",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 7
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 10
+     }
+    ],
+    "bottom_type": "sand",
+    "structure": 11,
+    "structure_tags": [
+     "mole",
+     "river mouth"
+    ],
+    "exposure_by_wind": {
+     "N": 0.5,
+     "NE": 0.2,
+     "E": 0.1,
+     "SE": 0.2,
+     "S": 0.5,
+     "SW": 0.8,
+     "W": 0.9,
+     "NW": 0.8
+    },
+    "current": 5,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "lagos_bandeira",
+    "name_key": "POS_PT_LAGOS_BANDEIRA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 2
+     },
+     {
+      "distance_m": 10,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 13,
+    "structure_tags": [
+     "fort rocks"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "The moles as a place to fish, the places to stand, depths and exposure are design fills. Portuguese sizes from the DGRM table; squid and picarel are not in it."
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q732548 (Lagos), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q732548 (Lagos), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 37.125,-8.625 (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "GBIF.org occurrence search (api.gbif.org, accessed 2026-11-22), records in the box 37.00-37.15 N, 8.75-8.55 W: Trachurus trachurus 76, Loligo vulgaris 48, Sparus aurata 20, Dicentrarchus labrax 12, Spicara smaris 5, Diplodus sargus 2. A species is listed with at least 3 records. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
+ },
+ {
+  "id": "cascais_bay",
+  "name_key": "SPOT_PT_CASCAIS",
+  "region": "Cascais: the bay, the marina breakwater and the rocks towards Boca do Inferno",
+  "jurisdiction": "pt_national",
+  "lat": 38.696944444,
+  "lon": -9.420555555,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 11,
+  "pressure": 12,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   15.2,
+   14.6,
+   14.7,
+   15.4,
+   16.4,
+   17.7,
+   18.3,
+   18.7,
+   18.8,
+   18.4,
+   17.2,
+   16.0
+  ],
+  "species": [
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.45,
+     0.45,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.25,
+     0.25,
+     0.3,
+     0.4,
+     0.45,
+     0.5
+    ]
+   },
+   {
+    "species_id": "istavrit",
+    "abundance_by_month": [
+     0.5,
+     0.45,
+     0.45,
+     0.5,
+     0.6,
+     0.65,
+     0.65,
+     0.65,
+     0.6,
+     0.55,
+     0.5,
+     0.5
+    ]
+   },
+   {
+    "species_id": "kalamar",
+    "abundance_by_month": [
+     0.25,
+     0.2,
+     0.1,
+     0.05,
+     0.03,
+     0.02,
+     0.02,
+     0.03,
+     0.08,
+     0.2,
+     0.3,
+     0.3
+    ]
+   },
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.7,
+     0.65,
+     0.5,
+     0.45
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "cascais_marina",
+    "name_key": "POS_PT_CASCAIS_MARINA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 8
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 12
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 12,
+    "structure_tags": [
+     "marina breakwater"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "cascais_pier",
+    "name_key": "POS_PT_CASCAIS_PIER",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 2
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 7
+     }
+    ],
+    "bottom_type": "sand",
+    "structure": 8,
+    "structure_tags": [
+     "fishing pier"
+    ],
+    "exposure_by_wind": {
+     "N": 0.1,
+     "NE": 0.2,
+     "E": 0.4,
+     "SE": 0.6,
+     "S": 0.8,
+     "SW": 0.9,
+     "W": 0.7,
+     "NW": 0.3
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "cascais_rocks",
+    "name_key": "POS_PT_CASCAIS_ROCKS",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SW",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 10,
+      "depth_m": 7
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 12
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 16,
+    "structure_tags": [
+     "cliff rocks"
+    ],
+    "exposure_by_wind": {
+     "N": 0.5,
+     "NE": 0.2,
+     "E": 0.1,
+     "SE": 0.2,
+     "S": 0.5,
+     "SW": 0.8,
+     "W": 0.9,
+     "NW": 0.8
+    },
+    "current": 5,
+    "landing_difficulty": 0.7,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "The bay as a place to fish, the places to stand, depths and exposure are design fills. Portuguese sizes from the DGRM table; squid and picarel are not in it."
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q273059 (Cascais), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q273059 (Cascais), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 38.625,-9.375 (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "GBIF.org occurrence search (api.gbif.org, accessed 2026-11-22), records in the box 38.62-38.75 N, 9.50-9.30 W: Dicentrarchus labrax 7, Trachurus trachurus 6, Loligo vulgaris 4, Sparus aurata 3, Diplodus sargus 1. A species is listed with at least 3 records. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
  }
 ]

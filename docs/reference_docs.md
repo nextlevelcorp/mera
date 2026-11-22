@@ -22,6 +22,15 @@ Add every data, art, audio and tool source here with its licence before it is us
 | Normattiva: DPR 1639/1968 | Official legal database | Italy's sizes |
 | vgo.gr guide; fishradar.ai | Third-party web pages, read only | Greece, marked unofficial; values cited, text not copied |
 
+## Greece's and Portugal's spots (2026-11-22, R17)
+| Value | Source | Licence or terms |
+| --- | --- | --- |
+| Coordinates: Thessaloniki Q17151, Port of Kavala Q60614830, Patras Q133123, Porto de Sesimbra Q10351944, Lagos Q732548, Cascais Q273059 | Wikidata, P625 | CC0 |
+| Monthly sea-surface temperature, 1991-2020 | NOAA OISST v2.1 (`tools/data/sst_climatology.py`) | US public domain |
+| Species near each spot (at least 3 records in a box round it) | GBIF.org occurrence search API, accessed 2026-11-22 | Counts only; records carry their datasets' licences |
+| Greek shore anglers' catch: gilthead, mullets and Diplodus species over 48%, sea bass prominent (Ionian, northern and central Aegean, 406 anglers) | Moutopoulos, Katselis and Kios, shore-based recreational angling catches in the Greek Seas 1950-2010, https://ir.lib.uth.gr/xmlui/handle/11615/31176 (search summary only) | Facts cited |
+| Portugal: squid and picarel have no size in the DGRM table | DGRM size table, 27.02.2026 | Government site |
+
 ## Italy's spots (2026-11-22, R17)
 | Value | Source | Licence or terms |
 | --- | --- | --- |
