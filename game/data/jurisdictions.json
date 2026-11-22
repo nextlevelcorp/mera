@@ -34,6 +34,24 @@
     "no_minimum": true,
     "status": "read",
     "note": "Loligo vulgaris is not in Çizelge 7: 'Diğer türler', no size limit"
+   },
+   {
+    "species_id": "cipura",
+    "min_length_cm": 20,
+    "status": "read",
+    "note": "Çizelge 7: Çipura, 20 cm"
+   },
+   {
+    "species_id": "levrek",
+    "min_length_cm": 25,
+    "status": "read",
+    "note": "Çizelge 7: Levrek, 25 cm"
+   },
+   {
+    "species_id": "sargoz",
+    "min_length_cm": 21,
+    "status": "read",
+    "note": "Çizelge 7: Sargos (Diplodus sargos), 21 cm"
    }
   ],
   "provenance": {
@@ -74,6 +92,24 @@
     "no_minimum": true,
     "status": "read",
     "note": "Spicara smaris is not in Annex IX"
+   },
+   {
+    "species_id": "cipura",
+    "min_length_cm": 20,
+    "status": "read",
+    "note": "Reg. (EU) 2019/1241 Annex IX Part A: Sparus aurata 20 cm"
+   },
+   {
+    "species_id": "levrek",
+    "min_length_cm": 25,
+    "status": "read",
+    "note": "Annex IX Part A: Dicentrarchus labrax 25 cm"
+   },
+   {
+    "species_id": "sargoz",
+    "min_length_cm": 23,
+    "status": "read",
+    "note": "Annex IX Part A: Diplodus sargus 23 cm"
    }
   ],
   "provenance": {
@@ -114,6 +150,24 @@
     "min_length_cm": 7,
     "status": "read",
     "note": "Not listed; the 7 cm juvenile rule"
+   },
+   {
+    "species_id": "cipura",
+    "min_length_cm": 20,
+    "status": "read",
+    "note": "DPR 1639/1968 Article 87: orata 20 cm"
+   },
+   {
+    "species_id": "levrek",
+    "min_length_cm": 20,
+    "status": "read",
+    "note": "Article 87: spigola 20 cm (the EU Annex IX size is 25 cm)"
+   },
+   {
+    "species_id": "sargoz",
+    "min_length_cm": 23,
+    "status": "applied_by_design",
+    "note": "Not in Article 87: the stricter EU Annex IX size (23 cm) is applied by design (D11)"
    }
   ],
   "provenance": {
@@ -147,6 +201,24 @@
     "no_minimum": true,
     "status": "read",
     "note": "Sarrajão: 'não se aplica'"
+   },
+   {
+    "species_id": "cipura",
+    "min_length_cm": 19,
+    "status": "read",
+    "note": "DGRM table 27.02.2026: Dourada 19 cm"
+   },
+   {
+    "species_id": "levrek",
+    "min_length_cm": 36,
+    "status": "read",
+    "note": "DGRM table: Robalo legítimo 36 cm"
+   },
+   {
+    "species_id": "sargoz",
+    "min_length_cm": 17,
+    "status": "read",
+    "note": "DGRM table: Sargo legítimo 17 cm"
    }
   ],
   "provenance": {
@@ -169,6 +241,24 @@
     "min_length_cm": 15,
     "status": "unofficial",
     "note": "Guides apply the EU sizes; Trachurus 15 cm in Annex IX"
+   },
+   {
+    "species_id": "levrek",
+    "min_length_cm": 25,
+    "status": "unofficial",
+    "note": "vgo.gr: European sea bass 25 cm (P.D. 373/85)"
+   },
+   {
+    "species_id": "cipura",
+    "min_length_cm": 20,
+    "status": "unofficial",
+    "note": "Not in the guide's table: the EU Annex IX size (20 cm) by design"
+   },
+   {
+    "species_id": "sargoz",
+    "min_length_cm": 23,
+    "status": "unofficial",
+    "note": "Not in the guide's table: the EU Annex IX size (23 cm) by design"
    }
   ],
   "provenance": {

@@ -583,6 +583,40 @@
   ],
   "species": [
    {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.6,
+     0.6,
+     0.6,
+     0.7,
+     0.8,
+     0.8,
+     0.8,
+     0.8,
+     0.8,
+     0.8,
+     0.7,
+     0.6
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.35,
+     0.3,
+     0.25,
+     0.2,
+     0.2,
+     0.2,
+     0.25,
+     0.3,
+     0.4,
+     0.45
+    ]
+   },
+   {
     "species_id": "istavrit",
     "abundance_by_month": [
      0.3,
@@ -789,7 +823,7 @@
      "accessed": "2026-11-22"
     },
     "species": {
-     "source": "Horse mackerel (T. trachurus) and squid (L. vulgaris) among shore anglers' catches: Ulaş, Tunca & Aydın (2019) Acta Adriatica 60(2): 157-180, 634 shore anglers interviewed in 2016 in eight districts of İzmir Inner Bay including Konak, Pasaport and Alsancak: https://hrcak.srce.hr/file/336364; picarel (S. smaris), horse mackerel and squid in the bay: Gökçe et al. (2005) E.Ü. Su Ürünleri Dergisi 22(3-4): 419-422, İzmir Bay trammel-net catches Oct-Nov 2003: https://dergipark.org.tr/tr/download/article-file/57843. Bluefish and bonito were not reported by the bay's shore anglers, so they are left out. Monthly abundances are design fills (squid strongest October to January, Gökçe et al. 2005).",
+     "source": "Gilthead sea bream (S. aurata, the most common catch), sea bass (D. labrax), horse mackerel (T. trachurus) and squid (L. vulgaris) among shore anglers' catches: Ulaş, Tunca & Aydın (2019) Acta Adriatica 60(2): 157-180, 634 shore anglers interviewed in 2016 in eight districts of İzmir Inner Bay including Konak, Pasaport and Alsancak: https://hrcak.srce.hr/file/336364; picarel (S. smaris), horse mackerel and squid in the bay: Gökçe et al. (2005) E.Ü. Su Ürünleri Dergisi 22(3-4): 419-422, İzmir Bay trammel-net catches Oct-Nov 2003: https://dergipark.org.tr/tr/download/article-file/57843. Bluefish and bonito were not reported by the bay's shore anglers, so they are left out. Monthly abundances are design fills (squid strongest October to January, Gökçe et al. 2005).",
      "accessed": "2026-11-22"
     }
    }

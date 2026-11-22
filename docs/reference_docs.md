@@ -22,6 +22,19 @@ Add every data, art, audio and tool source here with its licence before it is us
 | Normattiva: DPR 1639/1968 | Official legal database | Italy's sizes |
 | vgo.gr guide; fishradar.ai | Third-party web pages, read only | Greece, marked unofficial; values cited, text not copied |
 
+## Gilthead sea bream, sea bass and white sea bream (2026-11-22, owner decision)
+| Value | Source | Licence or terms |
+| --- | --- | --- |
+| Names: *Sparus aurata* (AphiaID 151523), *Dicentrarchus labrax* (126975), *Diplodus sargus* (127053) | WoRMS REST API | CC BY 4.0 (WoRMS) |
+| Gilthead TL 12.1-26.5 cm, W=0.0139 TL^3.009; sea bass TL 18.3-40.8 cm, W=0.0253 TL^2.764 | Reis (2020) Marine Science and Technology Bulletin 9(2): 136-144, Köyceğiz Lagoon, Table 1, https://dergipark.org.tr/en/download/article-file/1174367 | Open-access journal article; values cited |
+| White sea bream TL 14.3-36.7 cm, W=0.01989 TL^2.936 (n=322) | Daban, İşmen and Arslan İhsanoğlu (2024) Ege J. Fish. Aquat. Sci. 41(1): 30-36, https://doi.org/10.12714/egejfas.41.1.05 | Open-access journal article; values cited |
+| Turkey: gilthead 20 cm, sea bass 25 cm, white sea bream 21 cm | Tebliğ 6/2 (2024/21) Çizelge 7; Tebliğ 2026/26 Madde 5 does not change these rows | Official gazette |
+| Andalusia: 20, 25, 23 cm | Regulation (EU) 2019/1241 Annex IX Part A, through Decreto 205/2023 Article 8 | Official EU and regional law |
+| Italy: orata 20 cm, spigola 20 cm (Article 87); white sea bream 23 cm by design (EU) | DPR 1639/1968 Article 87, Normattiva | Official legal database |
+| Portugal: dourada 19 cm, robalo 36 cm, sargo legítimo 17 cm | DGRM size table, 27.02.2026 | Government site |
+| Greece: sea bass 25 cm (unofficial); gilthead and white sea bream not in the guide, EU sizes by design | vgo.gr guide citing P.D. 373/85 | Third-party page, read only |
+| Shore fish of the countries on the map: in 28 shore spots of Andalusia's official guide, white sea bream is a main species at 20, gilthead at 16, sea bass (baila, robalo) at 20 | Junta de Andalucía, "La pesca marítima de recreo en Andalucía", https://juntadeandalucia.es/sites/default/files/2020-04/1337161077Pesca_marxtima_de_recreo.pdf | Government publication; facts cited |
+
 ## İzmir Kordon (2026-11-22, R17)
 | Value | Source | Licence or terms |
 | --- | --- | --- |
