@@ -828,5 +828,687 @@
     }
    }
   }
+ },
+ {
+  "id": "puerto_banus",
+  "name_key": "SPOT_ES_BANUS",
+  "region": "Marbella, Málaga: the five breakwaters west of Puerto Banús, by its mouth",
+  "jurisdiction": "es_andalusia",
+  "lat": 36.4875,
+  "lon": -4.9525,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 12,
+  "pressure": 12,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   15.6,
+   15.2,
+   15.4,
+   16.2,
+   17.3,
+   19.1,
+   21.2,
+   22.2,
+   21.1,
+   19.4,
+   17.4,
+   16.3
+  ],
+  "species": [
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.5,
+     0.5,
+     0.55,
+     0.6,
+     0.7,
+     0.7,
+     0.7,
+     0.75,
+     0.8,
+     0.8,
+     0.7,
+     0.55
+    ]
+   },
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.7,
+     0.7,
+     0.65,
+     0.6,
+     0.55,
+     0.5,
+     0.5,
+     0.5,
+     0.6,
+     0.7,
+     0.75,
+     0.75
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "banus_benabola",
+    "name_key": "POS_BANUS_BENABOLA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 2
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 7
+     }
+    ],
+    "bottom_type": "sand",
+    "structure": 9,
+    "structure_tags": [
+     "breakwater",
+     "harbour mouth"
+    ],
+    "exposure_by_wind": {
+     "N": 0.05,
+     "NE": 0.2,
+     "E": 0.6,
+     "SE": 0.8,
+     "S": 0.9,
+     "SW": 0.8,
+     "W": 0.5,
+     "NW": 0.1
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "banus_t",
+    "name_key": "POS_BANUS_T",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 2
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 6
+     }
+    ],
+    "bottom_type": "sand",
+    "structure": 10,
+    "structure_tags": [
+     "T-shaped breakwater"
+    ],
+    "exposure_by_wind": {
+     "N": 0.05,
+     "NE": 0.2,
+     "E": 0.6,
+     "SE": 0.8,
+     "S": 0.9,
+     "SW": 0.8,
+     "W": 0.5,
+     "NW": 0.1
+    },
+    "current": 5,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "banus_mouth",
+    "name_key": "POS_BANUS_MOUTH",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 11,
+    "structure_tags": [
+     "harbour mouth",
+     "rocks"
+    ],
+    "exposure_by_wind": {
+     "N": 0.05,
+     "NE": 0.2,
+     "E": 0.6,
+     "SE": 0.8,
+     "S": 0.9,
+     "SW": 0.8,
+     "W": 0.5,
+     "NW": 0.1
+    },
+    "current": 5,
+    "landing_difficulty": 0.5,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q2117451 (Puerto Banús), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q2117451 (Puerto Banús), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 36.375 N, 4.875 W (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "Main species at the breakwaters: dorada (gilthead), breca, herrera, mojarra, sargo (white sea bream) and pargo; medium-size gilthead on the Benabola breakwater, the one sheltered in a storm; float fishing ('a boya'): Junta de Andalucía, 'La pesca marítima de recreo en Andalucía' (Consejería de Agricultura y Pesca, 2008): https://juntadeandalucia.es/sites/default/files/2020-04/1337161077Pesca_marxtima_de_recreo.pdf. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
+ },
+ {
+  "id": "maro",
+  "name_key": "SPOT_ES_MARO",
+  "region": "Maro, Nerja (Málaga): rocks and gravel under the cliffs",
+  "jurisdiction": "es_andalusia",
+  "lat": 36.757898,
+  "lon": -3.843076,
+  "shore_type": "rock",
+  "water_class": "marine",
+  "typical_clarity": 12,
+  "pressure": 12,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   15.3,
+   15.1,
+   15.3,
+   16.1,
+   17.7,
+   20.0,
+   22.4,
+   23.7,
+   22.1,
+   19.8,
+   17.3,
+   16.1
+  ],
+  "species": [
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.8,
+     0.8,
+     0.75,
+     0.7,
+     0.6,
+     0.55,
+     0.5,
+     0.55,
+     0.65,
+     0.8,
+     0.85,
+     0.85
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.35,
+     0.35,
+     0.3,
+     0.25,
+     0.2,
+     0.15,
+     0.15,
+     0.15,
+     0.2,
+     0.3,
+     0.35,
+     0.4
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "maro_rocks",
+    "name_key": "POS_MARO_ROCKS",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 2
+     },
+     {
+      "distance_m": 10,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 15,
+    "structure_tags": [
+     "rocks",
+     "cliffs"
+    ],
+    "exposure_by_wind": {
+     "N": 0.05,
+     "NE": 0.2,
+     "E": 0.6,
+     "SE": 0.8,
+     "S": 0.9,
+     "SW": 0.8,
+     "W": 0.5,
+     "NW": 0.1
+    },
+    "current": 5,
+    "landing_difficulty": 0.7,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "maro_point",
+    "name_key": "POS_MARO_POINT",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 10,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 30,
+      "depth_m": 11
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 16,
+    "structure_tags": [
+     "rock point"
+    ],
+    "exposure_by_wind": {
+     "N": 0.05,
+     "NE": 0.2,
+     "E": 0.6,
+     "SE": 0.8,
+     "S": 0.9,
+     "SW": 0.8,
+     "W": 0.5,
+     "NW": 0.1
+    },
+    "current": 5,
+    "landing_difficulty": 0.7,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "maro_beach",
+    "name_key": "POS_MARO_BEACH",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 1
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 6
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 9,
+    "structure_tags": [
+     "gravel beach",
+     "rocks"
+    ],
+    "exposure_by_wind": {
+     "N": 0.05,
+     "NE": 0.2,
+     "E": 0.6,
+     "SE": 0.8,
+     "S": 0.9,
+     "SW": 0.8,
+     "W": 0.5,
+     "NW": 0.1
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q3294545 (Maro), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q3294545 (Maro), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 36.625 N, 3.875 W (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "Rockfishing on Málaga's eastern coast: good-size white sea bream (sargos) and some sea bass (robalo) as the commonest catches: Junta de Andalucía, 'La pesca marítima de recreo en Andalucía' (Consejería de Agricultura y Pesca, 2008): https://juntadeandalucia.es/sites/default/files/2020-04/1337161077Pesca_marxtima_de_recreo.pdf. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
+ },
+ {
+  "id": "almeria_espigon",
+  "name_key": "SPOT_ES_ALMERIA",
+  "region": "Almería: the port's breakwater of concrete blocks, west of the city",
+  "jurisdiction": "es_andalusia",
+  "lat": 36.83368,
+  "lon": -2.4669,
+  "shore_type": "harbour",
+  "water_class": "marine",
+  "typical_clarity": 12,
+  "pressure": 12,
+  "access_difficulty": 2,
+  "water_temp_by_month_c": [
+   15.2,
+   14.9,
+   15.1,
+   16.0,
+   17.8,
+   20.4,
+   23.0,
+   24.5,
+   23.2,
+   20.7,
+   18.0,
+   16.3
+  ],
+  "species": [
+   {
+    "species_id": "sargoz",
+    "abundance_by_month": [
+     0.7,
+     0.7,
+     0.65,
+     0.6,
+     0.55,
+     0.5,
+     0.5,
+     0.5,
+     0.6,
+     0.7,
+     0.75,
+     0.75
+    ]
+   },
+   {
+    "species_id": "levrek",
+    "abundance_by_month": [
+     0.3,
+     0.3,
+     0.25,
+     0.2,
+     0.15,
+     0.1,
+     0.1,
+     0.1,
+     0.15,
+     0.25,
+     0.3,
+     0.35
+    ]
+   },
+   {
+    "species_id": "cipura",
+    "abundance_by_month": [
+     0.4,
+     0.4,
+     0.45,
+     0.5,
+     0.55,
+     0.6,
+     0.6,
+     0.6,
+     0.65,
+     0.6,
+     0.5,
+     0.45
+    ]
+   }
+  ],
+  "positions": [
+   {
+    "id": "almeria_sea",
+    "name_key": "POS_ALMERIA_SEA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 4
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 8
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 14
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 14,
+    "structure_tags": [
+     "concrete blocks",
+     "fishing platforms"
+    ],
+    "exposure_by_wind": {
+     "N": 0.05,
+     "NE": 0.2,
+     "E": 0.6,
+     "SE": 0.8,
+     "S": 0.9,
+     "SW": 0.8,
+     "W": 0.5,
+     "NW": 0.1
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "almeria_tip",
+    "name_key": "POS_ALMERIA_TIP",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "SE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 5
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 10
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 16
+     }
+    ],
+    "bottom_type": "rock",
+    "structure": 13,
+    "structure_tags": [
+     "breakwater tip"
+    ],
+    "exposure_by_wind": {
+     "N": 0.05,
+     "NE": 0.2,
+     "E": 0.6,
+     "SE": 0.8,
+     "S": 0.9,
+     "SW": 0.8,
+     "W": 0.5,
+     "NW": 0.1
+    },
+    "current": 5,
+    "landing_difficulty": 0.6,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "almeria_inner",
+    "name_key": "POS_ALMERIA_INNER",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "N",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 3
+     },
+     {
+      "distance_m": 15,
+      "depth_m": 6
+     },
+     {
+      "distance_m": 40,
+      "depth_m": 9
+     }
+    ],
+    "bottom_type": "mud",
+    "structure": 8,
+    "structure_tags": [
+     "harbour side"
+    ],
+    "exposure_by_wind": {
+     "N": 0.6,
+     "NE": 0.4,
+     "E": 0.2,
+     "SE": 0.1,
+     "S": 0.05,
+     "SW": 0.1,
+     "W": 0.3,
+     "NW": 0.5
+    },
+    "current": 5,
+    "landing_difficulty": 0.4,
+    "stage": "quay",
+    "provenance": {
+     "default": {
+      "design_fill": true
+     }
+    }
+   }
+  ],
+  "provenance": {
+   "default": {
+    "design_fill": true
+   },
+   "fields": {
+    "lat": {
+     "source": "Wikidata Q3199756 (Port of Almería), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "lon": {
+     "source": "Wikidata Q3199756 (Port of Almería), P625, CC0",
+     "accessed": "2026-11-22"
+    },
+    "water_temp_by_month_c": {
+     "source": "NOAA OISST v2.1 daily 0.25 degree, 1991-2020 monthly means of the cell at 36.625 N, 2.375 W (every third day), via NOAA CoastWatch ERDDAP ncdcOisst21Agg_LonPM180, US public domain; built by tools/data/sst_climatology.py",
+     "accessed": "2026-11-22"
+    },
+    "species": {
+     "source": "Main species on the Espigón de Almería: herrera, sargo (white sea bream), tordo, vaquita, robalo (sea bass), dorada (gilthead) and pargo; about a hundred concrete fishing platforms on the open-sea side, some lost to a recent infill: Junta de Andalucía, 'La pesca marítima de recreo en Andalucía' (Consejería de Agricultura y Pesca, 2008): https://juntadeandalucia.es/sites/default/files/2020-04/1337161077Pesca_marxtima_de_recreo.pdf. Monthly abundances are design fills.",
+     "accessed": "2026-11-22"
+    }
+   }
+  }
  }
 ]
