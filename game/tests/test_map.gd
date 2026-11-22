@@ -108,3 +108,14 @@ func test_spain_has_three_spots_with_its_own_rules_and_fish() -> void:
 	var w := WaitSim.new(ctx, Db.constants(), Db.database()["species"], 15.0, 1)
 	assert_true(float(w._rates["sargoz"]["rate_interest"]) > 0.0, "white sea bream on the Maro rocks (Junta de Andalucía)")
 	assert_true(not w._rates.has("istavrit") or float(w._rates["istavrit"]["rate_interest"]) == 0.0, "no horse mackerel listed there")
+
+
+func test_italy_has_three_spots_under_italian_rules() -> void:
+	var spots := MapModel.spots_in(Db.database(), "IT")
+	assert_eq(spots.size(), 3, "Naples, Trieste and Genoa")
+	var s := FishingSession.new(Db.database(), Db.constants(), "lrf", "trieste_tip", {"slot": "dawn", "month": 10, "wind_dir": "NE", "wind_ms": 3})
+	(s.trip["catches"] as Array).append({"species_id": "levrek", "length_cm": 22.0, "weight_kg": 0.13, "kept": true})
+	assert_eq(s.undersize_count(1), 0, "a 22 cm sea bass is legal in Italy (Article 87: 20 cm), though not in Turkey (25 cm)")
+	var ctx := FightSetup.build(Db.database(), "palamut", "spin", "trieste_tip", 0.5, {"slot": "dawn", "month": 9, "wind_dir": "NE", "wind_ms": 3})
+	var w := WaitSim.new(ctx, Db.constants(), Db.database()["species"], 15.0, 1)
+	assert_true(not w._rates.has("lufer") or float(w._rates["lufer"]["rate_interest"]) == 0.0, "no bluefish at Trieste (no GBIF record)")

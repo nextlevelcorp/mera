@@ -381,3 +381,15 @@ SPOT_ES_ALMERIA,Almería breakwater,Almería mendireği,Espigón de Almería
 POS_ALMERIA_SEA,Platforms on the open-sea side,Açık deniz tarafındaki platformlar,Puestos de la cara de mar abierto
 POS_ALMERIA_TIP,Breakwater tip,Mendirek ucu,Punta del espigón
 POS_ALMERIA_INNER,Harbour side,Liman tarafı,Cara del puerto
+SPOT_IT_NAPOLI,Naples harbour piers,Napoli liman iskeleleri,Muelles del puerto de Nápoles
+POS_NAPOLI_SAN_VINCENZO,Molo San Vincenzo,San Vincenzo iskelesi,Muelle de San Vincenzo
+POS_NAPOLI_BEVERELLO,Molo Beverello,Beverello iskelesi,Muelle Beverello
+POS_NAPOLI_MOLOSIGLIO,Molosiglio marina wall,Molosiglio marina duvarı,Muro del puerto deportivo de Molosiglio
+SPOT_IT_TRIESTE,"Trieste, Molo Audace","Trieste, Molo Audace","Trieste, Molo Audace"
+POS_TRIESTE_TIP,Pier head,İskele başı,Punta del muelle
+POS_TRIESTE_SAN_GIORGIO,San Giorgio basin side,San Giorgio havzası tarafı,Lado de la dársena de San Giorgio
+POS_TRIESTE_SAN_GIUSTO,San Giusto basin side,San Giusto havzası tarafı,Lado de la dársena de San Giusto
+SPOT_IT_GENOVA,"Genoa, Corso Italia rocks","Cenova, Corso Italia kayalıkları","Génova, rocas de Corso Italia"
+POS_GENOVA_PUNTA_VAGNO,By the Punta Vagno lighthouse,Punta Vagno fenerinin yanı,Junto al faro de Punta Vagno
+POS_GENOVA_SCOGLIERA,Rock armour,Kaya dolgusu,Escollera
+POS_GENOVA_BOCCADASSE,Boccadasse,Boccadasse,Boccadasse
