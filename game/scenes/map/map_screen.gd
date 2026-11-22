@@ -188,11 +188,16 @@ func _gui_input(event: InputEvent) -> void:
 	if not pressed:
 		return
 	var at: Vector2 = event.position
+	var best := ""
+	var best_d := 44.0
 	for s: Dictionary in MapModel.spots_in(Db.database(), country):
-		if pin(s).distance_to(at) < 44.0:
-			select(String(s["id"]))
-			accept_event()
-			return
+		var d := pin(s).distance_to(at)
+		if d < best_d:
+			best = String(s["id"])
+			best_d = d
+	if best != "":
+		select(best)
+		accept_event()
 
 
 ## The chart's rectangle on screen: the left part when a spot's card is open.
@@ -206,7 +211,24 @@ func _bounds() -> Array[float]:
 
 ## A spot's pin on screen.
 func pin(spot: Dictionary) -> Vector2:
+	var spots := MapModel.spots_in(Db.database(), country)
+	var shown := MapModel.spread(_true_points(spots), 46.0)
+	for i in spots.size():
+		if spots[i]["id"] == spot["id"]:
+			return shown[i]
+	return true_point(spot)
+
+
+## Where a spot really is on the chart (its pin may be moved aside).
+func true_point(spot: Dictionary) -> Vector2:
 	return MapModel.chart_point(float(spot["lat"]), float(spot["lon"]), _bounds(), chart_rect().grow(-60.0))
+
+
+func _true_points(spots: Array) -> Array[Vector2]:
+	var out: Array[Vector2] = []
+	for s: Dictionary in spots:
+		out.append(true_point(s))
+	return out
 
 
 func _draw() -> void:
@@ -225,7 +247,9 @@ func _draw() -> void:
 	_draw_land(b, inner, r)
 	var font := get_theme_default_font()
 	# Graticule: a line every hundredth of a degree, labelled on the edges.
-	var step := _grid_step(b[3] - b[1])
+	# A line every step, with the labels at least 90 px apart along a parallel.
+	var px_per_deg := MapModel.chart_point(b[1], b[0] + 1.0, b, inner).x - MapModel.chart_point(b[1], b[0], b, inner).x
+	var step := _grid_step_px(px_per_deg)
 	var lat := ceilf(b[1] / step) * step
 	while lat <= b[3]:
 		var y := MapModel.chart_point(lat, b[0], b, inner).y
@@ -243,6 +267,10 @@ func _draw() -> void:
 	_draw_rose(r.end - Vector2(70, 70), 40.0)
 	for s: Dictionary in MapModel.spots_in(Db.database(), country):
 		var p := pin(s)
+		var real := true_point(s)
+		if p.distance_to(real) > 1.0:
+			draw_line(real, p, Color(UiTheme.BRASS, 0.6), 1.5, true)   # moved aside: a leader to the real place
+			draw_circle(real, 3.0, UiTheme.BRASS)
 		var on := String(s["id"]) == selected
 		var pulse := 1.0 + 0.12 * sin(_t * 3.0) if on else 1.0
 		draw_circle(p, 22.0 * pulse, Color(UiTheme.BRASS, 0.18))
@@ -263,7 +291,7 @@ func _draw_land(b: Array[float], inner: Rect2, r: Rect2) -> void:
 		_land_tris.clear()
 		# Cut each ring to the view first (Clipper gives clean, simple pieces).
 		# The chart shows more than the bounds on its long side: cut wide.
-		var pad := 1.5 * maxf(b[2] - b[0], b[3] - b[1])
+		var pad := 4.0 * maxf(b[2] - b[0], b[3] - b[1]) + 0.5
 		var view := PackedVector2Array([Vector2(b[0] - pad, b[1] - pad), Vector2(b[2] + pad, b[1] - pad), Vector2(b[2] + pad, b[3] + pad), Vector2(b[0] - pad, b[3] + pad)])
 		_land_lines.clear()
 		for ring: PackedVector2Array in MapModel.rings_in(_land(), b):
@@ -316,11 +344,11 @@ static func _deg(v: float, step: float) -> String:
 	return ("%.3f" if step < 0.01 else "%.2f" if step < 0.1 else "%.1f") % v
 
 
-## A grid step that gives a handful of lines over this span of degrees.
-static func _grid_step(span_deg: float) -> float:
-	for s: float in [0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0]:
-		if span_deg / s <= 8.0:
-			return s
+## The smallest grid step whose lines are at least 90 px apart.
+static func _grid_step_px(px_per_deg: float) -> float:
+	for st: float in [0.005, 0.01, 0.05, 0.1, 0.5, 1.0, 2.0, 5.0]:
+		if st * px_per_deg >= 90.0:
+			return st
 	return 10.0
 
 

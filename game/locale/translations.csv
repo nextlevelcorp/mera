@@ -362,3 +362,7 @@ MAP_SHORE_PIER,A bridge over the water,Suyun üstünde bir köprü,Un puente sob
 MAP_SHORE_ROCK,A rocky shore,Kayalık bir kıyı,Una costa rocosa
 MAP_SHORE_HARBOUR,A harbour,Bir liman,Un puerto
 MAP_SHORE_SAND,A sandy shore,Kumluk bir kıyı,Una costa de arena
+SPOT_IZMIR_KORDON,İzmir Kordon,İzmir Kordon,Kordon de Esmirna
+POS_IZMIR_ALSANCAK,"Alsancak, by the ferry pier","Alsancak, vapur iskelesi yanı","Alsancak, junto al muelle del ferri"
+POS_IZMIR_PASAPORT,Pasaport pier,Pasaport iskelesi,Muelle de Pasaport
+POS_IZMIR_KONAK,Konak pier,Konak iskelesi,Muelle de Konak

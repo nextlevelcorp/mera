@@ -13,7 +13,7 @@ and written as flat [lon, lat, lon, lat, ...] lists rounded to 4 decimals.
 import json
 import sys
 
-BOX = (-10.5, 34.5, 30.5, 46.5)   # min lon, min lat, max lon, max lat
+BOX = (-14.0, 30.0, 40.0, 49.0)   # min lon, min lat, max lon, max lat
 TOLERANCE = 0.004                # degrees, about 400 m
 
 

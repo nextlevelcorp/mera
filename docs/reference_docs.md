@@ -22,6 +22,14 @@ Add every data, art, audio and tool source here with its licence before it is us
 | Normattiva: DPR 1639/1968 | Official legal database | Italy's sizes |
 | vgo.gr guide; fishradar.ai | Third-party web pages, read only | Greece, marked unofficial; values cited, text not copied |
 
+## İzmir Kordon (2026-11-22, R17)
+| Value | Source | Licence or terms |
+| --- | --- | --- |
+| Coordinates: Kordon Q6013884; positions at Alsancak Ferry Terminal Q55808401, Pasaport Ferry Terminal Q18209626, Konak Pier Q6428725 | Wikidata (SPARQL), P625 | CC0 |
+| Aegean monthly sea-water temperature, 1970-2025: 13.9, 13.3, 14.0, 15.9, 18.8, 22.1, 24.2, 24.6, 23.3, 20.8, 18.0, 15.6 °C | MGM, "Ege Denizi deniz suyu sıcaklık" 2025, https://mgm.gov.tr/FILES/resmi-istatistikler/denizSuyu/2025-Ege.pdf | Official statistics; values cited |
+| Shore anglers' catches in İzmir Inner Bay (Konak, Pasaport, Alsancak and five more districts, 634 interviews in 2016): mostly gilthead sea bream, sea bass and mullets; horse mackerel and squid in small amounts; no bluefish or bonito | Ulaş, Tunca and Aydın (2019) Acta Adriatica 60(2): 157-180, https://hrcak.srce.hr/file/336364 | Open-access journal article; facts cited, text not copied |
+| Picarel, horse mackerel and squid in the bay | Gökçe et al. (2005), see the squid section | As above |
+
 ## Map land (2026-11-22, R17)
 | Value | Source | Licence or terms |
 | --- | --- | --- |
