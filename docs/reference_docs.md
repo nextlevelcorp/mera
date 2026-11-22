@@ -22,6 +22,11 @@ Add every data, art, audio and tool source here with its licence before it is us
 | Normattiva: DPR 1639/1968 | Official legal database | Italy's sizes |
 | vgo.gr guide; fishradar.ai | Third-party web pages, read only | Greece, marked unofficial; values cited, text not copied |
 
+## Map land (2026-11-22, R17)
+| Value | Source | Licence or terms |
+| --- | --- | --- |
+| Land polygons for the map's charts, `game/data/map/land.json` (clipped to 10.5° W to 30.5° E, 34.5° to 46.5° N, simplified to 0.004°) | Natural Earth 1:10m land (`ne_10m_land`), from https://github.com/nvkelso/natural-earth-vector, built by `tools/map/build_land.py` | Public domain (owner approved its use on 2026-11-22): https://www.naturalearthdata.com/about/terms-of-use/ |
+
 ## European squid in `game/data/` (2026-11-21)
 | Value | Source | Licence or terms |
 | --- | --- | --- |
