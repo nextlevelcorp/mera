@@ -21,6 +21,9 @@ const LOOKS := {
 	"palamut": [Color(0.12, 0.2, 0.38), Color(0.6, 0.66, 0.72), Color(0.9, 0.91, 0.92), "stripes"],
 	"izmarit": [Color(0.42, 0.45, 0.5), Color(0.68, 0.7, 0.74), Color(0.88, 0.88, 0.9), "spot"],
 	"kalamar": [Color(0.82, 0.55, 0.6), Color(0.95, 0.82, 0.8), Color(0.97, 0.92, 0.9), "squid"],
+	"cipura": [Color(0.45, 0.52, 0.58), Color(0.78, 0.8, 0.82), Color(0.92, 0.92, 0.9), "gold_brow"],
+	"levrek": [Color(0.38, 0.45, 0.5), Color(0.78, 0.82, 0.85), Color(0.94, 0.95, 0.95), ""],
+	"sargoz": [Color(0.55, 0.58, 0.6), Color(0.82, 0.83, 0.84), Color(0.93, 0.93, 0.92), "bands"],
 }
 
 var lift := 0.0            ## 0 at the water, 1 at the rail
@@ -261,6 +264,14 @@ func _draw_fish(m: Vector2, dusk: float) -> void:
 				draw_line(top_edge[i], spine[i].lerp(top_edge[i], 0.3), Color(0.08, 0.12, 0.25, 0.85), maxf(depth * 0.1, 2.0), true)
 		"spot":
 			draw_circle(spine[5].lerp(top_edge[5], 0.3), maxf(depth * 0.22, 3.0), Color(0.1, 0.1, 0.12, 0.8))
+		"gold_brow":
+			# The gilthead's gold band between the eyes.
+			draw_line(spine[1].lerp(top_edge[1], 0.6), spine[2].lerp(top_edge[2], 0.7), Color(0.95, 0.78, 0.3), maxf(depth * 0.18, 2.5), true)
+		"bands":
+			# The white sea bream's dark bands and the black saddle by the tail.
+			for i in range(3, spine.size() - 3, 2):
+				draw_line(top_edge[i], spine[i].lerp(bottom_edge[i], 0.4), Color(0.25, 0.27, 0.3, 0.5), maxf(depth * 0.12, 2.0), true)
+			draw_circle(spine[spine.size() - 2], maxf(depth * 0.35, 3.0), Color(0.08, 0.08, 0.1, 0.85))
 		"squid":
 			# Arms wrapped round the jig at the top, the fins' diamond at the mantle's tip.
 			var up := (spine[0] - spine[1]).normalized()

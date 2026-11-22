@@ -383,5 +383,259 @@
    "as_of": "2026-09-16",
    "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, 11.08.2024, Çizelge 7: Loligo vulgaris is not listed, so it falls under 'Diğer türler' with size limit 'Yok' (none) and the 5 kg day limit; Tebliğ 2026/26 (Resmî Gazete 33372, 16.09.2026) did not change it. https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm"
   }
+ },
+ {
+  "id": "cipura",
+  "name_key": "SPECIES_GILTHEAD",
+  "scientific_name": "Sparus aurata",
+  "strength": 12,
+  "stamina": 12,
+  "speed": 9,
+  "caution": 14,
+  "aggression": 7,
+  "schooling": 6,
+  "feeding_depth_min_m": 1,
+  "feeding_depth_max_m": 30,
+  "temp_min_c": 11,
+  "temp_max_c": 28,
+  "activity_by_slot": {
+   "dawn": 0.9,
+   "day": 0.6,
+   "evening": 0.9,
+   "night": 0.4
+  },
+  "salinity": [
+   "marine",
+   "brackish"
+  ],
+  "mouth_gape_mm": 14,
+  "diet_tags": [
+   "mollusc",
+   "crustacean",
+   "worm"
+  ],
+  "surface_thrash": 4,
+  "teeth": 3,
+  "length_min_cm": 12.1,
+  "length_max_cm": 26.5,
+  "length_record_cm": 26.5,
+  "weight_record_kg": 0.284,
+  "rarity": 8,
+  "lw_a": 0.0139,
+  "lw_b": 3.009,
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "Strength, stamina, speed, caution, aggression, schooling, depths, temperatures, activity, mouth, thrash, teeth and rarity are design fills; lengths and the length-weight relation are sourced."
+   },
+   "fields": {
+    "scientific_name": {
+     "source": "WoRMS AphiaID 151523: https://www.marinespecies.org/aphia.php?p=taxdetails&id=151523",
+     "accessed": "2026-11-22"
+    },
+    "length_min_cm": {
+     "source": "Reis (2020), S. aurata n=61, TL 12.1-26.5 cm, W 25.15-283.82 g: https://dergipark.org.tr/en/download/article-file/1174367",
+     "accessed": "2026-11-22"
+    },
+    "length_max_cm": {
+     "source": "Reis (2020), S. aurata n=61, TL 12.1-26.5 cm, W 25.15-283.82 g: https://dergipark.org.tr/en/download/article-file/1174367",
+     "accessed": "2026-11-22"
+    },
+    "length_record_cm": {
+     "source": "Reis (2020), S. aurata n=61, TL 12.1-26.5 cm, W 25.15-283.82 g: https://dergipark.org.tr/en/download/article-file/1174367 (the largest in the sample, not a world record)",
+     "accessed": "2026-11-22"
+    },
+    "weight_record_kg": {
+     "source": "Reis (2020), S. aurata n=61, TL 12.1-26.5 cm, W 25.15-283.82 g: https://dergipark.org.tr/en/download/article-file/1174367 (the heaviest in the sample, not a world record)",
+     "accessed": "2026-11-22"
+    },
+    "lw_a": {
+     "source": "Reis (2020) Marine Science and Technology Bulletin 9(2): 136-144, Köyceğiz Lagoon, Table 1: https://dergipark.org.tr/en/download/article-file/1174367: S. aurata W=0.0139 TL^3.009, r2 0.938",
+     "accessed": "2026-11-22"
+    },
+    "lw_b": {
+     "source": "Reis (2020) Marine Science and Technology Bulletin 9(2): 136-144, Köyceğiz Lagoon, Table 1: https://dergipark.org.tr/en/download/article-file/1174367: S. aurata W=0.0139 TL^3.009, r2 0.938",
+     "accessed": "2026-11-22"
+    },
+    "regulation": {
+     "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, Çizelge 7; not changed by Tebliğ 2026/26 (its Madde 5 amends only the Dil, İstavrit, Lagos and bluefin tuna rows): https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm; row 'Çipura (Sparus aurata)', 20 cm",
+     "accessed": "2026-11-22"
+    }
+   }
+  },
+  "regulation": {
+   "min_length_cm": 20,
+   "as_of": "2026-09-16",
+   "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, Çizelge 7; not changed by Tebliğ 2026/26 (its Madde 5 amends only the Dil, İstavrit, Lagos and bluefin tuna rows): https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm"
+  }
+ },
+ {
+  "id": "levrek",
+  "name_key": "SPECIES_SEABASS",
+  "scientific_name": "Dicentrarchus labrax",
+  "strength": 14,
+  "stamina": 12,
+  "speed": 14,
+  "caution": 15,
+  "aggression": 12,
+  "schooling": 4,
+  "feeding_depth_min_m": 0.5,
+  "feeding_depth_max_m": 20,
+  "temp_min_c": 8,
+  "temp_max_c": 28,
+  "activity_by_slot": {
+   "dawn": 1.0,
+   "day": 0.4,
+   "evening": 0.9,
+   "night": 0.7
+  },
+  "salinity": [
+   "marine",
+   "brackish"
+  ],
+  "mouth_gape_mm": 30,
+  "diet_tags": [
+   "small_fish",
+   "crustacean"
+  ],
+  "surface_thrash": 8,
+  "teeth": 2,
+  "length_min_cm": 18.3,
+  "length_max_cm": 40.8,
+  "length_record_cm": 40.8,
+  "weight_record_kg": 0.805,
+  "rarity": 10,
+  "lw_a": 0.0253,
+  "lw_b": 2.764,
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "Strength, stamina, speed, caution, aggression, schooling, depths, temperatures, activity, mouth, thrash, teeth and rarity are design fills; lengths and the length-weight relation are sourced."
+   },
+   "fields": {
+    "scientific_name": {
+     "source": "WoRMS AphiaID 126975: https://www.marinespecies.org/aphia.php?p=taxdetails&id=126975",
+     "accessed": "2026-11-22"
+    },
+    "length_min_cm": {
+     "source": "Reis (2020), D. labrax n=39, TL 18.3-40.8 cm, W 69.76-805.32 g: https://dergipark.org.tr/en/download/article-file/1174367",
+     "accessed": "2026-11-22"
+    },
+    "length_max_cm": {
+     "source": "Reis (2020), D. labrax n=39, TL 18.3-40.8 cm, W 69.76-805.32 g: https://dergipark.org.tr/en/download/article-file/1174367",
+     "accessed": "2026-11-22"
+    },
+    "length_record_cm": {
+     "source": "Reis (2020), D. labrax n=39, TL 18.3-40.8 cm, W 69.76-805.32 g: https://dergipark.org.tr/en/download/article-file/1174367 (the largest in the sample, not a world record)",
+     "accessed": "2026-11-22"
+    },
+    "weight_record_kg": {
+     "source": "Reis (2020), D. labrax n=39, TL 18.3-40.8 cm, W 69.76-805.32 g: https://dergipark.org.tr/en/download/article-file/1174367 (the heaviest in the sample, not a world record)",
+     "accessed": "2026-11-22"
+    },
+    "lw_a": {
+     "source": "Reis (2020) Marine Science and Technology Bulletin 9(2): 136-144, Köyceğiz Lagoon, Table 1: https://dergipark.org.tr/en/download/article-file/1174367: D. labrax W=0.0253 TL^2.764, r2 0.967",
+     "accessed": "2026-11-22"
+    },
+    "lw_b": {
+     "source": "Reis (2020) Marine Science and Technology Bulletin 9(2): 136-144, Köyceğiz Lagoon, Table 1: https://dergipark.org.tr/en/download/article-file/1174367: D. labrax W=0.0253 TL^2.764, r2 0.967",
+     "accessed": "2026-11-22"
+    },
+    "regulation": {
+     "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, Çizelge 7; not changed by Tebliğ 2026/26 (its Madde 5 amends only the Dil, İstavrit, Lagos and bluefin tuna rows): https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm; row 'Levrek (Dicentrarchus labrax)', 25 cm",
+     "accessed": "2026-11-22"
+    }
+   }
+  },
+  "regulation": {
+   "min_length_cm": 25,
+   "as_of": "2026-09-16",
+   "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, Çizelge 7; not changed by Tebliğ 2026/26 (its Madde 5 amends only the Dil, İstavrit, Lagos and bluefin tuna rows): https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm"
+  }
+ },
+ {
+  "id": "sargoz",
+  "name_key": "SPECIES_WHITE_BREAM",
+  "scientific_name": "Diplodus sargus",
+  "strength": 11,
+  "stamina": 11,
+  "speed": 10,
+  "caution": 13,
+  "aggression": 9,
+  "schooling": 8,
+  "feeding_depth_min_m": 1,
+  "feeding_depth_max_m": 25,
+  "temp_min_c": 12,
+  "temp_max_c": 27,
+  "activity_by_slot": {
+   "dawn": 0.9,
+   "day": 0.7,
+   "evening": 0.8,
+   "night": 0.3
+  },
+  "salinity": [
+   "marine",
+   "brackish"
+  ],
+  "mouth_gape_mm": 12,
+  "diet_tags": [
+   "mollusc",
+   "crustacean",
+   "worm"
+  ],
+  "surface_thrash": 4,
+  "teeth": 3,
+  "length_min_cm": 14.3,
+  "length_max_cm": 36.7,
+  "length_record_cm": 36.7,
+  "weight_record_kg": 0.8365,
+  "rarity": 7,
+  "lw_a": 0.01989,
+  "lw_b": 2.936,
+  "provenance": {
+   "default": {
+    "design_fill": true,
+    "note": "Strength, stamina, speed, caution, aggression, schooling, depths, temperatures, activity, mouth, thrash, teeth and rarity are design fills; lengths and the length-weight relation are sourced."
+   },
+   "fields": {
+    "scientific_name": {
+     "source": "WoRMS AphiaID 127053: https://www.marinespecies.org/aphia.php?p=taxdetails&id=127053",
+     "accessed": "2026-11-22"
+    },
+    "length_min_cm": {
+     "source": "Daban et al. (2024), D. sargus n=322, TL 14.3-36.7 cm, W 50.5-836.5 g: https://doi.org/10.12714/egejfas.41.1.05",
+     "accessed": "2026-11-22"
+    },
+    "length_max_cm": {
+     "source": "Daban et al. (2024), D. sargus n=322, TL 14.3-36.7 cm, W 50.5-836.5 g: https://doi.org/10.12714/egejfas.41.1.05",
+     "accessed": "2026-11-22"
+    },
+    "length_record_cm": {
+     "source": "Daban et al. (2024), D. sargus n=322, TL 14.3-36.7 cm, W 50.5-836.5 g: https://doi.org/10.12714/egejfas.41.1.05 (the largest in the sample, not a world record)",
+     "accessed": "2026-11-22"
+    },
+    "weight_record_kg": {
+     "source": "Daban et al. (2024), D. sargus n=322, TL 14.3-36.7 cm, W 50.5-836.5 g: https://doi.org/10.12714/egejfas.41.1.05 (the heaviest in the sample, not a world record)",
+     "accessed": "2026-11-22"
+    },
+    "lw_a": {
+     "source": "Daban, İşmen & Arslan İhsanoğlu (2024) Ege J. Fish. Aquat. Sci. 41(1): 30-36, northeastern Aegean, n=322: https://doi.org/10.12714/egejfas.41.1.05: both sexes W=0.01989 TL^2.936",
+     "accessed": "2026-11-22"
+    },
+    "lw_b": {
+     "source": "Daban, İşmen & Arslan İhsanoğlu (2024) Ege J. Fish. Aquat. Sci. 41(1): 30-36, northeastern Aegean, n=322: https://doi.org/10.12714/egejfas.41.1.05: both sexes W=0.01989 TL^2.936",
+     "accessed": "2026-11-22"
+    },
+    "regulation": {
+     "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, Çizelge 7; not changed by Tebliğ 2026/26 (its Madde 5 amends only the Dil, İstavrit, Lagos and bluefin tuna rows): https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm; row 'Sargos (Diplodus sargos)', 21 cm",
+     "accessed": "2026-11-22"
+    }
+   }
+  },
+  "regulation": {
+   "min_length_cm": 21,
+   "as_of": "2026-09-16",
+   "source": "6/2 Amatör Amaçlı Su Ürünleri Avcılığı Tebliği (2024/21), Resmî Gazete 32629, Çizelge 7; not changed by Tebliğ 2026/26 (its Madde 5 amends only the Dil, İstavrit, Lagos and bluefin tuna rows): https://resmigazete.gov.tr/eskiler/2024/08/20240811-4.htm"
+  }
  }
 ]

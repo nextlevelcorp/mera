@@ -6,7 +6,10 @@
   "lufer": 160,
   "palamut": 180,
   "izmarit": 70,
-  "kalamar": 420
+  "kalamar": 420,
+  "cipura": 250,
+  "levrek": 280,
+  "sargoz": 200
  },
  "default_price_per_kg": 80,
  "lures": [

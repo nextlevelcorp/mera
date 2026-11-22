@@ -65,7 +65,7 @@ FISH_HOOK_FAILED,The hook did not set,Kanca tutmadı,El anzuelo no clavó
 FISH_STRIKE_EMPTY,Nothing there,Boşa vurdun,No había nada
 FISH_RETRIEVED,Lure is back. Cast again.,Yem geri geldi. Tekrar at.,El señuelo ha vuelto. Lanza otra vez.
 FISH_CAST_AGAIN,Cast again,Tekrar at,Lanzar otra vez
-FISH_CATCH,%s · %.0f cm · %.2f kg,%s · %.0f cm · %.2f kg,%s · %.0f cm · %.2f kg
+FISH_CATCH,%s · %.1f cm · %.2f kg,%s · %.1f cm · %.2f kg,%s · %.1f cm · %.2f kg
 FISH_FIRST,First of its kind in your log!,Defterine ilk kez girdi!,¡El primero en tu registro!
 FISH_RECORD,New record!,Yeni rekor!,¡Nuevo récord!
 FISH_STATUS,%s · wind %s %d m/s · %s,%s · rüzgâr %s %d m/s · %s,%s · viento %s %d m/s · %s
@@ -366,3 +366,6 @@ SPOT_IZMIR_KORDON,İzmir Kordon,İzmir Kordon,Kordon de Esmirna
 POS_IZMIR_ALSANCAK,"Alsancak, by the ferry pier","Alsancak, vapur iskelesi yanı","Alsancak, junto al muelle del ferri"
 POS_IZMIR_PASAPORT,Pasaport pier,Pasaport iskelesi,Muelle de Pasaport
 POS_IZMIR_KONAK,Konak pier,Konak iskelesi,Muelle de Konak
+SPECIES_GILTHEAD,Gilthead sea bream,Çipura,Dorada
+SPECIES_SEABASS,European sea bass,Levrek,Lubina
+SPECIES_WHITE_BREAM,White sea bream,Sargoz,Sargo
