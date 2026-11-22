@@ -369,3 +369,15 @@ POS_IZMIR_KONAK,Konak pier,Konak iskelesi,Muelle de Konak
 SPECIES_GILTHEAD,Gilthead sea bream,Çipura,Dorada
 SPECIES_SEABASS,European sea bass,Levrek,Lubina
 SPECIES_WHITE_BREAM,White sea bream,Sargoz,Sargo
+SPOT_ES_BANUS,Puerto Banús breakwaters,Puerto Banús mendirekleri,Espigones de Puerto Banús
+POS_BANUS_BENABOLA,Benabola breakwater,Benabola mendireği,Espigón de Benabola
+POS_BANUS_T,A T-shaped breakwater,T biçimli mendirek,Espigón en T
+POS_BANUS_MOUTH,By the harbour mouth,Liman ağzı,Junto a la bocana
+SPOT_ES_MARO,Maro rocks,Maro kayalıkları,Rocas de Maro
+POS_MARO_ROCKS,Rocks under the cliffs,Yalıyar altındaki kayalar,Rocas bajo los acantilados
+POS_MARO_POINT,Rock point,Kayalık burun,Punta rocosa
+POS_MARO_BEACH,End of the gravel beach,Çakıllı kumsalın ucu,Final de la playa de grava
+SPOT_ES_ALMERIA,Almería breakwater,Almería mendireği,Espigón de Almería
+POS_ALMERIA_SEA,Platforms on the open-sea side,Açık deniz tarafındaki platformlar,Puestos de la cara de mar abierto
+POS_ALMERIA_TIP,Breakwater tip,Mendirek ucu,Punta del espigón
+POS_ALMERIA_INNER,Harbour side,Liman tarafı,Cara del puerto

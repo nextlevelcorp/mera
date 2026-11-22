@@ -94,3 +94,17 @@ func test_close_pins_are_spread_so_each_can_be_tapped() -> void:
 	var shown := MapModel.spread([Vector2(100, 100), Vector2(104, 102), Vector2(400, 300)] as Array[Vector2], 46.0)
 	assert_true(shown[0].distance_to(shown[1]) >= 46.0 * 0.9 * 1.9, "the two close pins move apart (%.0f px)" % shown[0].distance_to(shown[1]))
 	assert_eq(shown[2], Vector2(400, 300), "a lone pin stays put")
+
+
+func test_spain_has_three_spots_with_its_own_rules_and_fish() -> void:
+	var spots := MapModel.spots_in(Db.database(), "ES")
+	assert_eq(spots.size(), 3, "Puerto Banús, Maro and Almería")
+	var cond := {"slot": "dawn", "month": 10, "wind_dir": "W", "wind_ms": 3}
+	var s := FishingSession.new(Db.database(), Db.constants(), "float", "almeria_sea", cond)
+	assert_eq(s.jurisdiction(), "es_andalusia", "Andalusia's rules hold on the Almería breakwater")
+	(s.trip["catches"] as Array).append({"species_id": "sargoz", "length_cm": 22.0, "weight_kg": 0.17, "kept": true})
+	assert_eq(s.undersize_count(1), 1, "a 22 cm white sea bream is legal in Turkey (21 cm) but goes back in Andalusia (23 cm)")
+	var ctx := FightSetup.build(Db.database(), "sargoz", "float", "maro_rocks", 0.5, cond)
+	var w := WaitSim.new(ctx, Db.constants(), Db.database()["species"], 15.0, 1)
+	assert_true(float(w._rates["sargoz"]["rate_interest"]) > 0.0, "white sea bream on the Maro rocks (Junta de Andalucía)")
+	assert_true(not w._rates.has("istavrit") or float(w._rates["istavrit"]["rate_interest"]) == 0.0, "no horse mackerel listed there")

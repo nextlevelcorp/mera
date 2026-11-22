@@ -129,7 +129,7 @@ func select(spot_id: String) -> void:
 			if sp["id"] == e["species_id"]:
 				names.append(tr(sp["name_key"]))
 	_info_text.text = "[b][font_size=26]%s[/font_size][/b]\n%s\n\n%s\n%s\n%s" % [
-		tr(spot["name_key"]), "%.4f° N, %.4f° E" % [float(spot["lat"]), float(spot["lon"])],
+		tr(spot["name_key"]), "%.4f° %s, %.4f° %s" % [absf(float(spot["lat"])), "N" if float(spot["lat"]) >= 0.0 else "S", absf(float(spot["lon"])), "E" if float(spot["lon"]) >= 0.0 else "W"],
 		tr("MAP_SHORE_%s" % String(spot.get("shore_type", "pier")).to_upper()),
 		tr("MAP_SPECIES") % ", ".join(names),
 		tr("MAP_POSITIONS") % (spot["positions"] as Array).size()]
@@ -255,14 +255,14 @@ func _draw() -> void:
 		var y := MapModel.chart_point(lat, b[0], b, inner).y
 		if y > r.position.y and y < r.end.y:
 			draw_line(Vector2(r.position.x, y), Vector2(r.end.x, y), Color(UiTheme.ROPE, 0.08), 1.0)
-			draw_string(font, Vector2(r.position.x + 8, y - 4), _deg(lat, step) + "° N", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(UiTheme.ROPE, 0.4))
+			draw_string(font, Vector2(r.position.x + 8, y - 4), _deg(absf(lat), step) + ("° N" if lat >= 0.0 else "° S"), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(UiTheme.ROPE, 0.4))
 		lat += step
 	var lon := ceilf(b[0] / step) * step
 	while lon <= b[2]:
 		var x := MapModel.chart_point(b[1], lon, b, inner).x
 		if x > r.position.x and x < r.end.x:
 			draw_line(Vector2(x, r.position.y), Vector2(x, r.end.y), Color(UiTheme.ROPE, 0.08), 1.0)
-			draw_string(font, Vector2(x + 4, r.end.y - 8), _deg(lon, step) + "° E", HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(UiTheme.ROPE, 0.4))
+			draw_string(font, Vector2(x + 4, r.end.y - 8), _deg(absf(lon), step) + ("° E" if lon >= 0.0 else "° W"), HORIZONTAL_ALIGNMENT_LEFT, -1, 13, Color(UiTheme.ROPE, 0.4))
 		lon += step
 	_draw_rose(r.end - Vector2(70, 70), 40.0)
 	for s: Dictionary in MapModel.spots_in(Db.database(), country):
@@ -276,8 +276,12 @@ func _draw() -> void:
 		draw_circle(p, 22.0 * pulse, Color(UiTheme.BRASS, 0.18))
 		draw_circle(p, 11.0, UiTheme.BRASS if on else Color(UiTheme.BRASS, 0.75))
 		draw_circle(p, 4.0, Color("0a1a24"))
-		draw_string_outline(font, p + Vector2(18, -14), tr(s["name_key"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, 6, Color(0, 0, 0, 0.7))
-		draw_string(font, p + Vector2(18, -14), tr(s["name_key"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, UiTheme.ROPE)
+		var name := tr(s["name_key"])
+		var w := font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, 20).x
+		# A label that would run off the chart goes on the pin's other side.
+		var at := p + (Vector2(18, -14) if p.x + 18.0 + w < chart_rect().end.x - 8.0 else Vector2(-18.0 - w, -14))
+		draw_string_outline(font, at, name, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, 6, Color(0, 0, 0, 0.7))
+		draw_string(font, at, name, HORIZONTAL_ALIGNMENT_LEFT, -1, 20, UiTheme.ROPE)
 
 
 ## Land from Natural Earth (public domain, game/data/map/land.json), filled

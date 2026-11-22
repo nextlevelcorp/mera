@@ -22,6 +22,13 @@ Add every data, art, audio and tool source here with its licence before it is us
 | Normattiva: DPR 1639/1968 | Official legal database | Italy's sizes |
 | vgo.gr guide; fishradar.ai | Third-party web pages, read only | Greece, marked unofficial; values cited, text not copied |
 
+## Andalusia's spots (2026-11-22, R17)
+| Value | Source | Licence or terms |
+| --- | --- | --- |
+| Coordinates: Puerto Banús Q2117451, Maro Q3294545, Port of Almería Q3199756 | Wikidata (SPARQL), P625 | CC0 |
+| Monthly sea-surface temperature, 1991-2020, at the nearest offshore 0.25 degree cell (every third day) | NOAA OISST v2.1 through NOAA CoastWatch ERDDAP (`ncdcOisst21Agg_LonPM180`), computed by `tools/data/sst_climatology.py` | US public domain (NOAA) |
+| The spots and their main species (Puerto Banús breakwaters: gilthead, white sea bream and others; Maro: white sea bream and sea bass; Espigón de Almería: white sea bream, sea bass, gilthead and others) | Junta de Andalucía, "La pesca marítima de recreo en Andalucía" (2008) | Government publication; facts cited |
+
 ## Gilthead sea bream, sea bass and white sea bream (2026-11-22, owner decision)
 | Value | Source | Licence or terms |
 | --- | --- | --- |
