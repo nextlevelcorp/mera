@@ -22,6 +22,12 @@ var _info_text: RichTextLabel
 var _go: Button
 var _back: Button
 var _t := 0.0
+var _land_key := ""
+var _land_polys: Array[PackedVector2Array] = []
+var _land_tris: Array[PackedInt32Array] = []
+var _land_lines: Array[PackedVector2Array] = []
+const LAND_FILE := "res://data/map/land.json"
+static var _land_cache: Array[PackedVector2Array] = []
 
 
 func _init() -> void:
@@ -195,7 +201,7 @@ func chart_rect() -> Rect2:
 
 
 func _bounds() -> Array[float]:
-	return MapModel.bounds(MapModel.spots_in(Db.database(), country), 0.012)
+	return MapModel.bounds(MapModel.spots_in(Db.database(), country), MapModel.margin_deg(MapModel.spots_in(Db.database(), country)))
 
 
 ## A spot's pin on screen.
@@ -216,6 +222,7 @@ func _draw() -> void:
 	draw_style_box(paper, r)
 	var b := _bounds()
 	var inner := r.grow(-60.0)
+	_draw_land(b, inner, r)
 	var font := get_theme_default_font()
 	# Graticule: a line every hundredth of a degree, labelled on the edges.
 	var step := _grid_step(b[3] - b[1])
@@ -243,6 +250,65 @@ func _draw() -> void:
 		draw_circle(p, 4.0, Color("0a1a24"))
 		draw_string_outline(font, p + Vector2(18, -14), tr(s["name_key"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, 6, Color(0, 0, 0, 0.7))
 		draw_string(font, p + Vector2(18, -14), tr(s["name_key"]), HORIZONTAL_ALIGNMENT_LEFT, -1, 20, UiTheme.ROPE)
+
+
+## Land from Natural Earth (public domain, game/data/map/land.json), filled
+## and outlined, then the frame around the chart is painted over so nothing
+## spills out. The triangulation is cached for the chart's current view.
+func _draw_land(b: Array[float], inner: Rect2, r: Rect2) -> void:
+	var key := "%s|%s|%s" % [country, str(inner), str(b)]
+	if key != _land_key:
+		_land_key = key
+		_land_polys.clear()
+		_land_tris.clear()
+		# Cut each ring to the view first (Clipper gives clean, simple pieces).
+		# The chart shows more than the bounds on its long side: cut wide.
+		var pad := 1.5 * maxf(b[2] - b[0], b[3] - b[1])
+		var view := PackedVector2Array([Vector2(b[0] - pad, b[1] - pad), Vector2(b[2] + pad, b[1] - pad), Vector2(b[2] + pad, b[3] + pad), Vector2(b[0] - pad, b[3] + pad)])
+		_land_lines.clear()
+		for ring: PackedVector2Array in MapModel.rings_in(_land(), b):
+			var line := PackedVector2Array()
+			for v: Vector2 in ring:
+				line.append(MapModel.chart_point(v.y, v.x, b, inner))
+			line.append(line[0])
+			_land_lines.append(line)
+			for piece: PackedVector2Array in Geometry2D.intersect_polygons(ring, view):
+				var pts := PackedVector2Array()
+				for v: Vector2 in piece:
+					pts.append(MapModel.chart_point(v.y, v.x, b, inner))
+				_land_polys.append(pts)
+				_land_tris.append(Geometry2D.triangulate_polygon(pts))
+	var land_c := Color("2c3a2e")
+	for i in _land_polys.size():
+		var pts: PackedVector2Array = _land_polys[i]
+		var tris: PackedInt32Array = _land_tris[i]
+		if tris.size() >= 3:
+			var cols := PackedColorArray()
+			cols.resize(pts.size())
+			cols.fill(land_c)
+			RenderingServer.canvas_item_add_triangle_array(get_canvas_item(), tris, pts, cols)
+	for line: PackedVector2Array in _land_lines:
+		draw_polyline(line, Color(UiTheme.BRASS, 0.45), 1.5, true)   # the coast, not the cut
+	# Paint the frame back over anything outside the chart.
+	var bg := Color("0a1a24")
+	draw_rect(Rect2(0, 0, size.x, r.position.y), bg)
+	draw_rect(Rect2(0, r.end.y, size.x, size.y - r.end.y), bg)
+	draw_rect(Rect2(0, r.position.y, r.position.x, r.size.y), bg)
+	draw_rect(Rect2(r.end.x, r.position.y, size.x - r.end.x, r.size.y), bg)
+	draw_rect(r, Color(UiTheme.BRASS, 0.55), false, 2.0)
+
+
+## The land rings, read once.
+static func _land() -> Array[PackedVector2Array]:
+	if _land_cache.is_empty():
+		var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(LAND_FILE))
+		if typeof(raw) == TYPE_DICTIONARY:
+			for flat: Array in raw.get("rings", []):
+				var ring := PackedVector2Array()
+				for i in range(0, flat.size() - 1, 2):
+					ring.append(Vector2(float(flat[i]), float(flat[i + 1])))
+				_land_cache.append(ring)
+	return _land_cache
 
 
 ## A grid label with as many decimals as the step needs.

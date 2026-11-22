@@ -72,3 +72,25 @@ static func chart_point(lat: float, lon: float, b: Array[float], rect: Rect2) ->
 	var mid_lon := (b[0] + b[2]) * 0.5
 	var mid_lat := (b[1] + b[3]) * 0.5
 	return centre + Vector2((lon - mid_lon) * squeeze * scale, -(lat - mid_lat) * scale)
+
+
+## A margin round the spots that grows with their spread, so the chart shows
+## some coast around a single spot as well as round a whole country.
+static func margin_deg(points: Array) -> float:
+	var b := bounds(points, 0.0)
+	return maxf(0.02, 0.25 * maxf(b[2] - b[0], b[3] - b[1]))
+
+
+## The rings (lon, lat) that reach into the bounds, for drawing.
+static func rings_in(rings: Array[PackedVector2Array], b: Array[float]) -> Array[PackedVector2Array]:
+	var out: Array[PackedVector2Array] = []
+	var box := Rect2(b[0], b[1], b[2] - b[0], b[3] - b[1])
+	for ring: PackedVector2Array in rings:
+		var lo := Vector2(INF, INF)
+		var hi := Vector2(-INF, -INF)
+		for v: Vector2 in ring:
+			lo = lo.min(v)
+			hi = hi.max(v)
+		if Rect2(lo, hi - lo).intersects(box, true):
+			out.append(ring)
+	return out

@@ -58,3 +58,21 @@ func test_the_map_screen_goes_from_a_country_to_a_spot() -> void:
 	m.back()
 	assert_eq(m.country, "", "back to the countries")
 	m.free()
+
+
+func test_the_land_file_covers_the_countries_and_says_where_it_comes_from() -> void:
+	var raw: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/map/land.json"))
+	assert_true(String(raw["source"]).contains("Natural Earth"), "Natural Earth, public domain")
+	var rings: Array[PackedVector2Array] = []
+	for flat: Array in raw["rings"]:
+		var ring := PackedVector2Array()
+		for i in range(0, flat.size() - 1, 2):
+			ring.append(Vector2(float(flat[i]), float(flat[i + 1])))
+		rings.append(ring)
+	var b := MapModel.bounds(MapModel.spots_in(Db.database(), "TR"), 0.05)
+	assert_true(not MapModel.rings_in(rings, b).is_empty(), "there is coast round Istanbul")
+	var pieces := 0
+	var view := PackedVector2Array([Vector2(b[0], b[1]), Vector2(b[2], b[1]), Vector2(b[2], b[3]), Vector2(b[0], b[3])])
+	for ring: PackedVector2Array in MapModel.rings_in(rings, b):
+		pieces += Geometry2D.intersect_polygons(ring, view).size()
+	assert_true(pieces >= 2, "Europe and Asia on either side of the Strait (%d pieces)" % pieces)
