@@ -130,3 +130,16 @@ func test_greece_and_portugal_have_three_spots_each() -> void:
 	var lisbon := FightSetup.build(Db.database(), "levrek", "lrf", "cascais_pier", 0.5, {"slot": "day", "month": 8, "wind_dir": "N", "wind_ms": 3})
 	var kavala := FightSetup.build(Db.database(), "levrek", "lrf", "kavala_quay", 0.5, {"slot": "day", "month": 8, "wind_dir": "N", "wind_ms": 3})
 	assert_true(float(lisbon["spot"]["water_temp_by_month_c"][7]) < float(kavala["spot"]["water_temp_by_month_c"][7]) - 5.0, "the Atlantic at Cascais is far cooler in August than the Aegean (NOAA)")
+
+
+func test_the_debug_spot_list_names_every_spot_under_its_country() -> void:
+	var picked := [""]
+	var menu: PopupMenu = load("res://debug/debug_menu.gd").spot_picker(func(id: String) -> void: picked[0] = id)
+	var spots := 0
+	for i in menu.item_count:
+		if not menu.is_item_separator(i):
+			spots += 1
+	assert_eq(spots, Db.database()["spot"].size(), "every spot is in the list")
+	assert_true(menu.is_item_separator(0), "under a country heading")
+	menu.index_pressed.emit(menu.item_count - 1)
+	assert_true(picked[0] != "", "picking one gives its id (%s)" % picked[0])
