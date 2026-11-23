@@ -921,7 +921,7 @@ func _fight_effects(delta: float) -> void:
 		_swing_v = 0.0
 		_fx.splash(_lift_from, pos, 0.8)
 		_snd("splash", -3.0)
-		_landing_view.open(String(_fight_ctx["species"]["id"]), float(_fight_ctx["play"]["fish_length_cm"]), float(_hud["lift_height_m"]), String(_fight_ctx["position"].get("stage", "bridge")) == "quay")
+		_landing_view.open(String(_fight_ctx["species"]["id"]), float(_fight_ctx["play"]["fish_length_cm"]), float(_hud["lift_height_m"]), String(_fight_ctx["position"].get("stage", "bridge")) != "bridge")   # a quay or a boat's gunwale: a low edge
 		_ui.distance_label.visible = false   # the wall's ruler gives the height now
 	if _hud["in_landing"]:
 		_step_lift(delta)
