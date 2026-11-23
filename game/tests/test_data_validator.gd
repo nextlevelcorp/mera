@@ -127,8 +127,9 @@ func test_position_rules() -> void:
 	_expect(func(db):
 		var positions: Array = db["spot"][0]["positions"]
 		positions.append((positions[0] as Dictionary).duplicate(true))
-		positions.append((positions[1] as Dictionary).duplicate(true)),
-		"allows at most 4", "five positions")
+		positions.append((positions[1] as Dictionary).duplicate(true))
+		positions.append((positions[2] as Dictionary).duplicate(true)),
+		"allows at most 5", "six positions")
 	_expect(func(db):
 		var p: Array = db["spot"][0]["positions"]
 		p[1]["depth_profile"] = (p[0]["depth_profile"] as Array).duplicate(true)

@@ -30,6 +30,7 @@ var speed_button: Button
 var rig_button: Button
 var log_button: Button
 var bait_button: Button
+var boat_button: Button
 var status_label: Label
 var toast_label: Label
 var hint_label: Label
@@ -203,6 +204,18 @@ func _build_hud() -> void:
 	_top_left(bait_button, 336.0)
 	_glass_key(bait_button, "hook")
 	add_child(bait_button)
+	# Rent the spot's boat, or go back to the shore (R23).
+	boat_button = _button("", 22, func() -> void: scr.toggle_boat())
+	# Top right, under the motion chip: the left side is the aim gauge's.
+	boat_button.anchor_left = 1.0
+	boat_button.anchor_right = 1.0
+	boat_button.offset_left = -296.0
+	boat_button.offset_right = -16.0
+	boat_button.offset_top = 262.0   # below the hint line
+	boat_button.offset_bottom = 262.0 + TOUCH_MIN
+	_glass_key(boat_button, "rig")
+	boat_button.visible = false
+	add_child(boat_button)
 
 
 func _build_rig_panel() -> void:

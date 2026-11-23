@@ -157,3 +157,11 @@ static func _species(species_list: Array, id: String) -> Dictionary:
 		if s["id"] == id:
 			return s
 	return {}
+
+
+## Pays a fee (a boat's rent, R23). False (and nothing changes) if the money is short.
+static func pay(save: Dictionary, amount: int) -> bool:
+	if money(save) < amount:
+		return false
+	save["money"] = money(save) - amount
+	return true

@@ -61,6 +61,11 @@ var lure_x0 := 0.0
 var lure_x_per_m := 0.0
 var depth_m := 0.0
 var retrieve_ms := 0.0
+## From a drifting boat (R23, BoatDrift): the drift speed and how far the
+## boat has gone out along its position's depth profile.
+var boat := false
+var drift_ms := 0.0
+var drift_m := 0.0
 
 
 ## ctx: a CatchModel context (species is replaced per species); species_records:
@@ -71,6 +76,9 @@ func _init(ctx: Dictionary, k: Dictionary, species_records: Array, cast_m: float
 	_k = k
 	_rng.seed = seed_value
 	lure_distance_m = cast_m
+	boat = BoatDrift.is_boat(ctx["position"])
+	if boat:
+		drift_ms = BoatDrift.drift_ms(k, float(ctx["conditions"].get("wind_ms", 0.0)))
 	if Presentation.is_float(ctx["lure"]):
 		depth_m = minf(float(ctx["lure"]["run_depth_max_m"]), CatchModel.depth_at(ctx["position"]["depth_profile"], cast_m) * 0.9)
 	_species = []
@@ -118,13 +126,24 @@ func step() -> void:
 			_end_take()
 		return
 
-	if controlled:
+	if boat:
+		# Straight down from a drifting boat: reeling lifts the lure, and the
+		# cast is over when it is back at the surface.
+		drift_m += drift_ms * DT
+		if controlled:
+			retrieve_ms = _reel * float(_ctx["reel"]["retrieve_m_per_s"])
+			_update_depth()
+			if _reel > 0.3 and depth_m <= 0.05 and time_s > 1.0:
+				phase = PHASE_RETRIEVED
+				_log("retrieved", {})
+				return
+	elif controlled:
 		retrieve_ms = _reel * float(_ctx["reel"]["retrieve_m_per_s"])
 		lure_distance_m = maxf(lure_distance_m - retrieve_ms * DT, 0.0)
 		_update_depth()
 	elif not Presentation.is_float(_ctx["lure"]):
 		lure_distance_m = maxf(lure_distance_m - float(_k["WAIT_RETRIEVE_M_PER_S"]) * DT, 0.0)
-	if lure_distance_m <= float(_k["WAIT_END_M"]):
+	if not boat and lure_distance_m <= float(_k["WAIT_END_M"]):
 		phase = PHASE_RETRIEVED
 		_log("retrieved", {})
 		return
@@ -134,7 +153,7 @@ func step() -> void:
 
 	# Not every pull is a fish (owner, 2026-11-21): drifting weed or rubbish
 	# anywhere, the bottom when the lure is near it. It looks like a take.
-	var near_bottom := not Presentation.is_float(_ctx["lure"]) and depth_m >= CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m) - float(_k["SNAG_NEAR_BOTTOM_M"])
+	var near_bottom := not Presentation.is_float(_ctx["lure"]) and depth_m >= water_depth() - float(_k["SNAG_NEAR_BOTTOM_M"])
 	if _rng.randf() < float(_k["WEED_RATE_PER_S"]) * DT:
 		_open_foul("weed")
 		return
@@ -149,6 +168,9 @@ func step() -> void:
 		boost *= 1.0 + float(_k.get("JIG_GAIN", 0.0)) * _jig
 		# A lure in a feeding shoal is among fish (design fill).
 		boost *= shoal_boost()
+		# A drifting boat passes over more fish (R23, design fill).
+		if boat:
+			boost *= BoatDrift.ground_gain(_k, drift_ms)
 		if _rng.randf() < float(r["rate_interest"]) * boost * DT:
 			if _rng.randf() < float(r["commit"]):
 				_open_take(id)
@@ -172,9 +194,9 @@ func snapshot() -> Dictionary:
 	return {
 		"time_s": time_s, "phase": phase, "lure_distance_m": lure_distance_m,
 		"depth_m": depth_m, "retrieve_ms": retrieve_ms, "controlled": controlled,
-		"water_depth_m": CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m),
+		"water_depth_m": water_depth(),
 		"take_progress": float(_take.get("elapsed_s", 0.0)) / window if window > 0.0 else 0.0,
-		"hooked": hooked, "fouled": fouled,
+		"hooked": hooked, "fouled": fouled, "boat": boat, "drift_ms": drift_ms, "drift_m": drift_m,
 	}
 
 
@@ -269,9 +291,12 @@ func _end_take() -> void:
 ## surface, never deeper than the lure runs or the water allows.
 func _update_depth() -> void:
 	var lure: Dictionary = _ctx["lure"]
-	var water := CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m)
+	var water := water_depth()
 	var ceiling := minf(float(lure["run_depth_max_m"]), water * 0.9)
 	var sink := float(lure["sink_rate_m_per_s"])
+	if boat:
+		# The drift drags the line aslant: the lure cannot get as deep (R23).
+		ceiling = minf(float(lure["run_depth_max_m"]), water * 0.95) * BoatDrift.line_cos(drift_ms, sink)
 	if Presentation.is_float(lure):
 		# Under a float the bait hangs at the set depth (or just off the bottom).
 		depth_m = float(lure["run_depth_max_m"])
@@ -290,7 +315,7 @@ func _refresh_rates() -> void:
 	_refresh_left = RATE_REFRESH_S
 	_ctx["play"]["cast_m"] = lure_distance_m
 	if Presentation.is_float(_ctx["lure"]):
-		_ctx["play"]["lure_depth_m"] = minf(float(_ctx["lure"]["run_depth_max_m"]), CatchModel.depth_at(_ctx["position"]["depth_profile"], lure_distance_m) * 0.9)
+		_ctx["play"]["lure_depth_m"] = minf(float(_ctx["lure"]["run_depth_max_m"]), water_depth() * 0.9)
 	elif controlled:
 		# What the player does is what the model sees (data_model 5.2, 5.3).
 		_ctx["play"]["lure_depth_m"] = depth_m
@@ -299,7 +324,7 @@ func _refresh_rates() -> void:
 		var c := _ctx.duplicate()
 		c["species"] = sp
 		var env := CatchModel.environment(_k, c["spot"], c["position"], c["conditions"])
-		var depth := CatchModel.depth_at(c["position"]["depth_profile"], lure_distance_m)
+		var depth := water_depth()
 		var pres := CatchModel.presence(_k, sp, c["spot"], c["position"], c["conditions"], env, depth)
 		var attr := CatchModel.attraction(_k, sp, c["lure"], c["play"], env, depth)
 		var com := CatchModel.commit(_k, sp, c["spot"], c["rod"], c["leader"], env, pres["presence"], attr["attraction"])
@@ -307,6 +332,13 @@ func _refresh_rates() -> void:
 			"rate_interest": com["rate_interest"], "commit": com["commit"], "window_s": float(com["strike_window_s"]) * Progress.strike_window_factor(_k, _ctx["angler"]),
 			"stages": {"water_depth_m": depth, "presence": pres, "attraction": attr, "commit": com},
 		}
+
+
+## The water under the lure: from the shore, at the lure's distance; from a
+## boat, under the boat where the drift has taken it (R23).
+func water_depth() -> float:
+	var x := lure_distance_m + drift_m if boat else lure_distance_m
+	return CatchModel.depth_at(_ctx["position"]["depth_profile"], x)
 
 
 func _species_by_id(id: String) -> Dictionary:

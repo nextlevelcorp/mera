@@ -273,7 +273,12 @@ func _step_landing(reel: float) -> void:
 
 ## How far the fish is lifted at the end: up a bridge's side or a quay's edge.
 static func lift_height(k: Dictionary, position: Dictionary) -> float:
-	return float(k["LIFT_HEIGHT_QUAY_M"]) if String(position.get("stage", "bridge")) == "quay" else float(k["LIFT_HEIGHT_BRIDGE_M"])
+	match String(position.get("stage", "bridge")):
+		"quay":
+			return float(k["LIFT_HEIGHT_QUAY_M"])
+		"boat":
+			return float(k["LIFT_HEIGHT_BOAT_M"])   # over the gunwale (R23)
+	return float(k["LIFT_HEIGHT_BRIDGE_M"])
 
 
 func _finish(result: String) -> Dictionary:

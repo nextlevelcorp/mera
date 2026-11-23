@@ -70,7 +70,7 @@ func _draw_stage(size: Vector2) -> void:
 	bridge.pose(scr._neighbours.people, scr._time)
 	var tips := PackedVector2Array()
 	var lures := PackedVector2Array()
-	for i in scr._neighbours.people.size():
+	for i in mini(scr._neighbours.people.size(), bridge.people_at.size()):   # none on a boat (R23)
 		var p: Dictionary = scr._neighbours.people[i]
 		var t := bridge.tip_water(i)
 		tips.append(WaterView.project(Vector2(t.x, t.z), t.y, size))

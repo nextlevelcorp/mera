@@ -132,7 +132,11 @@ func select(spot_id: String) -> void:
 		tr(spot["name_key"]), "%.4f° %s, %.4f° %s" % [absf(float(spot["lat"])), "N" if float(spot["lat"]) >= 0.0 else "S", absf(float(spot["lon"])), "E" if float(spot["lon"]) >= 0.0 else "W"],
 		tr("MAP_SHORE_%s" % String(spot.get("shore_type", "pier")).to_upper()),
 		tr("MAP_SPECIES") % ", ".join(names),
-		tr("MAP_POSITIONS") % (spot["positions"] as Array).size()]
+		tr("MAP_POSITIONS") % (spot["positions"] as Array).filter(func(p: Dictionary) -> bool: return not BoatDrift.is_boat(p)).size()]
+	# A boat for rent there (R23).
+	for p: Dictionary in spot["positions"]:
+		if BoatDrift.is_boat(p):
+			_info_text.text += "\n" + tr("MAP_BOAT") % int(p.get("rent_tl", 0))
 	_info.visible = true
 	queue_redraw()
 

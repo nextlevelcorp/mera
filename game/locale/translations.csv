@@ -418,3 +418,15 @@ POS_PT_CASCAIS_MARINA,Marina breakwater,Marina mendireği,Rompeolas del puerto d
 POS_PT_CASCAIS_PIER,Fishing pier,Balıkçı iskelesi,Muelle de pescadores
 POS_PT_CASCAIS_ROCKS,Cliff rocks,Yalıyar kayaları,Rocas del acantilado
 DBG_FISH_AT,Fish at a spot…,Bir yerde balık tut…,Pescar en un lugar…
+POS_BOAT_GALATA,A boat in the Strait,Boğaz'da tekne,Una barca en el estrecho
+POS_BOAT_ALMERIA,A boat off Almería,Almería açığında tekne,Una barca frente a Almería
+POS_BOAT_TRIESTE,A boat in the Gulf of Trieste,Trieste Körfezi'nde tekne,Una barca en el golfo de Trieste
+POS_BOAT_SESIMBRA,A boat off Sesimbra,Sesimbra açığında tekne,Una barca frente a Sesimbra
+POS_BOAT_KAVALA,A boat off Kavala,Kavala açığında tekne,Una barca frente a Kavala
+BOAT_RENT_KEY,Boat (%d TL),Tekne (%d TL),Barca (%d TL)
+BOAT_BACK_KEY,Back to shore,Kıyıya dön,Volver a tierra
+BOAT_RENTED,Boat rented for %d TL: drop the lure straight down,Tekne %d TL'ye kiralandı: yemi dikine bırak,Barca alquilada por %d TL: deja caer el señuelo en vertical
+BOAT_BACK,Back on the shore,Kıyıya dönüldü,De vuelta en tierra
+BOAT_NO_MONEY,A boat costs %d TL,Tekne %d TL,Una barca cuesta %d TL
+BOAT_DRIFT_HUD,"drift %.2f m/s, %.0f m out","sürüklenme %.2f m/sn, %.0f m açıkta","deriva %.2f m/s, %.0f m mar adentro"
+MAP_BOAT,A boat for rent (%d TL),Kiralık tekne (%d TL),Barca de alquiler (%d TL)
