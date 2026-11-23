@@ -11,7 +11,8 @@ func _area() -> WorldArea:
 func test_the_area_links_to_the_spot_and_is_consistent() -> void:
 	var a := _area()
 	assert_eq(a.spot_id, "galata_bridge", "the spot")
-	var positions: Array = Db.record("spot", a.spot_id)["positions"]
+	# A rented boat (R23) has no marker on the bridge.
+	var positions: Array = (Db.record("spot", a.spot_id)["positions"] as Array).filter(func(p: Dictionary) -> bool: return p.get("stage", "") != "boat")
 	assert_eq(a.markers.size(), positions.size(), "one marker per standing position")
 	for p: Dictionary in positions:
 		var found := false

@@ -129,7 +129,7 @@ func test_every_stage_kind_builds_with_neighbours_over_its_edge() -> void:
 		var n := NeighborAnglers.new(5)
 		stage.pose(n.people, 1.0)
 		assert_true(stage.ready_yaw > 0.3 and stage.ready_yaw < 1.3, "%s: a sensible look along the edge" % kind)
-		for i in n.people.size():
+		for i in mini(n.people.size(), stage.people_at.size()):   # a boat has no neighbours (R23)
 			var tip := stage.tip_water(i)
 			assert_true(tip.y > 1.8 and tip.y < 6.0, "%s: rod tip %d is above the deck (%.2f m)" % [kind, i, tip.y])
 			assert_true(tip.z > stage.edge_z, "%s: and out over the water" % kind)
@@ -146,7 +146,7 @@ func test_positions_name_a_known_stage_and_galata_is_a_bridge() -> void:
 	for spot: Dictionary in Db.database()["spot"]:
 		for p: Dictionary in spot["positions"]:
 			assert_true(not p.has("stage") or String(p["stage"]) in Stage3D.KINDS, "%s: a known stage" % p["id"])
-			if spot["id"] == "galata_bridge":
+			if spot["id"] == "galata_bridge" and p.get("stage", "") != "boat":
 				assert_eq(p.get("stage", ""), "bridge", "%s is on the bridge" % p["id"])
 
 

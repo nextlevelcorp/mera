@@ -75,6 +75,8 @@ func cast(ctx: Dictionary, power: float) -> Dictionary:
 	seed_counter += 1
 	var c := CatchModel.cast(k, ctx["rod"], ctx["lure"], ctx["angler"], ctx["position"], conditions, power)
 	c["cast_m"] = maxf(float(c["cast_m"]), float(k["WAIT_END_M"]) + 2.0)
+	if BoatDrift.is_boat(ctx["position"]):
+		c["cast_m"] = float(k["BOAT_DROP_M"])   # from a boat the lure goes straight down (R23)
 	# A natural bait that was badly put on may fly off the hook (R20).
 	c["bait_lost"] = false
 	if Presentation.is_float(ctx["lure"]) and _bait_out() and _rng.randf() < float(k["BAIT_FLYOFF"]) * (1.0 - rig_quality):

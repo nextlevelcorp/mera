@@ -80,7 +80,7 @@
 | R20 | Baiting minigame (D9) **(done 2026-11-19)**: a short hand-skill screen when the bait or rig changes or the bait is spent, per bait type | R12 | Good baiting holds longer and looks more natural | Pure scoring tests; played | `sim/`, `scenes/fishing/` |
 | R21 | Buttons and interface redesign (one theme for every screen) **(done 2026-11-19)** | R16 | A designed, consistent HUD | Screenshots at 1280x720 and 844x390 | `ui/theme/` |
 | R22 | Mastery progression (D8) **(done 2026-11-20: goals, badges, rank, next goal, weekly tasks, unlocks of rigs and live bait by rank; spot unlocks wait for the map, R17)**: species collection and records, goals and badges per spot, unlocks by level (spots, tackle, boat), a "next goal" line, fixed weekly tasks with no penalty for missing them | R9, R17 | A reason to come back without timers | Rule tests; played | `sim/progress.gd`, `data/goals.json` |
-| R23 | Boat fishing at higher levels (D7) | R22 | Rent a boat at some spots, fish deeper water | Simulation tests; played | `sim/`, `ui/sea/` |
+| R23 | Boat fishing at higher levels (D7) **(Partial 2026-11-23: drift fishing from a rented boat at one spot per country)** | R22 | Rent a boat at some spots, fish deeper water | Simulation tests; played | `sim/`, `ui/sea/` |
 
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
@@ -105,6 +105,7 @@
 - Check the schedule at week 4 (owner has about 3 hours a week).
 
 ## Done
+- Boat, drift (2026-11-23): 323 tests pass with no script errors; debug web build at 1280x720 and 844x390 (tr): with the debug position switch on "Boğaz'da tekne" the view is over the bow of a blue open boat, the key at the top right reads "Kıyıya dön", a drop showed "Yem derinliği 0.5 m / 25 m · sürüklenme 0.12 m/sn, 0 m açıkta" and the line straight off the bow; no console errors. A forced take from the boat was fought in 4 s from 2 m and landed into the bucket ("İstavrit · 14.4 cm"); the landing view uses the low edge in a boat. Not checked in the browser: renting with money and rank (unit test).
 - Debug spot list (2026-11-23): 317 tests pass with no script errors; debug web build at 1280x720 and 844x390 (tr): the fishing view's "Yer" key opened the list (Türkiye, İspanya Endülüs, İtalya, Portekiz, Yunanistan with three spots each) and picking Kavala limanı moved the session there; in the world, "Bir yerde balık tut…" opened the same list and Lagos liman ağzı opened its fishing view. No console errors.
 - Greece and Portugal (2026-11-22): 316 tests pass with no script errors; debug web build at 1280x720 (tr): Portekiz's chart shows Cascais koyu, Sesimbra limanı and Lagos liman ağzı on the coast, Yunanistan's shows Selanik sahili, Kavala limanı and Patras limanı; the Sesimbra card lists seven species, and "Burada balık tut" opened "Sesimbra limanı · Mendirek". No console errors. Not played: the Greek spots' fishing view.
 - Italy's spots (2026-11-22): 315 tests pass with no script errors; debug web build at 1280x720 (tr): "İtalya" opens a chart of the peninsula with Cenova, Trieste and Napoli on the coast; the Naples card reads "Türler: Levrek, Sargoz, Çipura, İzmarit, Kalamar · 3 durulacak yer" and "Burada balık tut" opened "Napoli liman iskeleleri · San Vincenzo iskelesi". No console errors.

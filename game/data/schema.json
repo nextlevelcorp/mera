@@ -315,7 +315,7 @@
       "entity": "position"
      },
      "min_items": 3,
-     "max_items": 4
+     "max_items": 5
     }
    }
   },
@@ -428,8 +428,15 @@
      "type": "enum",
      "values": [
       "bridge",
-      "quay"
+      "quay",
+      "boat"
      ],
+     "required": false
+    },
+    "rent_tl": {
+     "type": "int",
+     "min": 1,
+     "max": 100000,
      "required": false
     }
    }

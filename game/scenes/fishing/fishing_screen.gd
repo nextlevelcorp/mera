@@ -181,7 +181,8 @@ func setup(save_path: String = SaveFile.DEFAULT_PATH) -> void:
 			want = s
 	position_id = want["positions"][0]["id"]
 	for candidate: String in [String(request.get("position_id", "")), String(save["last_position"])]:
-		if _spot_has(want, candidate):
+		# A boat is rented each time, never where a visit starts (R23).
+		if _spot_has(want, candidate) and not BoatDrift.is_boat(_position_record(want, candidate)):
 			position_id = candidate
 			break
 	_rng.seed = 7
@@ -325,6 +326,8 @@ func set_rig(new_rig: String, new_position: String) -> void:
 	SaveGame.set_rig(save, rig, position_id)
 	_store()
 	apply_conditions()
+	if _ui:
+		_update_boat_button()
 
 
 func _base_context(species_id: String, overrides: Dictionary = {}) -> Dictionary:
@@ -350,6 +353,7 @@ func _set_phase(p: int) -> void:
 	_ui.rig_button.visible = p == Phase.READY
 	_ui.log_button.visible = p in [Phase.READY, Phase.RESULT]
 	_ui.bait_button.visible = p == Phase.READY
+	_update_boat_button()
 	_ui.distance_label.visible = p in [Phase.WAIT, Phase.FIGHT]
 	_ui.depth_label.visible = p == Phase.WAIT
 	_ui.result_panel.visible = p == Phase.RESULT
@@ -917,7 +921,7 @@ func _fight_effects(delta: float) -> void:
 		_swing_v = 0.0
 		_fx.splash(_lift_from, pos, 0.8)
 		_snd("splash", -3.0)
-		_landing_view.open(String(_fight_ctx["species"]["id"]), float(_fight_ctx["play"]["fish_length_cm"]), float(_hud["lift_height_m"]), String(_fight_ctx["position"].get("stage", "bridge")) == "quay")
+		_landing_view.open(String(_fight_ctx["species"]["id"]), float(_fight_ctx["play"]["fish_length_cm"]), float(_hud["lift_height_m"]), String(_fight_ctx["position"].get("stage", "bridge")) != "bridge")   # a quay or a boat's gunwale: a low edge
 		_ui.distance_label.visible = false   # the wall's ruler gives the height now
 	if _hud["in_landing"]:
 		_step_lift(delta)
@@ -1177,6 +1181,8 @@ func _process(delta: float) -> void:
 	_stats.add(delta)
 	_update_motion(delta)
 	_landing_view.advance(delta)
+	if _has_stage() and _water.stage is Boat3D:
+		(_water.stage as Boat3D).sway(_time, clampf(float(_env.get("chop", 0.3)), 0.0, 1.0))
 	match phase:
 		Phase.CHARGE:
 			_charge_s += delta
@@ -1255,7 +1261,7 @@ func _ready_yaw() -> float:
 func apply_stage() -> void:
 	if _water:
 		_water.set_stage(stage_kind())
-		if _water.stage:
+		if _water.stage and not _water.stage.people_at.is_empty():   # a boat has no neighbours
 			var places: Array[float] = _water.stage.people_at
 			_water.stage.arrange(NeighborAnglers.layout(_session_seed, places.size(), places[0], places[places.size() - 1] + 2.0))
 		if _water.stage and request.has("neighbours"):
@@ -1552,6 +1558,8 @@ func _update_texts() -> void:
 		Phase.WAIT:
 			_ui.distance_label.text = "%.1f m" % float(_wait_state.get("lure_distance_m", 0.0))
 			_ui.depth_label.text = tr("WAIT_HUD") % [float(_wait_state.get("depth_m", 0.0)), float(_wait_state.get("water_depth_m", 0.0)), float(_wait_state.get("retrieve_ms", 0.0))]
+			if _wait_state.get("boat", false):
+				_ui.depth_label.text += " · " + tr("BOAT_DRIFT_HUD") % [float(_wait_state.get("drift_ms", 0.0)), float(_wait_state.get("drift_m", 0.0))]
 		Phase.FIGHT:
 			_ui.tension_label.text = "%.2f / %.2f kg" % [_hud["tension_kg"], _hud["line_strength_kg"]]
 			var landing: bool = _hud["in_landing"]
@@ -1608,6 +1616,57 @@ func _species_by_id(id: String) -> Dictionary:
 ## The spot being fished: the one that has the current position.
 func spot() -> Dictionary:
 	return FightSetup.spot_of(_db, position_id)
+
+
+static func _position_record(spot_record: Dictionary, id: String) -> Dictionary:
+	for p: Dictionary in spot_record["positions"]:
+		if p["id"] == id:
+			return p
+	return {}
+
+
+## The spot's rented-boat position (R23), or an empty dictionary.
+func boat_position() -> Dictionary:
+	for p: Dictionary in spot()["positions"]:
+		if BoatDrift.is_boat(p):
+			return p
+	return {}
+
+
+func in_boat() -> bool:
+	return not _ctx.is_empty() and BoatDrift.is_boat(_ctx["position"])
+
+
+## Rents the spot's boat (it opens with the rank, D7, and costs its rent) or,
+## in the boat, goes back to the shore.
+func toggle_boat() -> void:
+	if in_boat():
+		for p: Dictionary in spot()["positions"]:
+			if not BoatDrift.is_boat(p):
+				set_rig(rig, p["id"])
+				break
+		_toast(tr("BOAT_BACK"), 2.0)
+		_update_boat_button()
+		return
+	var b := boat_position()
+	if b.is_empty():
+		return
+	if not Db.is_open(save, "boat", "boat"):
+		_toast(lock_text("boat", "boat"), 3.0)
+		return
+	if not Economy.pay(save, int(b.get("rent_tl", 0))):
+		_toast(tr("BOAT_NO_MONEY") % int(b.get("rent_tl", 0)), 3.0)
+		return
+	_store()
+	set_rig(rig, b["id"])
+	_toast(tr("BOAT_RENTED") % int(b.get("rent_tl", 0)), 3.0)
+	_update_boat_button()
+
+
+func _update_boat_button() -> void:
+	var b := boat_position()
+	_ui.boat_button.visible = phase == Phase.READY and not b.is_empty()
+	_ui.boat_button.text = tr("BOAT_BACK_KEY") if in_boat() else tr("BOAT_RENT_KEY") % int(b.get("rent_tl", 0))
 
 
 static func _spot_has(spot_record: Dictionary, id: String) -> bool:

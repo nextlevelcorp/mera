@@ -290,6 +290,53 @@
       "design_fill": true
      }
     }
+   },
+   {
+    "id": "galata_bridge_boat",
+    "name_key": "POS_BOAT_GALATA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "NE",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 25
+     },
+     {
+      "distance_m": 100,
+      "depth_m": 40
+     },
+     {
+      "distance_m": 250,
+      "depth_m": 60
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 8,
+    "structure_tags": [
+     "open water",
+     "drift"
+    ],
+    "exposure_by_wind": {
+     "N": 0.6,
+     "NE": 0.6,
+     "E": 0.6,
+     "SE": 0.6,
+     "S": 0.6,
+     "SW": 0.6,
+     "W": 0.6,
+     "NW": 0.6
+    },
+    "current": 6,
+    "landing_difficulty": 0.3,
+    "stage": "boat",
+    "rent_tl": 150,
+    "provenance": {
+     "default": {
+      "design_fill": true,
+      "note": "A rented boat off the spot (roadmap R23, owner decision D7 and 2026-11-23): depths, rent and everything else are design fills."
+     }
+    }
    }
   ],
   "provenance": {
@@ -1485,6 +1532,53 @@
       "design_fill": true
      }
     }
+   },
+   {
+    "id": "almeria_espigon_boat",
+    "name_key": "POS_BOAT_ALMERIA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 20
+     },
+     {
+      "distance_m": 100,
+      "depth_m": 35
+     },
+     {
+      "distance_m": 250,
+      "depth_m": 60
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 8,
+    "structure_tags": [
+     "open water",
+     "drift"
+    ],
+    "exposure_by_wind": {
+     "N": 0.6,
+     "NE": 0.6,
+     "E": 0.6,
+     "SE": 0.6,
+     "S": 0.6,
+     "SW": 0.6,
+     "W": 0.6,
+     "NW": 0.6
+    },
+    "current": 6,
+    "landing_difficulty": 0.3,
+    "stage": "boat",
+    "rent_tl": 150,
+    "provenance": {
+     "default": {
+      "design_fill": true,
+      "note": "A rented boat off the spot (roadmap R23, owner decision D7 and 2026-11-23): depths, rent and everything else are design fills."
+     }
+    }
    }
   ],
   "provenance": {
@@ -2061,6 +2155,53 @@
     "provenance": {
      "default": {
       "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "trieste_audace_boat",
+    "name_key": "POS_BOAT_TRIESTE",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "W",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 14
+     },
+     {
+      "distance_m": 100,
+      "depth_m": 18
+     },
+     {
+      "distance_m": 250,
+      "depth_m": 22
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 8,
+    "structure_tags": [
+     "open water",
+     "drift"
+    ],
+    "exposure_by_wind": {
+     "N": 0.6,
+     "NE": 0.6,
+     "E": 0.6,
+     "SE": 0.6,
+     "S": 0.6,
+     "SW": 0.6,
+     "W": 0.6,
+     "NW": 0.6
+    },
+    "current": 6,
+    "landing_difficulty": 0.3,
+    "stage": "boat",
+    "rent_tl": 150,
+    "provenance": {
+     "default": {
+      "design_fill": true,
+      "note": "A rented boat off the spot (roadmap R23, owner decision D7 and 2026-11-23): depths, rent and everything else are design fills."
      }
     }
    }
@@ -2779,6 +2920,53 @@
       "design_fill": true
      }
     }
+   },
+   {
+    "id": "kavala_port_boat",
+    "name_key": "POS_BOAT_KAVALA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 15
+     },
+     {
+      "distance_m": 100,
+      "depth_m": 25
+     },
+     {
+      "distance_m": 250,
+      "depth_m": 40
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 8,
+    "structure_tags": [
+     "open water",
+     "drift"
+    ],
+    "exposure_by_wind": {
+     "N": 0.6,
+     "NE": 0.6,
+     "E": 0.6,
+     "SE": 0.6,
+     "S": 0.6,
+     "SW": 0.6,
+     "W": 0.6,
+     "NW": 0.6
+    },
+    "current": 6,
+    "landing_difficulty": 0.3,
+    "stage": "boat",
+    "rent_tl": 150,
+    "provenance": {
+     "default": {
+      "design_fill": true,
+      "note": "A rented boat off the spot (roadmap R23, owner decision D7 and 2026-11-23): depths, rent and everything else are design fills."
+     }
+    }
    }
   ],
   "provenance": {
@@ -3321,6 +3509,53 @@
     "provenance": {
      "default": {
       "design_fill": true
+     }
+    }
+   },
+   {
+    "id": "sesimbra_port_boat",
+    "name_key": "POS_BOAT_SESIMBRA",
+    "map_x": 0.5,
+    "map_y": 0.5,
+    "facing": "S",
+    "depth_profile": [
+     {
+      "distance_m": 0,
+      "depth_m": 20
+     },
+     {
+      "distance_m": 100,
+      "depth_m": 35
+     },
+     {
+      "distance_m": 250,
+      "depth_m": 55
+     }
+    ],
+    "bottom_type": "mixed",
+    "structure": 8,
+    "structure_tags": [
+     "open water",
+     "drift"
+    ],
+    "exposure_by_wind": {
+     "N": 0.6,
+     "NE": 0.6,
+     "E": 0.6,
+     "SE": 0.6,
+     "S": 0.6,
+     "SW": 0.6,
+     "W": 0.6,
+     "NW": 0.6
+    },
+    "current": 6,
+    "landing_difficulty": 0.3,
+    "stage": "boat",
+    "rent_tl": 150,
+    "provenance": {
+     "default": {
+      "design_fill": true,
+      "note": "A rented boat off the spot (roadmap R23, owner decision D7 and 2026-11-23): depths, rent and everything else are design fills."
      }
     }
    }
