@@ -93,15 +93,14 @@ func _ready() -> void:
 		var positions: Array = _screen.spot()["positions"]
 		var i: int = _screen._position_index(_screen.position_id)
 		_screen.set_rig(_screen.rig, positions[(i + 1) % positions.size()]["id"]))
+	# Fifteen spots: a list by country instead of stepping through them (2026-11-23).
 	_add(grid, "spot", func() -> void:
-		var spots: Array = _screen._db["spot"]
-		var here := 0
-		for i in spots.size():
-			if spots[i]["id"] == _screen.spot()["id"]:
-				here = i
-		var next: Dictionary = spots[(here + 1) % spots.size()]
-		_screen.set_rig(_screen.rig, next["positions"][0]["id"])
-		_load_species())
+		var picker := spot_picker(func(id: String) -> void:
+			_screen.set_rig(_screen.rig, MapModel.spot(Db.database(), id)["positions"][0]["id"])
+			_load_species()
+			_refresh())
+		add_child(picker)
+		picker.popup_centered())
 	_add(grid, "rig", func() -> void:
 		var t := FightSetup.TACKLES
 		_screen.set_rig(t[(t.find(_screen.rig) + 1) % t.size()], _screen.position_id))
@@ -154,6 +153,30 @@ func _process(delta: float) -> void:
 	if _panel.visible and _info_clock <= 0.0:
 		_info_clock = 0.5
 		_refresh()
+
+
+## A list of every spot, under its country, for the debug menus; picking one
+## calls on_pick with the spot's id.
+static func spot_picker(on_pick: Callable) -> PopupMenu:
+	var menu := PopupMenu.new()
+	menu.add_theme_font_size_override("font_size", 22)
+	var ids: Array[String] = []
+	for c: Dictionary in MapModel.countries(Db.database()):
+		if (c["spots"] as Array).is_empty():
+			continue
+		menu.add_separator(TranslationServer.translate(c["name_key"]))
+		ids.append("")
+		for s: Dictionary in c["spots"]:
+			menu.add_item(TranslationServer.translate(s["name_key"]))
+			ids.append(String(s["id"]))
+	menu.index_pressed.connect(func(i: int) -> void:
+		if ids[i] != "":
+			on_pick.call(ids[i])
+		menu.queue_free())
+	menu.popup_hide.connect(func() -> void:
+		if is_instance_valid(menu):
+			menu.queue_free.call_deferred())
+	return menu
 
 
 func _add(grid: GridContainer, id: String, on_press: Callable) -> void:

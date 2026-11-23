@@ -4,6 +4,7 @@ extends Control
 ## a release export never has it. Sets the time of day and jumps to a
 ## fishing marker.
 
+const DebugMenu := preload("res://debug/debug_menu.gd")   # its spot list
 const SLOTS: Array[String] = ["dawn", "day", "evening", "night"]
 
 var _world: WorldScreen
@@ -61,6 +62,18 @@ func _ready() -> void:
 		_world.walk.teleport(m["pos"] + Vector2(0.0, 1.2))
 		_panel.visible = false)
 	box.add_child(jump)
+	# Any spot on the map, straight to its fishing view (2026-11-23).
+	var fish_at := Button.new()
+	fish_at.text = tr("DBG_FISH_AT")
+	fish_at.add_theme_font_size_override("font_size", 20)
+	fish_at.custom_minimum_size = Vector2(360, 64)
+	fish_at.pressed.connect(func() -> void:
+		var picker := DebugMenu.spot_picker(func(id: String) -> void:
+			_panel.visible = false
+			_world.fish_requested.emit(Game.fishing_request(id)))
+		add_child(picker)
+		picker.popup_centered())
+	box.add_child(fish_at)
 	# Reach the shops and the people quickly, to check their panels.
 	var to_shop := Button.new()
 	to_shop.text = tr("DBG_NEXT_SHOP")
