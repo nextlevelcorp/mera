@@ -190,6 +190,17 @@ func set_stage(kind: String) -> void:
 		stage.set_light(_light)
 
 
+## The place's own skyline (Horizon) for a position facing a compass
+## direction; an empty profile keeps the generic ridge.
+func set_horizon(prof: Dictionary, facing: String) -> void:
+	var on := not prof.is_empty()
+	var tex: ImageTexture = ImageTexture.create_from_image(Horizon.image(prof)) if on else null
+	for m: ShaderMaterial in [_sky, _sea]:
+		m.set_shader_parameter("horizon_on", 1.0 if on else 0.0)
+		m.set_shader_parameter("horizon_bearing", Horizon.bearing(facing))
+		m.set_shader_parameter("horizon_tex", tex)
+
+
 ## Rings and boils on the surface, from SplashFx.rings (world: x right, z out).
 ## At most MAX_RINGS, the strongest first when there are more.
 func set_rings(rings: Array[Dictionary], extra: Array[Vector4] = []) -> void:

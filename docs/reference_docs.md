@@ -71,6 +71,7 @@ Add every data, art, audio and tool source here with its licence before it is us
 | Value | Source | Licence or terms |
 | --- | --- | --- |
 | Land polygons for the map's charts, `game/data/map/land.json` (clipped to 10.5° W to 30.5° E, 34.5° to 46.5° N, simplified to 0.004°) | Natural Earth 1:10m land (`ne_10m_land`), from https://github.com/nvkelso/natural-earth-vector, built by `tools/map/build_land.py` | Public domain (owner approved its use on 2026-11-22): https://www.naturalearthdata.com/about/terms-of-use/ |
+| Each position's skyline, `game/data/map/horizons.json` (land's top by bearing, from the water's edge along the facing; a boat 400 m further out) | Coast: Natural Earth 1:10m land (as above, unsimplified). Peaks: Wikidata items that are mountains or hills with an elevation, within 45 km of each spot, in `tools/map/peaks.json` (`tools/map/fetch_peaks.py`); built by `tools/map/build_horizons.py`. Design fill: the ground between peaks (rising to `base_m` inland), each peak's cone (radius 6 times its height), the town's height on the shore band, and the 1.5 times vertical lift on screen | Natural Earth public domain; Wikidata CC0: https://www.wikidata.org/wiki/Wikidata:Licensing |
 
 ## European squid in `game/data/` (2026-11-21)
 | Value | Source | Licence or terms |

@@ -1261,6 +1261,8 @@ func _ready_yaw() -> float:
 func apply_stage() -> void:
 	if _water:
 		_water.set_stage(stage_kind())
+		if not _ctx.is_empty():
+			_water.set_horizon(Horizon.profile(String(_ctx["position"]["id"])), String(_ctx["position"]["facing"]))
 		if _water.stage and not _water.stage.people_at.is_empty():   # a boat has no neighbours
 			var places: Array[float] = _water.stage.people_at
 			_water.stage.arrange(NeighborAnglers.layout(_session_seed, places.size(), places[0], places[places.size() - 1] + 2.0))
