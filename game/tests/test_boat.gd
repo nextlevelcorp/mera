@@ -68,3 +68,16 @@ func test_a_boat_is_rented_with_the_rank_and_money_and_never_where_a_visit_start
 	scr.toggle_boat()
 	assert_true(not scr.in_boat(), "back to the shore")
 	scr.free()
+
+
+func test_the_debug_menu_boards_the_boat_for_free() -> void:
+	var scr := FishingScreen.new()
+	scr.request = Game.fishing_request("galata_bridge", "", "lrf", _cond(3.0))
+	scr.setup("")
+	var money := Economy.money(scr.save)
+	scr.debug_boat()
+	assert_true(scr.in_boat(), "aboard without rank")
+	assert_eq(Economy.money(scr.save), money, "and without rent")
+	scr.debug_boat()
+	assert_true(not scr.in_boat(), "and back")
+	scr.free()

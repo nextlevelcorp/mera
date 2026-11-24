@@ -80,7 +80,7 @@
 | R20 | Baiting minigame (D9) **(done 2026-11-19)**: a short hand-skill screen when the bait or rig changes or the bait is spent, per bait type | R12 | Good baiting holds longer and looks more natural | Pure scoring tests; played | `sim/`, `scenes/fishing/` |
 | R21 | Buttons and interface redesign (one theme for every screen) **(done 2026-11-19)** | R16 | A designed, consistent HUD | Screenshots at 1280x720 and 844x390 | `ui/theme/` |
 | R22 | Mastery progression (D8) **(done 2026-11-20: goals, badges, rank, next goal, weekly tasks, unlocks of rigs and live bait by rank; spot unlocks wait for the map, R17)**: species collection and records, goals and badges per spot, unlocks by level (spots, tackle, boat), a "next goal" line, fixed weekly tasks with no penalty for missing them | R9, R17 | A reason to come back without timers | Rule tests; played | `sim/progress.gd`, `data/goals.json` |
-| R23 | Boat fishing at higher levels (D7) **(Partial 2026-11-23: drift fishing from a rented boat at one spot per country)** | R22 | Rent a boat at some spots, fish deeper water | Simulation tests; played | `sim/`, `ui/sea/` |
+| R23 | Boat fishing at higher levels (D7) **(Partial 2026-11-23: drift fishing from a rented boat at one spot per country; the debug menu boards it for free)** | R22 | Rent a boat at some spots, fish deeper water | Simulation tests; played | `sim/`, `ui/sea/` |
 
 ## Owner decisions (2026-11-11)
 - Scope: one-spot vertical slice first (not 3-5 spots), with a waitlist demand test in parallel.
