@@ -1637,6 +1637,14 @@ func in_boat() -> bool:
 	return not _ctx.is_empty() and BoatDrift.is_boat(_ctx["position"])
 
 
+## Debug menu: into the spot's boat or back, with no rank or rent.
+func debug_boat() -> void:
+	if in_boat():
+		toggle_boat()
+	elif not boat_position().is_empty():
+		set_rig(rig, boat_position()["id"])
+
+
 ## Rents the spot's boat (it opens with the rank, D7, and costs its rent) or,
 ## in the boat, goes back to the shore.
 func toggle_boat() -> void:

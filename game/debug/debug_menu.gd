@@ -115,6 +115,10 @@ func _ready() -> void:
 	_add(grid, "shadows", func() -> void: _screen._water.set_shadows(not _screen._water.shadows))
 	_add(grid, "glow", func() -> void: _screen._water.set_glow(not _screen._water.glow))
 	_add(grid, "lamps", func() -> void: _screen._water.set_lamp_lights(not _screen._water.lamp_lights))
+	# The boat without rank or rent (owner, 2026-11-24: "I cannot test the boat").
+	_add(grid, "boat", func() -> void:
+		_screen.debug_boat()
+		_load_species())
 	_add(grid, "motion", func() -> void:
 		if _screen._motion:
 			_screen._motion.invert = not _screen._motion.invert
@@ -202,6 +206,7 @@ func _refresh() -> void:
 	var clarity: float = CLARITIES[_clarity_i]
 	_buttons["clarity"].text = "%s: %s" % [tr("DBG_CLARITY"), tr("DBG_AUTO") if clarity < 0.0 else str(int(clarity))]
 	_buttons["spot"].text = "%s: %s" % [tr("DBG_SPOT"), tr(_screen.spot()["name_key"])]
+	_buttons["boat"].text = tr("DBG_BOAT_OFF") if _screen.in_boat() else (tr("DBG_BOAT_ON") if not _screen.boat_position().is_empty() else tr("DBG_BOAT_NONE"))
 	_buttons["position"].text = "%s: %s" % [tr("FISH_POSITION"), tr(_screen._ctx["position"]["name_key"])]
 	_buttons["rig"].text = "%s: %s" % [tr("FIGHT_TACKLE"), tr(_screen._ctx["rod"]["name_key"])]
 	_buttons["species"].text = "%s: %s" % [tr("FIGHT_SPECIES"), tr(_screen._species_by_id(_species_ids[_species_i])["name_key"])]
