@@ -429,7 +429,8 @@
      "values": [
       "bridge",
       "quay",
-      "boat"
+      "boat",
+      "beach"
      ],
      "required": false
     },

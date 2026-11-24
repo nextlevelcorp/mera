@@ -73,8 +73,9 @@ vec3 far_shore(vec3 d) {
 	return vec3(land, lights, haze);
 }
 
-// Linear-light HDR colour of the sky in direction d (normalised).
-vec3 sky_radiance(vec3 d) {
+// Linear-light HDR colour of the sky in direction d (normalised); land_k
+// scales the far shore (0: the open sky behind it).
+vec3 sky_radiance_k(vec3 d, float land_k) {
 	float up = clamp(d.y, 0.0, 1.0);
 	vec3 sun = normalize(sun_dir);
 	float s = max(dot(d, sun), 0.0);
@@ -94,8 +95,13 @@ vec3 sky_radiance(vec3 d) {
 	// Land: a cool silhouette, hazier towards its foot and the further it is.
 	vec3 land_col = mix(mix(sky_top, sky_horizon, 0.55) * 0.42, sky_horizon * 0.7, smoothstep(0.012, 0.0, d.y) * 0.6);
 	land_col = mix(land_col, sky_horizon * 0.85, smoothstep(0.05, 0.6, shore.z) * 0.6);
-	c = mix(c, land_col, shore.x * 0.92);
+	c = mix(c, land_col, shore.x * 0.92 * land_k);
 	c += vec3(1.0, 0.62, 0.32) * city_lights * 0.10 * exp(-max(d.y, 0.0) * 40.0);
 	c += vec3(1.0, 0.82, 0.5) * shore.y * city_lights * 3.0;
 	return c;
+}
+
+
+vec3 sky_radiance(vec3 d) {
+	return sky_radiance_k(d, 1.0);
 }

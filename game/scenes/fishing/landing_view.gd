@@ -8,7 +8,9 @@ extends Control
 ## on the wall gives the height. At the top it is swung over the rail; if the
 ## line parts or the hook comes out it falls back. Drawn in code; it only
 ## reads state the fishing screen sets each frame (no rules here) and lets
-## every touch through to the controls above it.
+## every touch through to the controls above it. On a beach there is no wall:
+## the view looks down the sand to the wash, and the fish is drawn up out of
+## it, sliding head first, the ruler giving the metres of sand.
 
 const FALL_S := 0.9   ## a lost fish falls back into the water
 const OVER_S := 0.7   ## a landed fish is swung over the rail
@@ -32,7 +34,8 @@ var kicking := false
 var swing := 0.0           ## the pendulum angle of the fish on the line (rad)
 var length_cm := 20.0
 var species_id := "istavrit"
-var quay := false
+var quay := false          ## a low edge: a quay, or a boat's gunwale
+var beach := false
 var light := 1.0
 var tension_share := 0.0   ## line tension / line strength
 var _t := 0.0
@@ -47,11 +50,13 @@ func _init() -> void:
 	visible = false
 
 
-func open(species: String, fish_cm: float, lift_height_m: float, on_quay: bool) -> void:
+## edge: the position's stage ("bridge", "quay", "boat" or "beach").
+func open(species: String, fish_cm: float, lift_height_m: float, edge: String) -> void:
 	species_id = species
 	length_cm = fish_cm
 	height_m = lift_height_m
-	quay = on_quay
+	quay = edge != "bridge"
+	beach = edge == "beach"
 	_end = ""
 	_end_t = 0.0
 	visible = true
@@ -110,7 +115,7 @@ func mouth() -> Vector2:
 		var o := clampf(_end_t / OVER_S, 0.0, 1.0)
 		y = lerpf(rail_y() + size.y * 0.12, -size.y * 0.25, o * o)
 	var rope := tip().distance_to(Vector2(tip().x, y))
-	return Vector2(tip().x + sin(swing) * rope * 0.35, y)
+	return Vector2(tip().x + sin(swing) * rope * (0.08 if beach else 0.35), y)
 
 
 ## Pixels per metre of fish: bigger as it comes up towards the eye.
@@ -123,15 +128,42 @@ func _draw() -> void:
 	var dusk := clampf(light, 0.15, 1.0)
 	# The deck or the quay underfoot, beyond the rail at the top.
 	draw_rect(Rect2(Vector2.ZERO, s), Color(0.42, 0.42, 0.4).darkened(0.6 * (1.0 - dusk)))
-	_draw_water(s, dusk)
-	_draw_wall(s, dusk)
+	if beach:
+		_draw_sand(s, dusk)
+	else:
+		_draw_water(s, dusk)
+		_draw_wall(s, dusk)
 	var m := mouth()
 	var line_c := Color(0.95, 0.97, 1.0, 0.85) if tension_share < 0.85 else Color(1.0, 0.45, 0.35, 0.95)
 	if _end != "fall" or _end_t < 0.05:
 		draw_line(tip(), m, line_c, 2.0, true)
 	_draw_fish(m, dusk)
-	_draw_rail(s, dusk)
+	if not beach:
+		_draw_rail(s, dusk)
 	_draw_ruler(s, dusk)
+
+
+## A beach seen from the angler's feet: dry sand, the wet band, and the wash
+## running up it and sliding back over the sea at the bottom.
+func _draw_sand(s: Vector2, dusk: float) -> void:
+	var dry := Color(0.82, 0.74, 0.6).darkened(0.65 * (1.0 - dusk))
+	var wet := Color(0.56, 0.5, 0.42).darkened(0.65 * (1.0 - dusk))
+	var sea := Color(0.12, 0.3, 0.36).darkened(0.6 * (1.0 - dusk))
+	draw_rect(Rect2(Vector2.ZERO, s), dry)
+	var wet_top := s.y * 0.6
+	draw_rect(Rect2(0, wet_top, s.x, s.y - wet_top), wet)
+	# Grains and ripples in the sand, fixed so they do not crawl.
+	for i in 60:
+		var p := Vector2(fposmod(float(i) * 197.3, s.x), fposmod(float(i) * 83.9, s.y * 0.95))
+		draw_line(p, p + Vector2(26.0, 2.0), dry.darkened(0.12) if p.y < wet_top else wet.darkened(0.12), 2.0, true)
+	var k := 0.5 - 0.5 * cos(TAU * _t / 6.0)
+	var edge := lerpf(water_y(), s.y * 0.68, k)
+	draw_rect(Rect2(0, edge, s.x, s.y - edge), sea)
+	var pts := PackedVector2Array()
+	for i in 33:
+		var x := s.x * float(i) / 32.0
+		pts.append(Vector2(x, edge + 6.0 * sin(x * 0.02 + _t * 1.3)))
+	draw_polyline(pts, Color(0.96, 0.98, 1.0, 0.85), 8.0, true)
 
 
 func _draw_water(s: Vector2, dusk: float) -> void:

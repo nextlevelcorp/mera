@@ -168,7 +168,7 @@ func test_the_cc0_texture_sets_are_complete_and_credited() -> void:
 				assert_eq(tex.get_width(), 512, "%s/%s is 512 px (phone memory)" % [name_id, map])
 		var source := FileAccess.get_file_as_string("res://assets/3d/%s/source.txt" % name_id)
 		assert_true(source.contains("CC0") and source.contains("polyhaven.com/a/%s" % name_id), "%s names its source and licence" % name_id)
-	assert_eq(sets, 6, "the six sets of roadmap R7")
+	assert_eq(sets, 7, "the six sets of roadmap R7 and the beach sand")
 
 
 func test_the_stages_use_the_textures_and_fall_back_without_them() -> void:

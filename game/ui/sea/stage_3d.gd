@@ -12,7 +12,7 @@ extends Node3D
 ## Local frame: +X along the edge away from the angler, +Y up, +Z towards the
 ## water; the origin is on the deck at the edge.
 
-const KINDS: Array[String] = ["bridge", "quay", "boat"]
+const KINDS: Array[String] = ["bridge", "quay", "boat", "beach"]
 ## CC0 PBR texture sets (diff, nor, rough as 512 px WebP) from Poly Haven,
 ## one folder each, with their source in source.txt and a row in
 ## docs/reference_docs.md. Fetched by scripts/fetch_polyhaven_textures.py.
@@ -57,6 +57,8 @@ static func make(stage_kind: String) -> Stage3D:
 			return Quay3D.new()
 		"boat":
 			return Boat3D.new()
+		"beach":
+			return Beach3D.new()
 	return null
 
 

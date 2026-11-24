@@ -22,7 +22,7 @@ Dependencies point one way: views -> core -> sim and data. `sim/` never imports 
 | `game/sim/` | `progress`, `economy`, `world_area`, `world_walk`, `fishing_session`, `inventory`, `catch_model`, `wait_sim`, `fight_sim`, `fight_controller`, `fight_setup`, `why_report`, `shoal_field`, `session_conditions`, `motion_gesture`, `save_game`, `data_store`, `data_validator` | Implemented |
 | `game/data/` | `schema.json`, `constants.json`, `species.json`, `spots.json`, `tackle/`, `angler.json`, `demo/` | Implemented |
 | `game/scenes/fishing/` | `fishing_screen.gd` (`FishingScreen`: phases, simulations, view physics), `fishing_hud.gd` (`FishingHud`: controls, panels, raw thumb state), `fishing_overlay.gd` (`FishingOverlay`: the 2D layer) | Implemented; split 2026-11-17 (R1) |
-| `game/ui/water_view.gd`, `game/ui/sea/` | The 3D fishing scene: sea and sky shaders, `Stage3D` with `Bridge3D` and `Quay3D`, `Rig3D`, `SeaMaps` | Implemented |
+| `game/ui/water_view.gd`, `game/ui/sea/` | The 3D fishing scene: sea and sky shaders, `Stage3D` with `Bridge3D`, `Quay3D`, `Boat3D` and `Beach3D`, `Rig3D`, `SeaMaps` | Implemented |
 | `game/ui/fx/` | Screen-space motion and effects: `rod_spring`, `verlet_rope`, `angler_rig`, `cast_motion`, `fish_body`, `splash_fx`, `gull_flock`, `neighbor_anglers` | Implemented |
 | `game/ui/audio/` | `sound_director` (recorded CC0 beds and one-shots), `cue_synth` | Implemented |
 | `game/ui/device_motion.gd`, `device_guard.gd`, `frame_stats.gd` | Phone motion bridge, portrait guard, fps statistics | Implemented |
@@ -74,7 +74,7 @@ FishingResult  = { catches: [{species_id, length_cm, weight_kg, kept}], lost: [{
 | Thing | How | State |
 | --- | --- | --- |
 | Sea, sky, far shore, sun, clouds | `sea.gdshader` (Gerstner mesh), `sky.gdshader`, shared `sea_sky.gdshaderinc`, ACES and glow | Implemented |
-| Standing place | `Stage3D` subclasses chosen by the position's `stage`: `Bridge3D` (deck, rail, lamps and lights, shadows) and `Quay3D` (stone coping, bollards, low lamps); both with neighbours and rods | Implemented for two stage types (R5); `rocks` and `beach` Designed |
+| Standing place | `Stage3D` subclasses chosen by the position's `stage`: `Bridge3D` (deck, rail, lamps and lights, shadows), `Quay3D` (stone coping, bollards, low lamps), `Boat3D` (R23) and `Beach3D` (sand sloping into the sea, a wet band and the wash running up it; no lamps); all but the boat with neighbours and rods. On a beach the landing view shows the sand and the wash, and the fish is drawn up the slope (`LIFT_HEIGHT_BEACH_M`, `BEACH_WEIGHT_SHARE`) | Implemented for four stage types (beach 2026-11-24: Maro and Patras); `rocks` Designed |
 | Player's rod, reel, hands, forearms | `Rig3D`, lifted each frame from the screen-space `RodSpring` and `AnglerRig` | Implemented; hands are simple shapes (R7) |
 | Rings, boils, the lure's ripple | `sea.gdshader` (12 rings from `SplashFx` through `WaterView.set_rings`) | Implemented (R6) |
 | Fish under the water | A shadow in `sea.gdshader` (8 blobs along the spine, `WaterView.set_fish_shadow`) | Implemented (R6) |

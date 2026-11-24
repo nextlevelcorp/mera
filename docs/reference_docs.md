@@ -125,6 +125,7 @@ Owner approved CC0 assets (2026-11-15) and added the hosts `polyhaven.com`, `dl.
 | `rough_concrete` | https://polyhaven.com/a/rough_concrete | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay coping |
 | `rusty_metal_02` | https://polyhaven.com/a/rusty_metal_02 | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay bollards |
 | `stone_wall_04` | https://polyhaven.com/a/stone_wall_04 | per asset page (not read) | CC0 1.0 per Poly Haven policy | Quay wall below the waterline |
+| `coast_sand_01` | https://polyhaven.com/a/coast_sand_01 | per asset page (not read) | CC0 1.0 per Poly Haven policy | Beach sand (added 2026-11-24) |
 
 Quaternius (https://quaternius.com, CC0 per its pack pages): the site is reachable from the build environment but every pack download is on `drive.google.com` or `quaternius.itch.io`, which are not on the network list, so nothing was downloaded (checked 2026-11-17 over all 84 pack pages).
 

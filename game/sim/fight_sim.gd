@@ -63,7 +63,8 @@ var jump_left_s := 0.0
 var thrown_on_jump := false
 var lift := 0.0            ## landing: 0 at the water, 1 over the rail
 var kicking := false       ## landing: the fish is kicking on the line
-var lift_height_m := 1.0   ## landing: from the water to the rail or the quay edge
+var lift_height_m := 1.0   ## landing: from the water to the rail or the quay edge (up the sand on a beach)
+var weight_share := 1.0    ## landing: the share of the fish's weight on the line (less when dragged up a beach)
 var _kick_left_s := 0.0
 var events: Array[Dictionary] = []
 
@@ -88,6 +89,7 @@ func _init(ctx: Dictionary, k: Dictionary, hook_hold_value: float, seed_value: i
 	cut_rate = est["cut_rate_per_s"]
 	landing_q = CatchModel.landing(k, ctx["position"], env, weight_kg, b_eff)["landing_q"]
 	lift_height_m = lift_height(k, ctx["position"])
+	weight_share = float(k["BEACH_WEIGHT_SHARE"]) if String(ctx["position"].get("stage", "")) == "beach" else 1.0
 	hook_hold = hook_hold_value
 	run_speed = float(k["RUN_SPEED_BASE"]) + float(k["RUN_SPEED_RANGE"]) * CatchModel.n(float(sp["speed"]))
 	angler_pull_max = float(k["ANGLER_PULL_BASE"]) + float(k["ANGLER_PULL_RANGE"]) * CatchModel.n(float(ctx["rod"]["power"]))
@@ -255,7 +257,7 @@ func _step_landing(reel: float) -> void:
 	if kicking:
 		var into_kick := float(_k["LAND_KICK_S"]) - _kick_left_s
 		surge = float(_k["LAND_KICK_SURGE"]) * (1.0 if reeling and into_kick > float(_k["LAND_KICK_GRACE_S"]) else 0.4)
-	tension = weight_kg * (1.0 + surge)
+	tension = weight_kg * weight_share * (1.0 + surge)
 	if tension > b_eff:
 		_finish(OUTCOME_LINE_BREAK)
 		return
@@ -271,9 +273,12 @@ func _step_landing(reel: float) -> void:
 		_finish(OUTCOME_LOST_AT_EDGE if _rng.randf() < risk * float(_k["LAND_BASE_SHARE"]) else OUTCOME_LANDED)
 
 
-## How far the fish is lifted at the end: up a bridge's side or a quay's edge.
+## How far the fish is lifted at the end: up a bridge's side or a quay's
+## edge; on a beach, how far it is drawn up the sand out of the wash.
 static func lift_height(k: Dictionary, position: Dictionary) -> float:
 	match String(position.get("stage", "bridge")):
+		"beach":
+			return float(k["LIFT_HEIGHT_BEACH_M"])
 		"quay":
 			return float(k["LIFT_HEIGHT_QUAY_M"])
 		"boat":
