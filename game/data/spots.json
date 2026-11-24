@@ -1288,7 +1288,7 @@
     },
     "current": 5,
     "landing_difficulty": 0.4,
-    "stage": "quay",
+    "stage": "beach",
     "provenance": {
      "default": {
       "design_fill": true
@@ -3199,7 +3199,7 @@
     },
     "current": 5,
     "landing_difficulty": 0.4,
-    "stage": "quay",
+    "stage": "beach",
     "provenance": {
      "default": {
       "design_fill": true

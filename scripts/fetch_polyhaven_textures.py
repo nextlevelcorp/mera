@@ -30,6 +30,7 @@ ASSETS = {
     "rough_concrete": "quay coping",
     "rusty_metal_02": "quay bollards",
     "stone_wall_04": "quay wall below the waterline",
+    "coast_sand_01": "beach sand",
 }
 MAPS = {"diff": "diff", "nor_gl": "nor", "rough": "rough"}
 

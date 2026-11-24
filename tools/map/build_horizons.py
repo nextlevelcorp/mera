@@ -35,7 +35,9 @@ STEP_M = 100.0               # ground samples along a ray over land
 START_SKIP_M = 400.0         # a spot on the shore line: skip the land it stands on
 WATER_IN_M = 30.0            # metres out from the coast line, where a shore position stands
 BOAT_OUT_M = 400.0           # a boat position is this far out along its facing
-MAX_ELEV = 0.12              # rad; nearer land is clamped (it fills the side of the view)
+MAX_ELEV = 0.12              # rad; the texture's range (mountains)
+NEAR_M = 2000.0              # land nearer than this is the shore the angler stands on or beside:
+NEAR_ELEV = 0.035            # rad; its top is kept low, a waterfront and not a cliff (design fill)
 PEAK_SLOPE = 6.0             # a peak's cone reaches the ground this many times its height away
 
 # Design fill per spot: base_m is the ground's height a few km in from the
@@ -143,6 +145,8 @@ def profile(ox, oy, edges, terrain, peaks):
                 h, city = ground(ox + dx * s, oy + dy * s, inland, terrain, peaks)
                 drop = s * s / (2.0 * R_EARTH) * (1.0 - REFRACTION)
                 e = math.atan2(h - drop - EYE_M, s)
+                if s < NEAR_M:
+                    e = min(e, NEAR_ELEV)
                 if e > best:
                     best, best_d, best_city = e, s, city
                 s += STEP_M

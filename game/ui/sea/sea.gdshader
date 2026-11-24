@@ -113,7 +113,9 @@ void fragment() {
 	// Grazing reflections would pick the thin far shore up as dark dashes
 	// (aliasing on a phone screen); lift them above it. The shore lights get
 	// their own streaks below.
-	vec3 refl = sky_radiance(normalize(vec3(r.x, max(r.y, 0.045), r.z)));
+	// The shore is left out of the reflection: a place's skyline can stand
+	// above the clamp, and its hard edges in every wave read as stripes.
+	vec3 refl = sky_radiance_k(normalize(vec3(r.x, max(r.y, 0.045), r.z)), 0.0);
 
 	// The water body: darker looking down into it, clearer water a little brighter.
 	vec3 body = mix(water_shallow, water_deep, smoothstep(0.15, 0.6, ndv)) * (0.35 + 0.65 * light) * (0.75 + 0.5 * visibility);
@@ -160,7 +162,7 @@ void fragment() {
 	}
 
 	// Air between the angler and far water.
-	vec3 haze = sky_radiance(normalize(vec3(-v.x, 0.004, -v.z)));
+	vec3 haze = sky_radiance_k(normalize(vec3(-v.x, 0.004, -v.z)), 0.0);
 	col = mix(col, haze, 1.0 - exp(-dist * 0.0011));
 	ALBEDO = col;
 }
