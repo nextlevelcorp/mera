@@ -50,7 +50,7 @@ func _open_map() -> void:
 	map.spot_chosen.connect(func(spot_id: String) -> void:
 		map.queue_free()
 		if FileAccess.file_exists("res://data/areas/%s.json" % spot_id):
-			_open_world()
+			_open_world(spot_id)
 		else:
 			_open_fishing(Game.fishing_request(spot_id)))
 	_show_title(false)
@@ -59,8 +59,9 @@ func _open_map() -> void:
 
 ## The top-down world opens over the title. Its fishing markers open the
 ## fishing view over it (architecture.md 3); Back returns to the title.
-func _open_world() -> void:
+func _open_world(area_id: String = "galata_bridge") -> void:
 	var world := WorldScreen.new()
+	world.area_id = area_id
 	world.fish_requested.connect(func(request: Dictionary) -> void: _open_fishing(request, world))
 	world.closed.connect(func() -> void:
 		world.queue_free()

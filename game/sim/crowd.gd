@@ -10,7 +10,6 @@ extends RefCounted
 const LANE_MARGIN_M := 0.5     ## passers-by keep this far from rails and lamps
 const TRAM_TRACKS_X := [28.8, 31.2]
 const TRAM_LENGTH_M := 32.0     ## two coupled cars
-const CAR_LANES_X := [[20.5, 1.0], [23.6, 1.0], [36.4, -1.0], [39.5, -1.0]]  ## x, direction (+1 towards Eminönü)
 
 
 ## The passers-by for a slot: walkway walkers going up and down the bridge,
@@ -59,10 +58,13 @@ static func walker_at(w: Dictionary, t: float) -> Dictionary:
 	return {"pos": from.lerp(to, share), "facing": dir if forward else -dir, "phase": s * 4.5}
 
 
-## The trams: one each way on the middle tracks, {x, y (front centre), dir}.
+## The trams: one each way on the middle tracks, {x, y (front centre), dir};
+## none where the area has no tram line.
 ## A tram crosses the area every TRAM_PERIOD_S, from beyond one end to beyond
 ## the other; y can be outside the area while it is out of sight.
 static func trams(area: WorldArea, t: float, constants: Dictionary) -> Array[Dictionary]:
+	if not area.trams:
+		return []
 	var period := float(constants["TRAM_PERIOD_S"])
 	var speed := float(constants["TRAM_M_PER_S"])
 	var span := area.size_m.y + 2.0 * TRAM_LENGTH_M
@@ -76,28 +78,37 @@ static func trams(area: WorldArea, t: float, constants: Dictionary) -> Array[Dic
 	return out
 
 
-## The cars: a few per lane, evenly spaced, moving through the area and on.
+## The cars: a few per lane of the area, evenly spaced, moving through the
+## area and on. {x, y, dir, colour}; on a road along x, x is the moving one.
 static func cars(area: WorldArea, t: float, slot: String, constants: Dictionary) -> Array[Dictionary]:
 	var per_lane := int((constants["CARS_PER_LANE"] as Dictionary).get(slot, 0))
 	var speed := float(constants["CAR_M_PER_S"])
-	var span := area.size_m.y + 20.0
+	var along_x := area.road_axis == "x"
+	var length := area.size_m.x if along_x else area.size_m.y
+	var span := length + 20.0
 	var out: Array[Dictionary] = []
-	for li in CAR_LANES_X.size():
-		var lane: Array = CAR_LANES_X[li]
-		var dir := float(lane[1])
+	for li in area.car_lanes.size():
+		var lane := area.car_lanes[li]
+		var dir := lane.y
 		for c in per_lane:
 			var s := fmod(t * speed + span * (float(c) / per_lane) + li * 17.0, span)
-			var y := -10.0 + s if dir > 0.0 else area.size_m.y + 10.0 - s
-			out.append({"x": float(lane[0]), "y": y, "dir": dir, "colour": (li * 7 + c * 3) % 6})
+			var along := -10.0 + s if dir > 0.0 else length + 10.0 - s
+			out.append({"x": along if along_x else lane.x, "y": lane.x if along_x else along, "dir": dir, "colour": (li * 7 + c * 3) % 6})
 	return out
 
 
-## The ferries: one per water rect, crossing the whole area under the bridge
-## at that rect's height, {x (centre), y, dir}.
+## The ferries: one per ferry lane of the area (else one per water rect, at
+## that rect's height), crossing the whole area, {x (centre), y, dir}.
 static func ferries(area: WorldArea, t: float, constants: Dictionary) -> Array[Dictionary]:
 	var speed := float(constants["FERRY_M_PER_S"])
 	var span := area.size_m.x + 60.0
 	var out: Array[Dictionary] = []
+	for i in area.ferry_lanes.size():
+		var lane := area.ferry_lanes[i]
+		var s := fmod(t * speed + i * span * 0.5, span)
+		out.append({"x": -30.0 + s if lane.y > 0.0 else area.size_m.x + 30.0 - s, "y": lane.x, "dir": lane.y})
+	if not area.ferry_lanes.is_empty():
+		return out
 	var waters := _rects(area, "water")
 	for i in waters.size():
 		var w: Rect2 = waters[i]

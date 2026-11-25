@@ -433,3 +433,11 @@ MAP_BOAT,A boat for rent (%d TL),Kiralık tekne (%d TL),Barca de alquiler (%d TL
 DBG_BOAT_ON,Boat: board (free),Tekne: bin (ücretsiz),Barca: subir (gratis)
 DBG_BOAT_OFF,Boat: back to shore,Tekne: kıyıya dön,Barca: volver a tierra
 DBG_BOAT_NONE,Boat: none here,Tekne: burada yok,Barca: aquí no hay
+NPC_GENNARO,Gennaro,Gennaro,Gennaro
+NPC_SALVATORE,Salvatore,Salvatore,Salvatore
+NPC_ROSA,Rosa,Rosa,Rosa
+NPC_CIRO,Ciro,Ciro,Ciro
+WORLD_SIGN_MOLO_BEVERELLO,Molo Beverello,Molo Beverello,Molo Beverello
+WORLD_SIGN_MOLO_SAN_VINCENZO,Molo San Vincenzo,Molo San Vincenzo,Molo San Vincenzo
+WORLD_SIGN_MOLOSIGLIO,Molosiglio,Molosiglio,Molosiglio
+WORLD_SIGN_STAZIONE_MARITTIMA,Stazione Marittima,Stazione Marittima,Stazione Marittima

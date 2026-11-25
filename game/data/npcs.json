@@ -143,6 +143,90 @@
     0.45
    ],
    "shop": "tackle"
+  },
+  {
+   "id": "gennaro",
+   "name_key": "NPC_GENNARO",
+   "role": "angler",
+   "area": "napoli_moli",
+   "jacket": [
+    0.16,
+    0.2,
+    0.32
+   ],
+   "schedule": {
+    "dawn": {
+     "activity": "fish",
+     "position_id": "napoli_san_vincenzo",
+     "offset_m": -3.0
+    },
+    "day": {
+     "activity": "away"
+    },
+    "evening": {
+     "activity": "fish",
+     "position_id": "napoli_san_vincenzo",
+     "offset_m": -3.0
+    },
+    "night": {
+     "activity": "fish",
+     "position_id": "napoli_beverello",
+     "offset_m": -4.0
+    }
+   }
+  },
+  {
+   "id": "salvatore",
+   "name_key": "NPC_SALVATORE",
+   "role": "angler",
+   "area": "napoli_moli",
+   "jacket": [
+    0.36,
+    0.22,
+    0.14
+   ],
+   "schedule": {
+    "dawn": {
+     "activity": "away"
+    },
+    "day": {
+     "activity": "fish",
+     "position_id": "napoli_molosiglio",
+     "offset_m": -2.0
+    },
+    "evening": {
+     "activity": "fish",
+     "position_id": "napoli_san_vincenzo",
+     "offset_m": -7.0
+    },
+    "night": {
+     "activity": "away"
+    }
+   }
+  },
+  {
+   "id": "rosa",
+   "name_key": "NPC_ROSA",
+   "role": "vendor",
+   "area": "napoli_moli",
+   "jacket": [
+    0.86,
+    0.84,
+    0.8
+   ],
+   "shop": "fishmonger"
+  },
+  {
+   "id": "ciro",
+   "name_key": "NPC_CIRO",
+   "role": "vendor",
+   "area": "napoli_moli",
+   "jacket": [
+    0.2,
+    0.32,
+    0.22
+   ],
+   "shop": "tackle"
   }
  ]
 }
