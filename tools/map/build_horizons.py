@@ -1,28 +1,32 @@
 #!/usr/bin/env python3
 """Builds game/data/map/horizons.json: the skyline each spot sees, by bearing.
 
-For every spot (and every boat position, from a point out on the water) a ray
-is cast every degree of bearing over the land. Where the ray is over land the
-ground height is modelled and the highest angle above the eye is kept, with
-the Earth's curvature and normal refraction taken off. So a far shore, a
-headland or a mountain stands where it stands in the real place.
+For every position (a boat position from a point out on the water) a ray is
+cast every degree of bearing over the land. Where the ray is over land the
+ground's height is read from SRTM and the highest angle above the eye is
+kept, with the Earth's curvature and normal refraction taken off. So a far
+shore, a headland or a mountain stands where it stands in the real place.
 
 Sources:
 - Coast: Natural Earth 1:10m land (public domain), ne_10m_land.geojson from
   https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_10m_land.geojson
-- Peaks: Wikidata (CC0), mountains and hills of at least 100 m within 45 km of
-  each spot, with their coordinates and elevations, in tools/map/peaks.json
-  (fetched by tools/map/fetch_peaks.py).
-- Design fill (no elevation model yet): the ground between the peaks, the cone
-  each peak stands on and the height of the town along the shore, in
-  TERRAIN below.
+- Ground: NASA SRTM Global 1 arc-second (SRTMGL1 v3, public domain; owner
+  approval 2026-11-25), 1-degree .hgt tiles from ESA's mirror
+  https://step.esa.int/auxdata/dem/SRTMGL1/, downloaded into a cache folder.
+- Design fill: the height of the town along the shore (SRTM is the bare
+  ground with some of the buildings), in TOWN below; the low cap on the shore
+  beside the angler (NEAR_ELEV).
 
-Usage: python3 tools/map/build_horizons.py <ne_10m_land.geojson> tools/map/peaks.json \
+Usage: python3 tools/map/build_horizons.py <ne_10m_land.geojson> <srtm cache dir> \
     game/data/spots.json game/data/map/horizons.json
 """
+import array
 import json
 import math
+import os
+import subprocess
 import sys
+import zipfile
 
 sys.path.insert(0, __import__('os').path.dirname(__file__))
 from build_land import clip  # noqa: E402
@@ -35,32 +39,31 @@ STEP_M = 100.0               # ground samples along a ray over land
 START_SKIP_M = 400.0         # a spot on the shore line: skip the land it stands on
 WATER_IN_M = 30.0            # metres out from the coast line, where a shore position stands
 BOAT_OUT_M = 400.0           # a boat position is this far out along its facing
-MAX_ELEV = 0.12              # rad; the texture's range (mountains)
+MAX_ELEV = 0.2               # rad; the texture's range (mountains)
 NEAR_M = 2000.0              # land nearer than this is the shore the angler stands on or beside:
 NEAR_ELEV = 0.035            # rad; its top is kept low, a waterfront and not a cliff (design fill)
-PEAK_SLOPE = 6.0             # a peak's cone reaches the ground this many times its height away
+SRTM_URL = "https://step.esa.int/auxdata/dem/SRTMGL1/{name}.SRTMGL1.hgt.zip"
+SRTM_N = 3601                # samples per side of a 1 arc-second tile
 
-# Design fill per spot: base_m is the ground's height a few km in from the
-# shore, city_m the height of the buildings on the shore band city_km deep.
-TERRAIN = {
-    "galata_bridge": {"base_m": 80, "city_m": 30, "city_km": 4.0},
-    "sarayburnu": {"base_m": 80, "city_m": 30, "city_km": 4.0},
-    "izmir_kordon": {"base_m": 120, "city_m": 30, "city_km": 3.0},
-    "puerto_banus": {"base_m": 120, "city_m": 15, "city_km": 1.0},
-    "maro": {"base_m": 200, "city_m": 0, "city_km": 0.0},
-    "almeria_espigon": {"base_m": 120, "city_m": 20, "city_km": 2.0},
-    "napoli_moli": {"base_m": 120, "city_m": 30, "city_km": 3.0},
-    "trieste_audace": {"base_m": 250, "city_m": 25, "city_km": 1.5},
-    "genova_corso_italia": {"base_m": 250, "city_m": 25, "city_km": 1.5},
-    "thessaloniki_paralia": {"base_m": 60, "city_m": 25, "city_km": 2.5},
-    "kavala_port": {"base_m": 150, "city_m": 15, "city_km": 1.0},
-    "patras_port": {"base_m": 150, "city_m": 20, "city_km": 2.0},
-    "sesimbra_port": {"base_m": 150, "city_m": 10, "city_km": 0.5},
-    "lagos_pier": {"base_m": 60, "city_m": 12, "city_km": 1.0},
-    "cascais_bay": {"base_m": 80, "city_m": 15, "city_km": 1.5},
+# Design fill per spot: the buildings on the shore band city_km deep stand
+# city_m above the ground.
+TOWN = {
+    "galata_bridge": {"city_m": 20, "city_km": 4.0},
+    "sarayburnu": {"city_m": 20, "city_km": 4.0},
+    "izmir_kordon": {"city_m": 20, "city_km": 3.0},
+    "puerto_banus": {"city_m": 10, "city_km": 1.0},
+    "maro": {"city_m": 0, "city_km": 0.0},
+    "almeria_espigon": {"city_m": 15, "city_km": 2.0},
+    "napoli_moli": {"city_m": 20, "city_km": 3.0},
+    "trieste_audace": {"city_m": 20, "city_km": 1.5},
+    "genova_corso_italia": {"city_m": 20, "city_km": 1.5},
+    "thessaloniki_paralia": {"city_m": 20, "city_km": 2.5},
+    "kavala_port": {"city_m": 12, "city_km": 1.0},
+    "patras_port": {"city_m": 15, "city_km": 2.0},
+    "sesimbra_port": {"city_m": 8, "city_km": 0.5},
+    "lagos_pier": {"city_m": 10, "city_km": 1.0},
+    "cascais_bay": {"city_m": 12, "city_km": 1.5},
 }
-BASE_RAMP_M = 1500.0         # the ground rises to base_m over about this distance inland
-
 DIRS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
 
 
@@ -113,16 +116,54 @@ def crossings(ox, oy, dx, dy, edges, length):
     return out
 
 
-def ground(x, y, inland, terrain, peaks):
-    h = terrain["base_m"] * (1.0 - math.exp(-inland / BASE_RAMP_M))
-    for px, py, pe in peaks:
-        d = math.hypot(x - px, y - py)
-        h = max(h, pe * (1.0 - d / (pe * PEAK_SLOPE)))
-    city = inland < terrain["city_km"] * 1000.0 and terrain["city_m"] > 0
-    return h + (terrain["city_m"] if city else 0.0), city
+class Srtm:
+    """Heights from SRTMGL1 tiles, fetched once into a cache folder."""
+
+    def __init__(self, cache):
+        self.cache = cache
+        self.tiles = {}
+
+    def _tile(self, lat_i, lon_i):
+        name = "%s%02d%s%03d" % ("N" if lat_i >= 0 else "S", abs(lat_i), "E" if lon_i >= 0 else "W", abs(lon_i))
+        if name in self.tiles:
+            return self.tiles[name]
+        path = os.path.join(self.cache, name + ".zip")
+        missing = path + ".none"
+        tile = None
+        if not os.path.exists(path) and not os.path.exists(missing):
+            r = subprocess.run(["curl", "-sS", "-f", "-m", "120", "--retry", "3", "-A", "mera-game-data/0.1",
+                                "-o", path, SRTM_URL.format(name=name)])
+            if r.returncode != 0:
+                open(missing, "w").close()   # all sea: SRTM has no tile there
+                if os.path.exists(path):
+                    os.remove(path)
+        if os.path.exists(path):
+            with zipfile.ZipFile(path) as z:
+                tile = array.array("h", z.read(name + ".hgt"))
+            if sys.byteorder == "little":
+                tile.byteswap()      # .hgt is big-endian
+        self.tiles[name] = tile
+        return tile
+
+    def height(self, lat, lon):
+        lat_i, lon_i = math.floor(lat), math.floor(lon)
+        tile = self._tile(lat_i, lon_i)
+        if tile is None:
+            return 0.0
+        row = int(round((lat_i + 1 - lat) * (SRTM_N - 1)))
+        col = int(round((lon - lon_i) * (SRTM_N - 1)))
+        h = tile[row * SRTM_N + col]
+        return 0.0 if h < -1000 else float(h)   # -32768: a void
 
 
-def profile(ox, oy, edges, terrain, peaks):
+def ground(x, y, inland, town, frame):
+    srtm, lat0, lon0, kx, ky = frame
+    h = max(srtm.height(lat0 + y / ky, lon0 + x / kx), 0.0)
+    city = inland < town["city_km"] * 1000.0 and town["city_m"] > 0
+    return h + (town["city_m"] if city else 0.0), city
+
+
+def profile(ox, oy, edges, town, frame):
     start_in = inside(ox, oy, edges)
     length = MAX_KM * 1000.0
     elev, dist, urban = [], [], []
@@ -142,7 +183,7 @@ def profile(ox, oy, edges, terrain, peaks):
             s = max(a, STEP_M * 0.5)
             while s <= z:
                 inland = min(s - a, z - s) if z < length else s - a
-                h, city = ground(ox + dx * s, oy + dy * s, inland, terrain, peaks)
+                h, city = ground(ox + dx * s, oy + dy * s, inland, town, frame)
                 drop = s * s / (2.0 * R_EARTH) * (1.0 - REFRACTION)
                 e = math.atan2(h - drop - EYE_M, s)
                 if s < NEAR_M:
@@ -174,12 +215,13 @@ def water_origin(facing_rad, edges):
 
 
 def main():
-    land, peaks_path, spots_path, out_path = sys.argv[1:5]
-    peaks_all = json.load(open(peaks_path))["peaks"]
+    land, cache, spots_path, out_path = sys.argv[1:5]
+    os.makedirs(cache, exist_ok=True)
+    srtm = Srtm(cache)
     out = {
-        "source": "Coast: Natural Earth 1:10m land (public domain). Peaks: Wikidata (CC0), tools/map/peaks.json. "
-                  "Ground between peaks, peak cones and town heights: design fill (tools/map/build_horizons.py TERRAIN).",
-        "design_fill": ["ground between peaks", "peak cones", "town height"],
+        "source": "Coast: Natural Earth 1:10m land (public domain). Ground: NASA SRTM Global 1 arc-second (SRTMGL1 v3, public domain). "
+                  "Town heights on the shore and the low cap on the near shore: design fill (tools/map/build_horizons.py TOWN, NEAR_ELEV).",
+        "design_fill": ["town height", "near shore cap"],
         "step_deg": 1,
         "note": "One profile per position, keyed by position id, seen from where the water begins along the position's facing (a boat position 400 m further out). Arrays run by bearing, 0 = north, clockwise.",
         "profiles": {},
@@ -187,14 +229,14 @@ def main():
     for spot in json.load(open(spots_path)):
         sid = spot["id"]
         edges, kx, ky = load_edges(land, spot["lat"], spot["lon"], MAX_KM / 111.0 + 0.1)
-        peaks = [((p["lon"] - spot["lon"]) * kx, (p["lat"] - spot["lat"]) * ky, float(p["elev_m"])) for p in peaks_all.get(sid, [])]
-        terrain = TERRAIN[sid]
+        frame = (srtm, spot["lat"], spot["lon"], kx, ky)
         for pos in spot["positions"]:
             f = math.radians(DIRS.index(pos["facing"]) * 45.0)
             ox, oy = water_origin(f, edges)
             if pos.get("stage") == "boat":
                 ox, oy = ox + math.sin(f) * BOAT_OUT_M, oy + math.cos(f) * BOAT_OUT_M
-            out["profiles"][pos["id"]] = profile(ox, oy, edges, terrain, peaks)
+            out["profiles"][pos["id"]] = profile(ox, oy, edges, TOWN[sid], frame)
+        srtm.tiles.clear()   # a spot's tiles are not needed by the next
         print(sid, "done", file=sys.stderr)
     with open(out_path, "w") as fh:
         json.dump(out, fh, separators=(",", ":"))

@@ -19,7 +19,7 @@ uniform sampler2D cloud_tex : filter_linear_mipmap, repeat_enable;
 uniform sampler2D horizon_tex : filter_linear, repeat_enable;
 uniform float horizon_on = 0.0;
 uniform float horizon_bearing = 0.0;   // compass bearing of -z (the facing), radians
-const float HORIZON_MAX = 0.12;
+const float HORIZON_MAX = 0.2;
 // Drawn this much taller than its true angle: at a phone's field of view a
 // real far shore is a line a few pixels high (presentation, not data).
 const float HORIZON_LIFT = 1.5;
