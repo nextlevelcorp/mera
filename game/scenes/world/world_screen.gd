@@ -1,6 +1,7 @@
 class_name WorldScreen
 extends Node2D
-## The top-down world (architecture.md 4): one area (the Galata Bridge), a
+## The top-down world (architecture.md 4): one area (the Galata Bridge by
+## default, or another place's from game/data/areas), a
 ## player walking with the stick under the left thumb, and the fishing
 ## markers on the rails. At a marker the action button fishes: the screen
 ## emits fish_requested with a FishingRequest and the owner (main.gd) opens
@@ -12,7 +13,6 @@ extends Node2D
 signal fish_requested(request: Dictionary)
 signal closed
 
-const AREA_ID := "galata_bridge"
 const DEBUG_MENU := "res://debug/world_debug.gd"
 const STICK_RADIUS := 110.0
 ## The camera is close, as in Stardew Valley: three screen pixels per art
@@ -24,6 +24,8 @@ const TINT := {
 	"evening": Color(1.0, 0.76, 0.62), "night": Color(0.36, 0.42, 0.62),
 }
 
+## Which area to open (game/data/areas/<id>.json); set before setup().
+var area_id := "galata_bridge"
 var area: WorldArea
 var walk: WorldWalk
 var conditions := {}
@@ -59,7 +61,7 @@ func _ready() -> void:
 ## Loads the area and builds the controls. conditions: set before for a fixed
 ## set (tests, the debug menu); empty gives the phone's clock.
 func setup() -> void:
-	var loaded := WorldArea.load_area(AREA_ID, Db.database())
+	var loaded := WorldArea.load_area(area_id, Db.database())
 	if not loaded["ok"]:
 		push_error("World area failed to load: %s" % str(loaded["errors"]))
 		return
@@ -80,10 +82,13 @@ func setup() -> void:
 		pal["shirt"] = rec["jacket_color"].lightened(0.15)
 		rec["frames"] = PixelArt.person(pal)
 		_npcs.append(rec)
-	var q := Quests.load_quests(roster["npcs"], Db.database(), Db.shop())
+	var q := Quests.load_quests(roster["all"], Db.database(), Db.shop())
 	if not q["ok"]:
 		push_error("Quests failed to load: %s" % str(q["errors"]))
-	_quests = q["quests"]
+	var here := {}
+	for n: Dictionary in roster["npcs"]:
+		here[n["id"]] = true
+	_quests = (q["quests"] as Array).filter(func(quest: Dictionary) -> bool: return here.has(quest["giver"]))
 	apply_conditions()
 	settle_npcs()
 	_cam = Camera2D.new()
@@ -300,10 +305,11 @@ func _process(delta: float) -> void:
 
 
 ## Where the camera looks: at the player, and towards the landmarks at the
-## ends of the area (the tower above Karaköy) as the player nears them.
+## top of the area (the tower above Karaköy, the Castel Nuovo) as the player
+## nears the top of the walkable ground.
 func camera_target() -> Vector2:
-	var near_top := clampf((12.0 - walk.pos.y) / 7.0, 0.0, 1.0)
-	return walk.pos - Vector2(0.0, near_top * LOOK_AHEAD_M)
+	var near_top := clampf((area.top_open_y + 7.0 - walk.pos.y) / 7.0, 0.0, 1.0)
+	return walk.pos - Vector2(0.0, near_top * area.look_ahead_m)
 
 
 ## The active quests' titles for the HUD, or "" with none.
@@ -330,7 +336,7 @@ func _position_name_key(position_id: String) -> String:
 # ------------------------------------------------------------------ drawing
 
 ## Pixel-art tiles of each walkable ground kind (PixelArt.tile).
-const TILES := {"plaza": "cobble", "walkway": "paving", "road": "asphalt", "building": "asphalt"}
+const TILES := {"plaza": "cobble", "walkway": "paving", "road": "asphalt", "building": "asphalt", "pier": "paving"}
 const WATER_SHADER := preload("res://scenes/world/world_water.gdshader")
 ## Lamps and windows light up from dusk.
 const LIT_SLOTS := ["dawn", "evening", "night"]
@@ -338,9 +344,8 @@ const GLOW := {"dawn": 0.35, "day": 0.0, "evening": 0.7, "night": 1.0}
 const PLAYER_PALETTE := 7
 const GULLS := 5
 ## Above the Karaköy roofs the camera may look this far, so the tower shows,
-## and near either end it looks ahead by up to LOOK_AHEAD_M.
+## and near the top it looks ahead by up to the area's look_ahead_m.
 const BACKDROP_M := 8.0
-const LOOK_AHEAD_M := 4.0
 
 var _canvas_tint: CanvasModulate
 var _tiles := {}                     ## kind -> TextureRect
@@ -392,7 +397,7 @@ func _build_art() -> void:
 		if not TILES.has(kind):
 			continue
 		var rect: Rect2 = r["rect"]
-		if kind == "road":
+		if kind == "road" and area.road_axis == "y":
 			# The road runs on into the city beyond both ends.
 			rect = rect.grow_individual(0.0, BACKDROP_M, 0.0, BACKDROP_M)
 		var ground := TextureRect.new()
@@ -471,15 +476,23 @@ func _draw() -> void:
 	var road := Rect2()
 	for r: Dictionary in area.rects:
 		if r["kind"] == "road":
-			road = (r["rect"] as Rect2).grow_individual(0.0, BACKDROP_M, 0.0, BACKDROP_M)
-	WorldPainter.road(self, road, _crossings)
+			road = r["rect"]
+			if area.road_axis == "y":
+				road = road.grow_individual(0.0, BACKDROP_M, 0.0, BACKDROP_M)
+	WorldPainter.road(self, road, _crossings, area)
 	WorldPainter.far_city(self, -1.0, area.size_m.x + 1.0, -BACKDROP_M - 1.0, 0.5, hash(area.id))
 	for t: Dictionary in Crowd.trams(area, _time, k):
 		WorldPainter.tram(self, t["x"], t["y"], t["dir"])
 	for c: Dictionary in Crowd.cars(area, _time, slot, k):
-		WorldPainter.car(self, c["x"], c["y"], c["dir"], c["colour"])
+		if area.road_axis == "x":
+			WorldPainter.car_side(self, c["x"], c["y"], c["dir"], c["colour"])
+		else:
+			WorldPainter.car(self, c["x"], c["y"], c["dir"], c["colour"])
 	for rail: Dictionary in area.rails:
 		WorldPainter.rail(self, rail["from"], rail["to"])
+	for r: Dictionary in area.rects:
+		if r["kind"] == "pier":
+			WorldPainter.pier_edge(self, r["rect"])
 	var near := walk.nearest_marker()
 	for m: Dictionary in area.markers:
 		WorldPainter.marker(self, m["pos"], m["facing"], not near.is_empty() and near["position_id"] == m["position_id"], _time)
@@ -487,16 +500,16 @@ func _draw() -> void:
 	var items: Array = []
 	for b: Dictionary in area.rects:
 		if b["kind"] == "building":
-			items.append([(b["rect"] as Rect2).end.y, "building", b["rect"]])
+			items.append([(b["rect"] as Rect2).end.y, "building", b])
 	for sh: Dictionary in area.shops:
 		items.append([(sh["pos"] as Vector2).y - 1.3, "kiosk_back", sh])
 		items.append([(sh["pos"] as Vector2).y + 1.2, "kiosk_front", sh])
 	for lamp: Vector2 in area.lamps:
 		items.append([lamp.y, "lamp", lamp])
-	for cart: Vector2 in _carts():
+	for cart: Vector2 in area.carts:
 		items.append([cart.y, "cart", cart])
-	for sign: Array in _signs():
-		items.append([(sign[0] as Vector2).y, "sign", sign])
+	for sign: Dictionary in area.signs:
+		items.append([(sign["pos"] as Vector2).y, "sign", sign])
 	for n: Dictionary in _npcs:
 		var st: Dictionary = _npc_state[n["id"]]
 		if st["present"]:
@@ -508,27 +521,31 @@ func _draw() -> void:
 	items.sort_custom(func(a: Array, b: Array) -> bool: return a[0] < b[0])
 	for it: Array in items:
 		_draw_item(it[1], it[2], lit)
-	WorldPainter.pigeons(self, Rect2(3.0, 93.0, 11.0, 6.0), _time, 9)
-	for i in (GULLS if GullFlock.flies_at(String(conditions.get("slot", "day"))) else 0):
+	if area.pigeons.has_area():
+		WorldPainter.pigeons(self, area.pigeons, _time, 9)
+	for i in (mini(GULLS, area.gulls.size()) if GullFlock.flies_at(String(conditions.get("slot", "day"))) else 0):
 		var a := _time * (0.18 + i * 0.03) + i * 1.7
-		var centre := Vector2(7.0 if i % 2 == 0 else 53.0, 30.0 + i * 12.0)
+		var centre := area.gulls[i]
 		WorldPainter.gull(self, centre + Vector2(cos(a) * 5.0, sin(a) * 3.0), _time + i * 0.4, 3.0)
 
 
 func _draw_item(kind: String, data: Variant, lit: bool) -> void:
 	match kind:
 		"building":
-			var fp: Rect2 = data
-			if fp.position.y < area.size_m.y * 0.5:
-				if fp.position.x > area.size_m.x * 0.5:
+			var fp: Rect2 = data["rect"]
+			var sign_text := tr(data["sign_key"]) if data["sign_key"] != "" else ""
+			match String(data["look"]):
+				"galata_tower":
 					WorldPainter.galata_tower(self, Vector2(fp.position.x + 11.0, fp.position.y + 4.0))
-					WorldPainter.house_row(self, fp, 1, "")
-				else:
-					WorldPainter.house_row(self, fp, 3, tr("WORLD_SIGN_FISH_MARKET"))
-			elif fp.position.x < area.size_m.x * 0.5:
-				WorldPainter.mosque(self, fp)
-			else:
-				WorldPainter.bazaar(self, fp, tr("WORLD_SIGN_SPICE_BAZAAR"))
+					WorldPainter.house_row(self, fp, int(data["seed"]), sign_text)
+				"mosque":
+					WorldPainter.mosque(self, fp)
+				"bazaar":
+					WorldPainter.bazaar(self, fp, sign_text)
+				"castle":
+					WorldPainter.castle(self, fp)
+				_:
+					WorldPainter.house_row(self, fp, int(data["seed"]), sign_text)
 		"kiosk_back":
 			WorldPainter.kiosk_back(self, data["pos"], data["id"] == "fishmonger")
 		"kiosk_front":
@@ -538,7 +555,7 @@ func _draw_item(kind: String, data: Variant, lit: bool) -> void:
 		"cart":
 			WorldPainter.simit_cart(self, data)
 		"sign":
-			WorldPainter.place_sign(self, data[0], tr(data[1]))
+			WorldPainter.place_sign(self, data["pos"], tr(data["key"]))
 		"npc":
 			var st: Dictionary = _npc_state[data["id"]]
 			var arrived: bool = (st["pos"] as Vector2).distance_to(st["target"]) < 0.3
@@ -559,16 +576,6 @@ func _draw_item(kind: String, data: Variant, lit: bool) -> void:
 			# No rod while walking: the angler carries it packed (owner, 2026-11-18).
 			var f := walk.facing if walk.facing.length() > 0.01 else Vector2.DOWN
 			WorldPainter.person(self, _player_frames, walk.pos, f, _walk_phase, _moving)
-
-
-## Simit carts with their sellers' spots, on both squares.
-func _carts() -> Array[Vector2]:
-	return [Vector2(6.0, 16.0), Vector2(52.0, 95.0)]
-
-
-## The place-name signs: [foot, key].
-func _signs() -> Array:
-	return [[Vector2(57.0, 18.5), "WORLD_SIGN_KARAKOY"], [Vector2(57.0, 92.5), "WORLD_SIGN_EMINONU"]]
 
 
 # ------------------------------------------------------------------ controls

@@ -21,7 +21,10 @@
     18.2,
     5.0
    ],
-   "blocked": true
+   "blocked": true,
+   "look": "houses",
+   "seed": 3,
+   "sign_key": "WORLD_SIGN_FISH_MARKET"
   },
   {
    "kind": "building",
@@ -31,7 +34,9 @@
     18.2,
     5.0
    ],
-   "blocked": true
+   "blocked": true,
+   "look": "galata_tower",
+   "seed": 1
   },
   {
    "kind": "plaza",
@@ -151,7 +156,8 @@
     18.2,
     5.0
    ],
-   "blocked": true
+   "blocked": true,
+   "look": "mosque"
   },
   {
    "kind": "building",
@@ -161,7 +167,9 @@
     18.2,
     5.0
    ],
-   "blocked": true
+   "blocked": true,
+   "look": "bazaar",
+   "sign_key": "WORLD_SIGN_SPICE_BAZAAR"
   }
  ],
  "rails": [
@@ -261,5 +269,81 @@
     8.0
    ]
   }
+ ],
+ "traffic": {
+  "axis": "y",
+  "trams": true,
+  "car_lanes": [
+   [
+    20.5,
+    1.0
+   ],
+   [
+    23.6,
+    1.0
+   ],
+   [
+    36.4,
+    -1.0
+   ],
+   [
+    39.5,
+    -1.0
+   ]
+  ]
+ },
+ "carts_m": [
+  [
+   6.0,
+   16.0
+  ],
+  [
+   52.0,
+   95.0
+  ]
+ ],
+ "signs": [
+  {
+   "pos_m": [
+    57.0,
+    18.5
+   ],
+   "key": "WORLD_SIGN_KARAKOY"
+  },
+  {
+   "pos_m": [
+    57.0,
+    92.5
+   ],
+   "key": "WORLD_SIGN_EMINONU"
+  }
+ ],
+ "pigeons_m": [
+  3.0,
+  93.0,
+  11.0,
+  6.0
+ ],
+ "gulls_m": [
+  [
+   7.0,
+   30.0
+  ],
+  [
+   53.0,
+   42.0
+  ],
+  [
+   7.0,
+   54.0
+  ],
+  [
+   53.0,
+   66.0
+  ],
+  [
+   7.0,
+   78.0
+  ]
  ]
 }

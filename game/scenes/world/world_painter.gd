@@ -60,33 +60,67 @@ static func shadow(ci: CanvasItem, foot_m: Vector2, w_m: float) -> void:
 # --------------------------------------------------------------- road layer
 
 ## Lane lines, the tram tracks in the middle, kerbs and zebra crossings.
-static func road(ci: CanvasItem, rect: Rect2, crossings: Array[Rect2]) -> void:
+static func road(ci: CanvasItem, rect: Rect2, crossings: Array[Rect2], area: WorldArea) -> void:
 	var kerb := Color(0.62, 0.6, 0.56)
-	box(ci, rect.position.x, rect.position.y, 0.25, rect.size.y, kerb)
-	box(ci, rect.end.x - 0.25, rect.position.y, 0.25, rect.size.y, kerb)
-	# The tram's own strip, raised and set off by kerbs.
-	box(ci, 27.4, rect.position.y, 5.2, rect.size.y, Color(0.36, 0.34, 0.33))
-	box(ci, 27.4, rect.position.y, 0.2, rect.size.y, kerb)
-	box(ci, 32.4, rect.position.y, 0.2, rect.size.y, kerb)
-	for x: float in Crowd.TRAM_TRACKS_X:
-		for side in [-0.72, 0.72]:
-			box(ci, x + side - 0.06, rect.position.y, 0.12, rect.size.y, Color(0.66, 0.66, 0.68))
-		var y := rect.position.y
-		while y < rect.end.y:
-			box(ci, x - 0.95, y, 1.9, 0.18, Color(0.28, 0.25, 0.23))
-			y += 0.75
-	# Dashed lane lines.
-	for x: float in [22.05, 37.95]:
-		var y := rect.position.y
-		while y < rect.end.y:
-			box(ci, x - 0.06, y, 0.12, 1.5, Color(0.92, 0.92, 0.88))
-			y += 3.5
+	var along_x := area.road_axis == "x"
+	if along_x:
+		box(ci, rect.position.x, rect.position.y, rect.size.x, 0.25, kerb)
+		box(ci, rect.position.x, rect.end.y - 0.25, rect.size.x, 0.25, kerb)
+	else:
+		box(ci, rect.position.x, rect.position.y, 0.25, rect.size.y, kerb)
+		box(ci, rect.end.x - 0.25, rect.position.y, 0.25, rect.size.y, kerb)
+	if area.trams:
+		# The tram's own strip, raised and set off by kerbs.
+		box(ci, 27.4, rect.position.y, 5.2, rect.size.y, Color(0.36, 0.34, 0.33))
+		box(ci, 27.4, rect.position.y, 0.2, rect.size.y, kerb)
+		box(ci, 32.4, rect.position.y, 0.2, rect.size.y, kerb)
+		for x: float in Crowd.TRAM_TRACKS_X:
+			for side in [-0.72, 0.72]:
+				box(ci, x + side - 0.06, rect.position.y, 0.12, rect.size.y, Color(0.66, 0.66, 0.68))
+			var y := rect.position.y
+			while y < rect.end.y:
+				box(ci, x - 0.95, y, 1.9, 0.18, Color(0.28, 0.25, 0.23))
+				y += 0.75
+	# Dashed lines between neighbouring lanes (not across the tram strip).
+	for i in range(1, area.car_lanes.size()):
+		var a := area.car_lanes[i - 1].x
+		var b := area.car_lanes[i].x
+		if absf(b - a) > 5.0:
+			continue
+		var mid := (a + b) * 0.5
+		if along_x:
+			var x := rect.position.x
+			while x < rect.end.x:
+				box(ci, x, mid - 0.06, 1.5, 0.12, Color(0.92, 0.92, 0.88))
+				x += 3.5
+		else:
+			var y := rect.position.y
+			while y < rect.end.y:
+				box(ci, mid - 0.06, y, 0.12, 1.5, Color(0.92, 0.92, 0.88))
+				y += 3.5
 	for c: Rect2 in crossings:
 		box(ci, c.position.x, c.position.y, c.size.x, c.size.y, Color(0.3, 0.3, 0.33))
-		var x := c.position.x + 0.3
-		while x < c.end.x - 0.3:
-			box(ci, x, c.position.y + 0.15, 0.5, c.size.y - 0.3, Color(0.92, 0.92, 0.88))
-			x += 1.0
+		if c.size.x >= c.size.y:
+			var x := c.position.x + 0.3
+			while x < c.end.x - 0.3:
+				box(ci, x, c.position.y + 0.15, 0.5, c.size.y - 0.3, Color(0.92, 0.92, 0.88))
+				x += 1.0
+		else:
+			var y := c.position.y + 0.3
+			while y < c.end.y - 0.3:
+				box(ci, c.position.x + 0.15, y, c.size.x - 0.3, 0.5, Color(0.92, 0.92, 0.88))
+				y += 1.0
+
+
+## The stone edge of a pier or mole over the water: a coping on every side,
+## its face dark and wet below it.
+static func pier_edge(ci: CanvasItem, r: Rect2) -> void:
+	var coping := Color(0.72, 0.7, 0.66)
+	var face := Color(0.3, 0.3, 0.3)
+	box(ci, r.position.x, r.position.y, 0.3, r.size.y, coping)
+	box(ci, r.end.x - 0.3, r.position.y, 0.3, r.size.y, coping)
+	box(ci, r.position.x, r.end.y - 0.3, r.size.x, 0.3, coping)
+	box(ci, r.position.x, r.end.y, r.size.x, 0.5, face)
 
 
 ## The railing along the water: posts every metre and a green handrail.
@@ -276,6 +310,21 @@ static func car(ci: CanvasItem, x: float, y: float, dir: float, colour: int) -> 
 	box(ci, x + 0.45, top + 3.95, 0.3, 0.15, lights)
 
 
+## A car seen from the side, driving along x (a waterfront road): body,
+## cabin with its windows, wheels, and the lights at its front or back.
+static func car_side(ci: CanvasItem, x: float, y: float, dir: float, colour: int) -> void:
+	var c := CAR_COLOURS[colour % CAR_COLOURS.size()]
+	shadow(ci, Vector2(x, y + 0.5), 4.0)
+	block(ci, x - 2.1, y - 1.1, 4.2, 1.1, c)
+	block(ci, x - 1.3 + dir * 0.2, y - 1.9, 2.4, 0.85, c.darkened(0.08))
+	box(ci, x - 1.1 + dir * 0.2, y - 1.75, 0.95, 0.6, GLASS)
+	box(ci, x + 0.05 + dir * 0.2, y - 1.75, 0.95, 0.6, GLASS.lightened(0.15))
+	for wx: float in [x - 1.3, x + 1.3]:
+		box(ci, wx - 0.4, y - 0.35, 0.8, 0.5, INK)
+	box(ci, x + dir * 2.0 - 0.1, y - 0.9, 0.2, 0.3, Color(1.0, 0.95, 0.75))
+	box(ci, x - dir * 2.0 - 0.1, y - 0.9, 0.2, 0.3, Color(0.9, 0.2, 0.15))
+
+
 ## A city ferry: white hull, cream upper deck, black funnel; foam in its wake.
 static func ferry(ci: CanvasItem, x: float, y: float, dir: float, t: float) -> void:
 	for i in 10:
@@ -456,6 +505,32 @@ static func bazaar(ci: CanvasItem, footprint: Rect2, sign_text: String) -> void:
 	if sign_text != "":
 		block(ci, gx - 3.0, front - wall - 1.8, 6.0, 0.9, Color(0.35, 0.2, 0.12))
 		label(ci, Vector2(gx, front - wall - 1.35), sign_text, 9, Color(1.0, 0.92, 0.7))
+
+
+## A castle with round corner towers and battlements (Naples' Castel Nuovo,
+## the Maschio Angioino): grey tuff walls, a white marble gate between two
+## towers, drawn on its footprint facing the viewer.
+static func castle(ci: CanvasItem, footprint: Rect2) -> void:
+	var front := footprint.end.y
+	var tuff := Color(0.55, 0.52, 0.48)
+	var wall := 5.0
+	block(ci, footprint.position.x + 1.5, front - wall, footprint.size.x - 3.0, wall, tuff)
+	for i in int((footprint.size.x - 3.0) / 1.2):
+		box(ci, footprint.position.x + 1.7 + i * 1.2, front - wall - 0.5, 0.7, 0.5, tuff.darkened(0.05))
+	var towers: Array[float] = [footprint.position.x + 2.2, footprint.get_center().x - 2.6, footprint.get_center().x + 2.6, footprint.end.x - 2.2]
+	for tx: float in towers:
+		var tw := 3.0
+		block(ci, tx - tw * 0.5, front - wall - 2.2, tw, wall + 2.2, tuff.lightened(0.04))
+		box(ci, tx - tw * 0.5 + 0.1, front - wall - 2.1, 0.5, wall + 2.0, tuff.lightened(0.14))
+		box(ci, tx + tw * 0.5 - 0.6, front - wall - 2.1, 0.5, wall + 2.0, tuff.darkened(0.14))
+		for k in 4:
+			box(ci, tx - tw * 0.5 + 0.1 + k * 0.8, front - wall - 2.7, 0.5, 0.5, tuff.lightened(0.04))
+		block(ci, tx - 0.2, front - wall, 0.4, 0.7, INK)
+	# The triumphal arch between the middle towers, in white marble.
+	var gx := footprint.get_center().x
+	block(ci, gx - 1.3, front - wall - 1.2, 2.6, wall + 1.2, Color(0.92, 0.9, 0.85))
+	block(ci, gx - 0.7, front - 2.6, 1.4, 2.6, Color(0.25, 0.2, 0.18))
+	box(ci, gx - 1.1, front - wall - 0.6, 2.2, 0.15, Color(0.75, 0.72, 0.66))
 
 
 ## A blue place-name sign on two posts, as the city uses.

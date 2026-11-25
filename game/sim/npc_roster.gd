@@ -13,9 +13,12 @@ const ACTIVITIES := ["fish", "away"]
 const SLOTS := ["dawn", "day", "evening", "night"]
 const ARRIVE_M := 0.15
 const ENTRY_M := 6.0
+const DEFAULT_AREA := "galata_bridge"
 
 
-## Loads and validates the roster against the area. Returns {"ok", "errors", "npcs"}.
+## Loads and validates the roster of an area (each person names theirs in
+## "area", the Galata Bridge when they do not). Returns {"ok", "errors",
+## "npcs" (this area's), "all" (everyone, for the quests' givers)}.
 static func load_roster(area: WorldArea) -> Dictionary:
 	var errors: Array[String] = []
 	var raw: Variant = DataStore.read_json(FILE, errors)
@@ -31,11 +34,15 @@ static func load_roster(area: WorldArea) -> Dictionary:
 	for sh: Dictionary in area.shops:
 		shops[sh["id"]] = true
 	var seen := {}
+	var here: Array = []
 	for n: Dictionary in d.get("npcs", []):
 		var id := String(n.get("id", ""))
 		if seen.has(id) or id == "":
 			errors.append("npcs: missing or duplicate id %s" % id)
 		seen[id] = true
+		if String(n.get("area", DEFAULT_AREA)) != area.id:
+			continue   # someone of another place
+		here.append(n)
 		if not String(n.get("role", "")) in ROLES:
 			errors.append("npcs:%s: unknown role" % id)
 		if n.get("role") == "vendor" and not shops.has(String(n.get("shop", ""))):
@@ -47,7 +54,7 @@ static func load_roster(area: WorldArea) -> Dictionary:
 					errors.append("npcs:%s: no plan for %s" % [id, slot])
 				elif plan["activity"] == "fish" and not markers.has(String(plan.get("position_id", ""))):
 					errors.append("npcs:%s: fishes at an unknown position in %s" % [id, slot])
-	return {"ok": errors.is_empty(), "errors": errors, "npcs": d.get("npcs", [])}
+	return {"ok": errors.is_empty(), "errors": errors, "npcs": here, "all": d.get("npcs", [])}
 
 
 ## Where npc should be in this slot: {present, pos (world m), facing ("E", "W"
@@ -68,19 +75,30 @@ static func plan(npc: Dictionary, slot: String, area: WorldArea) -> Dictionary:
 	return {"present": false}
 
 
-## Where an angler enters the area: the plaza nearest their spot, in front of
-## the buildings that close it.
+## Where an angler enters the area: the area's entry nearest their spot, else
+## the end plaza nearest it, in front of the buildings that close it.
 static func entry_point(target: Vector2, area: WorldArea) -> Vector2:
+	if not area.entries.is_empty():
+		var best := area.entries[0]
+		for e: Vector2 in area.entries:
+			if e.distance_to(target) < best.distance_to(target):
+				best = e
+		return best
 	return Vector2(target.x, ENTRY_M if target.y < area.size_m.y * 0.5 else area.size_m.y - ENTRY_M)
 
 
-## One walking step towards target, around the blocked road: someone on the
-## wrong side first walks to the nearer plaza, crosses there and comes back
-## along the walkway. Returns the new position.
+## One walking step towards target, around blocked ground: someone whose way
+## is blocked first walks to the nearer of the area's open lanes (the plazas
+## with the zebra crossings on the bridge, the promenade on a waterfront),
+## goes along it and comes back along the walkway or pier. Returns the new
+## position.
 static func walk_step(pos: Vector2, target: Vector2, dt: float, area: WorldArea, speed: float) -> Vector2:
 	var goal := target
 	if _blocked_between(pos, target, area):
-		var y_cross := 10.0 if absf(pos.y - 10.0) + absf(target.y - 10.0) < absf(pos.y - (area.size_m.y - 10.0)) + absf(target.y - (area.size_m.y - 10.0)) else area.size_m.y - 10.0
+		var y_cross := area.lanes_y[0]
+		for y: float in area.lanes_y:
+			if absf(pos.y - y) + absf(target.y - y) < absf(pos.y - y_cross) + absf(target.y - y_cross):
+				y_cross = y
 		if absf(pos.y - y_cross) > 0.3 and absf(pos.x - target.x) > 0.3:
 			goal = Vector2(pos.x, y_cross)
 		else:

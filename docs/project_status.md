@@ -20,7 +20,7 @@
 | Bag screen (fish, tackle, money, skills; release undersize fish) | Implemented (R16) | `architecture.md` 7 |
 | Event-based quests, crafting, spot unlocks | Designed | `architecture.md` 7, `data_model.md` 12 |
 | Core (`Db`, `Profile`, `Game` request and result) | Implemented; mode switch with a world Designed | `architecture.md` 3 |
-| Top-down world (one area in Stardew-style pixel art, landmarks of both ends, crowd, trams, cars, ferries, walking, markers, shops, hand-over both ways) | Partial | `architecture.md` 4 |
+| Top-down world (Galata and Naples in Stardew-style pixel art, landmarks, crowd, trams, cars, ferries, walking, markers, shops, hand-over both ways; Almería, Thessaloniki and Sesimbra to come, one per country) | Partial | `architecture.md` 4 |
 | World people: four anglers with routines by slot, two vendors, neighbours carried into the fishing view | Implemented (R10) | `data_model.md` 16 |
 | World clock, more areas | Not started | `architecture.md` 4 |
 | Float fishing with bait (shrimp or live horse mackerel from the bag, depth setting, bait used per cast, float on the water) | Implemented (R12) | `architecture.md` 5 |

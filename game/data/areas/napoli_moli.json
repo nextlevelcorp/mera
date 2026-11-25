@@ -1,0 +1,279 @@
+{
+ "id": "napoli_moli",
+ "spot_id": "napoli_moli",
+ "design_fill": true,
+ "note": "Layout is a design fill, not to scale: Naples' waterfront from the Molosiglio marina (left) past the root of the Molo San Vincenzo to the Molo Beverello ferry pier (right), as seen from the sea with north-east at the right. Via Acton and Via Ammiraglio Ferdinando Acton run along the waterfront between the city and the promenade. Behind them stand the Palazzo Reale's side (left), the Castel Nuovo (Maschio Angioino) above the Molo Beverello and the Stazione Marittima, placed for recognition, not at their real distance; the Molo San Vincenzo is far longer than shown.",
+ "size_m": [
+  110.0,
+  76.0
+ ],
+ "px_per_m": 16.0,
+ "start_m": [
+  55.0,
+  21.0
+ ],
+ "rects": [
+  {
+   "kind": "building",
+   "rect": [
+    0.0,
+    0.0,
+    30.0,
+    6.0
+   ],
+   "blocked": true,
+   "look": "houses",
+   "seed": 2
+  },
+  {
+   "kind": "building",
+   "rect": [
+    30.0,
+    0.0,
+    22.0,
+    6.0
+   ],
+   "blocked": true,
+   "look": "houses",
+   "seed": 4
+  },
+  {
+   "kind": "building",
+   "rect": [
+    52.0,
+    0.0,
+    28.0,
+    6.0
+   ],
+   "blocked": true,
+   "look": "castle"
+  },
+  {
+   "kind": "building",
+   "rect": [
+    80.0,
+    0.0,
+    30.0,
+    6.0
+   ],
+   "blocked": true,
+   "look": "houses",
+   "seed": 5,
+   "sign_key": "WORLD_SIGN_STAZIONE_MARITTIMA"
+  },
+  {
+   "kind": "road",
+   "rect": [
+    0.0,
+    6.0,
+    110.0,
+    6.0
+   ],
+   "blocked": true
+  },
+  {
+   "kind": "plaza",
+   "rect": [
+    0.0,
+    12.0,
+    110.0,
+    14.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "water",
+   "rect": [
+    0.0,
+    26.0,
+    110.0,
+    50.0
+   ],
+   "blocked": true
+  },
+  {
+   "kind": "pier",
+   "rect": [
+    4.0,
+    25.0,
+    12.0,
+    9.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "pier",
+   "rect": [
+    30.0,
+    25.0,
+    6.0,
+    43.0
+   ],
+   "blocked": false
+  },
+  {
+   "kind": "pier",
+   "rect": [
+    74.0,
+    25.0,
+    14.0,
+    21.0
+   ],
+   "blocked": false
+  }
+ ],
+ "rails": [],
+ "lamps_m": [
+  [
+   10.0,
+   25.0
+  ],
+  [
+   28.0,
+   25.0
+  ],
+  [
+   46.0,
+   25.0
+  ],
+  [
+   64.0,
+   25.0
+  ],
+  [
+   92.0,
+   25.0
+  ],
+  [
+   106.0,
+   25.0
+  ]
+ ],
+ "markers": [
+  {
+   "position_id": "napoli_molosiglio",
+   "pos_m": [
+    15.3,
+    31.0
+   ],
+   "facing": "E"
+  },
+  {
+   "position_id": "napoli_san_vincenzo",
+   "pos_m": [
+    35.3,
+    62.0
+   ],
+   "facing": "E"
+  },
+  {
+   "position_id": "napoli_beverello",
+   "pos_m": [
+    87.3,
+    40.0
+   ],
+   "facing": "E"
+  }
+ ],
+ "shops": [
+  {
+   "id": "fishmonger",
+   "pos_m": [
+    46.0,
+    18.0
+   ]
+  },
+  {
+   "id": "tackle",
+   "pos_m": [
+    64.0,
+    18.0
+   ]
+  }
+ ],
+ "traffic": {
+  "axis": "x",
+  "trams": false,
+  "car_lanes": [
+   [
+    7.6,
+    1.0
+   ],
+   [
+    10.4,
+    -1.0
+   ]
+  ]
+ },
+ "ferry_lanes": [
+  [
+   72.0,
+   1.0
+  ]
+ ],
+ "signs": [
+  {
+   "pos_m": [
+    8.0,
+    23.5
+   ],
+   "key": "WORLD_SIGN_MOLOSIGLIO"
+  },
+  {
+   "pos_m": [
+    26.0,
+    23.5
+   ],
+   "key": "WORLD_SIGN_MOLO_SAN_VINCENZO"
+  },
+  {
+   "pos_m": [
+    72.0,
+    23.5
+   ],
+   "key": "WORLD_SIGN_MOLO_BEVERELLO"
+  }
+ ],
+ "pigeons_m": [
+  56.0,
+  15.0,
+  10.0,
+  5.0
+ ],
+ "gulls_m": [
+  [
+   22.0,
+   45.0
+  ],
+  [
+   55.0,
+   50.0
+  ],
+  [
+   95.0,
+   40.0
+  ],
+  [
+   50.0,
+   66.0
+  ],
+  [
+   10.0,
+   55.0
+  ]
+ ],
+ "entries_m": [
+  [
+   1.5,
+   20.0
+  ],
+  [
+   108.5,
+   20.0
+  ]
+ ],
+ "lanes_y": [
+  20.0
+ ],
+ "look_ahead_m": 7.0
+}
