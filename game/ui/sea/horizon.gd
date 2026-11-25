@@ -4,11 +4,11 @@ extends RefCounted
 ## at sea and at the new places"). game/data/map/horizons.json holds, per
 ## position, the land's top by compass bearing (1 degree steps), whether it is
 ## town and how far it is, built by tools/map/build_horizons.py from Natural
-## Earth's coast and Wikidata's peaks. The sky and sea shaders read it as a
+## Earth's coast and NASA's SRTM heights. The sky and sea shaders read it as a
 ## 360 x 1 texture (sea_sky.gdshaderinc, horizon_tex).
 
 const FILE := "res://data/map/horizons.json"
-const MAX_RAD := 0.12      ## the texture's red channel at 1 (HORIZON_MAX in the shader)
+const MAX_RAD := 0.2       ## the texture's red channel at 1 (HORIZON_MAX in the shader)
 const FAR_KM := 60.0       ## the texture's blue channel at 1
 const DIRS: Array[String] = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
 
